@@ -23,7 +23,7 @@ import { ProjectMenu } from './projects/ProjectMenu';
 import ps from './projects/projects.module.css';
 
 /** Von Panels verdeckte Ränder, damit „Einpassen“ den Plan in die freie Mitte legt */
-export const PLAN_INSETS = { left: 72, right: 330, top: 84, bottom: 80 };
+export const PLAN_INSETS = { left: 316, right: 330, top: 84, bottom: 80 };
 
 type Screen = 'boot' | 'wizard' | 'editor';
 

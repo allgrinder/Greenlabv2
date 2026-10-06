@@ -5,7 +5,6 @@
  */
 import type { Graphics } from 'pixi.js';
 import { parseNumber } from '../core/format';
-import { atDistance } from '../core/geometry/snap';
 import { dist, scale, sub } from '../core/geometry/vec';
 import type { PathGeometry, PathNode, Vec2 } from '../core/model/types';
 import type { LabelPool, ToScreen } from '../render/overlays/overlay';
@@ -94,7 +93,14 @@ export class PathBuilderTool implements Tool {
     const L = parseNumber(this.typed);
     const last = this.last;
     if (L === null || L <= 0 || !last || !this.hoverRaw) return null;
-    return atDistance(last, this.hoverRaw, L);
+    // Richtung nahe an 15°-Vielfachen (±3°) rastet ein: exakte rechte Winkel ohne ⇧
+    const raw = Math.atan2(this.hoverRaw.y - last.y, this.hoverRaw.x - last.x) * (180 / Math.PI);
+    const snapped = Math.round(raw / 15) * 15;
+    const deg = Math.abs(raw - snapped) <= 3 ? snapped : raw;
+    const r = (deg * Math.PI) / 180;
+    // Rundung auf 0,1 mm gegen Fließkomma-Rest (cos 90° ≠ 0)
+    const q = (v: number) => Math.round(v * 1e4) / 1e4;
+    return { x: q(last.x + Math.cos(r) * L), y: q(last.y + Math.sin(r) * L) };
   }
 
   key(e: KeyboardEvent): boolean {

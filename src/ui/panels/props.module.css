@@ -1,0 +1,250 @@
+.panel {
+  composes: glass from '../components/ui.module.css';
+  position: absolute;
+  right: 16px;
+  top: 84px;
+  width: 300px;
+  max-height: calc(100% - 84px - 80px);
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  z-index: 4;
+  scrollbar-width: thin;
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.headSwatch {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  flex: none;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+  background-color: var(--fld);
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: 21px;
+  line-height: 1.1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  border-radius: 6px;
+  width: calc(100% + 8px);
+}
+
+.title:hover,
+.title:focus {
+  background: var(--hov);
+}
+
+.sub {
+  font-size: 12px;
+  color: var(--ink3);
+  margin-top: 3px;
+}
+
+.latin {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink2);
+  margin-top: 2px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+
+.swatch {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 9px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+  transition: transform 0.15s var(--ease), box-shadow 0.15s;
+}
+
+.swatch:hover {
+  transform: translateY(-1px);
+}
+
+.swatchOn {
+  composes: swatch;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--acc);
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12.5px;
+  gap: 8px;
+}
+
+.muted {
+  color: var(--ink3);
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.select {
+  font: inherit;
+  font-size: 13px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  padding: 0;
+  outline: 0;
+  cursor: pointer;
+  appearance: none;
+}
+
+.costBig {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  letter-spacing: -0.01em;
+}
+
+.costLines {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--ink2);
+}
+
+.costLine {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.costLine span:first-child {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.note {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 9px;
+  background: var(--fld);
+}
+
+.noteAvatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  background: #9fb39a;
+  flex: none;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: #22301f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.noteText {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink2);
+  flex: 1;
+}
+
+.noteInput {
+  composes: note;
+  border: 0;
+  outline: 0;
+  width: 100%;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--ink);
+}
+
+.noteInput:focus {
+  box-shadow: 0 0 0 1.5px var(--acc);
+  background: var(--field-bg);
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.action {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: var(--fld);
+  font-size: 12px;
+  color: var(--ink2);
+  transition: background 0.15s, color 0.15s;
+}
+
+.action:hover {
+  background: var(--hov);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.danger:hover {
+  color: #b5452e;
+}
+
+.mixRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  flex: none;
+}
+
+.phen {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2px;
+  height: 16px;
+}
+
+.phen div {
+  border-radius: 2px;
+}
+
+@media (max-width: 1100px) {
+  .panel {
+    width: 270px;
+  }
+}

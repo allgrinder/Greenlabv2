@@ -258,8 +258,18 @@ export function materialPattern(m: Material, origin?: { x: number; y: number }, 
   return pattern;
 }
 
-/** Vorschaubild (CSS-Hintergrund) für Swatches im UI */
-export function materialSwatchUrl(m: Material): string {
-  const { texture } = tile(m.texture);
-  return (texture.source.resource as HTMLCanvasElement).toDataURL();
+const swatchCache = new Map<string, string>();
+
+/**
+ * CSS-Hintergrund für Material-Swatches im UI: dieselbe Kachel wie im Plan,
+ * dargestellt mit `pxPerM` Bildschirmpixeln pro Meter.
+ */
+export function materialSwatchStyle(m: Material, pxPerM = 70): { backgroundImage: string; backgroundSize: string } {
+  let url = swatchCache.get(m.texture);
+  if (!url) {
+    url = (tile(m.texture).texture.source.resource as HTMLCanvasElement).toDataURL();
+    swatchCache.set(m.texture, url);
+  }
+  const spec = SPECS[m.texture];
+  return { backgroundImage: `url(${url})`, backgroundSize: `${spec.w * pxPerM}px ${spec.h * pxPerM}px` };
 }

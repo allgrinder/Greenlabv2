@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&amp;family=Geist+Mono:wght@400;500&amp;family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&amp;display=swap" rel="stylesheet"></helmet>
+<div style="width:100%;height:100%;position:relative;">
+<svg viewBox="{{ vb }}" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" style="display:block;overflow:visible;">
+<defs>
+<pattern id="gwGrassA" width="14" height="14" patternUnits="userSpaceOnUse"><path d="M2 4l1-2.4M7 7l-.8-2.2M11.5 3l.6-2.2M4 11.5l1.1-2.2M9.5 13l-.6-2.2M12.5 9.5l.9-2" stroke="rgba(46,64,28,.34)" stroke-width=".7" stroke-linecap="round" fill="none"></path></pattern>
+<pattern id="gwGrassB" width="19" height="19" patternUnits="userSpaceOnUse"><path d="M3 16l-.7-2.1M8 5l.9-2.1M15 12l-1-2M16.5 4l.5-2.1M6 10l.8-1.9M11 17.5l.4-2" stroke="rgba(250,248,222,.34)" stroke-width=".7" stroke-linecap="round" fill="none"></path></pattern>
+<pattern id="gwMow" width="80" height="80" patternUnits="userSpaceOnUse"><rect x="0" y="0" width="40" height="80" fill="rgba(255,255,236,.06)"></rect></pattern>
+<pattern id="gwGravelA" width="8" height="8" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="2" r=".9" fill="rgba(80,70,55,.32)"></circle><circle cx="5.5" cy="1.4" r=".75" fill="rgba(255,252,240,.65)"></circle><circle cx="3.6" cy="5.2" r="1" fill="rgba(80,70,55,.22)"></circle><circle cx="7" cy="6.1" r=".6" fill="rgba(255,252,240,.55)"></circle><circle cx="1" cy="6.8" r=".55" fill="rgba(60,52,40,.36)"></circle><circle cx="6.2" cy="3.8" r=".5" fill="rgba(60,52,40,.26)"></circle></pattern>
+<pattern id="gwGravelB" width="11" height="11" patternUnits="userSpaceOnUse"><circle cx="2" cy="8.5" r="1.1" fill="rgba(255,252,240,.5)"></circle><circle cx="8.5" cy="9" r=".8" fill="rgba(80,70,55,.26)"></circle><circle cx="9.5" cy="2.5" r="1.2" fill="rgba(140,125,105,.28)"></circle><circle cx="4.5" cy="1" r=".6" fill="rgba(80,70,55,.32)"></circle></pattern>
+<pattern id="gwPave" width="16" height="16" patternUnits="userSpaceOnUse"><rect x="0" y="8" width="8" height="8" fill="rgba(0,0,0,.035)"></rect><rect x="8" y="8" width="8" height="8" fill="rgba(255,255,255,.05)"></rect><path d="M0 .3H16M0 8.3H16M.3 0V8M8.3 8V16" stroke="rgba(85,72,58,.4)" stroke-width=".55" fill="none"></path></pattern>
+<pattern id="gwDeck" width="40" height="8" patternUnits="userSpaceOnUse"><path d="M0 .25H40M0 4.25H40M.25 0V4M20.25 4V8" stroke="rgba(70,45,25,.5)" stroke-width=".5" fill="none"></path><path d="M3 2.2H17M24 6.2H37M26 1.6H35" stroke="rgba(70,45,25,.16)" stroke-width=".35" fill="none"></path></pattern>
+<pattern id="gwDeckV" width="40" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(90)"><path d="M0 .25H40M0 4.25H40M.25 0V4M20.25 4V8" stroke="rgba(50,35,20,.45)" stroke-width=".5" fill="none"></path></pattern>
+<pattern id="gwMulch" width="9" height="9" patternUnits="userSpaceOnUse"><path d="M1 2l2 .8M5 1l1.5 1.4M2 6l1.8-.6M6 6l1 1.6" stroke="rgba(55,36,22,.42)" stroke-width=".8" stroke-linecap="round" fill="none"></path><path d="M4 4l1.2.6M7.5 3.5l.8 1M1 8.3l1.3-.3" stroke="rgba(235,215,185,.25)" stroke-width=".7" stroke-linecap="round" fill="none"></path></pattern>
+<pattern id="gwHatch" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V9" stroke="rgba(60,60,50,.10)" stroke-width=".8"></path></pattern>
+<pattern id="gwRipple" width="34" height="16" patternUnits="userSpaceOnUse"><path d="M2 8q4.5-2.2 9 0M19 3.5q3.5-1.6 7 0M15 13.5q3-1.4 6 0" stroke="rgba(255,255,255,.28)" stroke-width=".6" fill="none" stroke-linecap="round"></path></pattern>
+<pattern id="gwGrid1" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="0" cy="0" r=".9" fill="rgba(30,40,40,.28)"></circle></pattern>
+<pattern id="gwGrid5" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M0 0H100M0 0V100" stroke="rgba(30,40,40,.14)" stroke-width=".6" fill="none"></path></pattern>
+<linearGradient id="gwWater" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#93B9B8"></stop><stop offset=".55" stop-color="#5F8F95"></stop><stop offset="1" stop-color="#47767F"></stop></linearGradient>
+<linearGradient id="gwGlass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EEF4F2" stop-opacity=".85"></stop><stop offset="1" stop-color="#C9D8D6" stop-opacity=".7"></stop></linearGradient>
+<radialGradient id="gwCanopy" cx=".5" cy=".5" r=".5" fx=".36" fy=".32"><stop offset="0" stop-color="#FFFBE6" stop-opacity=".38"></stop><stop offset=".45" stop-color="#FFFFFF" stop-opacity="0"></stop><stop offset=".84" stop-color="#0E1A08" stop-opacity=".22"></stop><stop offset="1" stop-color="#0E1A08" stop-opacity="0"></stop></radialGradient>
+<radialGradient id="gwClump" cx=".5" cy=".5" r=".5" fx=".38" fy=".34"><stop offset="0" stop-color="#FFFBE6" stop-opacity=".3"></stop><stop offset=".55" stop-color="#FFFFFF" stop-opacity="0"></stop><stop offset=".9" stop-color="#0E1A08" stop-opacity=".16"></stop><stop offset="1" stop-color="#0E1A08" stop-opacity="0"></stop></radialGradient>
+<radialGradient id="gwHole"><stop offset="0" stop-color="#000" stop-opacity=".96"></stop><stop offset=".4" stop-color="#000" stop-opacity=".7"></stop><stop offset="1" stop-color="#000" stop-opacity="0"></stop></radialGradient>
+<radialGradient id="gwHoleCone" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="1"><stop offset="0" stop-color="#000" stop-opacity=".95"></stop><stop offset=".5" stop-color="#000" stop-opacity=".62"></stop><stop offset="1" stop-color="#000" stop-opacity="0"></stop></radialGradient>
+<radialGradient id="gwL2200"><stop offset="0" stop-color="#FFAE58" stop-opacity=".95"></stop><stop offset=".3" stop-color="#FFAE58" stop-opacity=".45"></stop><stop offset="1" stop-color="#FFAE58" stop-opacity="0"></stop></radialGradient>
+<radialGradient id="gwL2700"><stop offset="0" stop-color="#FFC27E" stop-opacity=".95"></stop><stop offset=".3" stop-color="#FFC27E" stop-opacity=".45"></stop><stop offset="1" stop-color="#FFC27E" stop-opacity="0"></stop></radialGradient>
+<radialGradient id="gwL3000"><stop offset="0" stop-color="#FFD39E" stop-opacity=".95"></stop><stop offset=".3" stop-color="#FFD39E" stop-opacity=".45"></stop><stop offset="1" stop-color="#FFD39E" stop-opacity="0"></stop></radialGradient>
+<radialGradient id="gwC2700" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="1"><stop offset="0" stop-color="#FFC27E" stop-opacity=".9"></stop><stop offset=".45" stop-color="#FFC27E" stop-opacity=".4"></stop><stop offset="1" stop-color="#FFC27E" stop-opacity="0"></stop></radialGradient>
+<radialGradient id="gwC3000" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="1"><stop offset="0" stop-color="#FFD39E" stop-opacity=".9"></stop><stop offset=".45" stop-color="#FFD39E" stop-opacity=".4"></stop><stop offset="1" stop-color="#FFD39E" stop-opacity="0"></stop></radialGradient>
+<radialGradient id="gwLWater"><stop offset="0" stop-color="#9FF0F4" stop-opacity=".9"></stop><stop offset=".45" stop-color="#5FC6D6" stop-opacity=".4"></stop><stop offset="1" stop-color="#5FC6D6" stop-opacity="0"></stop></radialGradient>
+<radialGradient id="{{ selGlowId }}"><stop offset="0" stop-color="{{ selColor }}" stop-opacity=".95"></stop><stop offset=".3" stop-color="{{ selColor }}" stop-opacity=".45"></stop><stop offset="1" stop-color="{{ selColor }}" stop-opacity="0"></stop></radialGradient>
+<radialGradient id="{{ selConeId }}" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="1"><stop offset="0" stop-color="{{ selColor }}" stop-opacity=".92"></stop><stop offset=".45" stop-color="{{ selColor }}" stop-opacity=".42"></stop><stop offset="1" stop-color="{{ selColor }}" stop-opacity="0"></stop></radialGradient>
+<filter id="gwSoft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3.2"></feGaussianBlur></filter>
+<filter id="gwSoftS" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.4"></feGaussianBlur></filter>
+<filter id="gwHeat" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="17"></feGaussianBlur></filter>
+<filter id="gwGrain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" seed="4"></feTurbulence><feColorMatrix type="saturate" values="0"></feColorMatrix></filter>
+<clipPath id="gwPlotClip"><rect x="0" y="0" width="1000" height="600"></rect></clipPath>
+<clipPath id="gwPondClip"><path d="M610 440C630 418 690 412 725 428C752 440 752 480 735 500C712 525 650 528 622 510C600 496 595 458 610 440Z"></path></clipPath>
+</defs>
+
+<sc-if value="{{ day }}" hint-placeholder-val="{{ true }}"><rect x="-50" y="-50" width="1100" height="700" fill="url(#gwHatch)"></rect></sc-if>
+<rect x="0" y="0" width="1000" height="600" fill="#D3C9B3"></rect>
+<rect x="0" y="0" width="1000" height="600" fill="url(#gwMulch)" opacity=".35"></rect>
+
+<rect x="0" y="0" width="318" height="132" fill="#D6CDBB"></rect>
+<rect x="0" y="0" width="318" height="132" fill="url(#gwGravelA)"></rect>
+<rect x="0" y="0" width="318" height="132" fill="url(#gwGravelB)"></rect>
+<g fill="#CDBFA9" stroke="rgba(85,72,58,.45)" stroke-width=".6"><rect x="22" y="58" width="22" height="34" rx="1.5"></rect><rect x="58" y="58" width="22" height="34" rx="1.5"></rect><rect x="94" y="58" width="22" height="34" rx="1.5"></rect><rect x="130" y="58" width="22" height="34" rx="1.5"></rect><rect x="166" y="58" width="22" height="34" rx="1.5"></rect><rect x="202" y="76" width="34" height="22" rx="1.5"></rect><rect x="226" y="108" width="22" height="30" rx="1.5"></rect></g>
+
+<path d="M340 22L975 22Q985 22 985 32L985 236Q985 248 973 248L800 248Q785 248 785 263L785 566Q785 578 773 578L336 578Q320 578 320 562L320 38Q320 22 340 22Z" fill="{{ lawn }}"></path>
+<rect x="8" y="436" width="214" height="156" rx="10" fill="{{ lawn }}"></rect>
+<g clip-path="url(#gwPlotClip)"><path d="M340 22L975 22Q985 22 985 32L985 236Q985 248 973 248L800 248Q785 248 785 263L785 566Q785 578 773 578L336 578Q320 578 320 562L320 38Q320 22 340 22Z M8 446Q8 436 18 436L212 436Q222 436 222 446L222 582Q222 592 212 592L18 592Q8 592 8 582Z" fill="url(#gwMow)"></path><path d="M340 22L975 22Q985 22 985 32L985 236Q985 248 973 248L800 248Q785 248 785 263L785 566Q785 578 773 578L336 578Q320 578 320 562L320 38Q320 22 340 22Z M8 446Q8 436 18 436L212 436Q222 436 222 446L222 582Q222 592 212 592L18 592Q8 592 8 582Z" fill="url(#gwGrassA)"></path><path d="M340 22L975 22Q985 22 985 32L985 236Q985 248 973 248L800 248Q785 248 785 263L785 566Q785 578 773 578L336 578Q320 578 320 562L320 38Q320 22 340 22Z M8 446Q8 436 18 436L212 436Q222 436 222 446L222 582Q222 592 212 592L18 592Q8 592 8 582Z" fill="url(#gwGrassB)"></path></g>
+<sc-for list="{{ groundDots }}" as="d" hint-placeholder-count="0"><circle cx="{{ d.x }}" cy="{{ d.y }}" r="{{ d.r }}" fill="{{ d.c }}" opacity=".85"></circle></sc-for>
+
+<path d="M228 440L330 440C400 440 440 470 470 520C480 545 470 572 440 572L240 572C232 572 228 566 228 558Z" fill="#6E533F"></path>
+<path d="M228 440L330 440C400 440 440 470 470 520C480 545 470 572 440 572L240 572C232 572 228 566 228 558Z" fill="url(#gwMulch)" stroke="#A39886" stroke-width="2"></path>
+
+<rect x="792" y="256" width="193" height="322" rx="8" fill="#D6CDBB" stroke="#A69C8C" stroke-width="2"></rect>
+<rect x="792" y="256" width="193" height="322" rx="8" fill="url(#gwGravelA)"></rect>
+<rect x="792" y="256" width="193" height="322" rx="8" fill="url(#gwGravelB)"></rect>
+
+<rect x="220" y="140" width="100" height="280" fill="#CFC3AE"></rect>
+<rect x="220" y="140" width="100" height="280" fill="url(#gwPave)" stroke="#9B8F7D" stroke-width="1.6"></rect>
+
+<path d="{{ pathD }}" fill="none" stroke="#A3998A" stroke-width="27.5"></path>
+<path d="{{ pathD }}" fill="none" stroke="#D9D0BF" stroke-width="24"></path>
+<path d="{{ pathD }}" fill="none" stroke="url(#gwGravelA)" stroke-width="24"></path>
+<path d="{{ pathD }}" fill="none" stroke="url(#gwGravelB)" stroke-width="24"></path>
+
+<path d="M610 440C630 418 690 412 725 428C752 440 752 480 735 500C712 525 650 528 622 510C600 496 595 458 610 440Z" fill="none" stroke="#9E9585" stroke-width="12" stroke-linejoin="round"></path>
+<path d="M610 440C630 418 690 412 725 428C752 440 752 480 735 500C712 525 650 528 622 510C600 496 595 458 610 440Z" fill="url(#gwWater)"></path>
+<path d="M610 440C630 418 690 412 725 428C752 440 752 480 735 500C712 525 650 528 622 510C600 496 595 458 610 440Z" fill="url(#gwRipple)"></path>
+<path d="M610 440C630 418 690 412 725 428C752 440 752 480 735 500C712 525 650 528 622 510C600 496 595 458 610 440Z" fill="none" stroke="#C3BAAA" stroke-width="7" stroke-dasharray=".1 8.5" stroke-linecap="round"></path>
+<g clip-path="url(#gwPondClip)"><path d="M612 448C640 428 690 424 720 434" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="5" filter="url(#gwSoftS)"></path><path d="M612 448C640 428 690 424 720 434" fill="none" stroke="rgba(20,40,45,.25)" stroke-width="3" transform="translate(0 70)" filter="url(#gwSoftS)"></path></g>
+<g><circle cx="700" cy="488" r="7" fill="#7C9A5C" stroke="#5B7543" stroke-width=".6"></circle><circle cx="711" cy="480" r="5" fill="#86A365" stroke="#5B7543" stroke-width=".6"></circle><circle cx="686" cy="498" r="5.5" fill="#7C9A5C" stroke="#5B7543" stroke-width=".6"></circle><circle cx="700" cy="488" r="2" fill="#F4ECEE"></circle><circle cx="686" cy="498" r="1.6" fill="#F0D7DE"></circle></g>
+<path d="M736 432l4-7M741 437l6-5M732 428l1-8M745 444l7-3M740 441l5-7M748 450l6-1" stroke="#6E7F50" stroke-width="1.3" stroke-linecap="round"></path>
+<g fill="#BDB5A6" stroke="rgba(80,70,60,.35)" stroke-width=".6"><circle cx="748" cy="506" r="7"></circle><circle cx="757" cy="497" r="4.5"></circle></g>
+
+<rect x="566" y="448" width="62" height="70" fill="#B78C61"></rect>
+<rect x="566" y="448" width="62" height="70" fill="url(#gwDeck)" stroke="#7E5C3D" stroke-width=".9"></rect>
+
+<sc-if value="{{ heat }}" hint-placeholder-val="{{ false }}"><image href="{{ heatSrc }}" x="0" y="0" width="1000" height="600" preserveAspectRatio="none" opacity=".6"></image></sc-if>
+
+<g filter="url(#gwSoft)" opacity="{{ shO }}" fill="#1E2A1B">
+<sc-for list="{{ hulls }}" as="h"><polygon points="{{ h.p }}" opacity="{{ h.o }}"></polygon></sc-for>
+<sc-for list="{{ hedgeSh }}" as="h"><path d="{{ hedgeD }}" transform="{{ h.tf }}" fill="none" stroke="#1E2A1B" stroke-width="{{ hedgeW }}" stroke-linejoin="round"></path></sc-for>
+<sc-for list="{{ shrubSh }}" as="s"><circle cx="{{ s.x }}" cy="{{ s.y }}" r="{{ s.r }}"></circle></sc-for>
+<sc-for list="{{ treeSh }}" as="s"><g opacity="{{ s.o }}"><circle cx="{{ s.x }}" cy="{{ s.y }}" r="{{ s.r }}"></circle><line x1="{{ s.x1 }}" y1="{{ s.y1 }}" x2="{{ s.x }}" y2="{{ s.y }}" stroke="#1E2A1B" stroke-width="5"></line></g></sc-for>
+<g transform="{{ furnTf }}"><sc-for list="{{ furniture }}" as="f"><rect x="{{ f.x }}" y="{{ f.y }}" width="{{ f.w }}" height="{{ f.h }}" rx="{{ f.rx }}"></rect></sc-for></g>
+</g>
+
+<sc-for list="{{ beds }}" as="b"><g><rect x="{{ b.x }}" y="{{ b.y }}" width="60" height="24" rx="1.5" fill="#A27C56" stroke="#6F5238" stroke-width=".8"></rect><rect x="{{ b.ix }}" y="{{ b.iy }}" width="55" height="19" fill="#5B4535"></rect><rect x="{{ b.ix }}" y="{{ b.iy }}" width="55" height="19" fill="url(#gwMulch)"></rect></g></sc-for>
+<sc-for list="{{ veg }}" as="v"><circle cx="{{ v.x }}" cy="{{ v.y }}" r="{{ v.r }}" fill="{{ v.c }}" stroke="rgba(30,40,20,.35)" stroke-width=".5"></circle></sc-for>
+
+<rect x="880" y="490" width="80" height="70" fill="url(#gwGlass)" stroke="#8E9B99" stroke-width="1.2"></rect>
+<path d="M880 525H960M890 490V560M900 490V560M910 490V560M920 490V560M930 490V560M940 490V560M950 490V560" stroke="rgba(110,125,123,.55)" stroke-width=".6"></path>
+<path d="M880 525H960" stroke="#7F8C8A" stroke-width="1.4"></path>
+<g fill="#7E9A60" opacity=".7"><circle cx="893" cy="506" r="4"></circle><circle cx="905" cy="510" r="3.4"></circle><circle cx="935" cy="545" r="4.2"></circle><circle cx="948" cy="541" r="3.2"></circle></g>
+
+<rect x="950" y="40" width="35" height="50" fill="#7E6448" stroke="#57432F" stroke-width=".9"></rect>
+<rect x="953" y="43" width="13" height="44" fill="#4D3C2D"></rect><rect x="969" y="43" width="13" height="44" fill="#5A4636"></rect>
+<rect x="953" y="43" width="29" height="44" fill="url(#gwMulch)"></rect>
+<circle cx="948" cy="112" r="9" fill="#55605A" stroke="#3C4440" stroke-width="1"></circle><circle cx="948" cy="112" r="6" fill="#425049"></circle>
+
+<rect x="860" y="40" width="40" height="80" fill="#8A745E"></rect><rect x="900" y="40" width="40" height="80" fill="#6F5C49"></rect>
+<rect x="860" y="40" width="80" height="80" fill="url(#gwDeckV)"></rect>
+<rect x="858" y="38" width="84" height="84" fill="none" stroke="#4E3F31" stroke-width="1"></rect>
+<path d="M900 38V122" stroke="#4A3B2D" stroke-width="1.6"></path>
+
+<rect x="20" y="140" width="200" height="280" fill="#55585B"></rect>
+<polygon points="20,140 220,140 120,240" fill="#46494C"></polygon>
+<polygon points="220,140 220,420 120,320 120,240" fill="#4F5255"></polygon>
+<polygon points="20,140 120,240 120,320 20,420" fill="#62656A"></polygon>
+<polygon points="20,420 220,420 120,320" fill="#6A6D70"></polygon>
+<g fill="#2E3A4B" stroke="#8C98A8" stroke-width=".5"><rect x="60" y="394" width="16" height="16"></rect><rect x="76" y="394" width="16" height="16"></rect><rect x="92" y="394" width="16" height="16"></rect><rect x="108" y="394" width="16" height="16"></rect><rect x="124" y="394" width="16" height="16"></rect><rect x="140" y="394" width="16" height="16"></rect><rect x="156" y="394" width="16" height="16"></rect><rect x="80" y="376" width="16" height="16"></rect><rect x="96" y="376" width="16" height="16"></rect><rect x="112" y="376" width="16" height="16"></rect><rect x="128" y="376" width="16" height="16"></rect><rect x="144" y="376" width="16" height="16"></rect></g>
+<path d="M20 140L120 240L220 140M20 420L120 320L220 420M120 240V320" stroke="#2D3033" stroke-width="1.2" fill="none"></path>
+<rect x="52" y="226" width="14" height="22" fill="#9BB3C3" stroke="#3A3D40" stroke-width=".6"></rect><rect x="52" y="300" width="14" height="22" fill="#9BB3C3" stroke="#3A3D40" stroke-width=".6"></rect>
+<rect x="168" y="182" width="16" height="14" fill="#6E5F55" stroke="#2D3033" stroke-width=".8"></rect>
+<rect x="18" y="138" width="204" height="284" fill="none" stroke="#25282A" stroke-width="1.6"></rect>
+
+<sc-for list="{{ furniture }}" as="f"><rect x="{{ f.x }}" y="{{ f.y }}" width="{{ f.w }}" height="{{ f.h }}" rx="{{ f.rx }}" fill="{{ f.f }}" stroke="{{ f.s }}" stroke-width=".7"></rect></sc-for>
+<circle cx="309" cy="153" r="5" fill="#7D9561"></circle><circle cx="309" cy="409" r="5" fill="#7D9561"></circle>
+
+<sc-for list="{{ peren }}" as="p"><circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.c }}" stroke="{{ p.st }}" stroke-width="1.3" stroke-dasharray="{{ p.da }}"></circle></sc-for>
+<sc-for list="{{ peren }}" as="p"><circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.cr }}" fill="{{ p.c2 }}"></circle></sc-for>
+
+<path d="{{ hedgeD }}" fill="none" stroke="{{ hedge }}" stroke-width="{{ hedgeW }}" stroke-linejoin="round"></path>
+<path d="{{ hedgeD }}" fill="none" stroke="{{ hedge }}" stroke-width="{{ hedgeBump }}" stroke-dasharray="{{ hedgeDash }}" stroke-linecap="round"></path>
+<path d="{{ hedgeD }}" fill="none" stroke="rgba(18,30,12,.22)" stroke-width="{{ hedgeBump }}" stroke-dasharray="{{ hedgeDash }}" stroke-linecap="round" stroke-dashoffset="{{ hedgeOff }}" opacity=".5"></path>
+<path d="{{ hedgeD }}" fill="none" stroke="rgba(255,252,225,.22)" stroke-width="{{ hedgeHi }}" stroke-dasharray="{{ hedgeDash }}" stroke-linecap="round"></path>
+
+<sc-for list="{{ shrubs }}" as="s"><circle cx="{{ s.x }}" cy="{{ s.y }}" r="{{ s.r }}" fill="{{ shrubC }}" stroke="rgba(28,38,22,.3)" stroke-width=".6"></circle></sc-for>
+<sc-for list="{{ shrubs }}" as="s"><circle cx="{{ s.x }}" cy="{{ s.y }}" r="{{ s.r }}" fill="url(#gwClump)"></circle></sc-for>
+
+<sc-for list="{{ trees }}" as="t"><g>
+<sc-if value="{{ t.leafy }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ t.lobes }}" as="l"><circle cx="{{ l.x }}" cy="{{ l.y }}" r="{{ l.r }}" fill="{{ t.color }}" stroke="rgba(26,36,20,.32)" stroke-width=".8"></circle></sc-for>
+<sc-for list="{{ t.lobes }}" as="l"><circle cx="{{ l.x }}" cy="{{ l.y }}" r="{{ l.r }}" fill="url(#gwClump)"></circle></sc-for>
+<circle cx="{{ t.x }}" cy="{{ t.y }}" r="{{ t.ri }}" fill="{{ t.color }}"></circle>
+<sc-for list="{{ t.clumps }}" as="c"><circle cx="{{ c.x }}" cy="{{ c.y }}" r="{{ c.r }}" fill="url(#gwClump)"></circle></sc-for>
+<circle cx="{{ t.x }}" cy="{{ t.y }}" r="{{ t.r }}" fill="url(#gwCanopy)"></circle>
+</sc-if>
+<sc-if value="{{ t.bare }}" hint-placeholder-val="{{ false }}">
+<circle cx="{{ t.x }}" cy="{{ t.y }}" r="{{ t.r }}" fill="rgba(110,98,84,.08)" stroke="rgba(80,70,60,.45)" stroke-width=".8" stroke-dasharray="2 3"></circle>
+<sc-for list="{{ t.branches }}" as="b"><line x1="{{ b.x1 }}" y1="{{ b.y1 }}" x2="{{ b.x2 }}" y2="{{ b.y2 }}" stroke="#6A5E50" stroke-width="{{ b.w }}" stroke-linecap="round"></line></sc-for>
+</sc-if>
+<sc-for list="{{ t.dots }}" as="d"><circle cx="{{ d.x }}" cy="{{ d.y }}" r="{{ d.r }}" fill="{{ d.c }}"></circle></sc-for>
+<circle cx="{{ t.x }}" cy="{{ t.y }}" r="2.6" fill="#3B3226"></circle>
+<path d="{{ t.cross }}" stroke="rgba(40,32,24,.6)" stroke-width=".7"></path>
+</g></sc-for>
+
+<rect x="0" y="0" width="1000" height="600" fill="#F2F5F6" opacity="{{ frost }}"></rect>
+<sc-if value="{{ rings }}" hint-placeholder-val="{{ false }}"><sc-for list="{{ trees }}" as="t"><g><circle cx="{{ t.x }}" cy="{{ t.y }}" r="{{ t.rm }}" fill="none" stroke="#3D5BD9" stroke-width="1.1" stroke-dasharray="5 4"></circle><circle cx="{{ t.x }}" cy="{{ t.y }}" r="{{ t.r0 }}" fill="none" stroke="rgba(30,34,36,.5)" stroke-width=".8" stroke-dasharray="1.5 3"></circle></g></sc-for></sc-if>
+
+<sc-if value="{{ irrigation }}" hint-placeholder-val="{{ false }}"><g><rect x="0" y="0" width="1000" height="600" fill="#F3F0E8" opacity=".5"></rect>
+<sc-for list="{{ sprinklers }}" as="s"><g><path d="{{ s.d }}" fill="rgba(58,132,196,.16)" stroke="rgba(47,118,184,.7)" stroke-width="1" stroke-dasharray="5 3"></path><path d="{{ s.rays }}" stroke="rgba(47,118,184,.35)" stroke-width=".8" stroke-dasharray="1.5 4" fill="none"></path><line x1="{{ s.fx }}" y1="{{ s.fy }}" x2="{{ s.x }}" y2="{{ s.y }}" stroke="#2F76B8" stroke-width="1" stroke-dasharray="3 2"></line></g></sc-for>
+<path d="M228 152L330 152L330 262L780 262" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linejoin="round" opacity=".7"></path>
+<path d="M228 152L330 152L330 262L780 262" fill="none" stroke="#2F76B8" stroke-width="2.4" stroke-linejoin="round"></path>
+<path d="M330 262L330 446M801 262L812 262L812 410" fill="none" stroke="#2F76B8" stroke-width="1.8"></path>
+<path d="M330 446C300 446 250 446 240 452L240 470C300 470 380 466 420 480C440 488 450 500 456 512C380 506 300 500 240 498L240 525C320 526 400 528 462 540L460 555C380 556 300 556 244 556" fill="none" stroke="#1E2E3B" stroke-width="1.6" stroke-linejoin="round"></path>
+<path d="M330 446C300 446 250 446 240 452L240 470C300 470 380 466 420 480C440 488 450 500 456 512C380 506 300 500 240 498L240 525C320 526 400 528 462 540L460 555C380 556 300 556 244 556" fill="none" stroke="#7FC0EA" stroke-width="2.6" stroke-dasharray="0 9" stroke-linecap="round"></path>
+<sc-for list="{{ drips }}" as="d"><g><path d="{{ d.p }}" fill="none" stroke="#1E2E3B" stroke-width="1.4"></path><path d="{{ d.p }}" fill="none" stroke="#7FC0EA" stroke-width="2.4" stroke-dasharray="0 7" stroke-linecap="round"></path></g></sc-for>
+<sc-for list="{{ sprinklers }}" as="s"><g><circle cx="{{ s.x }}" cy="{{ s.y }}" r="5.5" fill="#FFFFFF" stroke="#2F76B8" stroke-width="1.6"></circle><circle cx="{{ s.x }}" cy="{{ s.y }}" r="1.8" fill="#2F76B8"></circle></g></sc-for>
+<rect x="778" y="254" width="24" height="16" rx="3" fill="#FFFFFF" stroke="#2F76B8" stroke-width="1.6"></rect><path d="M783 262H797M786 258V266M790 258V266M794 258V266" stroke="#2F76B8" stroke-width="1"></path>
+<rect x="222" y="146" width="12" height="12" rx="2" fill="#2F76B8"></rect><path d="M225 152H231M228 149V155" stroke="#fff" stroke-width="1.4"></path>
+<circle cx="948" cy="112" r="11" fill="none" stroke="#2F76B8" stroke-width="1.4" stroke-dasharray="2 2"></circle>
+</g></sc-if>
+
+<rect x="0" y="0" width="1000" height="600" fill="none" stroke="{{ boundC }}" stroke-width="1.5" stroke-dasharray="16 4 2 4"></rect>
+<sc-for list="{{ corners }}" as="c"><circle cx="{{ c.x }}" cy="{{ c.y }}" r="3.2" fill="{{ c.f }}" stroke="{{ boundC }}" stroke-width="1.2"></circle></sc-for>
+
+<sc-if value="{{ grid }}" hint-placeholder-val="{{ false }}"><rect x="0" y="0" width="1000" height="600" fill="url(#gwGrid1)"></rect><rect x="0" y="0" width="1000" height="600" fill="url(#gwGrid5)"></rect></sc-if>
+
+<sc-if value="{{ dayLamps }}" hint-placeholder-val="{{ true }}"><g>
+<polyline points="{{ zig }}" fill="none" stroke="rgba(50,52,54,.55)" stroke-width=".7"></polyline>
+<sc-for list="{{ bulbs }}" as="b"><circle cx="{{ b.x }}" cy="{{ b.y }}" r="1.3" fill="#3C3F41"></circle></sc-for>
+<sc-for list="{{ spotsDay }}" as="s"><line x1="{{ s.x }}" y1="{{ s.y }}" x2="{{ s.x2 }}" y2="{{ s.y2 }}" stroke="#2F3234" stroke-width="1.2" stroke-dasharray="2 1.6"></line></sc-for>
+<sc-for list="{{ lampsDay }}" as="l"><g><circle cx="{{ l.x }}" cy="{{ l.y }}" r="4.6" fill="#FBF8F1" stroke="#2F3234" stroke-width="1"></circle><circle cx="{{ l.x }}" cy="{{ l.y }}" r="1.6" fill="#C9963F"></circle></g></sc-for>
+</g></sc-if>
+
+<sc-if value="{{ night }}" hint-placeholder-val="{{ false }}"><g>
+<mask id="{{ maskId }}" maskUnits="userSpaceOnUse" x="-60" y="-60" width="1120" height="720"><rect x="-60" y="-60" width="1120" height="720" fill="#fff"></rect><sc-for list="{{ glows }}" as="g"><circle cx="{{ g.x }}" cy="{{ g.y }}" r="{{ g.r }}" fill="url(#gwHole)" opacity="{{ g.a }}"></circle></sc-for><g filter="url(#gwSoft)"><sc-for list="{{ cones }}" as="c"><path d="{{ c.d }}" transform="{{ c.tf }}" fill="url(#gwHoleCone)" opacity="{{ c.a }}"></path></sc-for></g></mask>
+<rect x="-1" y="-1" width="1002" height="602" fill="#07101E" opacity=".84" mask="{{ maskUrl }}"></rect>
+<g opacity=".9"><sc-for list="{{ glows }}" as="g"><circle cx="{{ g.x }}" cy="{{ g.y }}" r="{{ g.tr }}" fill="{{ g.fill }}" opacity="{{ g.ta }}"></circle></sc-for><g filter="url(#gwSoft)"><sc-for list="{{ cones }}" as="c"><path d="{{ c.d }}" transform="{{ c.tf }}" fill="{{ c.fill }}" opacity="{{ c.ta }}"></path></sc-for></g></g>
+<g clip-path="url(#gwPondClip)" opacity=".8"><circle cx="668" cy="470" r="86" fill="url(#gwLWater)" opacity=".9"></circle><ellipse cx="700" cy="438" rx="34" ry="5" fill="#CFE6F2" opacity=".14"></ellipse><sc-for list="{{ reflections }}" as="r"><ellipse cx="{{ r.x }}" cy="{{ r.y }}" rx="{{ r.rx }}" ry="2.4" fill="#FFE2B8" opacity=".6" filter="url(#gwSoftS)"></ellipse></sc-for></g>
+<polyline points="{{ zig }}" fill="none" stroke="rgba(255,226,180,.18)" stroke-width=".7"></polyline>
+<sc-for list="{{ bulbs }}" as="b"><g><circle cx="{{ b.x }}" cy="{{ b.y }}" r="8" fill="url(#gwL2200)" opacity=".85"></circle><circle cx="{{ b.x }}" cy="{{ b.y }}" r="1.5" fill="#FFF1D6"></circle></g></sc-for>
+<sc-for list="{{ cores }}" as="c"><g><circle cx="{{ c.x }}" cy="{{ c.y }}" r="9" fill="{{ c.fill }}"></circle><circle cx="{{ c.x }}" cy="{{ c.y }}" r="2.6" fill="#FFF6E6" stroke="rgba(20,24,30,.6)" stroke-width=".6"></circle></g></sc-for>
+</g></sc-if>
+
+<sc-if value="{{ labels }}" hint-placeholder-val="{{ true }}"><g font-family="Newsreader, serif" font-style="italic" text-anchor="middle">
+<text x="120" y="290" font-size="15" fill="rgba(255,255,255,.82)" letter-spacing=".3">Wohnhaus</text>
+<text x="900" y="84" font-size="11" fill="rgba(255,255,255,.85)">Gartenhaus</text>
+</g>
+<g font-family="Newsreader, serif" font-style="italic" text-anchor="middle" fill="{{ labelFill }}" stroke="{{ labelHalo }}" stroke-width="3.2" stroke-linejoin="round" style="paint-order:stroke">
+<text x="270" y="300" font-size="13">Terrasse</text>
+<text x="395" y="222" font-size="15">Rasen</text>
+<g transform="{{ lindenTf }}"><text x="0" y="0" font-size="13">Winterlinde</text></g>
+<g transform="{{ appleTf }}"><text x="0" y="0" font-size="11">Apfel ›Topaz‹</text></g>
+<text x="470" y="432" font-size="12">Kiesweg</text>
+<text x="682" y="474" font-size="13">Teich</text>
+<text x="597" y="533" font-size="11">Holzdeck</text>
+<text x="890" y="448" font-size="12">Hochbeete</text>
+<text x="920" y="529" font-size="11">Gewächshaus</text>
+<text x="345" y="492" font-size="12">Staudenbeet</text>
+<text x="120" y="30" font-size="12">Zugang</text>
+<text x="967" y="103" font-size="10">Kompost</text>
+<text x="112" y="520" font-size="12">Rasen</text>
+</g>
+<g font-family="Geist Mono, monospace" font-size="8" letter-spacing=".4" text-anchor="middle" fill="{{ labelSub }}" stroke="{{ labelHalo }}" stroke-width="2.6" stroke-linejoin="round" style="paint-order:stroke">
+<text x="270" y="310">70,0 m²</text>
+<text x="395" y="233">214 m²</text>
+<g transform="{{ lindenTf }}"><text x="0" y="10">Tilia cordata · 16 m</text></g>
+<text x="470" y="442">b = 1,20 m</text>
+<text x="682" y="484">9,4 m²</text>
+<text x="890" y="458">6 × 3,6 m²</text>
+<text x="345" y="502">24 m²</text>
+<text x="120" y="40">Kies</text>
+<text x="112" y="530">33 m²</text>
+</g></sc-if>
+
+<sc-if value="{{ dims }}" hint-placeholder-val="{{ false }}"><g stroke="{{ dimC }}" stroke-width=".8" fill="none"><path d="M0 -6V-36M1000 -6V-36M0 -26H1000M-5 -21L5 -31M995 -21L1005 -31M-6 0H-36M-6 600H-36M-26 0V600M-21 -5L-31 5M-21 595L-31 605M220 432V448M320 432V448M220 444H320M216 448L224 440M316 448L324 440"></path></g><g font-family="Geist Mono, monospace" font-size="11" fill="{{ dimC }}" text-anchor="middle"><text x="500" y="-31" stroke="{{ dimHalo }}" stroke-width="5" style="paint-order:stroke">50,00</text><text x="-31" y="300" transform="rotate(-90 -31 300)" stroke="{{ dimHalo }}" stroke-width="5" style="paint-order:stroke">30,00</text><text x="270" y="442" font-size="8.5" stroke="{{ dimHalo }}" stroke-width="3" style="paint-order:stroke">5,00</text></g></sc-if>
+
+<sc-if value="{{ selPath }}" hint-placeholder-val="{{ false }}"><g>
+<path d="{{ pathD }}" fill="none" stroke="#3D5BD9" stroke-width="28.6"></path>
+<path d="{{ pathD }}" fill="none" stroke="#D9D0BF" stroke-width="25.6"></path>
+<path d="{{ pathD }}" fill="none" stroke="url(#gwGravelA)" stroke-width="25.6"></path>
+<path d="{{ pathD }}" fill="none" stroke="url(#gwGravelB)" stroke-width="25.6"></path>
+<path d="{{ pathD }}" fill="none" stroke="#3D5BD9" stroke-width="1" stroke-dasharray="4 4"></path>
+<sc-for list="{{ handles }}" as="h"><line x1="{{ h.x1 }}" y1="{{ h.y1 }}" x2="{{ h.x2 }}" y2="{{ h.y2 }}" stroke="#3D5BD9" stroke-width=".9"></line></sc-for>
+<sc-for list="{{ cps }}" as="c"><circle cx="{{ c.x }}" cy="{{ c.y }}" r="3.4" fill="#FFFFFF" stroke="#3D5BD9" stroke-width="1.3"></circle></sc-for>
+<sc-for list="{{ nodes }}" as="n"><rect x="{{ n.x }}" y="{{ n.y }}" width="8" height="8" rx="1.5" fill="#FFFFFF" stroke="#3D5BD9" stroke-width="1.5"></rect></sc-for>
+<line x1="{{ callout.x1 }}" y1="{{ callout.y1 }}" x2="{{ callout.x2 }}" y2="{{ callout.y2 }}" stroke="#3D5BD9" stroke-width="1"></line>
+<circle cx="{{ callout.x1 }}" cy="{{ callout.y1 }}" r="1.8" fill="#3D5BD9"></circle><circle cx="{{ callout.x2 }}" cy="{{ callout.y2 }}" r="1.8" fill="#3D5BD9"></circle>
+<line x1="{{ callout.x2 }}" y1="{{ callout.y2 }}" x2="{{ callout.lx }}" y2="{{ callout.ly }}" stroke="#3D5BD9" stroke-width=".8"></line>
+<rect x="{{ callout.rx }}" y="{{ callout.ry }}" width="50" height="17" rx="8.5" fill="#3D5BD9"></rect>
+<text x="{{ callout.lx }}" y="{{ callout.ty }}" font-family="Geist Mono, monospace" font-size="9.5" fill="#FFFFFF" text-anchor="middle">1,20 m</text>
+</g></sc-if>
+
+<sc-if value="{{ selLamp }}" hint-placeholder-val="{{ false }}"><g>
+<circle cx="{{ sel.x }}" cy="{{ sel.y }}" r="11" fill="none" stroke="#93A6FF" stroke-width="1.4"></circle>
+<circle cx="{{ sel.x }}" cy="{{ sel.y }}" r="16" fill="none" stroke="#93A6FF" stroke-width=".8" opacity=".5"></circle>
+<path d="{{ sel.edges }}" stroke="#93A6FF" stroke-width=".9" stroke-dasharray="3 3" fill="none"></path>
+<path d="{{ sel.arc }}" stroke="#93A6FF" stroke-width="1.4" fill="none"></path>
+<line x1="{{ sel.x }}" y1="{{ sel.y }}" x2="{{ sel.hx }}" y2="{{ sel.hy }}" stroke="#93A6FF" stroke-width="1.2"></line>
+<circle cx="{{ sel.hx }}" cy="{{ sel.hy }}" r="4.2" fill="#0E1626" stroke="#93A6FF" stroke-width="1.6"></circle>
+<rect x="{{ sel.lx }}" y="{{ sel.ly }}" width="34" height="16" rx="8" fill="#93A6FF"></rect>
+{{ angText }}
+</g></sc-if>
+
+<sc-if value="{{ ghost }}" hint-placeholder-val="{{ false }}"><g>
+<circle cx="400" cy="112" r="40" fill="#1E2A1B" opacity=".12" filter="url(#gwSoft)" transform="translate(10 12)"></circle>
+<circle cx="400" cy="112" r="40" fill="#97AE6E" opacity=".72"></circle>
+<circle cx="400" cy="112" r="40" fill="url(#gwCanopy)"></circle>
+<circle cx="400" cy="112" r="40" fill="none" stroke="#3D5BD9" stroke-width="1.3" stroke-dasharray="5 3"></circle>
+<path d="M396 112H404M400 108V116" stroke="#3D5BD9" stroke-width="1.2"></path>
+<path d="M320 112H360M400 22V72" stroke="#E0567A" stroke-width="1" stroke-dasharray="3 2"></path>
+<rect x="318" y="96" width="44" height="14" rx="7" fill="#E0567A"></rect><text x="340" y="106" font-family="Geist Mono, monospace" font-size="8.5" fill="#fff" text-anchor="middle">2,00 m</text>
+<rect x="404" y="40" width="44" height="14" rx="7" fill="#E0567A"></rect><text x="426" y="50" font-family="Geist Mono, monospace" font-size="8.5" fill="#fff" text-anchor="middle">2,50 m</text>
+</g></sc-if>
+</svg>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1100,&quot;height&quot;:700},&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;day&quot;,&quot;night&quot;],&quot;default&quot;:&quot;day&quot;,&quot;tsType&quot;:&quot;'day'|'night'&quot;},&quot;season&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;spring&quot;,&quot;summer&quot;,&quot;autumn&quot;,&quot;winter&quot;],&quot;default&quot;:&quot;summer&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;years&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0,&quot;max&quot;:20,&quot;step&quot;:1,&quot;default&quot;:0,&quot;tsType&quot;:&quot;number&quot;},&quot;rings&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;sunMode&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;sunHour&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:5,&quot;max&quot;:21,&quot;step&quot;:0.25,&quot;default&quot;:15.5,&quot;tsType&quot;:&quot;number&quot;},&quot;doy&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:172,&quot;tsType&quot;:&quot;number&quot;},&quot;heat&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;irrigation&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;grid&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;dims&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;labels&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;ghost&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;showLamps&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;selected&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;path&quot;,&quot;lamp&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;spotLm&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:100,&quot;max&quot;:1200,&quot;step&quot;:10,&quot;default&quot;:480,&quot;tsType&quot;:&quot;number&quot;},&quot;spotK&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:2200,&quot;max&quot;:4000,&quot;step&quot;:100,&quot;default&quot;:3000,&quot;tsType&quot;:&quot;number&quot;},&quot;spotAng&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:10,&quot;max&quot;:60,&quot;step&quot;:1,&quot;default&quot;:36,&quot;tsType&quot;:&quot;number&quot;},&quot;shadowStrength&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:0.26,&quot;tsType&quot;:&quot;number&quot;},&quot;uid&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;gp&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vb&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;-50 -50 1100 700&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  static SEA = {
+    spring: { lawn: '#A7BB7B', linden: '#97AE68', fruit: '#AEBF8B', cherry: '#E6C3CB', hedge: '#86A35F', shrub: '#8FA66C', frost: 0, bare: false },
+    summer: { lawn: '#9BAE74', linden: '#6D8656', fruit: '#7C935F', cherry: '#738B58', hedge: '#5B7350', shrub: '#6B8460', frost: 0, bare: false },
+    autumn: { lawn: '#A3A672', linden: '#C69442', fruit: '#B48743', cherry: '#B5553A', hedge: '#A4813F', shrub: '#A3583A', frost: 0, bare: false },
+    winter: { lawn: '#B6B8A8', linden: '#7A6E5E', fruit: '#7A6E5E', cherry: '#7A6E5E', hedge: '#957C59', shrub: '#7E806C', frost: 0.14, bare: true }
+  };
+  static PER = {
+    spring: { salvia: '#7E9466', grass: '#A3B37E', geranium: '#8FA56C', sedum: '#9BAF85', allium: '#A27FB8' },
+    summer: { salvia: '#7466A6', grass: '#CBBE8F', geranium: '#C98AA6', sedum: '#AAB98F', allium: '#9A86C2' },
+    autumn: { salvia: '#6F6A60', grass: '#D5B97F', geranium: '#B4683F', sedum: '#A4504A', allium: '#8E7D62' },
+    winter: { salvia: '#8B8172', grass: '#CFC19E', geranium: '#8E7F6E', sedum: '#7A5A4C', allium: '#8C8273' }
+  };
+  static SEGS = [[[320,280],[420,280],[430,400],[540,400]],[[540,400],[650,400],[640,200],[720,170]],[[720,170],[780,148],[840,150],[880,130]]];
+  f(v) { return Math.round(v * 10) / 10; }
+  rng(seed) { let s = seed % 2147483647; if (s <= 0) s += 2147483646; return () => { s = s * 16807 % 2147483647; return (s - 1) / 2147483646; }; }
+  bz(P, t) { const u = 1 - t; return [u*u*u*P[0][0]+3*u*u*t*P[1][0]+3*u*t*t*P[2][0]+t*t*t*P[3][0], u*u*u*P[0][1]+3*u*u*t*P[1][1]+3*u*t*t*P[2][1]+t*t*t*P[3][1]]; }
+  bzd(P, t) { const u = 1 - t; return [3*u*u*(P[1][0]-P[0][0])+6*u*t*(P[2][0]-P[1][0])+3*t*t*(P[3][0]-P[2][0]), 3*u*u*(P[1][1]-P[0][1])+6*u*t*(P[2][1]-P[1][1])+3*t*t*(P[3][1]-P[2][1])]; }
+  sun(doy, clock) {
+    const rad = Math.PI / 180, lat = 50.1 * rad;
+    const dec = 23.44 * Math.sin(2 * Math.PI * (284 + doy) / 365) * rad;
+    const H = ((clock - 2 + 8.7 / 15) - 12) * 15 * rad;
+    const el = Math.asin(Math.sin(lat) * Math.sin(dec) + Math.cos(lat) * Math.cos(dec) * Math.cos(H));
+    const az = Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(lat) - Math.tan(dec) * Math.cos(lat)) + Math.PI;
+    return { el, az };
+  }
+  sv(doy, clock) { const s = this.sun(doy, clock); if (s.el <= 0.03) return null; const L = Math.min(1 / Math.tan(s.el), 9) * 20; return [-Math.sin(s.az) * L, Math.cos(s.az) * L]; }
+  hull(pts) {
+    pts = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const cr = (o, a, b) => (a[0]-o[0])*(b[1]-o[1]) - (a[1]-o[1])*(b[0]-o[0]);
+    const lo = [], up = [];
+    for (const p of pts) { while (lo.length >= 2 && cr(lo[lo.length-2], lo[lo.length-1], p) <= 0) lo.pop(); lo.push(p); }
+    for (let i = pts.length - 1; i >= 0; i--) { const p = pts[i]; while (up.length >= 2 && cr(up[up.length-2], up[up.length-1], p) <= 0) up.pop(); up.push(p); }
+    up.pop(); lo.pop();
+    return lo.concat(up).map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+  }
+  rectSh(x, y, w, h, H, sv, o) { const dx = sv[0]*H, dy = sv[1]*H; const c = [[x,y],[x+w,y],[x+w,y+h],[x,y+h]]; return { p: this.hull(c.concat(c.map(q => [q[0]+dx, q[1]+dy]))), o: o ?? 1 }; }
+  grow(y, k) { return 1 - Math.exp(-y / k); }
+  kc(k) {
+    const s = [[2200,[255,165,79]],[2700,[255,192,126]],[3000,[255,208,156]],[4000,[255,236,214]]];
+    k = Math.max(2200, Math.min(4000, k));
+    for (let i = 0; i < s.length - 1; i++) if (k <= s[i+1][0]) { const t = (k - s[i][0]) / (s[i+1][0] - s[i][0]); const c = s[i][1].map((v, j) => Math.round(v + (s[i+1][1][j] - v) * t)); return `rgb(${c.join(',')})`; }
+    return 'rgb(255,236,214)';
+  }
+  ramp(h) {
+    const st = [[0,[77,106,143]],[4,[143,178,176]],[7,[231,217,142]],[10,[238,176,98]],[13,[221,106,62]]];
+    if (h <= 0) return 'rgb(77,106,143)';
+    for (let i = 0; i < st.length - 1; i++) if (h <= st[i+1][0]) { const t = (h - st[i][0]) / (st[i+1][0] - st[i][0]); return 'rgb(' + st[i][1].map((v, j) => Math.round(v + (st[i+1][1][j] - v) * t)).join(',') + ')'; }
+    return 'rgb(221,106,62)';
+  }
+  heat(doy, trees, w) {
+    const key = doy + '|' + trees.map(t => t.r.toFixed(0)).join(',') + '|' + w.toFixed(0);
+    if (this._hk === key) return this._hc;
+    const times = []; for (let h = 5; h <= 21.6; h += 0.5) { const v = this.sv(doy, h); if (v) times.push(v); }
+    const cells = [];
+    for (let i = 0; i < 25; i++) for (let j = 0; j < 15; j++) {
+      const px = i * 40 + 20, py = j * 40 + 20; let sunny = 0;
+      for (const v of times) {
+        let sh = false;
+        for (const t of trees) { if (t.bare) continue; const dx = px - (t.x + v[0]*t.h), dy = py - (t.y + v[1]*t.h); if (dx*dx + dy*dy < (t.r*0.92)**2) { sh = true; break; } }
+        if (!sh) for (let k = 0; k <= 6 && !sh; k++) { const qx = px - v[0]*7*k/6, qy = py - v[1]*7*k/6; if (qx > 20 && qx < 220 && qy > 140 && qy < 420) sh = true; }
+        if (!sh) for (let k = 0; k <= 4 && !sh; k++) { const qx = px - v[0]*1.8*k/4, qy = py - v[1]*1.8*k/4; if (qy > 600 - w || qx > 1000 - w || (qy < w && qx > 330)) sh = true; if (qx > 860 && qx < 940 && qy > 40 && qy < 120) sh = true; }
+        if (!sh) sunny += 0.5;
+      }
+      cells.push({ i, j, c: this.ramp(sunny) });
+    }
+    const cv = document.createElement('canvas'); cv.width = 25; cv.height = 15; const ctx = cv.getContext('2d'); cells.forEach(c => { ctx.fillStyle = c.c; ctx.fillRect(c.i, c.j, 1, 1); }); const src = cv.toDataURL(); this._hk = key; this._hc = src; return src;
+  }
+  renderVals() {
+    const p = this.props, C = Component, f = (v) => this.f(v);
+    const night = (p.mode ?? 'day') === 'night';
+    const season = p.season ?? 'summer';
+    const S = C.SEA[season] || C.SEA.summer, PER = C.PER[season] || C.PER.summer;
+    const years = +(p.years ?? 0);
+    const uid = p.uid ?? 'gp';
+    const doy = +(p.doy ?? 172), hour = +(p.sunHour ?? 15.5);
+    const svr = night ? null : (p.sunMode ? this.sv(doy, hour) : [2.4, 3.0]);
+    const sv = svr || [0, 0];
+    const shO = (night || !svr) ? 0 : (p.shadowStrength ?? 0.26);
+
+    const TD = [
+      { id: 'linden', x: 540, y: 140, r0: 104, rm: 150, k: 9, h: 11, seed: 7 },
+      { id: 'fruit', x: 770, y: 95, r0: 30, rm: 72, k: 7, h: 3.2, seed: 11 },
+      { id: 'cherry', x: 720, y: 330, r0: 34, rm: 78, k: 7, h: 3.8, seed: 23 }
+    ];
+    const trees = TD.map(t => {
+      const r = t.r0 + (t.rm - t.r0) * this.grow(years, t.k);
+      const rnd = this.rng(t.seed);
+      const n = t.id === 'linden' ? 17 : 11;
+      const lobes = [];
+      for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2 + rnd() * 0.25, rr = r * (0.78 + rnd() * 0.06); lobes.push({ x: f(t.x + Math.cos(a) * rr), y: f(t.y + Math.sin(a) * rr), r: f(r * (0.25 + rnd() * 0.06)) }); }
+      const clumps = [];
+      const m = t.id === 'linden' ? 10 : 5;
+      for (let i = 0; i < m; i++) { const a = rnd() * 6.283, d = r * (0.12 + rnd() * 0.48); clumps.push({ x: f(t.x + Math.cos(a) * d), y: f(t.y + Math.sin(a) * d), r: f(r * (0.2 + rnd() * 0.12)) }); }
+      const branches = [];
+      if (S.bare) for (let i = 0; i < 8; i++) {
+        const a = i / 8 * 6.283 + rnd() * 0.4, L = r * (0.72 + rnd() * 0.2);
+        branches.push({ x1: t.x, y1: t.y, x2: f(t.x + Math.cos(a) * L), y2: f(t.y + Math.sin(a) * L), w: f(Math.max(1, r * 0.03)) });
+        const fx = t.x + Math.cos(a) * L * 0.5, fy = t.y + Math.sin(a) * L * 0.5;
+        for (const s of [-0.5, 0.5]) { const b = a + s; branches.push({ x1: f(fx), y1: f(fy), x2: f(fx + Math.cos(b) * L * 0.42), y2: f(fy + Math.sin(b) * L * 0.42), w: f(Math.max(0.6, r * 0.016)) }); }
+      }
+      const dots = [];
+      const sprinkle = (cnt, rr0, col) => { for (let i = 0; i < cnt; i++) { const a = rnd() * 6.283, d = Math.sqrt(rnd()) * r * 0.82; dots.push({ x: f(t.x + Math.cos(a) * d), y: f(t.y + Math.sin(a) * d), r: f(rr0 + rnd()), c: col }); } };
+      if (t.id !== 'linden') {
+        if (season === 'spring') sprinkle(t.id === 'cherry' ? 30 : 22, 1.4, t.id === 'cherry' ? '#FBF1F3' : '#F7EEF0');
+        if (season === 'summer' && t.id === 'fruit') sprinkle(9, 1.8, '#B9472F');
+        if (season === 'autumn' && t.id === 'fruit') sprinkle(7, 1.8, '#C8632F');
+      }
+      const c = 3.6;
+      return { ...t, r: f(r), ri: f(r * 0.86), lobes, clumps, color: S[t.id], leafy: !S.bare, bare: S.bare, branches, dots, cross: `M${t.x - c - 3} ${t.y}H${t.x - c}M${t.x + c} ${t.y}H${t.x + c + 3}M${t.x} ${t.y - c - 3}V${t.y - c}M${t.x} ${t.y + c}V${t.y + c + 3}` };
+    });
+    const treeSh = trees.map(t => ({ x: f(t.x + sv[0] * t.h), y: f(t.y + sv[1] * t.h), r: f(t.r * 0.94), x1: t.x, y1: t.y, o: t.bare ? 0.28 : 1 }));
+
+    const groundDots = [];
+    if (season === 'autumn' || season === 'spring') {
+      const rnd = this.rng(99), L = trees[0];
+      const cnt = season === 'autumn' ? 90 : 46;
+      for (let i = 0; i < cnt; i++) { const a = rnd() * 6.283, d = L.r * (0.7 + rnd() * 0.75); const x = L.x + Math.cos(a) * d, y = L.y + Math.sin(a) * d; if (x < 330 || y < 26 || y > 400) continue; groundDots.push({ x: f(x), y: f(y), r: f(1 + rnd() * 1.2), c: season === 'autumn' ? (rnd() > 0.5 ? '#C9963F' : '#B7743A') : (rnd() > 0.5 ? '#B7A3D6' : '#F2EBD6') }); }
+    }
+
+    const SHD = [[350,52,26,3],[965,170,22,5],[505,556,24,8],[612,566,20,13],[262,518,26,17],[452,552,20,19],[788,214,18,29],[40,470,24,31],[120,560,22,37],[190,470,20,41]];
+    const shrubs = [], shrubSh = [];
+    const sg = 0.72 + 0.28 * this.grow(years, 4);
+    SHD.forEach(([x, y, r0, seed]) => {
+      const r = r0 * sg, rnd = this.rng(seed);
+      for (let i = 0; i < 6; i++) { const a = i / 6 * 6.283 + rnd() * 0.5; shrubs.push({ x: f(x + Math.cos(a) * r * 0.5), y: f(y + Math.sin(a) * r * 0.5), r: f(r * (0.46 + rnd() * 0.08)) }); }
+      shrubs.push({ x, y, r: f(r * 0.55) });
+      shrubSh.push({ x: f(x + sv[0] * 1.2), y: f(y + sv[1] * 1.2), r: f(r * 0.95) });
+    });
+
+    const w = 16 + 14 * this.grow(years, 6), o = w / 2;
+    const hedgeD = `M330 ${f(o)}L${f(1000 - o)} ${f(o)}L${f(1000 - o)} ${f(600 - o)}L6 ${f(600 - o)}`;
+    const hedgeSh = [1/3, 2/3, 1].map(k => ({ tf: `translate(${f(sv[0] * 1.8 * k)} ${f(sv[1] * 1.8 * k)})` }));
+
+    const BEDS = [[820,290],[900,290],[820,340],[900,340],[820,390],[900,390]];
+    const beds = BEDS.map(([x, y]) => ({ x, y, ix: x + 2.5, iy: y + 2.5 }));
+    const VEG = [['#A9C47A', 3.6], ['#6E8C7A', 4.2], ['#6F8F4E', 4], ['#93B166', 3], ['#93A07E', 3.4], ['#7C9A58', 3.8]];
+    const veg = [];
+    const vs = season === 'spring' ? 0.7 : season === 'winter' ? 0.55 : 1;
+    BEDS.forEach(([x, y], bi) => {
+      if (season === 'winter' && bi % 2) return;
+      const [c, r] = VEG[bi];
+      for (let row = 0; row < 2; row++) for (let i = 0; i < 6; i++) veg.push({ x: x + 7.5 + i * 9 + (row ? 4.5 : 0) - (row ? 2 : 0), y: y + 8 + row * 8, r: f(r * vs), c: season === 'autumn' && bi === 2 ? '#9C8A4E' : c });
+      if (season === 'summer' && bi === 2) for (let i = 0; i < 5; i++) veg.push({ x: x + 10 + i * 10, y: y + 11, r: 1.6, c: '#C2452E' });
+    });
+
+    const DRIFTS = [[252,466,18,7,'grass'],[296,470,20,8,'salvia'],[345,462,16,6,'allium'],[392,478,18,7,'geranium'],[300,510,22,9,'geranium'],[350,505,20,8,'sedum'],[402,515,18,7,'salvia'],[440,528,12,4,'grass'],[300,552,18,7,'salvia'],[352,548,18,7,'grass'],[400,552,16,6,'sedum'],[244,548,10,4,'allium']];
+    const peren = [];
+    const prnd = this.rng(5);
+    const pr = season === 'spring' ? 0.75 : season === 'winter' ? 0.8 : 1;
+    DRIFTS.forEach(([x, y, rad, n, t]) => {
+      for (let i = 0; i < n; i++) {
+        const a = prnd() * 6.283, d = Math.sqrt(prnd()) * rad, r = (t === 'grass' ? 6.5 : 4.4 + prnd() * 1.4) * pr;
+        const c = PER[t];
+        peren.push({ x: f(x + Math.cos(a) * d), y: f(y + Math.sin(a) * d), r: f(r), c, st: t === 'grass' ? c : 'rgba(30,30,20,.28)', da: t === 'grass' ? '1 1.4' : 'none', cr: f(r * 0.32), c2: t === 'grass' ? 'rgba(255,250,230,.35)' : 'rgba(30,25,20,.32)' });
+      }
+    });
+
+    const furniture = [
+      { x: 252, y: 186, w: 34, h: 62, rx: 2, f: '#ECE6D9', s: '#837A6B' },
+      { x: 238, y: 192, w: 11, h: 11, rx: 2.5, f: '#D9CFBE', s: '#837A6B' }, { x: 238, y: 211, w: 11, h: 11, rx: 2.5, f: '#D9CFBE', s: '#837A6B' }, { x: 238, y: 230, w: 11, h: 11, rx: 2.5, f: '#D9CFBE', s: '#837A6B' },
+      { x: 289, y: 192, w: 11, h: 11, rx: 2.5, f: '#D9CFBE', s: '#837A6B' }, { x: 289, y: 211, w: 11, h: 11, rx: 2.5, f: '#D9CFBE', s: '#837A6B' }, { x: 289, y: 230, w: 11, h: 11, rx: 2.5, f: '#D9CFBE', s: '#837A6B' },
+      { x: 263, y: 172, w: 12, h: 11, rx: 2.5, f: '#D9CFBE', s: '#837A6B' }, { x: 263, y: 251, w: 12, h: 11, rx: 2.5, f: '#D9CFBE', s: '#837A6B' },
+      { x: 236, y: 330, w: 46, h: 15, rx: 3, f: '#F1EDE5', s: '#837A6B' }, { x: 236, y: 352, w: 46, h: 15, rx: 3, f: '#F1EDE5', s: '#837A6B' },
+      { x: 237, y: 332, w: 9, h: 11, rx: 2, f: '#DCD2C1', s: '#9C9384' }, { x: 237, y: 354, w: 9, h: 11, rx: 2, f: '#DCD2C1', s: '#9C9384' },
+      { x: 290, y: 342, w: 12, h: 12, rx: 6, f: '#E6DFD2', s: '#837A6B' },
+      { x: 302, y: 146, w: 14, h: 14, rx: 7, f: '#B9724F', s: '#7E4A31' }, { x: 302, y: 402, w: 14, h: 14, rx: 7, f: '#B9724F', s: '#7E4A31' }
+    ];
+    const hulls = [this.rectSh(20, 140, 200, 280, 7, sv), this.rectSh(858, 38, 84, 84, 2.6, sv), this.rectSh(880, 490, 80, 70, 2.4, sv, 0.45), this.rectSh(950, 40, 35, 50, 1.1, sv)].concat(BEDS.map(([x, y]) => this.rectSh(x, y, 60, 24, 0.7, sv)));
+
+    const SEGS = C.SEGS;
+    const pathD = `M${SEGS[0][0].join(' ')}` + SEGS.map(s => `C${s[1].join(' ')} ${s[2].join(' ')} ${s[3].join(' ')}`).join('');
+    const bolls = [[0, 0.3, 1], [0, 0.78, -1], [1, 0.22, 1], [1, 0.58, -1], [1, 0.93, 1], [2, 0.55, -1]].map(([si, t, side]) => { const [x, y] = this.bz(SEGS[si], t), [dx, dy] = this.bzd(SEGS[si], t), L = Math.hypot(dx, dy); return { x: f(x - dy / L * side * 26), y: f(y + dx / L * side * 26) }; });
+
+    const spotLm = +(p.spotLm ?? 480), spotK = +(p.spotK ?? 3000), spotAng = +(p.spotAng ?? 36);
+    const selColor = this.kc(spotK);
+    const selGlowId = uid + 'sg', selConeId = uid + 'sc';
+    const G = (x, y, r, a, tr, ta, fill) => ({ x, y, r, a, tr, ta, fill });
+    const zigP = [[222,160],[318,195],[222,230],[318,265],[222,300],[318,335],[222,370],[318,405]];
+    const bulbs = []; const brnd = this.rng(77);
+    for (let i = 0; i < zigP.length - 1; i++) { const [x1, y1] = zigP[i], [x2, y2] = zigP[i+1]; const L = Math.hypot(x2 - x1, y2 - y1), n = Math.floor(L / 13); for (let j = 1; j <= n; j++) bulbs.push({ x: f(x1 + (x2 - x1) * j / (n + 1)), y: f(y1 + (y2 - y1) * j / (n + 1)), dur: (2.2 + brnd() * 3).toFixed(1) + 's' }); }
+    const glows = [
+      ...bolls.map(b => G(b.x, b.y, 66, 0.88, 54, 0.85, 'url(#gwL2700)')),
+      G(234, 176, 74, 0.8, 58, 0.75, 'url(#gwL2700)'), G(234, 384, 74, 0.8, 58, 0.75, 'url(#gwL2700)'),
+      G(236, 232, 54, 0.45, 44, 0.5, 'url(#gwL2700)'), G(236, 330, 54, 0.45, 44, 0.5, 'url(#gwL2700)'),
+      G(570, 452, 40, 0.75, 32, 0.85, 'url(#gwL2200)'), G(570, 514, 40, 0.75, 32, 0.85, 'url(#gwL2200)'),
+      G(270, 282, 150, 0.45, 125, 0.32, 'url(#gwL2200)'),
+      G(668, 470, 80, 0.55, 0, 0, 'url(#gwL3000)'),
+      G(515, 168, f(58 + spotLm * 0.09), Math.min(0.78, 0.3 + spotLm / 1000), f((58 + spotLm * 0.09) * 0.8), 0.62, `url(#${selGlowId})`),
+      G(714, 334, 66, 0.5, 52, 0.5, 'url(#gwL2700)'),
+      ...bulbs.map(b => G(b.x, b.y, 18, 0.32, 0, 0, 'none'))
+    ];
+    const cone = (x, y, ang, half, len, a, fill, ta) => { const h = half * Math.PI / 180, c = Math.cos(h), s = Math.sin(h); return { d: `M0 0L${c.toFixed(4)} ${(-s).toFixed(4)}A1 1 0 0 1 ${c.toFixed(4)} ${s.toFixed(4)}Z`, tf: `translate(${x} ${y}) rotate(${ang}) scale(${len})`, a, fill, ta, x, y, ang, half, len }; };
+    const treeCone = cone(455, 225, -45, spotAng / 2, f(90 + spotLm * 0.14), Math.min(0.95, 0.55 + spotLm / 1200), `url(#${selConeId})`, 0.55);
+    const cones = [treeCone, cone(838, 206, -63.8, 17, 150, 0.85, 'url(#gwC3000)', 0.5), cone(690, 372, -53, 28, 80, 0.7, 'url(#gwC2700)', 0.45)];
+    const coreList = [...bolls, { x: 234, y: 176 }, { x: 234, y: 384 }, { x: 570, y: 452 }, { x: 570, y: 514 }, { x: 455, y: 225 }, { x: 838, y: 206 }, { x: 690, y: 372 }];
+    const cores = coreList.map(c => ({ ...c, fill: 'url(#gwL2700)' }));
+    const reflections = [{ x: 622, y: 462, rx: 14, dur: '3.4s' }, { x: 624, y: 504, rx: 12, dur: '4.1s' }, { x: 668, y: 470, rx: 20, dur: '2.8s' }, { x: 690, y: 452, rx: 10, dur: '3.7s' }];
+    const lampsDay = [...bolls, { x: 234, y: 176 }, { x: 234, y: 384 }, { x: 570, y: 452 }, { x: 570, y: 514 }, { x: 668, y: 470 }, { x: 455, y: 225 }, { x: 838, y: 206 }, { x: 690, y: 372 }];
+    const spotsDay = cones.map(c => ({ x: c.x, y: c.y, x2: f(c.x + Math.cos(c.ang * Math.PI / 180) * 16), y2: f(c.y + Math.sin(c.ang * Math.PI / 180) * 16) }));
+
+    const ar = (deg) => deg * Math.PI / 180;
+    const tc = treeCone, hh = tc.half, R = 46;
+    const sel = {
+      x: tc.x, y: tc.y,
+      hx: f(tc.x + Math.cos(ar(tc.ang)) * tc.len * 0.62), hy: f(tc.y + Math.sin(ar(tc.ang)) * tc.len * 0.62),
+      edges: `M${tc.x} ${tc.y}L${f(tc.x + Math.cos(ar(tc.ang - hh)) * tc.len)} ${f(tc.y + Math.sin(ar(tc.ang - hh)) * tc.len)}M${tc.x} ${tc.y}L${f(tc.x + Math.cos(ar(tc.ang + hh)) * tc.len)} ${f(tc.y + Math.sin(ar(tc.ang + hh)) * tc.len)}`,
+      arc: `M${f(tc.x + Math.cos(ar(tc.ang - hh)) * R)} ${f(tc.y + Math.sin(ar(tc.ang - hh)) * R)}A${R} ${R} 0 0 1 ${f(tc.x + Math.cos(ar(tc.ang + hh)) * R)} ${f(tc.y + Math.sin(ar(tc.ang + hh)) * R)}`,
+      ang: Math.round(spotAng) + '°'
+    };
+    sel.lx = f(tc.x - 24); sel.ly = f(tc.y + 16); sel.tx = f(tc.x - 7); sel.ty = f(tc.y + 27);
+
+    const nodes = [SEGS[0][0], ...SEGS.map(s => s[3])].map(q => ({ x: q[0] - 4, y: q[1] - 4 }));
+    const cps = [], handles = [];
+    SEGS.forEach(s => { cps.push({ x: s[1][0], y: s[1][1] }, { x: s[2][0], y: s[2][1] }); handles.push({ x1: s[0][0], y1: s[0][1], x2: s[1][0], y2: s[1][1] }, { x1: s[3][0], y1: s[3][1], x2: s[2][0], y2: s[2][1] }); });
+    const [qx, qy] = this.bz(SEGS[1], 0.32), [qdx, qdy] = this.bzd(SEGS[1], 0.32), qL = Math.hypot(qdx, qdy), nx = -qdy / qL, ny = qdx / qL;
+    const callout = { x1: f(qx - nx * 12), y1: f(qy - ny * 12), x2: f(qx + nx * 12), y2: f(qy + ny * 12), lx: f(qx + nx * 12 + 34), ly: f(qy + ny * 12 + 6) };
+    callout.rx = f(callout.lx - 25); callout.ry = f(callout.ly - 8.5); callout.ty = f(callout.ly + 3.3);
+
+    const SPR = [[336,38,140,0,90,330,152],[560,30,140,0,180,560,262],[780,36,130,90,180,780,262],[336,410,130,270,360,330,410],[770,236,130,90,270,770,262],[500,566,130,180,360,500,262],[775,560,130,180,270,780,262]];
+    const sprinklers = SPR.map(([x, y, r, a0, a1, fx, fy]) => {
+      const pt = (a) => [f(x + Math.cos(ar(a)) * r), f(y + Math.sin(ar(a)) * r)];
+      const [sx, sy] = pt(a0), [ex, ey] = pt(a1), large = (a1 - a0) > 180 ? 1 : 0;
+      const rays = [0.25, 0.5, 0.75].map(k => { const [rx2, ry2] = pt(a0 + (a1 - a0) * k); return `M${x} ${y}L${rx2} ${ry2}`; }).join('');
+      return { x, y, fx, fy, d: `M${x} ${y}L${sx} ${sy}A${r} ${r} 0 ${large} 1 ${ex} ${ey}Z`, rays };
+    });
+    const drips = BEDS.map(([x, y]) => ({ p: `M812 ${y + 8}L${x + 4} ${y + 8}L${x + 56} ${y + 8}L${x + 56} ${y + 16}L${x + 4} ${y + 16}` }));
+
+    const LB = [
+      ['Terrasse', 270, 300, 13, '70,0 m²'], ['Rasen', 395, 222, 15, '214 m²'], ['Winterlinde', 540, f(Math.min(trees[0].y + trees[0].r + 16, 330)), 13, 'Tilia cordata · 16 m'],
+      ['Kiesweg', 470, 432, 12, 'b = 1,20 m'], ['Teich', 682, 474, 13, '9,4 m²'], ['Holzdeck', 597, 534, 11, ''], ['Hochbeete', 890, 448, 12, '6 × 3,6 m²'],
+      ['Gewächshaus', 920, 530, 11, ''], ['Staudenbeet', 345, 492, 12, '24 m²'], ['Zugang', 120, 30, 12, 'Kies'], ['Kompost', 967, 102, 10, ''], ['Apfel', 770, f(95 + trees[1].r + 13), 11, '']
+    ];
+    const labelList = LB.map(([t, x, y, s, sub]) => ({ t, x, y, s, sub, y2: y + 10 }));
+
+    return {
+      vb: p.vb ?? '-50 -50 1100 700',
+      lawn: S.lawn, hedge: S.hedge, shrubC: S.shrub, frost: S.frost,
+      trees, treeSh, groundDots, shrubs, shrubSh,
+      hedgeD, hedgeW: f(w), hedgeBump: f(w * 1.16), hedgeHi: f(w * 0.42), hedgeDash: `0 ${f(w * 0.62)}`, hedgeOff: f(-w * 0.12), hedgeSh,
+      beds, veg, peren, furniture, hulls, furnTf: `translate(${f(sv[0] * 0.7)} ${f(sv[1] * 0.7)})`, shO,
+      pathD, heat: !!p.heat, heatSrc: p.heat ? this.heat(doy, trees, w) : '',
+      irrigation: !!p.irrigation, rings: !!p.rings, sprinklers, drips,
+      grid: !!p.grid, dims: !!p.dims, labels: p.labels ?? true, ghost: !!p.ghost,
+      night, day: !night, dayLamps: !night && (p.showLamps ?? true),
+      maskId: uid + 'm', maskUrl: `url(#${uid}m)`, glows, cones, cores, bulbs, reflections, zig: zigP.map(q => q.join(',')).join(' '),
+      lampsDay, spotsDay, selColor, selGlowId, selConeId,
+      selPath: p.selected === 'path', nodes, cps, handles, callout,
+      selLamp: p.selected === 'lamp', sel,
+      lindenTf: `translate(540 ${f(Math.min(trees[0].y + trees[0].r + 16, 330))})`, appleTf: `translate(770 ${f(95 + trees[1].r + 13)})`,
+      angText: React.createElement('text', { x: sel.tx, y: sel.ty, fontFamily: 'Geist Mono, monospace', fontSize: 9, fill: '#0B1220', textAnchor: 'middle' }, sel.ang),
+      labelList, labelFill: night ? '#B4C0CC' : '#353834', labelSub: night ? '#7D8B99' : '#6E716B', labelHalo: night ? 'rgba(10,18,32,.85)' : 'rgba(238,233,222,.85)',
+      boundC: night ? '#8794A3' : '#2D3033', dimC: night ? '#8794A3' : '#4A4D4F', dimHalo: night ? '#0E1724' : '#E8E4DA',
+      corners: [[0,0],[1000,0],[1000,600],[0,600]].map(([x, y]) => ({ x, y, f: night ? '#0E1724' : '#F4F1EA' }))
+    };
+  }
+}
+</script>
+</body>
+</html>

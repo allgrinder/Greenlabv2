@@ -1,0 +1,240 @@
+# Gartenwerk – Architektur & Datenmodell (Phase 1)
+
+Stand: 06.10.2026 · Grundlage: Design-Handoff `project/Gartenwerk.dc.html` (inkl. `Chrome`, `GardenPlan`)
+
+Dieses Dokument ist zur Abstimmung gedacht, bevor die UI gebaut wird. Maßgeblich für das Datenmodell ist der Code:
+`src/core/model/types.ts` (Projekt, Ebenen, Objekte, Katalog) und `src/state/types.ts` (Sitzung, Undo-Historie). Beide Dateien sind typgeprüft (`tsc --strict`).
+
+---
+
+## 1. Überblick
+
+```
+┌──────────────────────────── ui/ (React) ─────────────────────────────┐
+│ Topbar · Werkzeugleiste · Ebenen · Eigenschaften · Bibliothek ·      │
+│ Unterleiste (Zoom, Maßstab, Raster, Undo, Tag/Nacht) · Onboarding    │
+└───────▲───────────────────────────────┬──────────────────────────────┘
+        │ Selektoren (useStore)         │ Commands (store.apply)
+┌───────┴───────────────────────────────▼──────────────────────────────┐
+│ state/  Zustand + Immer                                               │
+│   doc (Project) ──produceWithPatches──► history (past/future)         │
+│   session (Werkzeug, Auswahl, Viewport, Modus) – nicht im Undo        │
+└───────▲───────────────┬───────────────────────────────▲──────────────┘
+        │               │ subscribe (Referenzvergleich) │ autosave
+┌───────┴──────┐ ┌──────▼──────────────────────┐ ┌──────┴──────────────┐
+│ tools/       │ │ render/  PixiJS v8 (WebGL)  │ │ persistence/        │
+│ Pointer →    │ │ Szenengraph je Ebene,       │ │ IndexedDB (idb),    │
+│ Weltkoord.,  │ │ inkrementelle Abgleichung,  │ │ JSON-Import/-Export │
+│ Snapping,    │ │ Culling, Texturen, Overlays │ └─────────────────────┘
+│ Vorschau     │ └─────────────▲───────────────┘
+└──────┬───────┘               │
+       └──────────► core/ (rein, ohne UI/Pixi): Geometrie, Modell,
+                    Katalog, Mengen, Kalibrierung  ◄── Unit-Tests
+```
+
+Grundregeln:
+- `core/` ist reines TypeScript ohne Abhängigkeiten zu React, Pixi oder dem Store. Hier liegt alles, was getestet wird.
+- Das Projekt ist ein JSON-Baum. Dadurch funktionieren Immer-Patches (Undo), IndexedDB und der JSON-Export ohne Mapping.
+- Abgeleitete Werte (m², Umfang, Mengen, Kosten) werden nie gespeichert. Sie werden in `core/quantities` berechnet und pro Objekt-Referenz gecacht (`WeakMap`).
+- Der Renderer liest den Store nur. Änderungen laufen immer über Commands.
+
+## 2. Ordnerstruktur
+
+```
+src/
+  core/
+    model/        types.ts, ids.ts, defaults.ts (Ebenen, Settings), migrations.ts
+    geometry/     vec.ts, polygon.ts (Fläche, Umfang, Schwerpunkt, contains, bbox)
+                  bezier.ts (Auswertung, adaptive Flachlegung, Bogenlänge)
+                  shape.ts (ShapeGeometry → Polygon), offset.ts (Weg mit Breite)
+                  clip.ts (Vereinigen/Abziehen, Wrapper um Clipper2)
+                  smooth.ts (Freihand: Ramer-Douglas-Peucker + Catmull-Rom → Bézier)
+                  plot.ts (Grundstück aus Kantenlängen/Winkeln, Schlusskante)
+                  snap.ts (Raster-, Ecken-, Kanten-, Mittelpunktfang – rein rechnerisch)
+    calibration.ts  2-Punkt-Kalibrierung → metersPerPixel
+    quantities/   quantities.ts (pro Objekt), summary.ts (Projekt)
+    catalog/      materials.ts, plants.ts, items.ts
+    sample/       lindenweg12.ts (Beispielgarten 30 × 50 m aus dem Design)
+    format.ts     de-DE-Zahlen: „41,5 m²“, „1.246 €“, „±0,00 m“
+  state/          store.ts, history.ts, commands/*.ts, selectors.ts, types.ts
+  persistence/    db.ts, autosave.ts, jsonIO.ts
+  render/
+    PlanRenderer.ts   Pixi-Application, Abgleich Store → Szenengraph
+    Viewport.ts       Welt↔Bildschirm, Zoom/Pan/Pinch, Trägheit
+    SpatialIndex.ts   rbush über Objekt-Bounding-Boxes (Culling, Hit-Test, Snapping)
+    layers/           PlotLayer, AreaLayer, PathLayer, PlantLayer, ItemLayer, AnnotationLayer, ShadowLayer
+    symbols/          Baumkrone, Strauch, Staudengruppe, Hochbeet, Gartenhaus … (Draufsicht)
+    textures/         prozedurale Kacheltexturen je Material
+    overlays/         Auswahl, Griffe, Fangführungen, Bemaßungen, Raster
+  tools/          Tool.ts, ToolController.ts, select/, rect/, polygon/, bezier/,
+                  freehand/, path/, dimension/, text/, plant/, calibrate/
+  ui/
+    theme/        tokens.css (Tag/Nacht-Variablen 1:1 aus dem Design), fonts
+    chrome/       TopBar, ToolRail, BottomBar, LayersPanel
+    panels/       PropertiesPanel (je Objekttyp), LibraryPanel, PlantDetail
+    onboarding/   NewProjectWizard (Rechteck/Polygon, Nord, Standort, Hintergrund)
+    components/   GlassPanel, Segmented, Field, Slider, Toggle, Swatch …
+    App.tsx
+  test/           Vitest-Fixtures
+```
+
+Neben den gewünschten Ordnern `/core`, `/render`, `/tools` und `/ui` gibt es zwei weitere: `state` und `persistence`. So bleibt `core` frei von Store- und Browser-APIs und damit gut testbar.
+
+## 3. Datenmodell
+
+Vollständig in `src/core/model/types.ts`. Die wichtigsten Entscheidungen:
+
+### Koordinaten
+- Weltkoordinaten in **Metern** (float). x nach Osten/rechts, y nach Süden/unten (wie der Bildschirm). Der Ursprung ist Ecke A des Grundstücks.
+- Das Grundstück wird achsparallel gezeichnet. Die Nordrichtung ist ein Projektwert (`site.northDeg`, im Design −12°). Der Nordpfeil dreht sich, der Plan nicht. Die Sonnenberechnung in Phase 2 rechnet `northDeg` ein.
+- Für Clipper2 werden Koordinaten intern mit 10.000 skaliert (0,1 mm Auflösung). Das bleibt im Wrapper `clip.ts` verborgen.
+
+### Projekt
+```ts
+Project {
+  schemaVersion, id, name, createdAt, updatedAt,
+  site: { plot: PlotSpec, boundary: Vec2[], northDeg, location },
+  background: BackgroundImage | null,      // Bild als Blob separat in IndexedDB
+  layerOrder: Id[], layers: Record<Id, Layer>,
+  objects: Record<Id, PlanObject>,         // flach, normalisiert
+  priceOverrides, settings: { gridStepM: 0.1|0.5|1, snapToGrid, snapToGeometry, scaleDenominator }
+}
+```
+Objekte werden flach als `Record` gespeichert. Die Reihenfolge steht in `layer.objectOrder`. Das hält Immer-Patches klein: Wird ein Objekt verschoben, betrifft der Patch nur dieses eine Objekt.
+
+### Grundstück (`PlotSpec`)
+- `rect` {width, depth} – Onboarding „Rechteck“.
+- `edges` [{length, angleDeg}] – Polygon mit exakten Kantenlängen und Innenwinkeln. Die **letzte Kante wird berechnet**, damit die Kontur schließt. Ihre Länge und ihr Winkel werden angezeigt („berechnet“). So entsteht kein überbestimmtes System.
+- `drawn` [Vec2] – frei geklickt (Design 01, Punkte A–E).
+
+Die Eingabe bleibt gespeichert, damit sie später editierbar ist. `boundary` ist das daraus berechnete Polygon.
+
+### Hintergrund & Kalibrierung
+`BackgroundImage { blobId, origin, metersPerPixel, rotationDeg, opacity, visible, locked, calibration: {a, b, distanceM} }`. Die beiden Punkte a und b liegen in **Bildpixeln**. Daraus folgt `metersPerPixel = distanceM / |b − a|`. So bleibt die Kalibrierung gültig, wenn das Bild verschoben wird.
+
+### Geometrie
+```ts
+ShapeGeometry = RectGeometry   // parametrisch: center, width, depth, rotationDeg, cornerRadius
+              | PathGeometry   // nodes: {p, in?, out?, smooth?}[], closed, source
+Region = { outer: ShapeGeometry, holes: PathGeometry[] }
+```
+- **Ein** Pfadformat für Polygon, Bézier und Freihand: Knoten mit optionalen Griffen. Damit kann jedes Werkzeug nachträglich mit demselben Knoteneditor bearbeitet werden. `source` merkt sich nur, welches Werkzeug ihn erzeugt hat.
+- Rechtecke bleiben parametrisch. So bleiben „30,00 × 50,00 m“ exakt, auch nach einer Drehung. Erst wenn ein Knoten einzeln gezogen wird, wird das Rechteck in einen Pfad umgewandelt (mit Rückfrage im UI).
+- Freihand wird beim Loslassen geglättet (RDP-Vereinfachung, dann Catmull-Rom → Bézier) und als normaler Pfad gespeichert.
+- Boolesche Operationen (Vereinigen/Abziehen) liefern Polygone mit Löchern (`source: 'boolean'`). Kurven werden dafür vorher fein flachgelegt.
+
+### Objekttypen (diskriminierte Union `PlanObject`)
+| type | Zweck | Geometrie | Ebene (Standard) |
+|---|---|---|---|
+| `area` | Rasen, Kies, Pflaster, Beet, Teich … | `Region` + `materialId` + optional Kantenstein | areas |
+| `path` | Weg-Werkzeug | Mittellinie + `width` (1,20 m), Fläche per Offset | paths |
+| `plant` | Baum, Strauch, Gemüse | Punkt + `speciesId` + `plantedYear` | plants |
+| `planting` | Stauden in Gruppen | `Region` + Artenmix + Stück/m² | plants |
+| `hedge` | Hecke | Mittellinie + Art + Höhe | plants |
+| `item` | Gartenhaus, Hochbeet, Möbel … | Punkt + Drehung + reale Maße aus dem Katalog | build |
+| `dimension` | Bemaßung | 2 Anker (frei oder an Objektknoten gebunden) | annotation |
+| `text` | Planbeschriftung | Punkt, Größe in Weltmetern | annotation |
+| `lamp` | Phase 2 | Typ, Lumen, Kelvin, Winkel, Richtung, Zeitplan | light |
+
+Alle Objekte haben die gemeinsamen Felder `layerId, name, locked, hidden, elevation, notes`. `lamp` steht schon jetzt im Modell, damit Phase 2 keine Schema-Migration braucht. Bewässerung (Phase 2) kommt als weitere Union-Variante dazu, mit `schemaVersion` 2 und Migration.
+
+### Katalog (statisch, versioniert mit der App)
+- `Material` – Textur-Schlüssel, Kachelgröße in m, **Verankerung** `world` (Rasen, Kies: Muster liegt fest im Raster) oder `object` (Pflaster, Dielen: Fugen bleiben kantenparallel), Abrechnungseinheit (m², m³ × Schichtdicke, Stück aus Steinformat), Preis.
+- `PlantSpecies` – Ø bei Pflanzung und Endgröße, Höhe, Zuwachs pro Jahr, Standort, Jahreszeitenfarben, Jahreslauf (12 Monate, wie in der Detailkarte im Design), Preis.
+- `CatalogItem` – reale Maße, Symbol, Standard-Ebene. Einige Einträge erzeugen **Flächen** statt Objekte (Terrasse → Holzfläche, Teich → Wasserfläche), damit Mengen und Kosten einheitlich berechnet werden.
+
+Phase-1-Materialien: Rasen, Kies, Pflaster, Holz, Mulch, Rindenmulch, Erde/Beet, Wasser.
+
+### Wachstum (vorbereitet für Phase 2)
+`Ø(t) = Ø₀ + (Ø_end − Ø₀) · (1 − e^(−t/k))`, dieselbe Kurve wie im Design-Prototyp. `k` wird aus `growthPerYear` abgeleitet, sodass die Anfangssteigung dem Zuwachs pro Jahr entspricht: `k = (Ø_end − Ø₀) / growthPerYear`.
+
+## 4. State, Commands, Undo/Redo
+
+- Ein Zustand-Store mit drei Bereichen: `doc` (Projekt), `session` (Werkzeug, Auswahl, Viewport, Modus, Panels) und `history`.
+- **Alle** Änderungen am Projekt laufen über `apply(label, recipe, opts)`. Intern ruft das Immers `produceWithPatches` auf und legt `{label, patches, inverse}` auf den Stack. Undo wendet die inversen Patches an, Redo die Vorwärts-Patches. Dadurch muss kein Command eine eigene Undo-Logik schreiben.
+- **Zusammenfassen:** Ziehen, Slider und Tastatur-Nudges geben eine `mergeKey` mit (z. B. `gesture:<pointerId>`). Alle Änderungen einer Geste werden zu *einem* Undo-Schritt.
+- Commands sind kleine, benannte Funktionen in `state/commands/` (`addObject`, `moveObjects`, `editNode`, `setMaterial`, `booleanOp`, `reorderLayer` …). Die Tests prüfen jeweils: apply → undo ergibt wieder exakt den Ausgangszustand.
+- Die Sitzung ist nicht Teil des Undo. Nur die Auswahl wird beim Undo auf noch existierende IDs bereinigt.
+
+## 5. Rendering (PixiJS v8, WebGL)
+
+- **Szenengraph:** eine Welt-Container-Ebene pro Layer, in der Reihenfolge `layerOrder`, plus eigene Container für Hintergrundbild, Raster, Schatten und Overlays.
+- **Abgleich statt Neuaufbau:** Der Renderer abonniert `doc.objects`. Dank Immers struktureller Teilung reicht ein Referenzvergleich pro Objekt. Nur geänderte Objekte bekommen neue Graphics. Unveränderte Geometrie bleibt auf der GPU.
+- **Viewport:** Eine einzige Transformation (Skalierung = px/m, Translation) auf dem Welt-Container. Zoom und Pan ändern keine Objekte, deshalb kosten sie kein Neuzeichnen.
+- **Culling:** Ein rbush-Index über die Objekt-Bounding-Boxes. Pro Frame mit geändertem Viewport werden nur Objekte im sichtbaren Bereich (plus Rand) auf `visible` gesetzt. Derselbe Index dient für Hit-Tests und Fang.
+- **LOD:** Baumkronen haben drei Detailstufen (Lappen, Büschel, Licht/Schatten wie in `GardenPlan`), abhängig von px/m. Stauden werden bei kleinem Zoom zu einer Fläche zusammengefasst.
+- **Texturen:** Sie werden beim Start prozedural per Canvas 2D erzeugt (Halmstruktur, Kieskörnung, Fugenraster, Dielen, Mulch, Wasserglanz). Farben und Muster kommen aus dem Design. Gefüllt wird mit `Graphics.fill({ texture, matrix })`. Die Matrix setzt die Verankerung um (Welt oder Objekt) und skaliert die Kachel auf ihre Größe in Metern. Externe Bilddateien und Lizenzen sind nicht nötig.
+- **Schatten (Phase 1):** Weiche Schlagschatten mit festem Versatz, wie im Design (Sonnenvektor ≈ Südost). Sie liegen auf einem eigenen Container mit `BlurFilter` und werden zwischengespeichert (`cacheAsTexture`) und nur bei Änderungen neu berechnet. In Phase 2 kommt der Vektor aus SunCalc.
+- **Overlays** (Auswahl, Griffe, Fangführungen, Maßlinien) werden im Bildschirmraum gezeichnet, damit sie bei jedem Zoom haarfein bleiben. Maßzahlen und Kantenlängen-Pills (Geist Mono, wie im Onboarding) sind ein schlankes DOM-Overlay über dem Canvas. Das ergibt scharfe Schrift und exakt das Design-Styling.
+- **Vorbereitet für Phase 2:** Licht wird additiv in eine RenderTexture akkumuliert und multiplikativ über die abgedunkelte Szene gelegt. Die Verdeckung erfolgt über 2D-Schattenpolygone von Gebäuden und Hecken.
+
+Ziel: 60 fps bei über 500 Objekten. Ein Benchmark-Projekt mit 1.000 Objekten wird generiert und per Playwright-Frame-Timing gemessen.
+
+## 6. Werkzeuge & Eingabe
+
+```ts
+interface Tool {
+  id: ToolId; cursor: string;
+  onPointerDown/Move/Up(e: WorldPointerEvent, ctx: ToolContext): void;
+  onKeyDown?(e: KeyboardEvent, ctx): boolean;
+  preview?(g: OverlayGraphics, ctx): void;   // Gummiband, Live-Maße
+  cancel(): void;
+}
+```
+- `ToolController` übersetzt Pointer-Events in Weltkoordinaten, wendet den Fang an und leitet weiter. Die Werkzeuge erzeugen erst beim Abschluss einen Command. Während des Zeichnens existiert die Geometrie nur als Vorschau.
+- **Fang** (`core/geometry/snap.ts`): Prioritäten Ecke > Kantenmittelpunkt > Kante > Raster (10 cm / 50 cm / 1 m). Die Toleranz ist in Bildschirmpixeln angegeben (8 px). ⇧ rastet Winkel in 15°-Schritten ein, Alt schaltet den Fang vorübergehend aus. Die Fangführungen werden angezeigt.
+- **Zahleneingabe beim Zeichnen:** Tippen während einer Kante setzt deren Länge exakt („4,5 ↵“). Das ist wichtig für Präzision ohne Maus.
+- **Knotenbearbeitung:** Mit dem Auswahlwerkzeug öffnet ein Doppelklick die Knoten. Ein Klick auf eine Kante fügt einen Knoten ein, Entf löscht ihn, Alt-Ziehen löst die Griffe.
+- **Weg-Werkzeug:** Die Mittellinie wird wie ein Bézier gezeichnet. Die Breite (Standard 1,20 m) lässt sich in der Eigenschaftenleiste ändern. Die Fläche entsteht per Clipper-Offset mit runden oder spitzen Ecken.
+- **Navigation:** Mausrad zoomt zum Cursor. Bei Trackpads scrollt ein Zwei-Finger-Wischen, Pinch kommt als `ctrlKey + wheel` an und zoomt. Touch: Pinch und Pan mit zwei Pointern. Leertaste gedrückt halten = Pan.
+- **Tastenkürzel:** V, R, P, B, F, W, M, T, G, L, E, Strg/⌘+Z, Strg/⌘+Y bzw. ⇧⌘Z, Entf, Pfeiltasten (Raster-Nudge), Esc, Strg+0 (Einpassen).
+
+## 7. Persistenz
+
+- `idb` mit drei Stores: `projects` (vollständiges Projekt), `meta` (id, name, updatedAt, Vorschaubild, für die Projektliste) und `blobs` (Hintergrundbilder).
+- **Autosave:** 800 ms nach der letzten Änderung sowie bei `visibilitychange`. Der Status erscheint in der Topbar („Gespeichert“).
+- **JSON-Export:** `{ format: 'gartenwerk', schemaVersion, project, blobs: { id: dataURL } }`. Beim Import wird mit zod validiert, dann migriert, dann bekommt das Projekt eine neue ID (Kopie statt Überschreiben).
+- `migrations.ts`: Eine Kette `v1 → v2 → …` läuft beim Laden aus der DB und beim Import.
+
+## 8. Tests (Vitest)
+
+`core/` wird vollständig per Unit-Test abgedeckt, unter anderem:
+- Fläche und Umfang (Rechteck, konkav, mit Löchern). Rechteck 30 × 50 → 1.500,0 m².
+- Bézier-Flachlegung: Die Bogenlänge konvergiert. Ein Kreis aus 4 Béziers hat einen Fehler unter 0,05 %.
+- Offset: Ein gerader Weg L × B hat die Fläche L·B. Am Bogen gilt: Innen- und Außenkante sind plausibel lang.
+- `plot.ts`: Kanten und Winkel schließen. Die Schlusskante wird korrekt berechnet.
+- Kalibrierung, Fang, Freihand-Glättung (Abweichung ≤ Toleranz).
+- Mengen: Kies m³ = Fläche × Schichtdicke, Pflaster-Stückzahl = Fläche / Steinformat aufgerundet, Kantenstein = beidseitige Weglänge. Referenzwerte aus dem Design: Kiesweg 34,60 m × 1,20 m ≈ 41,5 m², Kantenstein 69,2 m.
+- Undo/Redo: Für jeden Command gilt: apply → undo ist gleich dem Ausgangszustand.
+
+## 9. Bibliotheken – Entscheidungen und Abweichungen
+
+| Zweck | Wahl | Anmerkung |
+|---|---|---|
+| UI | React 19, TypeScript, Vite | wie gewünscht |
+| Rendering | pixi.js 8 | WebGL, WebGPU später optional |
+| State | zustand 5 + immer | Patches für Undo |
+| Sonnenstand | suncalc | Phase 2 |
+| Flächenoperationen und **Offset** | **clipper2-js** | Statt polygon-clipping, weil das Weg-Werkzeug einen Offset braucht (Linie mit Breite), den polygon-clipping nicht kann. Hinter `clip.ts` gekapselt und damit austauschbar. Hinweis: Die letzte Version ist von 01/2024. Der Clipper2-Algorithmus selbst ist stabil. |
+| Fläche und Umfang | **eigene Funktionen statt turf** | turf rechnet geodätisch auf Längen- und Breitengraden. Unsere Welt ist eben und in Metern, dort ist die Gaußsche Trapezformel exakt und schneller. Die Funktionen sind getestet. |
+| Räumlicher Index | rbush | Culling, Hit-Test, Fang |
+| Persistenz | idb, zod | IndexedDB, Import-Validierung |
+| Export | jsPDF | PNG über `renderer.extract` |
+| Tests | vitest | |
+
+## 10. Plan für Phase 1
+
+1. **Gerüst und core:** Vite-Projekt, Modell, Geometrie, Mengen, Tests, Beispielgarten Lindenweg 12.
+2. **Renderer:** Viewport mit Zoom, Pan und Pinch, Texturen, Ebenen-Layer, Symbole, Schatten, Culling, Benchmark.
+3. **Chrome-UI** pixelgenau nach Design: Topbar, Werkzeugleiste, Ebenen-Panel (sichtbar, gesperrt, Reihenfolge), Unterleiste, Eigenschaftenleiste.
+4. **Werkzeuge:** Auswahl/Verschieben, Rechteck, Polygon, Weg, Bézier, Freihand, Knotenbearbeitung, Fang, Bemaßung, Text, Undo/Redo.
+5. **Onboarding:** Rechteck oder Polygon mit Kanten und Winkeln, Nordrichtung, Standort, Hintergrundbild mit 2-Punkt-Kalibrierung und Deckkraft.
+6. **Bibliothek** mit Drag & Drop (Pflanzen, Objekte mit realen Maßen).
+7. **Persistenz:** Projektliste, Autosave, JSON-Import/-Export.
+
+Die Linsen-Tabs (Sonne, Wachstum, Jahreszeiten, Bewässerung, Kosten) sind in Phase 1 sichtbar, aber deaktiviert.
+
+## 11. Entschieden
+
+1. **Export:** PNG kommt in Phase 1, der PDF-Architektenplan mit Titelblock, Legende, Maßstab und Nordpfeil in Phase 2.
+2. **Mulch und Rindenmulch** sind zwei Materialien: „Mulch“ als Holzhäcksel (Design-Farbe #6E533F) und „Rindenmulch“ mit dunklerer, gröberer Textur.

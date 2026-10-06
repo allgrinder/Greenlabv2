@@ -126,3 +126,17 @@ export function dedupe(pts: Vec2[], closed: boolean, eps = 1e-9): Vec2[] {
   }
   return out;
 }
+
+/** Nächster Punkt auf dem Rand eines Polygons */
+export function closestPointOn(p: Vec2, poly: Polygon): Vec2 {
+  let best = poly[0];
+  let bestD = Infinity;
+  for (let i = 0; i < poly.length; i++) {
+    const q = closestOnSegment(p, poly[i], poly[(i + 1) % poly.length]);
+    if (q.d < bestD) {
+      bestD = q.d;
+      best = q.p;
+    }
+  }
+  return best;
+}

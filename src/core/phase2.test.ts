@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { kelvinRgb, lampRange } from './catalog/lamps';
 import { diameterAt, diameterToday, hedgeWidthAt, isBare } from './growth';
 import { getSpecies } from './catalog/plants';
-import { coverage, zoneSummaries, dailyDemandLiters, precipitationMmH } from './irrigation';
+import { coverage, zoneSummaries, dailyDemandLiters, inwardArc, precipitationMmH } from './irrigation';
 import { objectBase } from './model/defaults';
 import { newSprinkler } from './model/factory';
 import type { AreaObject, PlantObject, Project } from './model/types';
@@ -144,14 +144,29 @@ describe('Bewässerung', () => {
     expect(c.gaps).toHaveLength(4);
   });
 
+  it('Beispielgarten: automatisch verteilte Regner und Tropfschläuche bewässern fast alles', () => {
+    const c = coverage(createLindenweg12());
+    expect(c.ratio).toBeGreaterThan(0.97);
+  });
+
   it('Zonen: Durchfluss und Liter pro Lauf', () => {
     const p = createLindenweg12();
     const z = zoneSummaries(p);
     expect(z).toHaveLength(4);
-    expect(z[0].sprinklers).toBe(3);
-    expect(z[0].liters).toBeCloseTo(3 * 6 * 18, 6);
+    expect(z[0].sprinklers).toBeGreaterThan(3);
+    expect(z[0].liters).toBeGreaterThan(0);
+    expect(z[0].flowLpm).toBeLessThan(30);
     expect(z[2].dripMeters).toBeGreaterThan(30);
     expect(dailyDemandLiters(p)).toBeGreaterThan(0);
+  });
+
+  it('Randregner bekommen einen nach innen gerichteten Sektor', () => {
+    const sq = { outer: [{ x: 0, y: 0 }, { x: 20, y: 0 }, { x: 20, y: 20 }, { x: 0, y: 20 }], holes: [] };
+    expect(inwardArc({ x: 10, y: 10 }, sq, 5)).toEqual([0, 360]);
+    // Ecke oben links: Fläche liegt zwischen Osten (0°) und Süden (90°)
+    expect(inwardArc({ x: 0, y: 0 }, sq, 5)).toEqual([0, 90]);
+    // Mitte der Oberkante: Halbkreis nach Süden
+    expect(inwardArc({ x: 10, y: 0 }, sq, 5)).toEqual([0, 180]);
   });
 
   it('Niederschlag eines Viertelkreisregners', () => {

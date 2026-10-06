@@ -8,6 +8,7 @@ import { flatToRegion, polygonPath, simpleRegion } from '../geometry/regions';
 import { flattenRegion } from '../geometry/shape';
 import { createProject, layerOfKind, objectBase } from '../model/defaults';
 import { newDrip, newFixture, newLamp, newPipe, newSprinkler } from '../model/factory';
+import { autoDripPath, autoSprinklerPositions, inwardArc } from '../irrigation';
 import { cubicAt, cubicDerivative } from '../geometry/bezier';
 import { pathSegments } from '../geometry/shape';
 import type {
@@ -255,16 +256,28 @@ function addLighting(p: Project, add: (o: PlanObject) => PlanObject) {
 
 /** Bewässerung aus Screen 09: Versenkregner (Zonen 1/2), Tropfschläuche (3/4), Hauptleitung, Verteiler */
 function addIrrigation(p: Project, add: (o: PlanObject) => PlanObject) {
-  const SPR: [number, number, number, number, number, number][] = [
-    [16.8, 1.9, 7, 0, 90, 1], [28, 1.5, 7, 0, 180, 1], [39, 1.8, 6.5, 90, 180, 1],
-    [16.8, 20.5, 6.5, 270, 360, 2], [38.5, 11.8, 6.5, 90, 270, 2], [25, 28.3, 6.5, 180, 360, 2], [38.75, 28, 6.5, 180, 270, 2],
-  ];
-  SPR.forEach(([x, y, r, a0, a1, z]) => add(newSprinkler(p, P(x, y), z, r, [a0, a1])));
   const line = (pts: [number, number][]): PathGeometry => ({ kind: 'path', closed: false, source: 'polygon', nodes: pts.map(([x, y]) => ({ p: P(x, y) })) });
+  // Regner Kopf an Kopf über alle Rasenflächen; Zone 1 = nördlicher Rasen, Zone 2 = südlicher
+  for (const o of Object.values(p.objects)) {
+    if (o.type !== 'area' || o.materialId !== 'lawn') continue;
+    for (const r of footprint(o))
+      for (const q of autoSprinklerPositions(r, 6)) {
+        const arc = inwardArc(q, r, 6);
+        let sweep = arc[1] - arc[0];
+        if (sweep <= 0) sweep += 360;
+        // Durchfluss proportional zum Sektor (gleicher Niederschlag)
+        add({ ...newSprinkler(p, q, q.y < 14 ? 1 : 2, 6, arc), flowLpm: Math.round(1.5 * (sweep / 360) * 10) / 10 || 0.4 });
+      }
+  }
+  // Tropfschläuche: Ring in jedem Hochbeet, Mäander im Staudenbeet
   [[42.5, 15.1], [46.5, 15.1], [42.5, 17.6], [46.5, 17.6], [42.5, 20.1], [46.5, 20.1]].forEach(([x, y]) =>
-    add({ ...newDrip(p, line([[x - 1.3, y - 0.2], [x + 1.3, y - 0.2], [x + 1.3, y + 0.2], [x - 1.3, y + 0.2]]), 3), name: 'Tropfschlauch Hochbeet' }),
+    add({ ...newDrip(p, line([[x - 1.2, y - 0.3], [x + 1.2, y - 0.3], [x + 1.2, y + 0.3], [x - 1.2, y + 0.3], [x - 1.2, y - 0.25]]), 3), name: 'Tropfschlauch Hochbeet' }),
   );
-  add({ ...newDrip(p, line([[12, 22.8], [16.5, 22.8], [21, 24], [22.8, 25.6], [12, 24.9], [12, 26.3], [23, 27], [12, 27.8]]), 4), name: 'Tropfschlauch Staudenbeet' });
+  const beet = Object.values(p.objects).find((o) => o.type === 'planting');
+  if (beet) {
+    const meander = autoDripPath(footprint(beet)[0], 0.55);
+    if (meander.length >= 2) add({ ...newDrip(p, { kind: 'path', closed: false, source: 'polygon', nodes: meander.map((q) => ({ p: q })) }, 4), name: 'Tropfschlauch Staudenbeet' });
+  }
   add(newPipe(p, line([[11.4, 7.6], [16.5, 7.6], [16.5, 13.1], [39, 13.1]])));
   add(newPipe(p, line([[16.5, 13.1], [16.5, 22.3]])));
   add(newPipe(p, line([[40.05, 13.1], [40.6, 13.1], [40.6, 20.5]])));

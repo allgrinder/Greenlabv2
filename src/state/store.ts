@@ -35,6 +35,10 @@ export const initialSession = (): SessionState => ({
   mode: 'day',
   panels: { layers: true, library: false, properties: true },
   brush: { kind: 'plant', speciesId: 'amelanchier-lamarckii' },
+  sun: { doy: 172, hour: 16.5, heat: true },
+  years: 10,
+  season: 'summer',
+  night: { hour: 21.67, scene: null },
   defaults: { areaMaterial: 'soil', pathMaterial: 'gravel', pathWidth: 1.2 },
 });
 

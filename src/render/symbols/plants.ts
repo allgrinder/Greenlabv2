@@ -13,10 +13,49 @@ import { canopyGradient, clumpGradient } from './gradients';
 const LOBE_STROKE = { color: 0x1a2414, alpha: 0.32 };
 
 /** Baumkrone: Lappenkranz, Innenfläche, Büschel, Lichtverlauf, Stammpunkt mit Achsenkreuz */
-export function drawTree(g: Graphics, c: Vec2, diameter: number, sp: PlantSpecies, seed: number, lod: number): void {
+export interface TreeLook {
+  color: string;
+  bare: boolean;
+  /** Blütenfarbe für Tupfen (Frühling) */
+  bloom: string | null;
+  /** Fruchtfarbe für Tupfen (Sommer/Herbst bei Obst) */
+  fruit: string | null;
+}
+
+/** Kahle Krone im Winter: gestrichelter Umriss und Astgerüst */
+function drawBareTree(g: Graphics, c: Vec2, r: number, rnd: () => number) {
+  g.circle(c.x, c.y, r).fill({ color: 0x6e6254, alpha: 0.08 });
+  for (let i = 0; i < 48; i++) {
+    if (i % 2) continue;
+    const a0 = (i / 48) * Math.PI * 2;
+    const a1 = ((i + 0.8) / 48) * Math.PI * 2;
+    g.moveTo(c.x + Math.cos(a0) * r, c.y + Math.sin(a0) * r).lineTo(c.x + Math.cos(a1) * r, c.y + Math.sin(a1) * r);
+  }
+  g.stroke({ color: 0x50463c, alpha: 0.45, width: Math.max(0.03, r * 0.008) });
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2 + rnd() * 0.4;
+    const L = r * (0.72 + rnd() * 0.2);
+    const ex = c.x + Math.cos(a) * L;
+    const ey = c.y + Math.sin(a) * L;
+    g.moveTo(c.x, c.y).lineTo(ex, ey).stroke({ color: 0x6a5e50, width: Math.max(0.05, r * 0.03), cap: 'round' });
+    const fx = c.x + Math.cos(a) * L * 0.5;
+    const fy = c.y + Math.sin(a) * L * 0.5;
+    for (const sgn of [-0.5, 0.5]) {
+      const b = a + sgn;
+      g.moveTo(fx, fy).lineTo(fx + Math.cos(b) * L * 0.42, fy + Math.sin(b) * L * 0.42).stroke({ color: 0x6a5e50, width: Math.max(0.03, r * 0.016), cap: 'round' });
+    }
+  }
+}
+
+export function drawTree(g: Graphics, c: Vec2, diameter: number, sp: PlantSpecies, seed: number, lod: number, look?: TreeLook): void {
   const r = diameter / 2;
-  const color = hex(sp.colors.summer);
   const rnd = rng(seed);
+  if (look?.bare) {
+    drawBareTree(g, c, r, rnd);
+    drawTrunk(g, c);
+    return;
+  }
+  const color = hex(look?.color ?? sp.colors.summer);
   const big = diameter > 8;
   const n = lod >= 2 ? (big ? 17 : 11) : 8;
   const lobes: { x: number; y: number; r: number }[] = [];
@@ -38,6 +77,19 @@ export function drawTree(g: Graphics, c: Vec2, diameter: number, sp: PlantSpecie
     }
   }
   g.circle(c.x, c.y, r).fill(canopyGradient());
+  const dots = look?.bloom ?? look?.fruit;
+  if (dots && lod >= 1) {
+    const n = look?.bloom ? Math.round(diameter * 7) : Math.round(diameter * 2.5);
+    for (let i = 0; i < n; i++) {
+      const a = rnd() * Math.PI * 2;
+      const d = Math.sqrt(rnd()) * r * 0.82;
+      g.circle(c.x + Math.cos(a) * d, c.y + Math.sin(a) * d, look?.bloom ? 0.07 + rnd() * 0.05 : 0.09).fill(hex(dots));
+    }
+  }
+  drawTrunk(g, c);
+}
+
+function drawTrunk(g: Graphics, c: Vec2) {
   // Stamm und Achsenkreuz (Planzeichen)
   const k = 0.18;
   g.circle(c.x, c.y, 0.13).fill(0x3b3226);
@@ -47,9 +99,9 @@ export function drawTree(g: Graphics, c: Vec2, diameter: number, sp: PlantSpecie
 }
 
 /** Strauch: sechs Büschel im Kreis plus Mitte */
-export function drawShrub(g: Graphics, c: Vec2, diameter: number, sp: PlantSpecies, seed: number): void {
+export function drawShrub(g: Graphics, c: Vec2, diameter: number, sp: PlantSpecies, seed: number, colorHex?: string): void {
   const r = diameter / 2;
-  const color = hex(sp.colors.summer);
+  const color = hex(colorHex ?? sp.colors.summer);
   const rnd = rng(seed);
   const parts: [number, number, number][] = [];
   for (let i = 0; i < 6; i++) {
@@ -62,9 +114,9 @@ export function drawShrub(g: Graphics, c: Vec2, diameter: number, sp: PlantSpeci
 }
 
 /** Kleine Einzelpflanze (Staude, Gemüse): Punkt mit Mittelfleck */
-export function drawSmallPlant(g: Graphics, c: Vec2, diameter: number, sp: PlantSpecies): void {
+export function drawSmallPlant(g: Graphics, c: Vec2, diameter: number, sp: PlantSpecies, colorHex?: string): void {
   const r = diameter / 2;
-  g.circle(c.x, c.y, r).fill(hex(sp.colors.summer)).stroke({ color: 0x1e1e14, alpha: 0.28, width: 0.02 });
+  g.circle(c.x, c.y, r).fill(hex(colorHex ?? sp.colors.summer)).stroke({ color: 0x1e1e14, alpha: 0.28, width: 0.02 });
   g.circle(c.x, c.y, r * 0.32).fill({ color: 0x1e1914, alpha: 0.3 });
 }
 
@@ -75,26 +127,27 @@ export function drawSmallPlant(g: Graphics, c: Vec2, diameter: number, sp: Plant
 export function drawPlanting(
   g: Graphics,
   region: FlatRegion,
-  mix: { sp: PlantSpecies; share: number }[],
+  mix: { sp: PlantSpecies; share: number; color?: string }[],
   perSquareMeter: number,
   seed: number,
+  scale = 1,
 ): void {
   const rnd = rng(seed);
   const b = bbox(region.outer);
   const inside = (p: Vec2) => pointInRegion(p, region.outer, region.holes);
   // Driftzentren in einem groben Raster, Art je Zentrum nach Anteil
   const cell = 1.6;
-  const centers: { p: Vec2; sp: PlantSpecies }[] = [];
+  const centers: { p: Vec2; sp: PlantSpecies; color: string }[] = [];
   for (let y = b.minY + cell / 2; y < b.maxY; y += cell)
     for (let x = b.minX + cell / 2; x < b.maxX; x += cell) {
       const p = { x: x + (rnd() - 0.5) * cell * 0.8, y: y + (rnd() - 0.5) * cell * 0.8 };
       if (!inside(p)) continue;
       let t = rnd();
       const pick = mix.find((m) => (t -= m.share) <= 0) ?? mix[mix.length - 1];
-      centers.push({ p, sp: pick.sp });
+      centers.push({ p, sp: pick.sp, color: pick.color ?? pick.sp.colors.summer });
     }
   const perDrift = Math.max(1, Math.round(perSquareMeter * cell * cell));
-  const dotsList: { x: number; y: number; r: number; sp: PlantSpecies }[] = [];
+  const dotsList: { x: number; y: number; r: number; sp: PlantSpecies; color: string }[] = [];
   for (const c of centers) {
     for (let i = 0; i < perDrift; i++) {
       const a = rnd() * Math.PI * 2;
@@ -102,13 +155,13 @@ export function drawPlanting(
       const p = { x: c.p.x + Math.cos(a) * d, y: c.p.y + Math.sin(a) * d };
       if (!inside(p)) continue;
       const grass = c.sp.kind === 'grass';
-      dotsList.push({ ...p, r: grass ? 0.32 : 0.22 + rnd() * 0.07, sp: c.sp });
+      dotsList.push({ ...p, r: (grass ? 0.32 : 0.22 + rnd() * 0.07) * scale, sp: c.sp, color: c.color });
     }
   }
   for (const d of dotsList) {
     const grass = d.sp.kind === 'grass';
-    g.circle(d.x, d.y, d.r).fill(hex(d.sp.colors.summer)).stroke(
-      grass ? { color: hex(d.sp.colors.summer), width: 0.065 } : { color: 0x1e1e14, alpha: 0.28, width: 0.065 },
+    g.circle(d.x, d.y, d.r).fill(hex(d.color)).stroke(
+      grass ? { color: hex(d.color), width: 0.065 } : { color: 0x1e1e14, alpha: 0.28, width: 0.065 },
     );
   }
   for (const d of dotsList) {
@@ -118,8 +171,8 @@ export function drawPlanting(
 }
 
 /** Hecke: Band entlang der Kontur mit runden „Buckeln“ und Lichtkante */
-export function drawHedge(g: Graphics, outline: FlatRegion[], centerline: Polygon, width: number, sp: PlantSpecies): void {
-  const color = hex(sp.colors.summer);
+export function drawHedge(g: Graphics, outline: FlatRegion[], centerline: Polygon, width: number, sp: PlantSpecies, colorHex?: string): void {
+  const color = hex(colorHex ?? sp.colors.summer);
   for (const r of outline) {
     g.poly(r.outer.flatMap((p) => [p.x, p.y]), true).fill(color);
     for (const h of r.holes) g.poly(h.flatMap((p) => [p.x, p.y]), true).cut();

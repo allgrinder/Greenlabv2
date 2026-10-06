@@ -42,6 +42,14 @@ export interface SessionState {
   panels: { layers: boolean; library: boolean; properties: boolean };
   /** Was „Pflanze setzen“ bzw. ein Klick aus der Bibliothek platziert */
   brush: Brush;
+  /** Linse „Sonne“: Tag im Jahr, Uhrzeit (Ortszeit), Heatmap an/aus */
+  sun: { doy: number; hour: number; heat: boolean };
+  /** Linse „Wachstum“: Jahre ab heute */
+  years: number;
+  /** Jahreszeit für Farben (Linse „Jahreszeiten“ zeigt alle vier) */
+  season: 'spring' | 'summer' | 'autumn' | 'winter';
+  /** Nachtmodus: Uhrzeit für Zeitpläne, aktive Lichtszene */
+  night: { hour: number; scene: string | null };
   /** Vorgaben für neu gezeichnete Objekte */
   defaults: { areaMaterial: string; pathMaterial: string; pathWidth: number };
 }

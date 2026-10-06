@@ -9,6 +9,7 @@ import { flattenPath, flattenShape, pathLength } from './shape';
 import { smoothFreehand, simplify } from './smooth';
 import { constrainAngle, snapPoint } from './snap';
 import { distanceToPolyline } from './polygon';
+import { KIESWEG_CENTERLINE } from '../sample/lindenweg12';
 
 const sq = (x: number, y: number, s: number) => [
   { x, y },
@@ -72,7 +73,7 @@ describe('Bézier & Formen', () => {
   });
 });
 
-describe('Clipper: Offset und Boolesche Operationen', () => {
+describe('Offset und Boolesche Operationen', () => {
   it('gerader Weg L × B hat Fläche L·B', () => {
     const fr = offsetPolyline([{ x: 0, y: 0 }, { x: 10, y: 0 }], 1.2);
     expect(fr).toHaveLength(1);
@@ -85,6 +86,18 @@ describe('Clipper: Offset und Boolesche Operationen', () => {
     // Außenecke als Viertelkreis mit r = 1
     const fr = offsetPolyline([{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 10 }], 2, 'round');
     expect(area(fr[0].outer)).toBeCloseTo(40 - 1 + Math.PI / 4, 2);
+  });
+
+  it('Weg-Offset entlang einer Kurve bleibt eine zusammenhängende Fläche ≈ L·B (Regression clipper2-js)', () => {
+    const line = flattenPath(KIESWEG_CENTERLINE);
+    const L = pathLength(KIESWEG_CENTERLINE);
+    for (const join of ['round', 'miter'] as const) {
+      const fr = offsetPolyline(line, 1.2, join);
+      expect(fr).toHaveLength(1);
+      expect(fr[0].holes).toHaveLength(0);
+      expect(area(fr[0].outer) / (L * 1.2)).toBeGreaterThan(0.99);
+      expect(area(fr[0].outer) / (L * 1.2)).toBeLessThan(1.01);
+    }
   });
 
   it('Differenz erzeugt Loch, Vereinigung verschmilzt', () => {

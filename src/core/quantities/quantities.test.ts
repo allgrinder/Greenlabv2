@@ -107,9 +107,7 @@ describe('Beispielgarten Lindenweg 12 (Referenzwerte aus dem Design)', () => {
     expect(pathLength(KIESWEG_CENTERLINE)).toBeGreaterThan(33);
     expect(pathLength(KIESWEG_CENTERLINE)).toBeLessThan(38);
     const q = objectQuantities(find('Kiesweg'));
-    // In engen Kurven überlappt die Innenseite, daher etwas weniger als L × B
-    expect(q.area!).toBeLessThanOrEqual(q.length! * 1.2 + 1e-6);
-    expect(q.area!).toBeGreaterThan(q.length! * 1.2 * 0.9);
+    expect(q.area! / (q.length! * 1.2)).toBeCloseTo(1, 1);
     expect(q.edgingLength).toBeCloseTo(2 * q.length!, 9);
   });
 

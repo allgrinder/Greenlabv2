@@ -12,11 +12,11 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "clipper2-js": "^1.2.4",
     "idb": "^8.0.4",
     "immer": "^11.1.21",
     "nanoid": "^6.0.2",
     "pixi.js": "^8.22.0",
+    "polygon-clipping": "^0.15.7",
     "rbush": "^4.0.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",

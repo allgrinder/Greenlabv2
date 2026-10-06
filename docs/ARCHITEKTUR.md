@@ -47,7 +47,7 @@ src/
     geometry/     vec.ts, polygon.ts (Fläche, Umfang, Schwerpunkt, contains, bbox)
                   bezier.ts (Auswertung, adaptive Flachlegung, Bogenlänge)
                   shape.ts (ShapeGeometry → Polygon), offset.ts (Weg mit Breite)
-                  clip.ts (Vereinigen/Abziehen, Wrapper um Clipper2)
+                  clip.ts (Vereinigen/Abziehen/Weg-Offset, Wrapper um polygon-clipping)
                   smooth.ts (Freihand: Ramer-Douglas-Peucker + Catmull-Rom → Bézier)
                   plot.ts (Grundstück aus Kantenlängen/Winkeln, Schlusskante)
                   snap.ts (Raster-, Ecken-, Kanten-, Mittelpunktfang – rein rechnerisch)
@@ -87,7 +87,6 @@ Vollständig in `src/core/model/types.ts`. Die wichtigsten Entscheidungen:
 ### Koordinaten
 - Weltkoordinaten in **Metern** (float). x nach Osten/rechts, y nach Süden/unten (wie der Bildschirm). Der Ursprung ist Ecke A des Grundstücks.
 - Das Grundstück wird achsparallel gezeichnet. Die Nordrichtung ist ein Projektwert (`site.northDeg`, im Design −12°). Der Nordpfeil dreht sich, der Plan nicht. Die Sonnenberechnung in Phase 2 rechnet `northDeg` ein.
-- Für Clipper2 werden Koordinaten intern mit 10.000 skaliert (0,1 mm Auflösung). Das bleibt im Wrapper `clip.ts` verborgen.
 
 ### Projekt
 ```ts
@@ -185,7 +184,7 @@ interface Tool {
 - **Fang** (`core/geometry/snap.ts`): Prioritäten Ecke > Kantenmittelpunkt > Kante > Raster (10 cm / 50 cm / 1 m). Die Toleranz ist in Bildschirmpixeln angegeben (8 px). ⇧ rastet Winkel in 15°-Schritten ein, Alt schaltet den Fang vorübergehend aus. Die Fangführungen werden angezeigt.
 - **Zahleneingabe beim Zeichnen:** Tippen während einer Kante setzt deren Länge exakt („4,5 ↵“). Das ist wichtig für Präzision ohne Maus.
 - **Knotenbearbeitung:** Mit dem Auswahlwerkzeug öffnet ein Doppelklick die Knoten. Ein Klick auf eine Kante fügt einen Knoten ein, Entf löscht ihn, Alt-Ziehen löst die Griffe.
-- **Weg-Werkzeug:** Die Mittellinie wird wie ein Bézier gezeichnet. Die Breite (Standard 1,20 m) lässt sich in der Eigenschaftenleiste ändern. Die Fläche entsteht per Clipper-Offset mit runden oder spitzen Ecken.
+- **Weg-Werkzeug:** Die Mittellinie wird wie ein Bézier gezeichnet. Die Breite (Standard 1,20 m) lässt sich in der Eigenschaftenleiste ändern. Die Fläche entsteht als Offset der Mittellinie mit runden oder spitzen Ecken.
 - **Navigation:** Mausrad zoomt zum Cursor. Bei Trackpads scrollt ein Zwei-Finger-Wischen, Pinch kommt als `ctrlKey + wheel` an und zoomt. Touch: Pinch und Pan mit zwei Pointern. Leertaste gedrückt halten = Pan.
 - **Tastenkürzel:** V, R, P, B, F, W, M, T, G, L, E, Strg/⌘+Z, Strg/⌘+Y bzw. ⇧⌘Z, Entf, Pfeiltasten (Raster-Nudge), Esc, Strg+0 (Einpassen).
 
@@ -215,7 +214,7 @@ interface Tool {
 | Rendering | pixi.js 8 | WebGL, WebGPU später optional |
 | State | zustand 5 + immer | Patches für Undo |
 | Sonnenstand | suncalc | Phase 2 |
-| Flächenoperationen und **Offset** | **clipper2-js** | Statt polygon-clipping, weil das Weg-Werkzeug einen Offset braucht (Linie mit Breite), den polygon-clipping nicht kann. Hinter `clip.ts` gekapselt und damit austauschbar. Hinweis: Die letzte Version ist von 01/2024. Der Clipper2-Algorithmus selbst ist stabil. |
+| Flächenoperationen | **polygon-clipping** | Ursprünglich war clipper2-js geplant (wegen des Offsets). In der Praxis lieferte dessen JS-Portierung gezackte Offsets und zerfallende Vereinigungen. Der Weg-Offset wird jetzt selbst gebaut (Segment-Rechtecke plus Gelenkkeile, vereinigt mit polygon-clipping), abgesichert durch einen Regressionstest. Alles ist in `clip.ts` gekapselt. |
 | Fläche und Umfang | **eigene Funktionen statt turf** | turf rechnet geodätisch auf Längen- und Breitengraden. Unsere Welt ist eben und in Metern, dort ist die Gaußsche Trapezformel exakt und schneller. Die Funktionen sind getestet. |
 | Räumlicher Index | rbush | Culling, Hit-Test, Fang |
 | Persistenz | idb, zod | IndexedDB, Import-Validierung |

@@ -53,8 +53,8 @@ export class ShadowLayer {
       const g = c.density >= 0.7 ? this.dense : this.light;
       for (const poly of shadowPolygons(c, sv)) g.poly(poly.flatMap((p) => [p.x, p.y]), true).fill(COLOR);
       // Stammschatten als Linie vom Stammfuß zum Kronenschatten
-      if (c.kind === 'disc' && c.r > 1) {
-        const s = { x: c.c.x + sv.x * c.h, y: c.c.y + sv.y * c.h };
+      if (c.kind === 'disc' && c.r > 1 && c.h0 > 0) {
+        const s = { x: c.c.x + sv.x * c.h0, y: c.c.y + sv.y * c.h0 };
         g.moveTo(c.c.x, c.c.y).lineTo(s.x, s.y).stroke({ color: COLOR, width: Math.max(0.12, c.r * 0.05) });
       }
     }

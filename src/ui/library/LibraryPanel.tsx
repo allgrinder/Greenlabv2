@@ -97,8 +97,11 @@ export function LibraryPanel() {
   const total = sections.reduce((a, x) => a + x.items.length, 0);
 
   const pick = (e: Entry) => {
-    if (typeof e.brush === 'string') setSession({ tool: e.brush, selection: [] });
-    else setSession({ brush: e.brush, tool: 'plant', selection: [] });
+    // Bewässerungsteile sind nur in der Bewässerungs-Linse sichtbar
+    const water = e.key.startsWith('irr:');
+    const lens = water ? { lens: 'irrigation' as const } : {};
+    if (typeof e.brush === 'string') setSession({ tool: e.brush, selection: [], ...lens });
+    else setSession({ brush: e.brush, tool: 'plant', selection: [], ...lens });
   };
   const isOn = (e: Entry) => (typeof e.brush === 'string' ? tool === e.brush : tool === 'plant' && JSON.stringify(brush) === JSON.stringify(e.brush));
 

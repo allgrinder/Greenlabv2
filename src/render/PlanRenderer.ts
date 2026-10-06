@@ -8,6 +8,7 @@
 import { Application, Container, Graphics, RenderTexture, Sprite, Texture } from 'pixi.js';
 import type { Season } from '../core/growth';
 import { coverage } from '../core/irrigation';
+import { lensShowsLayer } from '../core/lens';
 import { lampLevel, scheduledOn } from '../core/lighting';
 import { bbox, expandBBox } from '../core/geometry/polygon';
 import type { FlatRegion } from '../core/geometry/shape';
@@ -208,6 +209,7 @@ export class PlanRenderer {
     // Exporte zeigen Planlinse (ohne Heatmap/Wachstum), außer die Ansicht wird ausdrücklich vorgegeben
     const base = viewParamsFrom(this.store.getState().session);
     this.viewOverride = { ...base, lens: 'plan', years: 0, season: 'summer', ...opts.view };
+    let canvas: HTMLCanvasElement;
     try {
       const s = this.store.getState();
       const lod = 2;
@@ -230,9 +232,7 @@ export class PlanRenderer {
       } else this.drawOverlay(s, true);
       this.app.stage.addChildAt(bg, 0);
       this.app.renderer.render({ container: this.app.stage, target: rt, clear: true });
-      const canvas = this.app.renderer.extract.canvas(rt) as HTMLCanvasElement;
-      const blob = await new Promise<Blob>((res, rej) => canvas.toBlob((x) => (x ? res(x) : rej(new Error('PNG-Erzeugung fehlgeschlagen'))), 'image/png'));
-      return { blob, ...size };
+      canvas = this.app.renderer.extract.canvas(rt) as HTMLCanvasElement;
     } finally {
       this.app.stage.removeChild(bg);
       bg.destroy();
@@ -244,6 +244,10 @@ export class PlanRenderer {
       this.lastCtxKey = '';
       this.invalidate();
     }
+    // Erst nach dem Zurücksetzen warten, damit der Bildschirm nie den Exportzustand zeigt
+    const c = canvas;
+    const blob = await new Promise<Blob>((res, rej) => c.toBlob((x) => (x ? res(x) : rej(new Error('PNG-Erzeugung fehlgeschlagen'))), 'image/png'));
+    return { blob, ...size };
   }
 
   private rebuildAll() {
@@ -401,10 +405,11 @@ export class PlanRenderer {
   /** Nur Objekte im sichtbaren Bereich zeichnen */
   private cull(doc: Project, vp: Viewport) {
     const visible = new Set(this.index.query(expandBBox(visibleWorldBBox(vp, this.viewSize), 2)));
+    const p = this.params;
     for (const [id, m] of this.mounted) {
       const o = doc.objects[id];
       const layer = o && doc.layers[o.layerId];
-      const on = !!o && !!layer && layer.visible && !o.hidden && visible.has(id);
+      const on = !!o && !!layer && layer.visible && lensShowsLayer(layer.kind, p.lens, p.night) && !o.hidden && visible.has(id);
       m.view.node.visible = on;
     }
   }
@@ -473,7 +478,7 @@ export class PlanRenderer {
     if (p.night) {
       const t = this.sunTimes(doc, p.sun.doy);
       const wd = (new Date().getDay() + 6) % 7;
-      const level = (l: LampObject) => lampLevel(l, p.scene, () => scheduledOn(l, p.nightHour, wd, t.sunset, t.sunrise));
+      const level = (l: LampObject) => lampLevel(l, p.scene, () => scheduledOn(l, p.nightHour % 24, wd, t.sunset, t.sunrise));
       this.night.update(this.app.renderer, { doc, level, world: { scale: this.world.scale.x, x: this.world.position.x, y: this.world.position.y }, size: this.viewSize });
     }
   }

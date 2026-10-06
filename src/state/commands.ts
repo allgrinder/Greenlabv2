@@ -13,6 +13,7 @@ import type {
   AreaObject,
   BackgroundImage,
   Id,
+  IrrigationZone,
   PlanObject,
   PlotSpec,
   Project,
@@ -214,6 +215,40 @@ export function createCommands(store: EditorStoreApi) {
       apply('Preis ändern', (d) => {
         if (price === null) delete d.priceOverrides[key];
         else d.priceOverrides[key] = price;
+      });
+    },
+
+    /** Objekte in einem Schritt ersetzen (z. B. Regner automatisch verteilen) */
+    replaceObjects(label: string, remove: Id[], add: PlanObject[]) {
+      if (!remove.length && !add.length) return;
+      apply(label, (d) => {
+        remove.forEach((id) => detach(d, id));
+        for (const o of add) {
+          d.objects[o.id] = o as Draft<PlanObject>;
+          d.layers[o.layerId].objectOrder.push(o.id);
+        }
+      });
+      store.getState().setSession({ selection: add.map((o) => o.id) });
+    },
+
+    addZone(zone: IrrigationZone) {
+      apply('Zone hinzufügen', (d) => {
+        d.zones.push(zone);
+      });
+    },
+
+    updateZone(index: number, patch: Partial<Omit<IrrigationZone, 'id'>>, mergeKey?: string) {
+      apply('Zone ändern', (d) => d.zones[index] && Object.assign(d.zones[index], patch), mergeKey);
+    },
+
+    /** Zone löschen; Regner und Schläuche der Zone wandern in die vorherige, höhere Nummern rücken nach */
+    removeZone(index: number) {
+      apply('Zone löschen', (d) => {
+        if (d.zones.length <= 1) return;
+        d.zones.splice(index, 1);
+        const n = index + 1;
+        for (const o of Object.values(d.objects))
+          if ((o.type === 'sprinkler' || o.type === 'drip') && o.zone >= n) o.zone = Math.max(1, o.zone === n ? n - 1 : o.zone - 1);
       });
     },
 

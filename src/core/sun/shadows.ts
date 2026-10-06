@@ -16,8 +16,10 @@ import type { GeoLocation, Project, Vec2 } from '../model/types';
 import { dayInfo, shadowVector, sunAt } from './sun';
 
 export type Caster =
-  | { kind: 'disc'; c: Vec2; r: number; h: number; density: number }
-  | { kind: 'prism'; outlines: Polygon[]; h: number; density: number };
+  /** Krone als Zylinder von Kronenansatz h0 bis Kronenspitze h1 */
+  | { kind: 'disc'; c: Vec2; r: number; h0: number; h1: number; density: number }
+  /** Extrudierter Grundriss; `selfLit`: Oberseite wird bepflanzt (Hochbeet) und liegt selbst in der Sonne */
+  | { kind: 'prism'; outlines: Polygon[]; h: number; density: number; selfLit?: boolean };
 
 export function collectCasters(doc: Project, years: number, season: Season): Caster[] {
   const out: Caster[] = [];
@@ -32,8 +34,8 @@ export function collectCasters(doc: Project, years: number, season: Season): Cas
         if (sp.kind !== 'tree' && sp.kind !== 'shrub') continue;
         const d = diameterAt(o, years);
         const h = heightAt(o, years);
-        // Kronenschwerpunkt etwa auf 60 % der Höhe
-        out.push({ kind: 'disc', c: o.position, r: d / 2, h: h * 0.6, density: shadeDensity(sp, season) });
+        // Kronenansatz: Bäume bei etwa 25 % der Höhe, Sträucher am Boden; Spitze etwas unter der Gesamthöhe
+        out.push({ kind: 'disc', c: o.position, r: d / 2, h0: sp.kind === 'tree' ? h * 0.25 : 0, h1: h * 0.85, density: shadeDensity(sp, season) });
       } else if (o.type === 'hedge') {
         const sp = getSpecies(o.speciesId);
         const outline = offsetPolyline(flattenPath(o.centerline, 0.05), hedgeWidthAt(o, years), 'round').map((r) => r.outer);
@@ -42,7 +44,7 @@ export function collectCasters(doc: Project, years: number, season: Season): Cas
         const h = itemSize(o).height;
         if (h <= 0.05) continue;
         const it = getItem(o.catalogId);
-        out.push({ kind: 'prism', outlines: footprint(o).map((r) => r.outer), h, density: it.category === 'greenhouse' ? 0.35 : 1 });
+        out.push({ kind: 'prism', outlines: footprint(o).map((r) => r.outer), h, density: it.category === 'greenhouse' ? 0.35 : 1, selfLit: it.category === 'raisedBed' });
       }
     }
   }
@@ -54,8 +56,23 @@ const shift = (pts: Polygon, d: Vec2) => pts.map((p) => ({ x: p.x + d.x, y: p.y 
 /** Schattenpolygone eines Werfers; ihre Vereinigung ist der Schatten */
 export function shadowPolygons(c: Caster, sv: Vec2): Polygon[] {
   if (c.kind === 'disc') {
-    const s = { x: sv.x * c.h, y: sv.y * c.h };
-    return [circlePolygon({ x: c.c.x + s.x, y: c.c.y + s.y }, c.r * 0.95, 32)];
+    // Vereinigung der Kronenscheiben zwischen h0 und h1: zwei Kreise und die verbindende Hülle
+    const a = { x: c.c.x + sv.x * c.h0, y: c.c.y + sv.y * c.h0 };
+    const b = { x: c.c.x + sv.x * c.h1, y: c.c.y + sv.y * c.h1 };
+    const r0 = c.r * 0.95;
+    const r1 = c.r * 0.8;
+    const polys = [circlePolygon(a, r0, 32), circlePolygon(b, r1, 32)];
+    const L = Math.hypot(b.x - a.x, b.y - a.y);
+    if (L > 1e-6) {
+      const n = { x: -(b.y - a.y) / L, y: (b.x - a.x) / L };
+      polys.push([
+        { x: a.x + n.x * r0, y: a.y + n.y * r0 },
+        { x: b.x + n.x * r1, y: b.y + n.y * r1 },
+        { x: b.x - n.x * r1, y: b.y - n.y * r1 },
+        { x: a.x - n.x * r0, y: a.y - n.y * r0 },
+      ]);
+    }
+    return polys;
   }
   const d = { x: sv.x * c.h, y: sv.y * c.h };
   const polys: Polygon[] = [];
@@ -131,7 +148,12 @@ export function sunHours(doc: Project, loc: GeoLocation, year: number, doy: numb
     shade.fill(0);
     for (const c of casters) {
       const dens = c.density;
-      for (const poly of shadowPolygons(c, sv)) rasterize(poly, cols, rows, origin, cell, (i) => (shade[i] = Math.max(shade[i], dens)));
+      if (c.kind === 'prism' && c.selfLit) {
+        // eigene Oberseite ausnehmen
+        const own = new Set<number>();
+        for (const o of c.outlines) rasterize(o, cols, rows, origin, cell, (i) => own.add(i));
+        for (const poly of shadowPolygons(c, sv)) rasterize(poly, cols, rows, origin, cell, (i) => !own.has(i) && (shade[i] = Math.max(shade[i], dens)));
+      } else for (const poly of shadowPolygons(c, sv)) rasterize(poly, cols, rows, origin, cell, (i) => (shade[i] = Math.max(shade[i], dens)));
     }
     for (let i = 0; i < hours.length; i++) hours[i] += step * (1 - shade[i]);
   }

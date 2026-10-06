@@ -17,6 +17,12 @@ import { ToolRail } from './chrome/ToolRail';
 import { TopBar } from './chrome/TopBar';
 import { downloadBlob, ExportDialog, fileSafe } from './export/ExportDialog';
 import { LibraryPanel } from './library/LibraryPanel';
+import { CostsView } from './lenses/CostsView';
+import { GrowthBar, GrowthPanel } from './lenses/GrowthLens';
+import { IrrigationPanel } from './lenses/IrrigationPanel';
+import { NightPanel, NightPill } from './lenses/NightPanel';
+import { SeasonsView } from './lenses/SeasonsView';
+import { SunBar, SunPanel } from './lenses/SunLens';
 import { NewProjectWizard } from './onboarding/NewProjectWizard';
 import { PropertiesPanel } from './panels/PropertiesPanel';
 import { ProjectMenu } from './projects/ProjectMenu';
@@ -31,6 +37,11 @@ export function App() {
   const mode = useEditor((s) => s.session.mode);
   const panels = useEditor((s) => s.session.panels);
   const docId = useEditor((s) => s.doc?.id);
+  const lens = useEditor((s) => s.session.lens);
+  const night = useEditor((s) => s.session.mode === 'night');
+  const hasSelection = useEditor((s) => s.session.selection.length > 0);
+  const techSelected = useEditor((s) => s.session.selection.some((id) => ['sprinkler', 'drip', 'pipe', 'fixture'].includes(s.doc?.objects[id]?.type ?? '')));
+  const leftPanels = lens === 'plan' || lens === 'irrigation';
   const bgBlobId = useEditor((s) => s.doc?.background?.blobId ?? null);
   const [screen, setScreen] = useState<Screen>('boot');
   const [saveState, setSaveState] = useState<SaveState>('saved');
@@ -134,6 +145,17 @@ export function App() {
     setMenu(false);
   };
 
+  const costPdf = async () => {
+    const doc = editor.getState().doc;
+    if (!doc) return;
+    try {
+      const { costPdfBlob } = await import('./export/pdf');
+      downloadBlob(await costPdfBlob(doc), `${fileSafe(doc.name)}_Kosten.pdf`);
+    } catch (e) {
+      notify((e as Error).message, true);
+    }
+  };
+
   return (
     <PlanCanvas
       onReady={(r) => {
@@ -146,8 +168,24 @@ export function App() {
           <ToolLayer onFit={fit} />
           <TopBar saveState={saveState} onExport={() => setExporting(true)} onProjects={() => setMenu((m) => !m)} />
           <ToolRail />
-          {panels.library ? <LibraryPanel /> : panels.layers && <LayersPanel />}
-          {panels.properties && <PropertiesPanel />}
+          {leftPanels && (panels.library ? <LibraryPanel /> : panels.layers && <LayersPanel />)}
+          {lens === 'sun' && (
+            <>
+              <SunBar />
+              <SunPanel />
+            </>
+          )}
+          {lens === 'growth' && (
+            <>
+              <GrowthBar />
+              <GrowthPanel />
+            </>
+          )}
+          {lens === 'seasons' && <SeasonsView />}
+          {lens === 'irrigation' && (techSelected ? panels.properties && <PropertiesPanel /> : <IrrigationPanel />)}
+          {(lens === 'plan' || lens === 'costs') && (night && !hasSelection ? <NightPanel /> : panels.properties && <PropertiesPanel />)}
+          {night && lens !== 'seasons' && <NightPill />}
+          {lens === 'costs' && <CostsView onClose={() => editor.getState().setSession({ lens: 'plan' })} onPdf={costPdf} />}
           <BottomBar onFit={fit} />
           {menu && (
             <ProjectMenu

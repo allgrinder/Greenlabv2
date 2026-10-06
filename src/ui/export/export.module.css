@@ -73,6 +73,7 @@
 }
 
 .side {
+  overflow-y: auto;
   width: 330px;
   flex: none;
   padding: 24px;
@@ -124,6 +125,268 @@
 
 .primary:disabled {
   opacity: 0.6;
+}
+
+/* PDF-Blatt-Vorschau (Screen 11) */
+.pdfSheet {
+  width: min(100%, calc((100vh - 200px) * 1.414));
+  max-height: 100%;
+  background: #fbfaf6;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08), 0 16px 40px rgba(0, 0, 0, 0.14);
+  padding: 2.4%;
+  display: flex;
+  color: #2d3033;
+  container-type: inline-size;
+}
+
+.pdfFrame {
+  flex: 1;
+  display: flex;
+  border: 1px solid #2d3033;
+  min-width: 0;
+}
+
+.pdfPlan {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7% 3% 6%;
+  margin: 3px;
+}
+
+.pdfPlan img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.pdfTitle {
+  position: absolute;
+  left: 2.5%;
+  top: 2%;
+  font-family: var(--font-serif);
+  font-size: max(11px, 2.1cqw);
+  color: #1f2224;
+}
+
+.pdfTitle i {
+  color: #5d615d;
+}
+
+.pdfScale {
+  position: absolute;
+  left: 2.5%;
+  bottom: 3%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 5px;
+  background: #fbfaf6;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: max(7px, 0.95cqw);
+}
+
+.pdfScaleBar {
+  display: flex;
+  width: 90px;
+  height: 4px;
+  border: 1px solid #2d3033;
+}
+
+.pdfSide {
+  width: 21%;
+  flex: none;
+  border-left: 1px solid #2d3033;
+  padding: 3% 2.4% 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: max(7px, 1.05cqw);
+  min-width: 0;
+}
+
+.pdfNorth {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: max(9px, 1.6cqw);
+}
+
+.pdfEyebrow {
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  font-size: max(6.5px, 0.9cqw);
+  margin-bottom: 2px;
+}
+
+.pdfLegend {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.pdfLegendRow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pdfLegendRow span {
+  width: 16px;
+  flex: none;
+}
+
+.pdfBlock {
+  margin-top: auto;
+  border-top: 1px solid #2d3033;
+  padding: 8px 0 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.pdfName {
+  font-family: var(--font-serif);
+  font-size: max(10px, 1.8cqw);
+  line-height: 1.1;
+  color: #1f2224;
+}
+
+.pdfSub {
+  color: #4a4d4f;
+  line-height: 1.45;
+}
+
+.pdfGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: max(6.5px, 0.9cqw);
+  border-top: 0.6px solid #2d3033;
+  padding-top: 5px;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.selectField {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--fld);
+  font-size: 11px;
+  color: var(--ink3);
+}
+
+.selectField select {
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--ink);
+  padding: 0;
+  outline: 0;
+  cursor: pointer;
+}
+
+.looks {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+}
+
+.look {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  padding: 8px 6px;
+  border-radius: 9px;
+  background: var(--fld);
+  font-size: 12px;
+  color: var(--ink2);
+}
+
+.look:hover {
+  background: rgba(31, 34, 36, 0.08);
+}
+
+.look span {
+  width: 100%;
+  height: 36px;
+  border-radius: 5px;
+}
+
+.lookOn {
+  composes: look;
+  background: #fff;
+  box-shadow: 0 0 0 1.5px var(--acc);
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.lookOn:hover {
+  background: #fff;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.check input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.box {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1.5px var(--ink3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.box svg {
+  opacity: 0;
+}
+
+.check input:checked + .box {
+  background: var(--acc);
+  box-shadow: none;
+}
+
+.check input:checked + .box svg {
+  opacity: 1;
+}
+
+.check input:focus-visible + .box {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
 }
 
 @media (max-width: 900px) {

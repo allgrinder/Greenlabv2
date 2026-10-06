@@ -51,6 +51,8 @@ export interface SessionState {
   years: number;
   /** Jahreszeit für Farben (Linse „Jahreszeiten“ zeigt alle vier) */
   season: 'spring' | 'summer' | 'autumn' | 'winter';
+  /** Jahreszeiten-Linse: eine Jahreszeit groß statt Vergleich 4× */
+  seasonFocus: 'spring' | 'summer' | 'autumn' | 'winter' | null;
   /** Nachtmodus: Uhrzeit für Zeitpläne, aktive Lichtszene */
   night: { hour: number; scene: string | null };
   /** Vorgaben für neu gezeichnete Objekte */

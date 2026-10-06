@@ -630,3 +630,175 @@
     right: 16px;
   }
 }
+
+/* Wachstum: Jahresleiste */
+.yearTrack {
+  position: relative;
+  height: 40px;
+  cursor: ew-resize;
+  touch-action: none;
+  outline: 0;
+}
+
+.yearRail {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 9px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--fld);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.yearFill {
+  position: absolute;
+  left: 0;
+  top: 9px;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #b4c394, #6d8656);
+}
+
+.yearStop {
+  position: absolute;
+  top: 0;
+  width: 0;
+  height: 40px;
+  padding: 0;
+  cursor: pointer;
+}
+
+.yearDot {
+  position: absolute;
+  top: 7px;
+  left: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(31, 34, 36, 0.25);
+}
+
+.yearLabel {
+  position: absolute;
+  top: 22px;
+  left: 0;
+  transform: translateX(-50%);
+  font-size: 11.5px;
+  color: var(--ink2);
+  white-space: nowrap;
+}
+
+.yearStop:first-of-type .yearLabel {
+  transform: none;
+}
+
+.yearStop:last-of-type .yearLabel {
+  transform: translateX(-100%);
+}
+
+.yearKnob {
+  position: absolute;
+  top: 1px;
+  width: 20px;
+  height: 20px;
+  margin-left: -10px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 0 0 1px var(--line), 0 2px 6px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+.yearKnob::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background: #6d8656;
+}
+
+.yearTrack:focus-visible .yearKnob {
+  box-shadow: 0 0 0 2px var(--acc), 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.seasonFocus {
+  composes: glass from '../components/ui.module.css';
+  position: absolute;
+  left: 50%;
+  top: 84px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 6px 6px 16px;
+  border-radius: 14px;
+  z-index: 4;
+  white-space: nowrap;
+}
+
+.segRow {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--fld);
+  border-radius: 9px;
+}
+
+.seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--ink2);
+}
+
+.seg:hover {
+  color: var(--ink);
+  background: var(--hov);
+}
+
+.segOn {
+  composes: seg;
+  background: var(--tab);
+  color: var(--ink);
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.segOn:hover {
+  background: var(--tab);
+}
+
+.stat {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--fld);
+}
+
+.statLabel {
+  font-size: 11px;
+  color: var(--ink3);
+}
+
+.statValue {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+/* verdeckt den Plan hinter dem Vergleichsraster */
+.seasonsBackdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--dot) 1px, transparent 1px);
+  background-size: 20px 20px;
+}

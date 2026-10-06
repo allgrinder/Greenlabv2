@@ -146,12 +146,12 @@ export function BottomBar({ onFit }: { onFit: () => void }) {
       </div>
       <div className={u.divider} />
       <div className={s.daynight}>
-        <button type="button" className={mode === 'day' ? s.dnBtnOn : s.dnBtn} onClick={() => setSession({ mode: 'day' })}>
+        <button type="button" className={mode === 'day' ? s.dnBtnOn : s.dnBtn} onClick={() => setSession({ mode: 'day' })} data-testid="day-btn">
           <Sun />
           Tag
         </button>
-        <button type="button" className={s.dnBtn} disabled title="Nachtmodus kommt in Phase 2" style={{ opacity: 0.55, cursor: 'default' }}>
-          <Icon name="moon" size={13} color="var(--ink2)" />
+        <button type="button" className={mode === 'night' ? s.dnBtnOn : s.dnBtn} onClick={() => setSession({ mode: 'night' })} data-testid="night-btn">
+          <Icon name="moon" size={13} color={mode === 'night' ? '#C9D4FF' : 'var(--ink2)'} />
           Nacht
         </button>
       </div>

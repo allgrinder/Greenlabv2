@@ -6,13 +6,13 @@ import { Icon, Logo } from '../icons';
 import u from '../components/ui.module.css';
 import s from './chrome.module.css';
 
-const TABS: { v: LensTab; label: string; phase1: boolean }[] = [
-  { v: 'plan', label: 'Planen', phase1: true },
-  { v: 'sun', label: 'Sonne', phase1: false },
-  { v: 'growth', label: 'Wachstum', phase1: false },
-  { v: 'seasons', label: 'Jahreszeiten', phase1: false },
-  { v: 'irrigation', label: 'Bewässerung', phase1: false },
-  { v: 'costs', label: 'Kosten', phase1: false },
+const TABS: { v: LensTab; label: string }[] = [
+  { v: 'plan', label: 'Planen' },
+  { v: 'sun', label: 'Sonne' },
+  { v: 'growth', label: 'Wachstum' },
+  { v: 'seasons', label: 'Jahreszeiten' },
+  { v: 'irrigation', label: 'Bewässerung' },
+  { v: 'costs', label: 'Kosten' },
 ];
 
 export function TopBar({ saveState, onExport, onProjects }: { saveState: SaveState; onExport: () => void; onProjects: () => void }) {
@@ -59,7 +59,7 @@ export function TopBar({ saveState, onExport, onProjects }: { saveState: SaveSta
         <Segmented
           value={lens}
           onChange={(v) => setSession({ lens: v })}
-          options={TABS.map((t) => ({ v: t.v, label: t.label, disabled: !t.phase1, title: t.phase1 ? undefined : 'Kommt in Phase 2' }))}
+          options={TABS.map((t) => ({ v: t.v, label: t.label }))}
         />
       </div>
       <div className={s.spacer} />

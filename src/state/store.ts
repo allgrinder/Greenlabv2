@@ -38,6 +38,7 @@ export const initialSession = (): SessionState => ({
   sun: { doy: 172, hour: 16.5, heat: true },
   years: 10,
   season: 'summer',
+  seasonFocus: null,
   night: { hour: 21.67, scene: null },
   defaults: { areaMaterial: 'soil', pathMaterial: 'gravel', pathWidth: 1.2 },
 });

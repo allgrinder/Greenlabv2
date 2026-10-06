@@ -7,8 +7,9 @@ import { footprint } from '../geometry/objects';
 import { flatToRegion, polygonPath, simpleRegion } from '../geometry/regions';
 import { flattenRegion } from '../geometry/shape';
 import { createProject, layerOfKind, objectBase } from '../model/defaults';
-import { newDrip, newFixture, newLamp, newPipe, newSprinkler } from '../model/factory';
-import { autoDripPath, autoSprinklerPositions, inwardArc } from '../irrigation';
+import { newDrip, newFixture, newLamp, newPipe } from '../model/factory';
+import { autoDripPath } from '../irrigation';
+import { sprinklersFor } from '../irrigationLayout';
 import { cubicAt, cubicDerivative } from '../geometry/bezier';
 import { pathSegments } from '../geometry/shape';
 import type {
@@ -260,14 +261,7 @@ function addIrrigation(p: Project, add: (o: PlanObject) => PlanObject) {
   // Regner Kopf an Kopf über alle Rasenflächen; Zone 1 = nördlicher Rasen, Zone 2 = südlicher
   for (const o of Object.values(p.objects)) {
     if (o.type !== 'area' || o.materialId !== 'lawn') continue;
-    for (const r of footprint(o))
-      for (const q of autoSprinklerPositions(r, 6)) {
-        const arc = inwardArc(q, r, 6);
-        let sweep = arc[1] - arc[0];
-        if (sweep <= 0) sweep += 360;
-        // Durchfluss proportional zum Sektor (gleicher Niederschlag)
-        add({ ...newSprinkler(p, q, q.y < 14 ? 1 : 2, 6, arc), flowLpm: Math.round(1.5 * (sweep / 360) * 10) / 10 || 0.4 });
-      }
+    for (const r of footprint(o)) for (const sp of sprinklersFor(p, r, 1)) add({ ...sp, zone: sp.position.y < 14 ? 1 : 2 });
   }
   // Tropfschläuche: Ring in jedem Hochbeet, Mäander im Staudenbeet
   [[42.5, 15.1], [46.5, 15.1], [42.5, 17.6], [46.5, 17.6], [42.5, 20.1], [46.5, 20.1]].forEach(([x, y]) =>

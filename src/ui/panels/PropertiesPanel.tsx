@@ -15,11 +15,11 @@ import { materialSwatchStyle } from '../../render/textures/materialTextures';
 import { cmd, useEditor } from '../../state';
 import { Field, NumberField, Toggle } from '../components/controls';
 import { Icon } from '../icons';
-import { glyphSrc, SYMBOL_GLYPH } from '../library/glyphs';
+import { glyphSrc, irrGlyph, SYMBOL_GLYPH } from '../library/glyphs';
 import type { Brush } from '../../state/types';
 import { BackgroundSection } from './BackgroundSection';
 import { DripProps, FixtureProps, LampProps, PipeProps, SprinklerProps } from './TechProps';
-import { getLamp, kelvinRgb } from '../../core/catalog/lamps';
+import { getLamp, kelvinHex, kelvinRgb } from '../../core/catalog/lamps';
 import u from '../components/ui.module.css';
 import s from './props.module.css';
 
@@ -115,6 +115,8 @@ function defaultName(o: PlanObject): string {
       return getItem(o.catalogId).name;
     case 'text':
       return o.text;
+    case 'lamp':
+      return getLamp(o.lampType).name;
     default:
       return TYPE_LABEL[o.type];
   }
@@ -263,7 +265,11 @@ function ObjectProps({ o, doc }: { o: PlanObject; doc: Project }) {
           ? { background: `radial-gradient(circle at 40% 35%, #ffffff44, ${getSpecies(o.speciesId).colors.summer} 60%)` }
           : o.type === 'item'
             ? { background: `url("${glyphSrc(SYMBOL_GLYPH[getItem(o.catalogId).symbol] ?? 'edge')}") center/32px no-repeat, rgba(255,255,255,.6)` }
-            : { background: 'var(--fld)' };
+            : o.type === 'lamp'
+              ? { background: `radial-gradient(circle at 50% 60%, ${kelvinHex(o.kelvin)} 0, rgba(255,200,140,.25) 40%, rgba(20,28,41,0) 72%), #121A27` }
+              : o.type === 'sprinkler' || o.type === 'drip' || o.type === 'pipe' || o.type === 'fixture'
+                ? { background: `url("${irrGlyph(o.type === 'sprinkler' ? 'sprinkler' : o.type === 'fixture' ? o.kind : 'drip')}") center/30px no-repeat, rgba(255,255,255,.6)` }
+                : { background: 'var(--fld)' };
 
   return (
     <>
@@ -550,7 +556,7 @@ function ProjectInfo({ doc }: { doc: Project }) {
           </span>
         </div>
         <div className={s.muted} style={{ fontSize: 12, lineHeight: 1.45 }}>
-          Mengen werden aus der Zeichnung abgeleitet. Die vollständige Kostenübersicht folgt in Phase 2.
+          Mengen werden aus der Zeichnung abgeleitet. Preise und Einkaufsliste im Tab „Kosten“.
         </div>
       </div>
       <BackgroundSection doc={doc} />

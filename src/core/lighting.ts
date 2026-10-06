@@ -1,6 +1,7 @@
 /**
  * Lichtszenen und Zeitpläne (Screen 03/05): welche Leuchten wann wie hell brennen.
  */
+import { lampWatts } from './catalog/lamps';
 import type { LampObject, LampType } from './model/types';
 
 export interface LightScene {
@@ -39,4 +40,37 @@ export function lampLevel(l: LampObject, scene: string | null, schedule: () => b
   if (!l.on) return 0;
   if (scene) return SCENES.find((s) => s.id === scene)?.levels[l.lampType] ?? 0;
   return schedule() ? 1 : 0;
+}
+
+/** Strompreis für die Abschätzung „pro Abend“, €/kWh */
+export const POWER_PRICE = 0.35;
+/** angenommene Dauer einer manuell gestarteten Szene, h */
+const SCENE_HOURS = 4;
+
+export interface NightStats {
+  lamps: number;
+  /** Leistung jetzt (Szene bzw. Zeitplan zur Uhrzeit), W */
+  wattsNow: number;
+  /** Verbrauch pro Abend, kWh */
+  kwhEvening: number;
+  costEvening: number;
+}
+
+export function nightStats(lamps: LampObject[], scene: string | null, hour: number, weekday: number, sunset: number, sunrise: number): NightStats {
+  const watts = (l: LampObject) => lampWatts(l.lumen);
+  const level = (l: LampObject, h: number) => lampLevel(l, scene, () => scheduledOn(l, h % 24, weekday, sunset, sunrise));
+  const wattsNow = lamps.reduce((s, l) => s + watts(l) * level(l, hour), 0);
+  let wh = 0;
+  if (scene) wh = lamps.reduce((s, l) => s + watts(l) * level(l, hour), 0) * SCENE_HOURS;
+  else {
+    // Zeitplan von Sonnenuntergang bis Sonnenaufgang in 10-Minuten-Schritten
+    const end = sunrise + 24;
+    for (let h = sunset; h < end; h += 1 / 6) wh += lamps.reduce((s, l) => s + watts(l) * level(l, h), 0) / 6;
+  }
+  return {
+    lamps: lamps.length,
+    wattsNow,
+    kwhEvening: wh / 1000,
+    costEvening: (wh / 1000) * POWER_PRICE,
+  };
 }

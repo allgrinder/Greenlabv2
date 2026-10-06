@@ -23,7 +23,10 @@ export type ToolId =
   | 'plant'
   | 'hedge'
   | 'calibrate'
-  | 'bgmove';
+  | 'bgmove'
+  | 'drip'
+  | 'pipe'
+  | 'lights';
 
 export type LensTab = 'plan' | 'sun' | 'growth' | 'seasons' | 'irrigation' | 'costs';
 
@@ -54,7 +57,11 @@ export interface SessionState {
   defaults: { areaMaterial: string; pathMaterial: string; pathWidth: number };
 }
 
-export type Brush = { kind: 'plant'; speciesId: string } | { kind: 'item'; catalogId: string };
+export type Brush =
+  | { kind: 'plant'; speciesId: string }
+  | { kind: 'item'; catalogId: string }
+  | { kind: 'lamp'; lampType: import('../core/model/types').LampType }
+  | { kind: 'irr'; what: 'sprinkler' | 'tap' | 'manifold' };
 
 export interface Viewport {
   /** Weltpunkt in der Bildschirmmitte */

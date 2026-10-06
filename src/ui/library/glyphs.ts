@@ -132,3 +132,44 @@ export const SYMBOL_GLYPH: Record<string, GlyphKind> = {
   barrel: 'barrel',
   edge: 'edge',
 };
+
+const LAMP_ICON: Record<string, string> = {
+  bollard: 'M9 21h6M10 21V9h4v12M8.5 9h7l-1.5-4h-4Z',
+  spot: 'M4 14l6-6 4 4-6 6ZM14 8l5-5M15 21h6',
+  pathLight: 'M12 21V11M7.5 11h9l-2-4h-5ZM6 21h12',
+  stringLights: 'M3 7c6 5 12 5 18 0M7 10.5v2M12 12v2M17 10.5v2',
+  wall: 'M6 4v16M6 9h5a3 3 0 0 1 0 6H6',
+  underwater: 'M3 18c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0M12 6a3 3 0 1 0 0 6a3 3 0 1 0 0-6Z',
+  treeUplight: 'M8 21l3-6h2l3 6ZM12 15V10M7 7l2 2M17 7l-2 2M12 4v3',
+};
+
+/** Leuchtensymbol aus Screen 03/05 auf warmem Lichtschein */
+export function lampGlyph(type: string, rgb: [number, number, number]): string {
+  const key = `lamp|${type}|${rgb}`;
+  let url = cache.get(key);
+  if (!url) {
+    const [r, g, b] = rgb;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><defs><radialGradient id="g" cx=".5" cy=".55" r=".5"><stop offset="0" stop-color="rgb(${r},${g},${b})"/><stop offset=".4" stop-color="rgb(${r},${g},${b})" stop-opacity=".25"/><stop offset="1" stop-color="rgb(${r},${g},${b})" stop-opacity="0"/></radialGradient></defs><rect width="40" height="40" rx="8" fill="#101826"/><rect width="40" height="40" fill="url(#g)"/><g transform="translate(8 8) scale(1)"><path d="${LAMP_ICON[type] ?? LAMP_ICON.bollard}" stroke="#F6E7CC" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g></svg>`;
+    url = 'data:image/svg+xml,' + encodeURIComponent(svg);
+    cache.set(key, url);
+  }
+  return url;
+}
+
+/** Bewässerungssymbole aus der Legende von Screen 09 */
+export function irrGlyph(what: 'sprinkler' | 'drip' | 'pipe' | 'manifold' | 'tap'): string {
+  const body = {
+    sprinkler: '<path d="M8 30L8 10A20 20 0 0 1 28 30Z" fill="rgba(58,132,196,.15)" stroke="#2F76B8" stroke-dasharray="3 2"/><circle cx="8" cy="30" r="3" fill="#fff" stroke="#2F76B8" stroke-width="1.6"/>',
+    drip: '<path d="M4 20H36" stroke="#1E2E3B" stroke-width="2"/><path d="M4 20H36" stroke="#7FC0EA" stroke-width="3.2" stroke-dasharray="0 6" stroke-linecap="round"/>',
+    pipe: '<path d="M4 20H36" stroke="#fff" stroke-width="5" opacity=".7"/><path d="M4 20H36" stroke="#2F76B8" stroke-width="2.6"/>',
+    manifold: '<rect x="8" y="13" width="24" height="14" rx="3" fill="#fff" stroke="#2F76B8" stroke-width="1.6"/><path d="M14 16v8M20 16v8M26 16v8" stroke="#2F76B8"/>',
+    tap: '<rect x="13" y="13" width="14" height="14" rx="3" fill="#2F76B8"/><path d="M16 20h8M20 16v8" stroke="#fff" stroke-width="1.6"/>',
+  }[what];
+  const key = `irr|${what}`;
+  let url = cache.get(key);
+  if (!url) {
+    url = 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">${body}</svg>`);
+    cache.set(key, url);
+  }
+  return url;
+}

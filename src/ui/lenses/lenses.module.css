@@ -1,0 +1,632 @@
+/* Linsen-Panels nach Screen 03/05/06/07/08/09/10 */
+
+.bottomPanel {
+  composes: glass from '../components/ui.module.css';
+  position: absolute;
+  left: 96px;
+  right: 346px;
+  bottom: 80px;
+  padding: 16px 20px 18px;
+  display: flex;
+  gap: 24px;
+  align-items: stretch;
+  z-index: 4;
+  --gl: rgba(250, 248, 244, 0.82);
+}
+
+[data-mode='night'] .bottomPanel {
+  --gl: rgba(20, 28, 41, 0.78);
+}
+
+.rightPanel {
+  composes: glass from '../components/ui.module.css';
+  position: absolute;
+  right: 16px;
+  top: 84px;
+  width: 300px;
+  max-height: calc(100% - 84px - 80px);
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 4;
+  scrollbar-width: thin;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: 21px;
+  line-height: 1.1;
+}
+
+.big {
+  font-family: var(--font-serif);
+  font-size: 30px;
+  line-height: 1;
+}
+
+.muted {
+  color: var(--ink3);
+  font-size: 12px;
+}
+
+.sub {
+  font-size: 13px;
+  color: var(--ink2);
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.legendBar {
+  height: 10px;
+  border-radius: 5px;
+}
+
+.ticks {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink3);
+}
+
+.reco {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 9px;
+  background: var(--fld);
+}
+
+.recoDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  margin-top: 3px;
+  flex: none;
+}
+
+.recoTitle {
+  font-weight: 500;
+}
+
+.recoText {
+  font-size: 12px;
+  color: var(--ink2);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.curve {
+  position: relative;
+  height: 70px;
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.curve svg {
+  position: absolute;
+  inset: 0 0 auto 0;
+  width: 100%;
+  height: 56px;
+}
+
+.needle {
+  position: absolute;
+  top: 0;
+  bottom: 12px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--ink);
+}
+
+.handle {
+  position: absolute;
+  top: 44px;
+  width: 22px;
+  height: 22px;
+  margin-left: -11px;
+  border-radius: 11px;
+  background: #fff;
+  box-shadow: 0 0 0 1px var(--line), 0 2px 6px rgba(0, 0, 0, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.handle::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background: #e2a33b;
+}
+
+.curveTicks {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -8px;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink3);
+}
+
+.growthItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bar {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--fld);
+}
+
+.barFill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 3px;
+  background: #8fa66c;
+  transition: width 0.2s var(--ease);
+}
+
+.warn {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 9px;
+  background: rgba(185, 114, 79, 0.12);
+  font-size: 12px;
+  line-height: 1.45;
+  color: #7a4a31;
+}
+
+[data-mode='night'] .warn {
+  color: #e8b394;
+}
+
+.ok {
+  composes: warn;
+  background: rgba(94, 158, 110, 0.12);
+  color: #2f5c3a;
+}
+
+/* Jahreszeiten 2 × 2 */
+.seasons {
+  position: absolute;
+  left: 96px;
+  right: 32px;
+  top: 88px;
+  bottom: 80px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 14px;
+  z-index: 4;
+}
+
+.seasonCell {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 0 1px var(--line);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+
+.seasonCell:hover {
+  box-shadow: 0 0 0 1.5px var(--acc);
+}
+
+.seasonCell img {
+  position: absolute;
+  inset: 8px;
+  width: calc(100% - 16px);
+  height: calc(100% - 16px);
+  object-fit: contain;
+}
+
+.seasonChip {
+  composes: glass from '../components/ui.module.css';
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
+}
+
+.seasonNote {
+  composes: glass from '../components/ui.module.css';
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  max-width: 70%;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ink2);
+}
+
+.loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink3);
+}
+
+/* Bewässerung */
+.zone {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 9px;
+  background: var(--fld);
+}
+
+.zoneBadge {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: #2f76b8;
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.zoneName {
+  font-weight: 500;
+  font-size: 12.5px;
+  border: 0;
+  background: transparent;
+  outline: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.zoneMeta {
+  font-size: 11.5px;
+  color: var(--ink3);
+  margin-top: 1px;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.inlineInput {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  width: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--ink2);
+  outline: 0;
+  border-radius: 4px;
+  padding: 0 2px;
+}
+
+.inlineInput:focus,
+.inlineInput:hover {
+  background: var(--hov);
+}
+
+.legendRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+}
+
+.action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--fld);
+  font-size: 12px;
+  color: var(--ink2);
+}
+
+.action:hover:not(:disabled) {
+  color: var(--ink);
+  background: var(--hov);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.action:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Kosten */
+.costScrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(233, 229, 220, 0.5);
+  backdrop-filter: blur(3px);
+  z-index: 6;
+}
+
+[data-mode='night'] .costScrim {
+  background: rgba(14, 23, 36, 0.55);
+}
+
+.costSheet {
+  position: absolute;
+  left: 150px;
+  right: 150px;
+  top: 84px;
+  bottom: 28px;
+  display: flex;
+  background: var(--gl);
+  backdrop-filter: blur(30px) saturate(1.4);
+  border: 1px solid var(--gb);
+  border-radius: 18px;
+  box-shadow: var(--sh);
+  overflow: hidden;
+  z-index: 7;
+  --gl: rgba(250, 248, 244, 0.9);
+  animation: rise 0.22s var(--ease);
+}
+
+[data-mode='night'] .costSheet {
+  --gl: rgba(20, 28, 41, 0.9);
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(6px);
+    opacity: 0;
+  }
+}
+
+.costMain {
+  flex: 1;
+  min-width: 0;
+  padding: 26px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.costTableWrap {
+  flex: 1;
+  overflow: auto;
+  margin: -12px -10px 0;
+  padding: 0 10px;
+}
+
+.costHead,
+.costRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px 120px 110px;
+  gap: 0 14px;
+  align-items: center;
+}
+
+.costHead {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  color: var(--ink3);
+  position: sticky;
+  top: 0;
+  background: var(--gl);
+  z-index: 1;
+}
+
+.costRow {
+  padding: 5px 10px;
+  border-radius: 7px;
+  font-variant-numeric: tabular-nums;
+}
+
+.costRow:hover {
+  background: var(--hov);
+}
+
+.costGroup {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 14px 10px 6px;
+}
+
+.costGroupName {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 16px;
+}
+
+.right {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.priceInput {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-align: right;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--ink2);
+  border-radius: 6px;
+  padding: 4px 6px;
+  outline: 0;
+}
+
+.priceInput:hover {
+  background: var(--fld);
+}
+
+.priceInput:focus {
+  background: var(--field-bg);
+  box-shadow: 0 0 0 1.5px var(--acc);
+  color: var(--ink);
+}
+
+.priceEdited {
+  color: var(--acc);
+}
+
+.costSide {
+  width: 300px;
+  flex: none;
+  padding: 26px 24px;
+  border-left: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+[data-mode='night'] .costSide {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.total {
+  font-family: var(--font-serif);
+  font-size: 46px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-top: 4px;
+}
+
+.stack {
+  display: flex;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  gap: 2px;
+}
+
+.btnDark {
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--bg);
+  text-align: center;
+  font-weight: 500;
+}
+
+.btnLine {
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 1px var(--line);
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Nacht */
+.nightPill {
+  composes: glass from '../components/ui.module.css';
+  position: absolute;
+  left: 50%;
+  top: 84px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--ink2);
+  z-index: 3;
+  white-space: nowrap;
+}
+
+.scene {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--fld);
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.scene:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.sceneOn {
+  composes: scene;
+  background: rgba(233, 180, 94, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(233, 180, 94, 0.45);
+}
+
+.sceneOn:hover {
+  background: rgba(233, 180, 94, 0.16);
+}
+
+@media (max-width: 1100px) {
+  .bottomPanel {
+    right: 16px;
+    left: 72px;
+    bottom: 72px;
+    flex-wrap: wrap;
+  }
+  .costSheet {
+    left: 16px;
+    right: 16px;
+  }
+  .seasons {
+    left: 72px;
+    right: 16px;
+  }
+}

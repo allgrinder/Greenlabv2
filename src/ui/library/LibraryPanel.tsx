@@ -9,21 +9,27 @@ import type { PlantKind } from '../../core/model/types';
 import { useEditor } from '../../state';
 import type { Brush } from '../../state/types';
 import { DND_MIME } from '../../tools/BackgroundTools';
+import { LAMPS, kelvinRgb } from '../../core/catalog/lamps';
+import { irrGlyph, lampGlyph } from './glyphs';
 import { glyphSrc, SYMBOL_GLYPH, type GlyphKind } from './glyphs';
 import u from '../components/ui.module.css';
 import s from './library.module.css';
 
 
-type Filter = 'all' | 'plants' | 'build' | 'water';
+type Filter = 'all' | 'plants' | 'build' | 'water' | 'light';
 
+/** Bibliothekseintrag: setzt einen Pinsel oder startet ein Linienwerkzeug */
 interface Entry {
   key: string;
   name: string;
   src: string;
-  brush: Brush | 'hedge';
+  brush: Brush | 'hedge' | 'drip' | 'pipe' | 'lights';
   search: string;
   filter: Filter[];
+  sub?: string;
 }
+
+
 
 const PLANT_SECTIONS: { h: string; kinds: PlantKind[]; glyph: GlyphKind }[] = [
   { h: 'Bäume', kinds: ['tree'], glyph: 'tree' },
@@ -55,6 +61,28 @@ function useSections() {
     }));
     build.splice(7, 0, { key: 'hedge', name: 'Hecke', src: glyphSrc('hedge'), brush: 'hedge', search: 'hecke hainbuche', filter: ['all', 'plants', 'build'] });
     sections.push({ h: 'Bauten & Ausstattung', items: build });
+    sections.push({
+      h: 'Licht',
+      items: LAMPS.map((l) => ({
+        key: `lamp:${l.type}`,
+        name: l.short,
+        sub: `${l.lumen} lm · ${l.kelvin} K · ${l.beamDeg >= 360 ? '360°' : l.beamDeg + '°'}`,
+        src: lampGlyph(l.type, kelvinRgb(l.kelvin)),
+        brush: (l.type === 'stringLights' ? 'lights' : { kind: 'lamp', lampType: l.type }) as Entry['brush'],
+        search: `${l.name} leuchte licht`.toLowerCase(),
+        filter: ['all', 'light'] as Filter[],
+      })),
+    });
+    sections.push({
+      h: 'Bewässerung',
+      items: [
+        { key: 'irr:sprinkler', name: 'Regner', src: irrGlyph('sprinkler'), brush: { kind: 'irr', what: 'sprinkler' } as Brush, search: 'versenkregner regner sprinkler', filter: ['all', 'water'] as Filter[] },
+        { key: 'irr:drip', name: 'Tropfschlauch', src: irrGlyph('drip'), brush: 'drip' as const, search: 'tropfschlauch tropfrohr', filter: ['all', 'water'] as Filter[] },
+        { key: 'irr:pipe', name: 'Leitung', src: irrGlyph('pipe'), brush: 'pipe' as const, search: 'leitung rohr pe', filter: ['all', 'water'] as Filter[] },
+        { key: 'irr:manifold', name: 'Verteiler', src: irrGlyph('manifold'), brush: { kind: 'irr', what: 'manifold' } as Brush, search: 'verteiler ventil', filter: ['all', 'water'] as Filter[] },
+        { key: 'irr:tap', name: 'Anschluss', src: irrGlyph('tap'), brush: { kind: 'irr', what: 'tap' } as Brush, search: 'wasseranschluss hahn', filter: ['all', 'water'] as Filter[] },
+      ],
+    });
     return sections;
   }, []);
 }
@@ -69,13 +97,10 @@ export function LibraryPanel() {
   const total = sections.reduce((a, x) => a + x.items.length, 0);
 
   const pick = (e: Entry) => {
-    if (e.brush === 'hedge') setSession({ tool: 'hedge', selection: [] });
+    if (typeof e.brush === 'string') setSession({ tool: e.brush, selection: [] });
     else setSession({ brush: e.brush, tool: 'plant', selection: [] });
   };
-  const isOn = (e: Entry) =>
-    e.brush === 'hedge'
-      ? tool === 'hedge'
-      : tool === 'plant' && (e.brush.kind === 'plant' ? brush.kind === 'plant' && brush.speciesId === e.brush.speciesId : brush.kind === 'item' && brush.catalogId === e.brush.catalogId);
+  const isOn = (e: Entry) => (typeof e.brush === 'string' ? tool === e.brush : tool === 'plant' && JSON.stringify(brush) === JSON.stringify(e.brush));
 
   const query = q.trim().toLowerCase();
   const FILTERS: { v: Filter; label: string }[] = [
@@ -83,6 +108,7 @@ export function LibraryPanel() {
     { v: 'plants', label: 'Pflanzen' },
     { v: 'build', label: 'Bauten' },
     { v: 'water', label: 'Wasser' },
+    { v: 'light', label: 'Licht' },
   ];
 
   return (
@@ -103,9 +129,6 @@ export function LibraryPanel() {
             {f.label}
           </button>
         ))}
-        <button type="button" className={s.chip} disabled title="Leuchten kommen mit dem Nachtmodus (Phase 2)">
-          Licht
-        </button>
       </div>
       <div className={s.scroll}>
         {sections.map((sec) => {
@@ -123,10 +146,10 @@ export function LibraryPanel() {
                     key={e.key}
                     type="button"
                     className={s.item}
-                    title={e.name}
-                    draggable={e.brush !== 'hedge'}
+                    title={e.sub ? `${e.name} · ${e.sub}` : e.name}
+                    draggable={typeof e.brush !== 'string'}
                     onDragStart={(ev) => {
-                      if (e.brush === 'hedge') return;
+                      if (typeof e.brush === 'string') return;
                       ev.dataTransfer.setData(DND_MIME, JSON.stringify(e.brush));
                       ev.dataTransfer.effectAllowed = 'copy';
                       const img = new Image();

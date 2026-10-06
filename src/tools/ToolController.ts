@@ -4,7 +4,8 @@
  */
 import { snapPoint, constrainAngle, type SnapResult } from '../core/geometry/snap';
 import { dist } from '../core/geometry/vec';
-import { newArea, newFromCatalog, newHedge, newPath, newPlant } from '../core/model/factory';
+import { newArea, newDrip, newHedge, newLamp, newPath, newPipe } from '../core/model/factory';
+import { objectFromBrush } from './simpleTools';
 import type { PathGeometry, PlanObject, Vec2 } from '../core/model/types';
 import type { PlanRenderer } from '../render/PlanRenderer';
 import { panBy, zoomAt } from '../render/Viewport';
@@ -75,6 +76,9 @@ export class ToolController {
         },
       }),
       hedge: new PathBuilderTool(ctx, { id: 'hedge', closed: false, curves: false, source: 'polygon', min: 2, finish: (path) => cmd.addObject(newHedge(ctx.doc(), path)) }),
+      drip: new PathBuilderTool(ctx, { id: 'drip', closed: false, curves: true, source: 'polygon', min: 2, finish: (path) => cmd.addObject(newDrip(ctx.doc(), path, 3)) }),
+      pipe: new PathBuilderTool(ctx, { id: 'pipe', closed: false, curves: false, source: 'polygon', min: 2, finish: (path) => cmd.addObject(newPipe(ctx.doc(), path)) }),
+      lights: new PathBuilderTool(ctx, { id: 'lights', closed: false, curves: true, source: 'polygon', min: 2, finish: (path) => cmd.addObject(newLamp(ctx.doc(), 'stringLights', path.nodes[0].p, path)) }),
       calibrate: new CalibrateTool(ctx),
       bgmove: new BackgroundMoveTool(ctx),
       free: new FreehandTool(ctx),
@@ -121,8 +125,7 @@ export class ToolController {
       const brush = JSON.parse(data) as Brush;
       const raw = renderer.toWorld(this.screenOf(e));
       const p = this.snapAt(raw, {}, { shift: false, alt: e.altKey }).p;
-      const doc = ctx.doc();
-      cmd.addObject(brush.kind === 'plant' ? newPlant(doc, brush.speciesId, p) : newFromCatalog(doc, brush.catalogId, p));
+      cmd.addObject(objectFromBrush(ctx.doc(), brush, p));
       store.getState().setSession({ brush });
     });
     on(window, 'keydown', (e) => this.onKey(e as unknown as KeyboardEvent));

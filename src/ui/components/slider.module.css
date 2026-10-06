@@ -1,0 +1,42 @@
+.slider {
+  position: relative;
+  height: 18px;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 7px;
+  height: 4px;
+  border-radius: 3px;
+  background: var(--fld);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.fill {
+  position: absolute;
+  left: 0;
+  top: 7px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.knob {
+  position: absolute;
+  top: 1px;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 0 0 1px var(--line), 0 1px 4px rgba(0, 0, 0, 0.3);
+  transition: transform 0.12s var(--ease);
+}
+
+.slider:active .knob,
+.slider:focus-visible .knob {
+  transform: scale(1.12);
+}

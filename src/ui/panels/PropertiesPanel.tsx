@@ -18,6 +18,8 @@ import { Icon } from '../icons';
 import { glyphSrc, SYMBOL_GLYPH } from '../library/glyphs';
 import type { Brush } from '../../state/types';
 import { BackgroundSection } from './BackgroundSection';
+import { DripProps, FixtureProps, LampProps, PipeProps, SprinklerProps } from './TechProps';
+import { getLamp, kelvinRgb } from '../../core/catalog/lamps';
 import u from '../components/ui.module.css';
 import s from './props.module.css';
 
@@ -274,6 +276,11 @@ function ObjectProps({ o, doc }: { o: PlanObject; doc: Project }) {
       {o.type === 'item' && <ItemProps o={o} doc={doc} />}
       {o.type === 'text' && <TextProps o={o} />}
       {o.type === 'dimension' && <DimensionProps o={o} doc={doc} />}
+      {o.type === 'lamp' && <LampProps o={o} />}
+      {o.type === 'sprinkler' && <SprinklerProps o={o} doc={doc} />}
+      {o.type === 'drip' && <DripProps o={o} doc={doc} />}
+      {o.type === 'pipe' && <PipeProps o={o} />}
+      {o.type === 'fixture' && <FixtureProps o={o} />}
       <Costs q={q} />
       <Notes o={o} />
       <Actions o={o} />
@@ -553,6 +560,31 @@ function ProjectInfo({ doc }: { doc: Project }) {
 
 /** Detailkarte des gewählten Bibliothekselements (Design 04, rechts) */
 function BrushDetail({ brush }: { brush: Brush }) {
+  if (brush.kind === 'lamp' || brush.kind === 'irr') {
+    const name = brush.kind === 'lamp' ? getLamp(brush.lampType).name : { sprinkler: 'Versenkregner', tap: 'Wasseranschluss', manifold: 'Verteiler' }[brush.what];
+    const spec = brush.kind === 'lamp' ? getLamp(brush.lampType) : null;
+    return (
+      <>
+        <div className={s.brushHero} style={{ background: spec ? `radial-gradient(circle at 50% 55%, rgb(${kelvinRgb(spec.kelvin).join(',')}) 0, rgba(255,190,120,.2) 38%, transparent 70%), #101826` : '#DCE6EC' }}>
+          <span className={s.brushScale} style={spec ? { color: '#A6AEB7' } : undefined}>
+            {spec ? 'Lichtwirkung im Nachtmodus' : 'Draufsicht'}
+          </span>
+        </div>
+        <div className={s.serif21}>{name}</div>
+        {spec && (
+          <div className={s.grid2}>
+            <Field label="Lichtstrom" value={`${spec.lumen} lm`} />
+            <Field label="Farbe" value={`${spec.kelvin} K`} />
+            <Field label="Abstrahlung" value={spec.beamDeg >= 360 ? 'rundum' : `${spec.beamDeg}°`} />
+            <Field label="Preis" value={euros(spec.price)} />
+          </div>
+        )}
+        <div className={s.muted} style={{ fontSize: 12, lineHeight: 1.45 }}>
+          Klicke in den Plan, um es zu setzen.{spec?.directional ? ' Richtung und Abstrahlwinkel stellst du danach rechts ein.' : ''}
+        </div>
+      </>
+    );
+  }
   if (brush.kind === 'item') {
     const it = getItem(brush.catalogId);
     return (

@@ -1,0 +1,269 @@
+/* Gemeinsame Bausteine nach Gartenwerk.dc.html */
+
+.glass {
+  background: var(--gl);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--gb);
+  border-radius: var(--r-panel);
+  box-shadow: var(--sh);
+  animation: panelIn 0.22s var(--ease);
+}
+
+@keyframes panelIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.995);
+  }
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  color: var(--ink3);
+  text-transform: uppercase;
+}
+
+.serifTitle {
+  font-family: var(--font-serif);
+  font-size: 21px;
+  line-height: 1.1;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* Segmented Control */
+.segmented {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--fld);
+  border-radius: 10px;
+}
+
+.segment {
+  padding: 6px 12px;
+  border-radius: 7px;
+  color: var(--ink2);
+  font-size: 12.5px;
+  white-space: nowrap;
+  transition: color 0.15s, background 0.15s;
+}
+
+.segment:hover:not(:disabled) {
+  color: var(--ink);
+  background: var(--hov);
+}
+
+.segment:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.segmentOn {
+  composes: segment;
+  background: var(--tab);
+  color: var(--ink);
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--line);
+}
+
+.segmentOn:hover:not(:disabled) {
+  background: var(--tab);
+}
+
+/* Feld (Wertkachel) */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--fld);
+  min-width: 0;
+  transition: box-shadow 0.15s, background 0.15s;
+}
+
+.fieldLabel {
+  font-size: 11px;
+  color: var(--ink3);
+}
+
+.fieldValue {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fieldEditable {
+  composes: field;
+  cursor: text;
+}
+
+.fieldEditable:hover {
+  background: var(--hov);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.fieldFocus {
+  composes: field;
+  background: var(--field-bg);
+  box-shadow: 0 0 0 1.5px var(--acc);
+}
+
+.fieldInput {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  padding: 0;
+  width: 100%;
+  color: var(--ink);
+}
+
+/* Schalter */
+.toggle {
+  width: 30px;
+  height: 18px;
+  border-radius: 9px;
+  background: rgba(31, 34, 36, 0.18);
+  position: relative;
+  flex: none;
+  transition: background 0.18s var(--ease);
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 7px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: transform 0.18s var(--ease);
+}
+
+.toggleOn {
+  composes: toggle;
+  background: var(--acc);
+}
+
+.toggleOn::after {
+  transform: translateX(12px);
+}
+
+/* Icon-Button */
+.iconBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink2);
+  transition: background 0.15s, color 0.15s;
+}
+
+.iconBtn:hover:not(:disabled) {
+  background: var(--hov);
+  color: var(--ink);
+}
+
+.iconBtn:disabled {
+  color: var(--ink3);
+  opacity: 0.6;
+  cursor: default;
+}
+
+.iconBtnOn {
+  composes: iconBtn;
+  background: var(--accs);
+  color: var(--acc);
+}
+
+.iconBtnOn:hover:not(:disabled) {
+  background: var(--accs);
+  color: var(--acc);
+}
+
+.primary {
+  padding: 7px 14px;
+  border-radius: 9px;
+  background: var(--acc);
+  color: #fff;
+  font-weight: 500;
+  font-size: 12.5px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 2px 8px rgba(61, 91, 217, 0.35);
+  transition: filter 0.15s;
+}
+
+.primary:hover {
+  filter: brightness(1.08);
+}
+
+.ghost {
+  padding: 7px 12px;
+  border-radius: 9px;
+  font-weight: 500;
+  font-size: 12.5px;
+  transition: background 0.15s;
+}
+
+.ghost:hover {
+  background: var(--hov);
+}
+
+.divider {
+  width: 1px;
+  height: 22px;
+  background: var(--line);
+  flex: none;
+}
+
+/* Tooltip (CSS) */
+.tip {
+  position: relative;
+}
+
+.tip[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 6px 8px 6px 10px;
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: pre;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+  z-index: 10;
+  animation: panelIn 0.15s var(--ease);
+}
+
+.tipUp[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 5px 8px;
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 7px;
+  font-size: 11.5px;
+  white-space: pre;
+  pointer-events: none;
+  z-index: 10;
+}

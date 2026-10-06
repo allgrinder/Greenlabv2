@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><meta name="design_doc_mode" content="canvas"><link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&amp;family=Geist+Mono:wght@400;500&amp;family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&amp;display=swap" rel="stylesheet"><style>body{margin:0;background:#D9D5CC;font-family:'Geist',system-ui,sans-serif;color:#1F2224;-webkit-font-smoothing:antialiased}a{color:#3D5BD9;text-decoration:none}a:hover{color:#2B46B8;text-decoration:underline}*{box-sizing:border-box}</style></helmet>
+
+<section id="t1" style="padding:72px 80px 120px;display:flex;flex-direction:column;gap:72px;">
+
+<div style="display:flex;gap:80px;align-items:flex-end;width:2960px;">
+  <div style="flex:1;min-width:0;">
+    <div style="font-family:'Geist Mono',monospace;font-size:13px;letter-spacing:.08em;color:#6E716B;">UI-ENTWURF · RUNDE 1</div>
+    <div style="font-family:'Newsreader',serif;font-size:88px;line-height:1;letter-spacing:-0.02em;margin-top:14px;">Gartenwerk</div>
+    <div style="font-size:20px;line-height:1.5;color:#4C504C;margin-top:18px;max-width:900px;text-wrap:pretty;">Gartenplanung als ruhiges Präzisionswerkzeug. Die Planfläche ist ein Architektenplan mit echten Materialtexturen. Darüber schweben gläserne Panels. Beispiel: 30 × 50 m, Frankfurt, Hausgarten Lindenweg 12.</div>
+  </div>
+  <div style="display:flex;gap:40px;flex:none;align-items:flex-end;">
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.08em;color:#6E716B;">FARBEN</div>
+      <div style="display:flex;gap:8px;">
+        <div style="display:flex;flex-direction:column;gap:6px;"><div style="width:64px;height:64px;border-radius:10px;background:#9BAE74;"></div><span style="font-size:11px;color:#5D615D;">Salbei</span></div>
+        <div style="display:flex;flex-direction:column;gap:6px;"><div style="width:64px;height:64px;border-radius:10px;background:#D6CDBB;"></div><span style="font-size:11px;color:#5D615D;">Sand</span></div>
+        <div style="display:flex;flex-direction:column;gap:6px;"><div style="width:64px;height:64px;border-radius:10px;background:#B9724F;"></div><span style="font-size:11px;color:#5D615D;">Terrakotta</span></div>
+        <div style="display:flex;flex-direction:column;gap:6px;"><div style="width:64px;height:64px;border-radius:10px;background:#1F2224;"></div><span style="font-size:11px;color:#5D615D;">Anthrazit</span></div>
+        <div style="display:flex;flex-direction:column;gap:6px;"><div style="width:64px;height:64px;border-radius:10px;background:#3D5BD9;"></div><span style="font-size:11px;color:#5D615D;">Kobalt · Auswahl</span></div>
+        <div style="display:flex;flex-direction:column;gap:6px;"><div style="width:64px;height:64px;border-radius:10px;background:#0E1724;"></div><span style="font-size:11px;color:#5D615D;">Nacht</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.08em;color:#6E716B;">SCHRIFT</div>
+      <div style="display:flex;gap:28px;align-items:flex-end;">
+        <div><div style="font-family:'Newsreader',serif;font-style:italic;font-size:52px;line-height:1;">Aa</div><div style="font-size:11px;color:#5D615D;margin-top:8px;">Newsreader · Titel, Plan</div></div>
+        <div><div style="font-size:52px;line-height:1;font-weight:450;">Aa</div><div style="font-size:11px;color:#5D615D;margin-top:8px;">Geist · UI</div></div>
+        <div><div style="font-family:'Geist Mono',monospace;font-size:40px;line-height:1.2;">1,20</div><div style="font-size:11px;color:#5D615D;margin-top:8px;">Geist Mono · Maße</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1440px 1440px;gap:96px 80px;">
+
+<!-- 01 Onboarding -->
+<div id="s01" data-screen-label="01 Onboarding" style="display:flex;flex-direction:column;gap:14px;">
+  <div style="display:flex;align-items:baseline;gap:12px;"><a href="#s01" style="font-family:'Geist Mono',monospace;font-size:13px;padding:4px 9px;background:#1F2224;color:#fff;border-radius:6px;">01</a><span style="font-size:20px;font-weight:500;">Neues Projekt</span><span style="font-size:15px;color:#6E716B;">Rechteck oder Polygon (umschaltbar) · Nordrichtung · Standort · Lageplan mit Maßstab-Kalibrierung</span></div>
+  <div style="--bg:#E9E5DC;--gl:rgba(250,248,244,.8);--gb:rgba(255,255,255,.75);--sh:0 1px 0 rgba(255,255,255,.7) inset,0 10px 36px rgba(44,46,34,.12),0 1px 3px rgba(44,46,34,.08);--ink:#1F2224;--ink2:#5D615D;--ink3:#8C8E88;--line:rgba(31,34,36,.09);--hov:rgba(31,34,36,.05);--fld:rgba(31,34,36,.05);--tab:#FFFFFF;--acc:#3D5BD9;--accs:rgba(61,91,217,.11);position:relative;width:1440px;height:900px;overflow:hidden;border-radius:14px;box-shadow:0 30px 80px rgba(40,38,30,.18),0 0 0 1px rgba(0,0,0,.06);background-color:var(--bg);background-image:radial-gradient(rgba(31,34,36,.10) 1px, transparent 1px);background-size:20px 20px;font-family:'Geist',sans-serif;color:var(--ink);font-size:13px;">
+    <div style="position:absolute;left:0;top:0;bottom:0;width:520px;background:rgba(250,248,244,.92);border-right:1px solid var(--line);padding:30px 44px 28px;display:flex;flex-direction:column;gap:18px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:28px;height:28px;border-radius:8px;background:var(--ink);display:flex;align-items:center;justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5" fill="none" stroke="#E9E5DC" stroke-width="1.4"></circle><path d="M12 4.5V19.5M12 12L17 7.5M12 15L7.5 11" stroke="#E9E5DC" stroke-width="1.4" fill="none" stroke-linecap="round"></path></svg></div>
+        <span style="font-family:'Newsreader',serif;font-size:19px;">Gartenwerk</span>
+        <span style="margin-left:auto;font-size:12.5px;color:var(--ink3);">Schritt 1 von 3</span>
+      </div>
+      <div>
+        <div style="font-family:'Newsreader',serif;font-size:36px;line-height:1.05;letter-spacing:-0.015em;">Lege dein Grundstück an</div>
+        <div style="font-size:14px;line-height:1.5;color:var(--ink2);margin-top:10px;text-wrap:pretty;">Maße, Ausrichtung und Hintergrund kannst du später jederzeit ändern.</div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;align-items:center;gap:10px;"><span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--ink3);">01</span><span style="font-weight:500;font-size:14px;">Kontur</span></div>
+        <div style="display:flex;gap:2px;padding:3px;background:var(--fld);border-radius:10px;">
+          <sc-if value="{{ onbRect }}" hint-placeholder-val="{{ false }}"><div style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px;border-radius:7px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08),0 0 0 1px var(--line);font-weight:500;"><svg width="15" height="15" viewBox="0 0 24 24"><path d="M4.5 6.5h15v11h-15Z" stroke="var(--ink)" stroke-width="1.5" fill="none"></path></svg>Rechteck</div><div onClick="{{ setPoly }}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px;border-radius:7px;color:var(--ink2);cursor:pointer;" style-hover="color:var(--ink);"><svg width="15" height="15" viewBox="0 0 24 24"><path d="M5 18.5L3.5 9.5 11 4.5l9 3.5-2 10.5Z" stroke="currentColor" stroke-width="1.5" fill="none"></path></svg>Polygon zeichnen</div></sc-if>
+          <sc-if value="{{ onbPoly }}" hint-placeholder-val="{{ true }}"><div onClick="{{ setRect }}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px;border-radius:7px;color:var(--ink2);cursor:pointer;" style-hover="color:var(--ink);"><svg width="15" height="15" viewBox="0 0 24 24"><path d="M4.5 6.5h15v11h-15Z" stroke="currentColor" stroke-width="1.5" fill="none"></path></svg>Rechteck</div><div style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px;border-radius:7px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08),0 0 0 1px var(--line);font-weight:500;"><svg width="15" height="15" viewBox="0 0 24 24"><path d="M5 18.5L3.5 9.5 11 4.5l9 3.5-2 10.5Z" stroke="var(--ink)" stroke-width="1.5" fill="none"></path></svg>Polygon zeichnen</div></sc-if>
+        </div>
+        <sc-if value="{{ onbRect }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end;">
+            <div style="display:flex;flex-direction:column;gap:6px;"><span style="font-size:12px;color:var(--ink2);">Breite</span><div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:9px;background:#fff;box-shadow:0 0 0 1.5px var(--acc),0 0 0 4px var(--accs);font-family:'Geist Mono',monospace;font-size:14px;">30,00<span style="color:var(--ink3);">m</span></div></div>
+            <span style="padding-bottom:11px;color:var(--ink3);">×</span>
+            <div style="display:flex;flex-direction:column;gap:6px;"><span style="font-size:12px;color:var(--ink2);">Tiefe</span><div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:9px;background:#fff;box-shadow:0 0 0 1px var(--line);font-family:'Geist Mono',monospace;font-size:14px;">50,00<span style="color:var(--ink3);">m</span></div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink2);"><span>Fläche</span><span style="font-family:'Geist Mono',monospace;color:var(--ink);">1.500,0 m²</span></div>
+        </sc-if>
+        <sc-if value="{{ onbPoly }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;border-radius:10px;background:#fff;box-shadow:0 0 0 1px var(--line);overflow:hidden;">
+            <sc-for list="{{ edges }}" as="e" hint-placeholder-count="5"><div style="display:flex;align-items:center;gap:12px;padding:6px 12px;border-bottom:1px solid var(--line);"><span style="font-family:'Geist Mono',monospace;font-size:11.5px;color:var(--ink3);width:44px;">{{ e.n }}</span><span style="flex:1;font-size:12.5px;color:var(--ink2);">Kante</span><span style="font-family:'Geist Mono',monospace;font-size:13px;">{{ e.l }}</span><span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--ink3);width:16px;">m</span></div></sc-for>
+            <div style="display:flex;justify-content:space-between;padding:9px 12px;background:var(--fld);font-size:12.5px;color:var(--ink2);"><span>Fläche · 5 Punkte, geschlossen</span><span style="font-family:'Geist Mono',monospace;color:var(--ink);">{{ polyArea }}</span></div>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;align-items:center;gap:10px;"><span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--ink3);">02</span><span style="font-weight:500;font-size:14px;">Ausrichtung & Standort</span><span style="margin-left:auto;font-size:12px;color:var(--ink3);">für den Sonnenstand</span></div>
+        <div style="display:flex;gap:12px;align-items:stretch;">
+          <div style="width:84px;height:84px;flex:none;border-radius:42px;background:#fff;box-shadow:0 0 0 1px var(--line);position:relative;">
+            <svg width="84" height="84" viewBox="0 0 84 84"><g stroke="rgba(31,34,36,.25)" stroke-width="1"><path d="M42 6v5M42 73v5M6 42h5M73 42h5"></path></g><g transform="rotate(-12 42 42)"><path d="M42 16l6 26h-12Z" fill="#C4553A"></path><path d="M42 68l-6-26h12Z" fill="#B9BBB5"></path><circle cx="42" cy="42" r="3" fill="#fff" stroke="#1F2224" stroke-width="1.2"></circle></g></svg>
+            <span style="position:absolute;left:0;right:0;top:-2px;text-align:center;font-family:'Newsreader',serif;font-style:italic;font-size:12px;">N</span>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:9px;background:#fff;box-shadow:0 0 0 1px var(--line);"><span style="font-size:12.5px;color:var(--ink2);">Nord-Abweichung</span><span style="font-family:'Geist Mono',monospace;font-size:13px;">−12°</span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;background:#fff;box-shadow:0 0 0 1px var(--line);"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12ZM12 6.5a2.5 2.5 0 1 0 0 5a2.5 2.5 0 1 0 0-5Z" stroke="var(--ink2)" stroke-width="1.6" fill="none"></path></svg><span style="flex:1;">Lindenweg 12, Frankfurt</span><span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--ink3);">50,15° N</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;align-items:center;gap:10px;"><span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--ink3);">03</span><span style="font-weight:500;font-size:14px;">Hintergrund</span><span style="margin-left:auto;font-size:12px;color:var(--ink3);">optional</span></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;background:#fff;box-shadow:0 0 0 1px var(--line);">
+          <div style="width:36px;height:36px;border-radius:7px;background:#ECE8DF;box-shadow:inset 0 0 0 1px var(--line);display:flex;align-items:center;justify-content:center;font-family:'Geist Mono',monospace;font-size:9px;color:var(--ink2);">PDF</div>
+          <div style="flex:1;min-width:0;"><div style="font-weight:500;">Lageplan_Flur12.pdf</div><div style="font-size:12px;color:var(--ink3);margin-top:2px;">Deckkraft 60 % · unter allen Ebenen</div></div>
+          <span style="font-size:12.5px;color:var(--ink2);">Ersetzen</span>
+        </div>
+        <div style="display:flex;gap:12px;padding:12px;border-radius:10px;background:var(--accs);">
+          <div style="width:22px;height:22px;border-radius:11px;background:var(--acc);color:#fff;font-family:'Geist Mono',monospace;font-size:11px;display:flex;align-items:center;justify-content:center;flex:none;">2/2</div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+            <div style="font-size:13px;line-height:1.45;"><b style="font-weight:600;">Maßstab kalibrieren.</b> Klicke zwei Punkte mit bekanntem Abstand und gib die Distanz ein.</div>
+            <div style="display:flex;gap:8px;"><div style="flex:1;display:flex;justify-content:space-between;padding:8px 10px;border-radius:8px;background:#fff;box-shadow:0 0 0 1.5px var(--acc);font-family:'Geist Mono',monospace;font-size:13px;">12,40<span style="color:var(--ink3);">m</span></div><div style="padding:8px 14px;border-radius:8px;background:var(--acc);color:#fff;font-weight:500;">Übernehmen</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:auto;display:flex;align-items:center;gap:10px;">
+        <span style="font-size:13px;color:var(--ink2);">Abbrechen</span>
+        <div style="margin-left:auto;padding:11px 20px;border-radius:10px;background:var(--ink);color:#fff;font-weight:500;font-size:14px;display:flex;align-items:center;gap:8px;">Projekt anlegen<svg width="14" height="14" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"></path></svg></div>
+      </div>
+    </div>
+
+    <div style="position:absolute;left:560px;top:40px;width:860px;height:820px;">
+      <svg width="860" height="820" viewBox="0 0 860 820" style="position:absolute;inset:0;">
+        <defs><pattern id="obHatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V6" stroke="rgba(60,60,50,.28)" stroke-width="1"></path></pattern></defs>
+        <rect x="0" y="0" width="860" height="820" rx="14" fill="#F2EFE8" opacity=".75"></rect>
+        <rect x="0" y="600" width="860" height="56" fill="#E0DBD0"></rect>
+        <path d="M0 600H860M0 656H860" stroke="rgba(60,60,50,.45)" stroke-width="1"></path>
+        <g stroke="rgba(60,60,50,.4)" stroke-width="1" fill="none"><path d="M40 60V600M190 40V600M672 60V600M820 60V600M40 150H190M672 170H820M190 140H672M40 380H190M672 360H820M300 40V140M520 40V140"></path></g>
+        <g fill="url(#obHatch)" stroke="rgba(60,60,50,.55)" stroke-width="1"><rect x="62" y="430" width="100" height="120"></rect><rect x="694" y="410" width="104" height="128"></rect><rect x="330" y="62" width="120" height="58"></rect><rect x="62" y="190" width="90" height="140"></rect><rect x="694" y="200" width="100" height="120"></rect><rect x="208" y="279" width="84" height="118"></rect></g>
+        <text x="430" y="634" font-family="Newsreader, serif" font-style="italic" font-size="16" fill="#5D615D" text-anchor="middle">Lindenweg</text>
+        <text x="110" y="584" font-family="Geist Mono, monospace" font-size="10" fill="#8C8E88" text-anchor="middle">Flst. 14</text>
+        <text x="746" y="584" font-family="Geist Mono, monospace" font-size="10" fill="#8C8E88" text-anchor="middle">Flst. 10</text>
+        <sc-if value="{{ onbPoly }}" hint-placeholder-val="{{ true }}"><g><polygon points="{{ polyPts }}" fill="rgba(61,91,217,.08)" stroke="#3D5BD9" stroke-width="2"></polygon><sc-for list="{{ polyV }}" as="v"><rect x="{{ v.x }}" y="{{ v.y }}" width="10" height="10" rx="2" fill="#fff" stroke="#3D5BD9" stroke-width="1.6"></rect></sc-for><path d="M446 548L522 592" stroke="#3D5BD9" stroke-width="1" stroke-dasharray="4 4"></path></g></sc-if>
+        <sc-if value="{{ onbRect }}" hint-placeholder-val="{{ false }}"><g><rect x="200" y="220" width="470" height="282" fill="rgba(61,91,217,.08)" stroke="#3D5BD9" stroke-width="2"></rect><rect x="195" y="215" width="10" height="10" rx="2" fill="#fff" stroke="#3D5BD9" stroke-width="1.6"></rect><rect x="665" y="215" width="10" height="10" rx="2" fill="#fff" stroke="#3D5BD9" stroke-width="1.6"></rect><rect x="665" y="497" width="10" height="10" rx="2" fill="#fff" stroke="#3D5BD9" stroke-width="1.6"></rect><rect x="195" y="497" width="10" height="10" rx="2" fill="#fff" stroke="#3D5BD9" stroke-width="1.6"></rect></g></sc-if>
+        <path d="M260 600L377 600" stroke="#E0567A" stroke-width="2"></path>
+        <circle cx="260" cy="600" r="7" fill="#fff" stroke="#E0567A" stroke-width="2"></circle><circle cx="260" cy="600" r="2" fill="#E0567A"></circle>
+        <circle cx="377" cy="600" r="7" fill="#fff" stroke="#E0567A" stroke-width="2"></circle><circle cx="377" cy="600" r="2" fill="#E0567A"></circle>
+        <g transform="translate(790 90) rotate(-12)"><circle cx="0" cy="0" r="26" fill="#fff" stroke="rgba(31,34,36,.15)"></circle><path d="M0 -18l6 18h-12Z" fill="#C4553A"></path><path d="M0 18l-6-18h12Z" fill="#B9BBB5"></path><text x="0" y="-30" font-family="Newsreader, serif" font-style="italic" font-size="13" text-anchor="middle" fill="#1F2224">N</text></g>
+      </svg>
+      <sc-if value="{{ onbPoly }}" hint-placeholder-val="{{ true }}"><sc-for list="{{ edges }}" as="e"><div style="position:absolute;left:{{ e.px }};top:{{ e.py }};transform:translate(-50%,-50%);padding:3px 8px;border-radius:7px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12),0 0 0 1px rgba(61,91,217,.35);font-family:'Geist Mono',monospace;font-size:11.5px;color:#3D5BD9;white-space:nowrap;">{{ e.l }} m</div></sc-for></sc-if>
+      <sc-if value="{{ onbRect }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:435px;top:202px;transform:translate(-50%,-50%);padding:3px 8px;border-radius:7px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12),0 0 0 1px rgba(61,91,217,.35);font-family:'Geist Mono',monospace;font-size:11.5px;color:#3D5BD9;">50,00 m</div><div style="position:absolute;left:690px;top:361px;transform:translate(0,-50%);padding:3px 8px;border-radius:7px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12),0 0 0 1px rgba(61,91,217,.35);font-family:'Geist Mono',monospace;font-size:11.5px;color:#3D5BD9;">30,00 m</div></sc-if>
+      <div style="position:absolute;left:318px;top:574px;transform:translate(-50%,-50%);padding:4px 9px;border-radius:7px;background:#E0567A;color:#fff;font-family:'Geist Mono',monospace;font-size:11.5px;">12,40 m</div>
+      <sc-if value="{{ onbPoly }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;left:528px;top:596px;display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;background:#1F2224;color:#fff;font-size:12px;box-shadow:0 6px 20px rgba(0,0,0,.18);">Punkt setzen oder<span style="font-family:'Geist Mono',monospace;font-size:10.5px;padding:1px 5px;border-radius:4px;background:rgba(255,255,255,.18);">↵</span>schließt die Kontur</div></sc-if>
+      <div style="position:absolute;left:20px;top:20px;display:flex;gap:2px;padding:4px;background:var(--gl);backdrop-filter:blur(20px);border:1px solid var(--gb);border-radius:11px;box-shadow:var(--sh);">
+        <div style="padding:6px 10px;border-radius:7px;background:var(--accs);color:var(--acc);font-weight:500;font-size:12px;">Kontur</div>
+        <div style="padding:6px 10px;border-radius:7px;color:var(--ink2);font-size:12px;">Kalibrieren</div>
+        <div style="padding:6px 10px;border-radius:7px;color:var(--ink2);font-size:12px;">Hintergrund 60 %</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;padding-top:44px;">
+  <div style="font-family:'Newsreader',serif;font-size:34px;line-height:1.15;max-width:760px;">Annahmen und Prinzipien</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px 48px;max-width:1240px;font-size:16px;line-height:1.55;color:#3F433F;">
+    <div><b style="font-weight:600;color:#1F2224;">Plan zuerst.</b> Die UI hält sich im Hintergrund: transluzente Panels mit 28 px Blur, nur eine Akzentfarbe (Kobalt) für Auswahl und Primäraktionen. Terrakotta steht für Material, nicht für Interaktion.</div>
+    <div><b style="font-weight:600;color:#1F2224;">Architektur-Konventionen.</b> Grenzlinie strichpunktiert, Bemaßung mit Schrägstrichen, kursive Serifen für Planbeschriftung und Mono für Maße. Norden oben, 1 m = 1 Rasterfeld.</div>
+    <div><b style="font-weight:600;color:#1F2224;">Ein Plan, viele Linsen.</b> Sonne, Wachstum, Jahreszeit, Bewässerung und Kosten sind Modi derselben Zeichnung (Tabs oben), keine eigenen Seiten. Tag/Nacht ist ein globaler Schalter.</div>
+    <div><b style="font-weight:600;color:#1F2224;">Interaktiv.</b> Die Regler in 03, 06 und 07 sowie die Konturwahl in 01 funktionieren. Licht, Schatten und Wachstum werden live aus dem Sonnenstand bzw. der Zeit berechnet.</div>
+  </div>
+</div>
+
+<!-- 02 Planen Tag -->
+<div id="s02" data-screen-label="02 Planen – Tag" style="display:flex;flex-direction:column;gap:14px;">
+  <div style="display:flex;align-items:baseline;gap:12px;"><a href="#s02" style="font-family:'Geist Mono',monospace;font-size:13px;padding:4px 9px;background:#1F2224;color:#fff;border-radius:6px;">02</a><span style="font-size:20px;font-weight:500;">Planung · Tag</span><span style="font-size:15px;color:#6E716B;">Kiesweg ausgewählt (Bézier mit Breite 1,20 m)</span></div>
+  <div style="--bg:#E9E5DC;--gl:rgba(250,248,244,.76);--gb:rgba(255,255,255,.75);--sh:0 1px 0 rgba(255,255,255,.7) inset,0 10px 36px rgba(44,46,34,.12),0 1px 3px rgba(44,46,34,.08);--ink:#1F2224;--ink2:#5D615D;--ink3:#8C8E88;--line:rgba(31,34,36,.09);--hov:rgba(31,34,36,.05);--fld:rgba(31,34,36,.05);--tab:#FFFFFF;--acc:#3D5BD9;--accs:rgba(61,91,217,.11);position:relative;width:1440px;height:900px;overflow:hidden;border-radius:14px;box-shadow:0 30px 80px rgba(40,38,30,.18),0 0 0 1px rgba(0,0,0,.06);background-color:var(--bg);background-image:radial-gradient(rgba(31,34,36,.10) 1px, transparent 1px);background-size:20px 20px;font-family:'Geist',sans-serif;color:var(--ink);font-size:13px;">
+    <dc-import name="GardenPlan" uid="p02" mode="day" selected="path" dims="{{ true }}" grid="{{ true }}" style="position:absolute;left:300px;top:146px;width:840px;height:535px;" hint-size="840px,535px"></dc-import>
+    <dc-import name="Chrome" tab="Planen" tool="select" layer-active="paths" style="position:absolute;inset:0;" hint-size="1440px,900px"></dc-import>
+    <div style="position:absolute;right:16px;top:84px;width:300px;padding:16px;display:flex;flex-direction:column;gap:18px;background:var(--gl);backdrop-filter:blur(28px) saturate(1.5);-webkit-backdrop-filter:blur(28px) saturate(1.5);border:1px solid var(--gb);border-radius:14px;box-shadow:var(--sh);">
+      <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div style="width:38px;height:38px;border-radius:9px;flex:none;background-color:#D6CDBB;background-image:radial-gradient(rgba(80,70,55,.5) .8px,transparent 1.3px),radial-gradient(rgba(255,252,240,.9) .7px,transparent 1.2px);background-size:5px 5px,7px 7px;background-position:0 0,2px 3px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);"></div>
+        <div style="flex:1;min-width:0;"><div style="font-family:'Newsreader',serif;font-size:21px;line-height:1.1;">Kiesweg</div><div style="font-size:12px;color:var(--ink3);margin-top:3px;">Weg · Bézier, 4 Knoten · Ebene Wege</div></div>
+        <svg width="18" height="18" viewBox="0 0 24 24"><path d="M6 12h.01M12 12h.01M18 12h.01" stroke="var(--ink2)" stroke-width="2.6" stroke-linecap="round"></path></svg>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--ink3);">MATERIAL</div>
+        <div style="display:flex;gap:8px;">
+          <div style="width:42px;height:42px;border-radius:9px;background-color:#D6CDBB;background-image:radial-gradient(rgba(80,70,55,.5) .8px,transparent 1.3px),radial-gradient(rgba(255,252,240,.9) .7px,transparent 1.2px);background-size:5px 5px,7px 7px;background-position:0 0,2px 3px;box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--acc);"></div>
+          <div style="width:42px;height:42px;border-radius:9px;background-color:#B7B6B0;background-image:radial-gradient(rgba(50,50,50,.45) .9px,transparent 1.4px),radial-gradient(rgba(255,255,255,.7) .7px,transparent 1.2px);background-size:6px 6px,5px 5px;background-position:0 0,3px 2px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);"></div>
+          <div style="width:42px;height:42px;border-radius:9px;background-color:#6E533F;background-image:repeating-linear-gradient(35deg,rgba(235,215,185,.22) 0 1px,transparent 1px 4px),repeating-linear-gradient(-50deg,rgba(40,25,15,.35) 0 1px,transparent 1px 5px);box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);"></div>
+          <div style="width:42px;height:42px;border-radius:9px;background-color:#CFC3AE;background-image:linear-gradient(rgba(85,72,58,.45) 1px,transparent 1px),linear-gradient(90deg,rgba(85,72,58,.45) 1px,transparent 1px);background-size:14px 7px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);"></div>
+          <div style="width:42px;height:42px;border-radius:9px;background-color:#B78C61;background-image:repeating-linear-gradient(0deg,rgba(70,45,25,.45) 0 1px,transparent 1px 5px);box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);"></div>
+          <div style="width:42px;height:42px;border-radius:9px;border:1px dashed rgba(31,34,36,.25);display:flex;align-items:center;justify-content:center;"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="var(--ink3)" stroke-width="1.8" stroke-linecap="round"></path></svg></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;"><span>Kies 8/16, Jurakalk</span><span style="color:var(--ink3);">Aufbau ›</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--ink3);">GEOMETRIE</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div style="display:flex;flex-direction:column;gap:3px;padding:8px 10px;border-radius:8px;background:#fff;box-shadow:0 0 0 1.5px var(--acc);"><span style="font-size:11px;color:var(--ink3);">Breite</span><span style="font-family:'Geist Mono',monospace;font-size:13px;">1,20 m</span></div>
+          <div style="display:flex;flex-direction:column;gap:3px;padding:8px 10px;border-radius:8px;background:var(--fld);"><span style="font-size:11px;color:var(--ink3);">Länge</span><span style="font-family:'Geist Mono',monospace;font-size:13px;">34,60 m</span></div>
+          <div style="display:flex;flex-direction:column;gap:3px;padding:8px 10px;border-radius:8px;background:var(--fld);"><span style="font-size:11px;color:var(--ink3);">Fläche</span><span style="font-family:'Geist Mono',monospace;font-size:13px;">41,5 m²</span></div>
+          <div style="display:flex;flex-direction:column;gap:3px;padding:8px 10px;border-radius:8px;background:var(--fld);"><span style="font-size:11px;color:var(--ink3);">Umfang</span><span style="font-family:'Geist Mono',monospace;font-size:13px;">71,6 m</span></div>
+          <div style="display:flex;flex-direction:column;gap:3px;padding:8px 10px;border-radius:8px;background:var(--fld);"><span style="font-size:11px;color:var(--ink3);">Höhe</span><span style="font-family:'Geist Mono',monospace;font-size:13px;">±0,00 m</span></div>
+          <div style="display:flex;flex-direction:column;gap:3px;padding:8px 10px;border-radius:8px;background:var(--fld);"><span style="font-size:11px;color:var(--ink3);">Ebene</span><span style="font-size:13px;">Wege ▾</span></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 2px;"><span style="font-size:12.5px;">Kantenstein beidseitig</span><div style="display:flex;align-items:center;gap:10px;"><span style="font-family:'Geist Mono',monospace;font-size:12px;color:var(--ink3);">69,2 m</span><div style="width:30px;height:18px;border-radius:9px;background:var(--acc);position:relative;"><div style="position:absolute;right:2px;top:2px;width:14px;height:14px;border-radius:7px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);"></div></div></div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--ink3);">KOSTEN</div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-family:'Newsreader',serif;font-size:28px;letter-spacing:-0.01em;">1.246 €</span><span style="font-size:12px;color:var(--ink3);">Material, netto</span></div>
+        <div style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--ink2);">
+          <div style="display:flex;justify-content:space-between;"><span>41,5 m² × 24,90 €</span><span style="font-family:'Geist Mono',monospace;">1.033 €</span></div>
+          <div style="display:flex;justify-content:space-between;"><span>Kantenstein 69,2 m × 3,08 €</span><span style="font-family:'Geist Mono',monospace;">213 €</span></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--ink3);">NOTIZEN</div>
+        <div style="display:flex;gap:10px;padding:10px;border-radius:9px;background:var(--fld);">
+          <div style="width:22px;height:22px;border-radius:11px;background:#9FB39A;flex:none;font-size:9.5px;font-weight:600;color:#22301F;display:flex;align-items:center;justify-content:center;">MS</div>
+          <div style="font-size:12.5px;line-height:1.45;color:var(--ink2);">Kante zum Rasen in Cortenstahl? Angebot bei GaLaBau Weber anfragen.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 03 Planen Nacht -->
+<div id="s03" data-screen-label="03 Planen – Nacht" style="display:flex;flex-direction:column;gap:14px;">
+  <div style="display:flex;align-items:baseline;gap:12px;"><a href="#s03" style="font-family:'Geist Mono',monospace;font-size:13px;padding:4px 9px;background:#1F2224;color:#fff;border-radius:6px;">03</a><span style="font-size:20px;font-weight:500;">Planung · Nacht</span><span style="font-size:15px;color:#6E716B;">Baumstrahler ausgewählt. Die Regler steuern Lichtkegel und Farbe live.</span></div>
+  <div style="--bg:#0E1724;--gl:rgba(20,28,41,.72);--gb:rgba(255,255,255,.08);--sh:0 1px 0 rgba(255,255,255,.05) inset,0 16px 44px rgba(0,0,0,.45);--ink:#ECE9E2;--ink2:#A6AEB7;--ink3:#6F7986;--line:rgba(255,255,255,.08);--hov:rgba(255,255,255,.05);--fld:rgba(255,255,255,.055);--tab:rgba(255,255,255,.12);--acc:#5A78F0;--accs:rgba(110,140,255,.16);position:relative;width:1440px;height:900px;overflow:hidden;border-radius:14px;box-shadow:0 30px 80px rgba(20,20,30,.35),0 0 0 1px rgba(0,0,0,.2);background-color:var(--bg);background-image:radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px);background-size:20px 20px;font-family:'Geist',sans-serif;color:var(--ink);font-size:13px;">
+    <dc-import name="GardenPlan" uid="p03" mode="night" selected="lamp" spot-lm="{{ lm }}" spot-k="{{ k }}" spot-ang="{{ ang }}" style="position:absolute;left:300px;top:146px;width:840px;height:535px;" hint-size="840px,535px"></dc-import>
+    <dc-import name="Chrome" tab="Planen" tool="select" night="{{ true }}" layer-active="light" hidden="water" style="position:absolute;inset:0;" hint-size="1440px,900px"></dc-import>
+    <div style="position:absolute;left:50%;top:84px;transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:7px 14px;border-radius:20px;background:var(--gl);backdrop-filter:blur(20px);border:1px solid var(--gb);font-size:12px;color:var(--ink2);">
+      <svg width="13" height="13" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" fill="#C9D4FF"></path></svg><span style="font-family:'Geist Mono',monospace;color:var(--ink);">21:40</span><span>Sonnenuntergang 21:38</span><span style="width:3px;height:3px;border-radius:2px;background:var(--ink3);"></span><span>Szene „Abendessen“</span>
+    </div>
+    <div style="position:absolute;right:16px;top:84px;width:300px;padding:16px;display:flex;flex-direction:column;gap:18px;background:var(--gl);backdrop-filter:blur(28px) saturate(1.5);-webkit-backdrop-filter:blur(28px) saturate(1.5);border:1px solid var(--gb);border-radius:14px;box-shadow:var(--sh);">
+      <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div style="width:38px;height:38px;border-radius:9px;flex:none;background:radial-gradient(circle at 50% 60%,{{ kColor }} 0,rgba(255,200,140,.25) 40%,rgba(20,28,41,0) 72%),#121A27;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);"></div>
+        <div style="flex:1;min-width:0;"><div style="font-family:'Newsreader',serif;font-size:21px;line-height:1.1;">Baumstrahler</div><div style="font-size:12px;color:var(--ink3);margin-top:3px;">Erdspieß, IP67 · auf Winterlinde</div></div>
+        <div style="width:30px;height:18px;border-radius:9px;background:#E9B45E;position:relative;flex:none;margin-top:4px;"><div style="position:absolute;right:2px;top:2px;width:14px;height:14px;border-radius:7px;background:#fff;"></div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--ink3);">LEUCHTENTYP</div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">
+          <sc-for list="{{ lampTypes }}" as="t" hint-placeholder-count="7">
+            <sc-if value="{{ t.on }}" hint-placeholder-val="{{ false }}"><div style="height:36px;border-radius:8px;background:rgba(233,180,94,.16);box-shadow:inset 0 0 0 1px rgba(233,180,94,.55);display:flex;align-items:center;justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24"><path d="{{ t.d }}" stroke="#F2C77E" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg></div></sc-if>
+            <sc-if value="{{ t.off }}" hint-placeholder-val="{{ true }}"><div style="height:36px;border-radius:8px;background:var(--fld);display:flex;align-items:center;justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24"><path d="{{ t.d }}" stroke="var(--ink2)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg></div></sc-if>
+          </sc-for>
+        </div>
+        <div style="font-size:11.5px;color:var(--ink3);">Poller · Spot · Weg · Lichterkette · Wand · Unterwasser · <span style="color:#F2C77E;">Baum</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;justify-content:space-between;font-size:12.5px;"><span>Lichtstrom</span><span style="font-family:'Geist Mono',monospace;">{{ lmLabel }}</span></div>
+          <div onPointerDown="{{ dragLm }}" style="position:relative;height:18px;cursor:pointer;touch-action:none;"><div style="position:absolute;left:0;right:0;top:7px;height:4px;border-radius:2px;background:rgba(255,255,255,.1);"></div><div style="position:absolute;left:0;top:7px;height:4px;border-radius:2px;background:#E9B45E;width:{{ lmPct }};"></div><div style="position:absolute;top:1px;left:{{ lmPct }};width:16px;height:16px;margin-left:-8px;border-radius:8px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.5);"></div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;justify-content:space-between;font-size:12.5px;"><span>Farbtemperatur</span><span style="font-family:'Geist Mono',monospace;">{{ kLabel }}</span></div>
+          <div onPointerDown="{{ dragK }}" style="position:relative;height:18px;cursor:pointer;touch-action:none;"><div style="position:absolute;left:0;right:0;top:6px;height:6px;border-radius:3px;background:linear-gradient(90deg,#FFA54F,#FFC07E 28%,#FFD09C 44%,#FFECD6);"></div><div style="position:absolute;top:1px;left:{{ kPct }};width:16px;height:16px;margin-left:-8px;border-radius:8px;background:{{ kColor }};box-shadow:0 0 0 2px #fff,0 1px 4px rgba(0,0,0,.5);"></div></div>
+          <div style="display:flex;justify-content:space-between;font-family:'Geist Mono',monospace;font-size:10px;color:var(--ink3);"><span>2200 K</span><span>warmweiß</span><span>4000 K</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;justify-content:space-between;font-size:12.5px;"><span>Abstrahlwinkel</span><span style="font-family:'Geist Mono',monospace;">{{ angLabel }}</span></div>
+          <div onPointerDown="{{ dragAng }}" style="position:relative;height:18px;cursor:pointer;touch-action:none;"><div style="position:absolute;left:0;right:0;top:7px;height:4px;border-radius:2px;background:rgba(255,255,255,.1);"></div><div style="position:absolute;left:0;top:7px;height:4px;border-radius:2px;background:var(--acc);width:{{ angPct }};"></div><div style="position:absolute;top:1px;left:{{ angPct }};width:16px;height:16px;margin-left:-8px;border-radius:8px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.5);"></div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div style="display:flex;flex-direction:column;gap:3px;padding:8px 10px;border-radius:8px;background:var(--fld);"><span style="font-size:11px;color:var(--ink3);">Richtung</span><span style="font-family:'Geist Mono',monospace;font-size:13px;">315° NW</span></div>
+          <div style="display:flex;flex-direction:column;gap:3px;padding:8px 10px;border-radius:8px;background:var(--fld);"><span style="font-size:11px;color:var(--ink3);">Leistung</span><span style="font-family:'Geist Mono',monospace;font-size:13px;">{{ watt }}</span></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--ink3);">ZEITPLAN</div>
+        <div style="display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:8px;background:var(--fld);font-size:12.5px;"><span>Dämmerung</span><svg width="12" height="12" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" stroke="var(--ink3)" stroke-width="2" fill="none"></path></svg><span style="font-family:'Geist Mono',monospace;">23:30</span><span style="margin-left:auto;color:var(--ink3);font-size:11.5px;">Astro</span></div>
+        <div style="display:flex;gap:4px;">
+          <div style="flex:1;text-align:center;padding:5px 0;border-radius:6px;background:var(--accs);color:#B9C6FF;font-size:11.5px;">Mo</div><div style="flex:1;text-align:center;padding:5px 0;border-radius:6px;background:var(--accs);color:#B9C6FF;font-size:11.5px;">Di</div><div style="flex:1;text-align:center;padding:5px 0;border-radius:6px;background:var(--accs);color:#B9C6FF;font-size:11.5px;">Mi</div><div style="flex:1;text-align:center;padding:5px 0;border-radius:6px;background:var(--accs);color:#B9C6FF;font-size:11.5px;">Do</div><div style="flex:1;text-align:center;padding:5px 0;border-radius:6px;background:var(--accs);color:#B9C6FF;font-size:11.5px;">Fr</div><div style="flex:1;text-align:center;padding:5px 0;border-radius:6px;background:var(--accs);color:#B9C6FF;font-size:11.5px;">Sa</div><div style="flex:1;text-align:center;padding:5px 0;border-radius:6px;background:var(--fld);color:var(--ink3);font-size:11.5px;">So</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 04 Bibliothek Tag -->
+<div id="s04" data-screen-label="04 Bibliothek – Tag" style="display:flex;flex-direction:column;gap:14px;">
+  <div style="display:flex;align-items:baseline;gap:12px;"><a href="#s04" style="font-family:'Geist Mono',monospace;font-size:13px;padding:4px 9px;background:#1F2224;color:#fff;border-radius:6px;">04</a><span style="font-size:20px;font-weight:500;">Bibliothek · Tag</span><span style="font-size:15px;color:#6E716B;">Felsenbirne wird hineingezogen. Fangführungen zeigen Abstände.</span></div>
+  <div style="--bg:#E9E5DC;--gl:rgba(250,248,244,.76);--gb:rgba(255,255,255,.75);--sh:0 1px 0 rgba(255,255,255,.7) inset,0 10px 36px rgba(44,46,34,.12),0 1px 3px rgba(44,46,34,.08);--ink:#1F2224;--ink2:#5D615D;--ink3:#8C8E88;--line:rgba(31,34,36,.09);--hov:rgba(31,34,36,.05);--fld:rgba(31,34,36,.05);--tab:#FFFFFF;--acc:#3D5BD9;--accs:rgba(61,91,217,.11);position:relative;width:1440px;height:900px;overflow:hidden;border-radius:14px;box-shadow:0 30px 80px rgba(40,38,30,.18),0 0 0 1px rgba(0,0,0,.06);background-color:var(--bg);background-image:radial-gradient(rgba(31,34,36,.10) 1px, transparent 1px);background-size:20px 20px;font-family:'Geist',sans-serif;color:var(--ink);font-size:13px;">
+    <dc-import name="GardenPlan" uid="p04" mode="day" ghost="{{ true }}" style="position:absolute;left:330px;top:146px;width:840px;height:535px;" hint-size="840px,535px"></dc-import>
+    <dc-import name="Chrome" tab="Planen" tool="plant" left="none" lib-open="{{ true }}" style="position:absolute;inset:0;" hint-size="1440px,900px"></dc-import>
+    <div style="position:absolute;left:72px;top:84px;bottom:16px;width:300px;padding:12px 14px;display:flex;flex-direction:column;gap:9px;background:var(--gl);backdrop-filter:blur(28px) saturate(1.5);-webkit-backdrop-filter:blur(28px) saturate(1.5);border:1px solid var(--gb);border-radius:14px;box-shadow:var(--sh);overflow:hidden;">
+      <div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-family:'Newsreader',serif;font-size:18px;">Bibliothek</span><span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--ink3);">412 Elemente</span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;background:var(--fld);"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14ZM20 20l-4-4" stroke="var(--ink3)" stroke-width="1.8" fill="none" stroke-linecap="round"></path></svg><span style="color:var(--ink3);flex:1;">Felsenbirne, Hochbeet, Poller …</span><span style="font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--ink3);padding:1px 5px;border-radius:4px;box-shadow:inset 0 0 0 1px var(--line);">⌘K</span></div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;">
+        <span style="padding:4px 10px;border-radius:12px;background:var(--ink);color:var(--bg);font-size:12px;">Alle</span><span style="padding:4px 10px;border-radius:12px;background:var(--fld);font-size:12px;color:var(--ink2);">Pflanzen</span><span style="padding:4px 10px;border-radius:12px;background:var(--fld);font-size:12px;color:var(--ink2);">Bauten</span><span style="padding:4px 10px;border-radius:12px;background:var(--fld);font-size:12px;color:var(--ink2);">Wasser</span><span style="padding:4px 10px;border-radius:12px;background:var(--fld);font-size:12px;color:var(--ink2);">Licht</span><span style="padding:4px 10px;border-radius:12px;background:var(--fld);font-size:12px;color:var(--ink2);">Heimisch</span>
+      </div>
+      <sc-for list="{{ libSections }}" as="sec" hint-placeholder-count="5">
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--ink3);">{{ sec.h }}</span><span style="font-size:11.5px;color:var(--ink3);">{{ sec.n }}</span></div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px 6px;">
+            <sc-for list="{{ sec.items }}" as="it" hint-placeholder-count="4">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;cursor:grab;">
+                <div style="width:50px;height:50px;border-radius:10px;background:rgba(255,255,255,.6);box-shadow:{{ it.ring }};display:flex;align-items:center;justify-content:center;" style-hover="background:#fff;"><img src="{{ it.src }}" width="40" height="40" alt="" style="display:block;"></div>
+                <span style="font-size:11px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">{{ it.n }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="position:absolute;left:688px;top:300px;display:flex;align-items:center;gap:10px;padding:6px 10px 6px 6px;border-radius:10px;background:var(--gl);backdrop-filter:blur(20px);border:1px solid var(--gb);box-shadow:var(--sh);pointer-events:none;">
+      <svg width="16" height="16" viewBox="0 0 24 24" style="position:absolute;left:-22px;top:-20px;"><path d="M5 3l13 7.5-5.6 1.4L10 17.5Z" fill="#1F2224" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"></path></svg>
+      <div style="width:28px;height:28px;border-radius:7px;background:radial-gradient(circle at 40% 35%,#B6C88E,#7E9A5C 70%);"></div>
+      <div><div style="font-weight:500;font-size:12.5px;">Felsenbirne</div><div style="font-size:11px;color:var(--ink3);font-family:'Geist Mono',monospace;">Ø 4,0 m · Abstand 2,00 m</div></div>
+    </div>
+    <div style="position:absolute;right:16px;top:84px;width:280px;padding:16px;display:flex;flex-direction:column;gap:14px;background:var(--gl);backdrop-filter:blur(28px) saturate(1.5);-webkit-backdrop-filter:blur(28px) saturate(1.5);border:1px solid var(--gb);border-radius:14px;box-shadow:var(--sh);">
+      <div style="height:120px;border-radius:10px;background:radial-gradient(circle at 50% 52%,#9DB070 0,#86A062 34%,rgba(134,160,98,0) 36%),#DCD3BF;position:relative;overflow:hidden;">
+        <div style="position:absolute;left:50%;top:50%;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:42px;background:radial-gradient(circle at 36% 32%,rgba(255,251,230,.4),rgba(255,255,255,0) 45%,rgba(14,26,8,.22) 88%);"></div>
+        <span style="position:absolute;left:10px;bottom:8px;font-family:'Geist Mono',monospace;font-size:10px;color:#5D615D;">Draufsicht · 1:100</span>
+      </div>
+      <div><div style="font-family:'Newsreader',serif;font-size:21px;line-height:1.1;">Felsenbirne</div><div style="font-family:'Newsreader',serif;font-style:italic;font-size:14px;color:var(--ink2);margin-top:2px;">Amelanchier lamarckii</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <div style="padding:8px 10px;border-radius:8px;background:var(--fld);"><div style="font-size:11px;color:var(--ink3);">Endgröße</div><div style="font-family:'Geist Mono',monospace;font-size:12.5px;margin-top:2px;">4–6 m</div></div>
+        <div style="padding:8px 10px;border-radius:8px;background:var(--fld);"><div style="font-size:11px;color:var(--ink3);">Zuwachs</div><div style="font-family:'Geist Mono',monospace;font-size:12.5px;margin-top:2px;">30 cm/J</div></div>
+        <div style="padding:8px 10px;border-radius:8px;background:var(--fld);"><div style="font-size:11px;color:var(--ink3);">Standort</div><div style="font-size:12.5px;margin-top:2px;">☀ – ◐</div></div>
+        <div style="padding:8px 10px;border-radius:8px;background:var(--fld);"><div style="font-size:11px;color:var(--ink3);">Preis</div><div style="font-family:'Geist Mono',monospace;font-size:12.5px;margin-top:2px;">89 €</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--ink3);">JAHRESLAUF</div>
+        <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:2px;height:16px;"><div style="background:#C9C5BA;border-radius:2px;"></div><div style="background:#C9C5BA;border-radius:2px;"></div><div style="background:#C9C5BA;border-radius:2px;"></div><div style="background:#F3E9EC;border-radius:2px;box-shadow:inset 0 0 0 1px #E2C6CE;"></div><div style="background:#B5C78A;border-radius:2px;"></div><div style="background:#8FA96A;border-radius:2px;"></div><div style="background:#4E5C9A;border-radius:2px;"></div><div style="background:#7E9A5C;border-radius:2px;"></div><div style="background:#7E9A5C;border-radius:2px;"></div><div style="background:#C4553A;border-radius:2px;"></div><div style="background:#D08A3E;border-radius:2px;"></div><div style="background:#C9C5BA;border-radius:2px;"></div></div>
+        <div style="font-size:11.5px;color:var(--ink3);line-height:1.4;">Blüte April · Beeren Juli · Herbstfärbung Oktober</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 05 Bibliothek Nacht -->
+<div id="s05" data-screen-label="05 Bibliothek – Nacht" style="display:flex;flex-direction:column;gap:14px;">
+  <div style="display:flex;align-items:baseline;gap:12px;"><a href="#s05" style="font-family:'Geist Mono',monospace;font-size:13px;padding:4px 9px;background:#1F2224;color:#fff;border-radius:6px;">05</a><span style="font-size:20px;font-weight:500;">Bibliothek · Nacht</span><span style="font-size:15px;color:#6E716B;">Leuchten und Lichtszenen. Wasser spiegelt das Licht.</span></div>
+  <div style="--bg:#0E1724;--gl:rgba(20,28,41,.72);--gb:rgba(255,255,255,.08);--sh:0 1px 0 rgba(255,255,255,.05) inset,0 16px 44px rgba(0,0,0,.45);--ink:#ECE9E2;--ink2:#A6AEB7;--ink3:#6F7986;--line:rgba(255,255,255,.08);--hov:rgba(255,255,255,.05);--fld:rgba(255,255,255,.055);--tab:rgba(255,255,255,.12);--acc:#5A78F0;--accs:rgba(110,140,255,.16);position:relative;width:1440px;height:900px;overflow:hidden;border-radius:14px;box-shadow:0 30px 80px rgba(20,20,30,.35),0 0 0 1px rgba(0,0,0,.2);background-color:var(--bg);background-image:radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px);background-size:20px 20px;font-family:'Geist',sans-serif;color:var(--ink);font-size:13px;">
+    <dc-import name="GardenPlan" uid="p05" mode="night" style="position:absolute;left:330px;top:146px;width:840px;height:535px;" hint-size="840px,535px"></dc-import>
+    <dc-import name="Chrome" tab="Planen" tool="select" night="{{ true }}" left="none" lib-open="{{ true }}" style="position:absolute;inset:0;" hint-size="1440px,900px"></dc-import>
+    <div style="position:absolute;left:72px;top:84px;bottom:16px;width:300px;padding:14px;display:flex;flex-direction:column;gap:12px;background:var(--gl);backdrop-filter:blur(28px) saturate(1.5);-webkit-backdrop-filter:blur(28px) saturate(1.5);border:1px solid var(--gb);border-radius:14px;box-shadow:var(--sh);">
+      <div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-family:'Newsreader',serif;font-size:18px;">Bibliothek</span><span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--ink3);">Licht · 7 Typen</span></div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;">
+        <span style="padding:4px 10px;border-radius:12px;background:var(--fld);font-size:12px;color:var(--ink2);">Alle</span><span style="padding:4px 10px;border-radius:12px;background:var(--fld);font-size:12px;color:var(--ink2);">Pflanzen</span><span style="padding:4px 10px;border-radius:12px;background:var(--fld);font-size:12px;color:var(--ink2);">Bauten</span><span style="padding:4px 10px;border-radius:12px;background:#ECE9E2;color:#0E1724;font-size:12px;">Licht</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        <sc-for list="{{ lampLib }}" as="l" hint-placeholder-count="7">
+          <div style="display:flex;align-items:center;gap:12px;padding:8px;border-radius:10px;cursor:grab;" style-hover="background:var(--hov);">
+            <div style="width:46px;height:46px;border-radius:10px;flex:none;background:radial-gradient(circle at 50% 55%,{{ l.c }} 0,rgba(255,190,120,.18) 38%,rgba(14,23,36,0) 70%),#101826;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24"><path d="{{ l.d }}" stroke="#F6E7CC" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+            <div style="flex:1;min-width:0;"><div style="font-weight:500;font-size:13px;">{{ l.n }}</div><div style="font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--ink3);margin-top:3px;">{{ l.s }}</div></div>
+            <span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--ink3);">{{ l.cnt }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="margin-top:auto;padding:12px;border-radius:10px;background:var(--fld);font-size:12px;line-height:1.5;color:var(--ink2);">Zum Platzieren ziehen. Mit <span style="color:var(--ink);">⇧</span> richtet sich ein Spot automatisch auf das nächste Objekt aus.</div>
+    </div>
+    <div style="position:absolute;right:16px;top:84px;width:290px;padding:16px;display:flex;flex-direction:column;gap:14px;background:var(--gl);backdrop-filter:blur(28px) saturate(1.5);-webkit-backdrop-filter:blur(28px) saturate(1.5);border:1px solid var(--gb);border-radius:14px;box-shadow:var(--sh);">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-family:'Newsreader',serif;font-size:21px;">Lichtszenen</span><span style="font-size:12px;color:var(--ink3);">17 Leuchten</span></div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <sc-for list="{{ scenes }}" as="s" hint-placeholder-count="4">
+          <sc-if value="{{ s.on }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:10px;background:rgba(233,180,94,.12);box-shadow:inset 0 0 0 1px rgba(233,180,94,.45);"><div style="display:flex;justify-content:space-between;"><span style="font-weight:500;">{{ s.n }}</span><span style="font-family:'Geist Mono',monospace;font-size:11.5px;color:#F2C77E;">{{ s.t }}</span></div><div style="font-size:12px;color:var(--ink2);">{{ s.d }}</div></div></sc-if>
+          <sc-if value="{{ s.off }}" hint-placeholder-val="{{ true }}"><div onClick="{{ s.pick }}" style="display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:10px;background:var(--fld);cursor:pointer;" style-hover="background:rgba(255,255,255,.08);"><div style="display:flex;justify-content:space-between;"><span style="font-weight:500;">{{ s.n }}</span><span style="font-family:'Geist Mono',monospace;font-size:11.5px;color:var(--ink3);">{{ s.t }}</span></div><div style="font-size:12px;color:var(--ink3);">{{ s.d }}</div></div></sc-if>
+        </sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <div style="padding:8px 10px;border-radius:8px;background:var(--fld);"><div style="font-size:11px;color:var(--ink3);">Gesamtleistung</div><div style="font-family:'Geist Mono',monospace;font-size:13px;margin-top:2px;">92 W</div></div>
+        <div style="padding:8px 10px;border-radius:8px;background:var(--fld);"><div style="font-size:11px;color:var(--ink3);">Pro Abend</div><div style="font-family:'Geist Mono',monospace;font-size:13px;margin-top:2px;">≈ 0,09 €</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 06 Sonne -->
+<div id="s06" data-screen-label="06 Sonne & Schatten" style="display:flex;flex-direction:column;gap:14px;">
+  <div style="display:flex;align-items:baseline;gap:12px;"><a href="#s06" style="font-family:'Geist Mono',monospace;font-size:13px;padding:4px 9px;background:#1F2224;color:#fff;border-radius:6px;">06</a><span style="font-size:20px;font-weight:500;">Sonne & Schatten</span><span style="font-size:15px;color:#6E716B;">Uhrzeit ziehen, Datum wählen. Schatten werden live berechnet. Heatmap: Sonnenstunden pro Tag.</span></div>
+  <div style="--bg:#E9E5DC;--gl:rgba(250,248,244,.78);--gb:rgba(255,255,255,.75);--sh:0 1px 0 rgba(255,255,255,.7) inset,0 10px 36px rgba(44,46,34,.12),0 1px 3px rgba(44,46,34,.08);--ink:#1F2224;--ink2:#5D615D;--ink3:#8C8E88;--line:rgba(31,34,36,.09);--hov:rgba(31,34,36,.05);--fld:rgba(31,34,36,.05);--tab:#FFFFFF;--acc:#3D5BD9;--accs:rgba(61,91,217,.11);position:relative;width:1440px;height:900px;overflow:hidden;border-radius:14px;box-shadow:0 30px 80px rgba(40,38,30,.18),0 0 0 1px rgba(0,0,0,.06);background-color:var(--bg);background-image:radial-gradient(rgba(31,34,36,.10) 1px, transparent 1px);background-size:20px 20px;font-family:'Geist',sans-serif;color:var(--ink);font-size:13px;">
+    <dc-import name="GardenPlan" uid="p06" mode="day" sun-mode="{{ true }}" sun-hour="{{ hour }}" doy="{{ doy }}" heat="{{ heat }}" shadow-strength="{{ shStrength }}" show-lamps="{{ false }}" style="position:absolute;left:150px;top:96px;width:900px;height:573px;" hint-size="900px,573px"></dc-import>
+    <dc-import name="Chrome" tab="Sonne" tool="select" left="none" style="position:absolute;inset:0;" hint-size="1440px,900px"></dc-import>
+    <div style="position:absolute;left:96px;bottom:80px;width:964px;padding:16px 20px 18px;display:flex;gap:24px;align-items:stretch;background:var(--gl);backdrop-filter:blur(28px) saturate(1.5);-webkit-backdrop-filter:blur(28px) saturate(1.5);border:1px solid var(--gb);border-radius:14px;box-shadow:var(--sh);">
+      <div style="width:150px;flex:none;display:flex;flex-direction:column;gap:10px;">
+        <div style="position:relative;width:92px;height:92px;">
+          <svg width="92" height="92" viewBox="0 0 92 92"><circle cx="46" cy="46" r="36" fill="none" stroke="var(--line)" stroke-width="1"></circle><circle cx="46" cy="46" r="22" fill="none" stroke="var(--line)" stroke-width="1" stroke-dasharray="2 3"></circle><path d="{{ sunArc }}" fill="none" stroke="#E2A33B" stroke-width="1.4" stroke-dasharray="3 3"></path><line x1="46" y1="46" x2="{{ sunX }}" y2="{{ sunY }}" stroke="#E2A33B" stroke-width="1.2"></line><circle cx="{{ sunX }}" cy="{{ sunY }}" r="6.5" fill="#F1B648" stroke="#fff" stroke-width="2"></circle><circle cx="46" cy="46" r="2.5" fill="var(--ink)"></circle></svg>
+          <span style="position:absolute;left:0;right:0;top:-4px;text-align:center;font-family:'Newsreader',serif;font-style:italic;font-size:11px;color:var(--ink2);">N</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:2px;font-family:'Geist Mono',monospace;font-size:11px;color:var(--ink2);"><span>Azimut {{ azLabel }}</span><span>Höhe {{ elLabel }}</span></div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:12px;min-width:0;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <span style="font-family:'Newsreader',serif;font-size:30px;line-height:1;">{{ hourLabel }}</span>
+          <span style="font-size:13px;color:var(--ink2);">{{ dateLabel }} · Aufgang {{ riseLabel }} · Untergang {{ setLabel }}</span>
+          <div style="margin-left:auto;display:flex;gap:2px;padding:3px;background:var(--fld);border-radius:9px;">
+            <sc-for list="{{ dates }}" as="d" hint-placeholder-count="4">
+              <sc-if value="{{ d.on }}" hint-placeholder-val="{{ false }}"><div style="padding:5px 10px;border-radius:6px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08);font-size:12px;font-weight:500;">{{ d.n }}</div></sc-if>
+              <sc-if value="{{ d.off }}" hint-placeholder-val="{{ true }}"><div onClick="{{ d.pick }}" style="padding:5px 10px;border-radius:6px;font-size:12px;color:var(--ink2);cursor:pointer;" style-hover="color:var(--ink);">{{ d.n }}</div></sc-if>
+            </sc-for>
+          </div>
+        </div>
+        <div onPointerDown="{{ dragHour }}" style="position:relative;height:70px;cursor:ew-resize;touch-action:none;">
+          <svg width="750" height="56" viewBox="0 0 750 56" style="position:absolute;left:0;top:0;"><path d="{{ elArea }}" fill="rgba(226,163,59,.14)"></path><path d="{{ elPath }}" fill="none" stroke="#E2A33B" stroke-width="1.5"></path><path d="M0 55.5H750" stroke="rgba(31,34,36,.18)" stroke-width="1"></path></svg>
+          <div style="position:absolute;top:0;bottom:12px;left:{{ hourPct }};width:2px;margin-left:-1px;background:var(--ink);"></div>
+          <div style="position:absolute;top:44px;left:{{ hourPct }};width:22px;height:22px;margin-left:-11px;border-radius:11px;background:#fff;box-shadow:0 0 0 1px var(--line),0 2px 6px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;"><div style="width:8px;height:8px;border-radius:4px;background:#E2A33B;"></div></div>
+          <div style="position:absolute;left:0;right:0;bottom:-8px;display:flex;justify-content:space-between;font-family:'Geist Mono',monospace;font-size:10px;color:var(--ink3);"><span>05</span><span>08</span><span>11</span><span>14</span><span>17</span><span>20</span><span>21</span></div>
+        </div>
+      </div>
+    </div>
+    <div style="position:absolute;right:16px;top:84px;width:300px;padding:16px;display:flex;flex-direction:column;gap:16px;background:var(--gl);backdrop-filter:blur(28px) saturate(1.5);-webkit-backdrop-filter:blur(28px) saturate(1.5);border:1px solid var(--gb);border-radius:14px;box-shadow:var(--sh);">
+      <div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-family:'Newsreader',serif;font-size:21px;">Sonnenstunden</span><div onClick="{{ toggleHeat }}" style="width:30px;height:18px;border-radius:9px;background:{{ heatBg }};position:relative;cursor:pointer;"><div style="position:absolute;top:2px;left:{{ heatKnob }};width:14px;height:14px;border-radius:7px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);"></div></div></div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="height:10px;border-radius:5px;background:linear-gradient(90deg,#4D6A8F 0%,#8FB2B0 36%,#E7D98E 55%,#EEB062 73%,#DD6A3E 100%);"></div>
+        <div style="display:flex;justify-content:space-between;font-family:'Geist Mono',monospace;font-size:10px;color:var(--ink3);"><span>0 h</span><span>4</span><span>7</span><span>10</span><span>13+ h</span></div>
+        <div style="font-size:12px;color:var(--ink3);">Direkte Sonne pro Tag am {{ dateLabel }}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--ink3);">EMPFEHLUNGEN</div>
+        <div style="display:flex;gap:10px;padding:10px;border-radius:9px;background:var(--fld);"><span style="width:10px;height:10px;border-radius:5px;background:#DD6A3E;margin-top:3px;flex:none;"></span><div><div style="font-weight:500;">Hochbeete · 13 h</div><div style="font-size:12px;color:var(--ink2);margin-top:2px;line-height:1.4;">Ideal für Tomaten, Paprika, Basilikum</div></div></div>
+        <div style="display:flex;gap:10px;padding:10px;border-radius:9px;background:var(--fld);"><span style="width:10px;height:10px;border-radius:5px;background:#EEB062;margin-top:3px;flex:none;"></span><div><div style="font-weight:500;">Staudenbeet · 11 h</div><div style="font-size:12px;color:var(--ink2);margin-top:2px;line-height:1.4;">Präriestauden, Salbei, Gräser</div></div></div>
+        <div style="display:flex;gap:10px;padding:10px;border-radius:9px;background:var(--fld);"><span style="width:10px;height:10px;border-radius:5px;background:#4D6A8F;margin-top:3px;flex:none;"></span><div><div style="font-weight:500;">Unter der Linde · 4 h</div><div style="font-size:12px;color:var(--ink2);margin-top:2px;line-height:1.4;">Farne, Funkien, Elfenblume</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 07 Wachstum -->
+<div id="s07" data-screen-label="07 Wachstums-Zeitreise" style="display:flex;flex-direction:column;gap:14px;">
+  <div style="display:flex;align-items:baseline;gap:12px;"><a href="#s07" style="font-family:'Geist Mono',monospace;font-size:13px;padding:4px 9px;background:#1F2224;color:#fff;border-radius:6px;">07</a><span style="font-size:20px;font-weight:500;">Wachstums-Zeitreise</span><span style="font-size:15px;color:#6E716B;">Ziehen von heute bis in 20 Jahren. Gestrichelt: Endgröße, gepunktet: Pflanzgröße.</span></div>
+  <div style="--bg:#E9E5DC;--gl:rgba(250,248,244,.78);--gb:rgba(255,255,255,.75);--sh:0 1px 0 rgba(255,255,255,.7) inset,0 10px 36px rgba(44,46,34,.12),0 1px 3px rgba(44,46,34,.08);--ink:#1F2224;--ink2:#5D615D;--ink3:#8C8E88;--line:rgba(31,34,36,.09);--hov:rgba(31,34,36,.05);--fld:rgba(31,34,36,.05);--tab:#FFFFFF;--acc:#3D5BD9;--accs:rgba(61,91,217,.11);position:relative;width:1440px;height:900px;overflow:hidden;border-radius:14px;box-shadow:0 30px 80px rgba(40,38,30,.18),0 0 0 1px rgba(0,0,0,.06);background-color:var(--bg);background-image:radial-gradient(rgba(31,34,36,.10) 1px, transparent 1px);background-size:20px 20px;font-family:'Geist',sans-serif;color:var(--ink);font-size:13px;">
+    <dc-import name="GardenPlan" uid="p07" mode="day" years="{{ years }}" rings="{{ true }}" show-lamps="{{ false }}" style="position:absolute;left:150px;top:96px;width:900px;height:573px;" hint-size="900px,573px"></dc-import>
+    <dc-import name="Chrome" tab="Wachstum" tool="select" left="none" style="position:absolute;inset:0;" hint-size="1440px,900px"></dc-import>
+    <div style="position:absolute;left:96px;bottom:80px;width:964px;padding:18px 22px 20px;display:flex;flex-direction:column;gap:14px;background:var(--gl);backdrop-filter:blur(28px) saturate(1.5);-webkit-backdrop-filter:blur(28px) saturate(1.5);border:1px solid var(--gb);border-radius:14px;box-shadow:var(--sh);">
+      <div style="display:flex;align-items:baseline;gap:14px;"><span style="font-family:'Newsreader',serif;font-size:30px;line-height:1;">{{ yearsLabel }}</span><span style="font-size:13px;color:var(--ink2);">{{ yearSub }}</span><span style="margin-left:auto;font-size:12.5px;color:var(--ink3);">Wuchs nach Standort und Sorte</span></div>
+      <div onPointerDown="{{ dragYears }}" style="position:relative;height:40px;cursor:ew-resize;touch-action:none;">
+        <div style="position:absolute;left:0;right:0;top:9px;height:4px;border-radius:2px;background:var(--fld);box-shadow:inset 0 0 0 1px var(--line);"></div>
+        <div style="position:absolute;left:0;top:9px;height:4px;border-radius:2px;background:linear-gradient(90deg,#B4C394,#6D8656);width:{{ yearsPct }};"></div>
+        <sc-for list="{{ yearStops }}" as="s" hint-placeholder-count="4"><div style="position:absolute;top:22px;left:{{ s.p }};transform:translateX(-50%);font-size:11.5px;color:var(--ink2);white-space:nowrap;">{{ s.n }}</div><div style="position:absolute;top:7px;left:{{ s.p }};width:8px;height:8px;margin-left:-4px;border-radius:4px;background:#fff;box-shadow:0 0 0 1px rgba(31,34,36,.25);"></div></sc-for>
+        <div style="position:absolute;top:1px;left:{{ yearsPct }};width:20px;height:20px;margin-left:-10px;border-radius:10px;background:#fff;box-shadow:0 0 0 1px var(--line),0 2px 6px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;"><div style="width:8px;height:8px;border-radius:4px;background:#6D8656;"></div></div>
+      </div>
+    </div>
+    <div style="position:absolute;right:16px;top:84px;width:300px;padding:16px;display:flex;flex-direction:column;gap:14px;background:var(--gl);backdrop-filter:blur(28px) saturate(1.5);-webkit-backdrop-filter:blur(28px) saturate(1.5);border:1px solid var(--gb);border-radius:14px;box-shadow:var(--sh);">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-family:'Newsreader',serif;font-size:21px;">Entwicklung</span><span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--ink3);">{{ yearNum }}</span></div>
+      <sc-for list="{{ growth }}" as="g" hint-placeholder-count="5">
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-weight:500;">{{ g.n }}</span><span style="font-family:'Geist Mono',monospace;font-size:12px;">{{ g.v }}</span></div>
+          <div style="position:relative;height:6px;border-radius:3px;background:var(--fld);"><div style="position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:#8FA66C;width:{{ g.p }};"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink3);"><span>{{ g.d }}</span><span>Endgröße {{ g.max }}</span></div>
+        </div>
+      </sc-for>
+      <div style="display:flex;gap:10px;padding:10px;border-radius:9px;background:rgba(185,114,79,.12);"><svg width="16" height="16" viewBox="0 0 24 24" style="flex:none;margin-top:1px;"><path d="M12 4l9 16H3Z M12 10v4M12 17h.01" stroke="#B9724F" stroke-width="1.7" fill="none" stroke-linejoin="round" stroke-linecap="round"></path></svg><span style="font-size:12px;line-height:1.45;color:#7A4A31;">Ab etwa 12 Jahren reicht die Lindenkrone bis 1,5 m an den Kiesweg. Einen Kronenschnitt einplanen.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 08 Jahreszeiten -->
+<div id="s08" data-screen-label="08 Jahreszeiten" style="display:flex;flex-direction:column;gap:14px;">
+  <div style="display:flex;align-items:baseline;gap:12px;"><a href="#s08" style="font-family:'Geist Mono',monospace;font-size:13px;padding:4px 9px;background:#1F2224;color:#fff;border-radius:6px;">08</a><span style="font-size:20px;font-weight:500;">Jahreszeiten-Vorschau</span><span style="font-size:15px;color:#6E716B;">Vergleichsansicht 4×. Farbe, Blüte, Laub und Kahlheit je Pflanze.</span></div>
+  <div style="--bg:#E9E5DC;--gl:rgba(250,248,244,.8);--gb:rgba(255,255,255,.75);--sh:0 1px 0 rgba(255,255,255,.7) inset,0 10px 36px rgba(44,46,34,.12),0 1px 3px rgba(44,46,34,.08);--ink:#1F2224;--ink2:#5D615D;--ink3:#8C8E88;--line:rgba(31,34,36,.09);--hov:rgba(31,34,36,.05);--fld:rgba(31,34,36,.05);--tab:#FFFFFF;--acc:#3D5BD9;--accs:rgba(61,91,217,.11);position:relative;width:1440px;height:900px;overflow:hidden;border-radius:14px;box-shadow:0 30px 80px rgba(40,38,30,.18),0 0 0 1px rgba(0,0,0,.06);background-color:var(--bg);background-image:radial-gradient(rgba(31,34,36,.10) 1px, transparent 1px);background-size:20px 20px;font-family:'Geist',sans-serif;color:var(--ink);font-size:13px;">
+    <dc-import name="Chrome" tab="Jahreszeiten" tool="select" left="none" zoom="52 %" scale="1 : 200" style="position:absolute;inset:0;" hint-size="1440px,900px"></dc-import>
+    <div style="position:absolute;left:96px;right:32px;top:88px;bottom:80px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:14px;">
+      <sc-for list="{{ seasons }}" as="s" hint-placeholder-count="4">
+        <div style="position:relative;border-radius:14px;overflow:hidden;background:rgba(255,255,255,.35);box-shadow:0 0 0 1px var(--line);">
+          <dc-import name="GardenPlan" uid="{{ s.uid }}" mode="day" season="{{ s.k }}" labels="{{ false }}" show-lamps="{{ false }}" vb="-14 -14 1028 628" style="position:absolute;inset:8px;" hint-size="100%,100%"></dc-import>
+          <div style="position:absolute;left:14px;top:14px;display:flex;align-items:baseline;gap:10px;padding:8px 12px;border-radius:10px;background:var(--gl);backdrop-filter:blur(20px);border:1px solid var(--gb);box-shadow:var(--sh);"><span style="font-family:'Newsreader',serif;font-size:19px;">{{ s.n }}</span><span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--ink3);">{{ s.m }}</span></div>
+          <div style="position:absolute;left:14px;bottom:14px;max-width:70%;padding:8px 12px;border-radius:10px;background:var(--gl);backdrop-filter:blur(20px);border:1px solid var(--gb);font-size:12px;line-height:1.4;color:var(--ink2);">{{ s.d }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+
+<!-- 09 Bewässerung -->
+<div id="s09" data-screen-label="09 Bewässerung" style="display:flex;flex-direction:column;gap:14px;">
+  <div style="display:flex;align-items:baseline;gap:12px;"><a href="#s09" style="font-family:'Geist Mono',monospace;font-size:13px;padding:4px 9px;background:#1F2224;color:#fff;border-radius:6px;">09</a><span style="font-size:20px;font-weight:500;">Bewässerungsplan</span><span style="font-size:15px;color:#6E716B;">Versenkregner mit Wurfradius, Tropfschläuche, Verteiler, Hausanschluss</span></div>
+  <div style="--bg:#E9E5DC;--gl:rgba(250,248,244,.78);--gb:rgba(255,255,255,.75);--sh:0 1px 0 rgba(255,255,255,.7) inset,0 10px 36px rgba(44,46,34,.12),0 1px 3px rgba(44,46,34,.08);--ink:#1F2224;--ink2:#5D615D;--ink3:#8C8E88;--line:rgba(31,34,36,.09);--hov:rgba(31,34,36,.05);--fld:rgba(31,34,36,.05);--tab:#FFFFFF;--acc:#3D5BD9;--accs:rgba(61,91,217,.11);position:relative;width:1440px;height:900px;overflow:hidden;border-radius:14px;box-shadow:0 30px 80px rgba(40,38,30,.18),0 0 0 1px rgba(0,0,0,.06);background-color:var(--bg);background-image:radial-gradient(rgba(31,34,36,.10) 1px, transparent 1px);background-size:20px 20px;font-family:'Geist',sans-serif;color:var(--ink);font-size:13px;">
+    <dc-import name="GardenPlan" uid="p09" mode="day" irrigation="{{ true }}" show-lamps="{{ false }}" labels="{{ false }}" style="position:absolute;left:300px;top:146px;width:840px;height:535px;" hint-size="840px,535px"></dc-import>
+    <dc-import name="Chrome" tab="Bewässerung" tool="select" layer-active="water" hidden="light" style="position:absolute;inset:0;" hint-size="1440px,900px"></dc-import>
+    <div style="position:absolute;right:16px;top:84px;width:300px;padding:16px;display:flex;flex-direction:column;gap:16px;background:var(--gl);backdrop-filter:blur(28px) saturate(1.5);-webkit-backdrop-filter:blur(28px) saturate(1.5);border:1px solid var(--gb);border-radius:14px;box-shadow:var(--sh);">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-family:'Newsreader',serif;font-size:21px;">Bewässerung</span><span style="font-size:12px;color:var(--ink3);">4 Zonen</span></div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <sc-for list="{{ zones }}" as="z" hint-placeholder-count="4">
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;background:var(--fld);">
+            <span style="width:22px;height:22px;border-radius:6px;background:#2F76B8;color:#fff;font-family:'Geist Mono',monospace;font-size:11px;display:flex;align-items:center;justify-content:center;flex:none;">{{ z.i }}</span>
+            <div style="flex:1;min-width:0;"><div style="font-weight:500;font-size:12.5px;">{{ z.n }}</div><div style="font-size:11.5px;color:var(--ink3);margin-top:1px;">{{ z.d }}</div></div>
+            <span style="font-family:'Geist Mono',monospace;font-size:11.5px;color:var(--ink2);">{{ z.t }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <div style="padding:8px 10px;border-radius:8px;background:var(--fld);"><div style="font-size:11px;color:var(--ink3);">Bedarf / Tag</div><div style="font-family:'Geist Mono',monospace;font-size:13px;margin-top:2px;">412 l</div></div>
+        <div style="padding:8px 10px;border-radius:8px;background:var(--fld);"><div style="font-size:11px;color:var(--ink3);">Anschluss</div><div style="font-family:'Geist Mono',monospace;font-size:13px;margin-top:2px;">3,5 bar</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px;">
+        <div style="font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--ink3);">LEGENDE</div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:12.5px;"><svg width="28" height="16" viewBox="0 0 28 16"><path d="M4 14L4 2A12 12 0 0 1 16 14Z" fill="rgba(58,132,196,.15)" stroke="#2F76B8" stroke-dasharray="3 2"></path><circle cx="4" cy="14" r="2.5" fill="#fff" stroke="#2F76B8" stroke-width="1.4"></circle></svg>Versenkregner, Wurfradius 6,5–7 m</div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:12.5px;"><svg width="28" height="16" viewBox="0 0 28 16"><path d="M2 8H26" stroke="#1E2E3B" stroke-width="1.6"></path><path d="M2 8H26" stroke="#7FC0EA" stroke-width="2.6" stroke-dasharray="0 6" stroke-linecap="round"></path></svg>Tropfschlauch, 2 l/h je 30 cm</div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:12.5px;"><svg width="28" height="16" viewBox="0 0 28 16"><path d="M2 8H26" stroke="#2F76B8" stroke-width="2.4"></path></svg>Hauptleitung PE 32</div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:12.5px;"><svg width="28" height="16" viewBox="0 0 28 16"><rect x="6" y="3" width="16" height="10" rx="2" fill="#fff" stroke="#2F76B8" stroke-width="1.4"></rect><path d="M10 5v6M14 5v6M18 5v6" stroke="#2F76B8"></path></svg>Verteiler, 4 Magnetventile</div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:12.5px;"><svg width="28" height="16" viewBox="0 0 28 16"><rect x="9" y="3" width="10" height="10" rx="2" fill="#2F76B8"></rect><path d="M11.5 8h5M14 5.5v5" stroke="#fff" stroke-width="1.2"></path></svg>Wasseranschluss am Haus</div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:12.5px;"><svg width="28" height="16" viewBox="0 0 28 16"><circle cx="14" cy="8" r="6" fill="#55605A"></circle><circle cx="14" cy="8" r="7.5" fill="none" stroke="#2F76B8" stroke-dasharray="2 2"></circle></svg>Regentonne 300 l, Pumpe</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 10 Kosten -->
+<div id="s10" data-screen-label="10 Material & Kosten" style="display:flex;flex-direction:column;gap:14px;">
+  <div style="display:flex;align-items:baseline;gap:12px;"><a href="#s10" style="font-family:'Geist Mono',monospace;font-size:13px;padding:4px 9px;background:#1F2224;color:#fff;border-radius:6px;">10</a><span style="font-size:20px;font-weight:500;">Material- & Kostenübersicht</span><span style="font-size:15px;color:#6E716B;">Mengen werden aus der Zeichnung abgeleitet. Preise sind editierbar.</span></div>
+  <div style="--bg:#E9E5DC;--gl:rgba(250,248,244,.9);--gb:rgba(255,255,255,.75);--sh:0 1px 0 rgba(255,255,255,.7) inset,0 24px 60px rgba(44,46,34,.18),0 1px 3px rgba(44,46,34,.08);--ink:#1F2224;--ink2:#5D615D;--ink3:#8C8E88;--line:rgba(31,34,36,.09);--hov:rgba(31,34,36,.05);--fld:rgba(31,34,36,.05);--tab:#FFFFFF;--acc:#3D5BD9;--accs:rgba(61,91,217,.11);position:relative;width:1440px;height:900px;overflow:hidden;border-radius:14px;box-shadow:0 30px 80px rgba(40,38,30,.18),0 0 0 1px rgba(0,0,0,.06);background-color:var(--bg);background-image:radial-gradient(rgba(31,34,36,.10) 1px, transparent 1px);background-size:20px 20px;font-family:'Geist',sans-serif;color:var(--ink);font-size:13px;">
+    <dc-import name="GardenPlan" uid="p10" mode="day" labels="{{ false }}" show-lamps="{{ false }}" style="position:absolute;left:300px;top:146px;width:840px;height:535px;" hint-size="840px,535px"></dc-import>
+    <dc-import name="Chrome" tab="Kosten" tool="select" left="none" style="position:absolute;inset:0;" hint-size="1440px,900px"></dc-import>
+    <div style="position:absolute;inset:0;background:rgba(233,229,220,.5);backdrop-filter:blur(3px);"></div>
+    <div style="position:absolute;left:150px;right:150px;top:84px;bottom:28px;display:flex;background:var(--gl);backdrop-filter:blur(30px) saturate(1.4);-webkit-backdrop-filter:blur(30px) saturate(1.4);border:1px solid var(--gb);border-radius:18px;box-shadow:var(--sh);overflow:hidden;">
+      <div style="flex:1;min-width:0;padding:26px 28px;display:flex;flex-direction:column;gap:16px;">
+        <div style="display:flex;align-items:flex-end;gap:16px;">
+          <div><div style="font-family:'Newsreader',serif;font-size:32px;line-height:1;">Material & Kosten</div><div style="font-size:13px;color:var(--ink2);margin-top:6px;">Mengen live aus dem Plan · Stand 6. Okt. 2026</div></div>
+          <div style="margin-left:auto;display:flex;gap:2px;padding:3px;background:var(--fld);border-radius:9px;"><div style="padding:5px 12px;border-radius:6px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08);font-size:12px;font-weight:500;">Nach Bereich</div><div style="padding:5px 12px;border-radius:6px;font-size:12px;color:var(--ink2);">Nach Material</div><div style="padding:5px 12px;border-radius:6px;font-size:12px;color:var(--ink2);">Einkaufsliste</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) 120px 110px 110px;gap:0 14px;padding:8px 10px;border-bottom:1px solid var(--line);font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.06em;color:var(--ink3);"><span>POSITION</span><span style="text-align:right;">MENGE</span><span style="text-align:right;">EINZELPREIS</span><span style="text-align:right;">SUMME</span></div>
+        <div style="display:flex;flex-direction:column;margin-top:-12px;">
+          <sc-for list="{{ costGroups }}" as="g" hint-placeholder-count="4">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;padding:12px 10px 6px;"><span style="font-family:'Newsreader',serif;font-style:italic;font-size:16px;">{{ g.n }}</span><span style="font-family:'Geist Mono',monospace;font-size:12px;color:var(--ink2);">{{ g.sum }}</span></div>
+            <sc-for list="{{ g.rows }}" as="r">
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) 120px 110px 110px;gap:0 14px;align-items:center;padding:6px 10px;border-radius:7px;" style-hover="background:var(--hov);">
+                <div style="display:flex;align-items:center;gap:10px;min-width:0;"><span style="width:16px;height:16px;border-radius:4px;flex:none;background:{{ r.c }};box-shadow:inset 0 0 0 1px rgba(0,0,0,.1);"></span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.n }}</span><span style="font-size:11.5px;color:var(--ink3);white-space:nowrap;">{{ r.s }}</span></div>
+                <span style="text-align:right;font-family:'Geist Mono',monospace;font-size:12px;">{{ r.q }}</span>
+                <span style="text-align:right;font-family:'Geist Mono',monospace;font-size:12px;color:var(--ink2);">{{ r.p }}</span>
+                <span style="text-align:right;font-family:'Geist Mono',monospace;font-size:12px;">{{ r.t }}</span>
+              </div>
+            </sc-for>
+          </sc-for>
+        </div>
+      </div>
+      <div style="width:300px;flex:none;padding:26px 24px;border-left:1px solid var(--line);background:rgba(255,255,255,.4);display:flex;flex-direction:column;gap:18px;">
+        <div><div style="font-size:12.5px;color:var(--ink2);">Material gesamt, netto</div><div style="font-family:'Newsreader',serif;font-size:46px;line-height:1.05;letter-spacing:-0.02em;margin-top:4px;">23.584 €</div><div style="font-size:12.5px;color:var(--ink3);margin-top:4px;">28.065 € brutto · ohne Einbau</div></div>
+        <div style="display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px;"><div style="flex:40.1;background:#C9BBA3;"></div><div style="flex:18.1;background:#7E9A5C;"></div><div style="flex:25.8;background:#B9724F;"></div><div style="flex:16;background:#3F4A5A;"></div></div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:12.5px;">
+          <div style="display:flex;align-items:center;gap:8px;"><span style="width:8px;height:8px;border-radius:2px;background:#C9BBA3;"></span>Flächen & Wege<span style="margin-left:auto;font-family:'Geist Mono',monospace;">9.452 €</span></div>
+          <div style="display:flex;align-items:center;gap:8px;"><span style="width:8px;height:8px;border-radius:2px;background:#7E9A5C;"></span>Pflanzen<span style="margin-left:auto;font-family:'Geist Mono',monospace;">4.258 €</span></div>
+          <div style="display:flex;align-items:center;gap:8px;"><span style="width:8px;height:8px;border-radius:2px;background:#B9724F;"></span>Bauten & Wasser<span style="margin-left:auto;font-family:'Geist Mono',monospace;">6.074 €</span></div>
+          <div style="display:flex;align-items:center;gap:8px;"><span style="width:8px;height:8px;border-radius:2px;background:#3F4A5A;"></span>Licht & Bewässerung<span style="margin-left:auto;font-family:'Geist Mono',monospace;">3.800 €</span></div>
+        </div>
+        <div style="height:1px;background:var(--line);"></div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:var(--ink2);">
+          <div style="display:flex;justify-content:space-between;"><span>Rasen</span><span style="font-family:'Geist Mono',monospace;color:var(--ink);">247 m²</span></div>
+          <div style="display:flex;justify-content:space-between;"><span>Kies</span><span style="font-family:'Geist Mono',monospace;color:var(--ink);">15,1 m³</span></div>
+          <div style="display:flex;justify-content:space-between;"><span>Pflastersteine</span><span style="font-family:'Geist Mono',monospace;color:var(--ink);">219 Stk</span></div>
+          <div style="display:flex;justify-content:space-between;"><span>Kantenstein</span><span style="font-family:'Geist Mono',monospace;color:var(--ink);">96 m</span></div>
+          <div style="display:flex;justify-content:space-between;"><span>Pflanzen</span><span style="font-family:'Geist Mono',monospace;color:var(--ink);">602 Stk</span></div>
+        </div>
+        <div style="margin-top:auto;display:flex;flex-direction:column;gap:8px;">
+          <div style="padding:10px;border-radius:10px;background:var(--ink);color:#fff;text-align:center;font-weight:500;">Angebot anfragen</div>
+          <div style="padding:10px;border-radius:10px;box-shadow:inset 0 0 0 1px var(--line);text-align:center;font-weight:500;">Als CSV exportieren</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 11 Export -->
+<div id="s11" data-screen-label="11 Export" style="display:flex;flex-direction:column;gap:14px;">
+  <div style="display:flex;align-items:baseline;gap:12px;"><a href="#s11" style="font-family:'Geist Mono',monospace;font-size:13px;padding:4px 9px;background:#1F2224;color:#fff;border-radius:6px;">11</a><span style="font-size:20px;font-weight:500;">Export als Architektenplan</span><span style="font-size:15px;color:#6E716B;">Legende, Maßstab, Nordpfeil, Titelblock. Darstellung Tag, Nacht oder Strich (umschaltbar).</span></div>
+  <div style="--bg:#E9E5DC;--gl:rgba(250,248,244,.94);--gb:rgba(255,255,255,.75);--sh:0 1px 0 rgba(255,255,255,.7) inset,0 30px 80px rgba(30,32,24,.25),0 1px 3px rgba(44,46,34,.08);--ink:#1F2224;--ink2:#5D615D;--ink3:#8C8E88;--line:rgba(31,34,36,.09);--hov:rgba(31,34,36,.05);--fld:rgba(31,34,36,.05);--tab:#FFFFFF;--acc:#3D5BD9;--accs:rgba(61,91,217,.11);position:relative;width:1440px;height:900px;overflow:hidden;border-radius:14px;box-shadow:0 30px 80px rgba(40,38,30,.18),0 0 0 1px rgba(0,0,0,.06);background-color:var(--bg);background-image:radial-gradient(rgba(31,34,36,.10) 1px, transparent 1px);background-size:20px 20px;font-family:'Geist',sans-serif;color:var(--ink);font-size:13px;">
+    <dc-import name="GardenPlan" uid="p11bg" mode="day" labels="{{ false }}" show-lamps="{{ false }}" style="position:absolute;left:300px;top:146px;width:840px;height:535px;" hint-size="840px,535px"></dc-import>
+    <dc-import name="Chrome" tab="Planen" tool="select" style="position:absolute;inset:0;" hint-size="1440px,900px"></dc-import>
+    <div style="position:absolute;inset:0;background:rgba(30,32,30,.32);backdrop-filter:blur(4px);"></div>
+    <div style="position:absolute;left:110px;right:110px;top:70px;bottom:70px;display:flex;background:var(--gl);border:1px solid var(--gb);border-radius:18px;box-shadow:var(--sh);overflow:hidden;">
+      <div style="flex:1;min-width:0;background:#DCD8CF;display:flex;align-items:center;justify-content:center;padding:28px;">
+        <div style="width:820px;height:580px;background:#FBFAF6;box-shadow:0 2px 6px rgba(0,0,0,.08),0 16px 40px rgba(0,0,0,.14);position:relative;padding:22px;display:flex;gap:18px;">
+          <div style="position:absolute;inset:12px;border:1px solid #2D3033;pointer-events:none;"></div>
+          <div style="flex:1;min-width:0;position:relative;">
+            <div style="position:absolute;left:8px;top:2px;font-family:'Newsreader',serif;font-size:17px;color:#1F2224;z-index:1;">Gestaltungsplan <span style="font-style:italic;color:#5D615D;">Freianlagen</span></div>
+            <sc-if value="{{ lookNight }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:4px;background:#0E1724;"></div><dc-import name="GardenPlan" uid="p11n" mode="night" dims="{{ true }}" style="position:absolute;inset:4px;" hint-size="100%,100%"></dc-import></sc-if>
+            <sc-if value="{{ lookDay }}" hint-placeholder-val="{{ true }}"><dc-import name="GardenPlan" uid="p11d" mode="day" dims="{{ true }}" show-lamps="{{ false }}" style="position:absolute;inset:4px;" hint-size="100%,100%"></dc-import></sc-if>
+            <sc-if value="{{ lookLine }}" hint-placeholder-val="{{ false }}"><dc-import name="GardenPlan" uid="p11l" mode="day" dims="{{ true }}" show-lamps="{{ false }}" style="position:absolute;inset:4px;filter:grayscale(1) contrast(1.15) brightness(1.08);" hint-size="100%,100%"></dc-import></sc-if>
+            <div style="position:absolute;left:10px;bottom:6px;display:flex;align-items:flex-end;gap:14px;">
+              <div style="display:flex;flex-direction:column;gap:3px;"><div style="display:flex;height:4px;width:100px;border:1px solid #2D3033;"><div style="flex:1;background:#2D3033;"></div><div style="flex:1;"></div><div style="flex:3;background:#2D3033;"></div></div><div style="display:flex;justify-content:space-between;width:104px;font-family:'Geist Mono',monospace;font-size:7.5px;color:#2D3033;"><span>0</span><span>1</span><span>2</span><span style="margin-left:auto;">5 m</span></div></div>
+            </div>
+          </div>
+          <div style="width:170px;flex:none;display:flex;flex-direction:column;gap:12px;padding-left:14px;border-left:1px solid #2D3033;position:relative;">
+            <div style="display:flex;align-items:center;gap:8px;"><svg width="30" height="30" viewBox="0 0 30 30"><circle cx="15" cy="15" r="13" fill="none" stroke="#2D3033" stroke-width=".8"></circle><path d="M15 3l4 12h-8Z" fill="#2D3033"></path><path d="M15 27l-4-12h8Z" fill="none" stroke="#2D3033" stroke-width=".8"></path></svg><span style="font-family:'Newsreader',serif;font-style:italic;font-size:13px;color:#2D3033;">Nord</span></div>
+            <div style="font-family:'Geist Mono',monospace;font-size:7.5px;letter-spacing:.1em;color:#2D3033;">LEGENDE</div>
+            <div style="display:flex;flex-direction:column;gap:5px;font-size:8.5px;color:#2D3033;">
+              <sc-for list="{{ legend }}" as="l" hint-placeholder-count="9"><div style="display:flex;align-items:center;gap:7px;"><span style="width:16px;height:10px;flex:none;background:{{ l.c }};box-shadow:inset 0 0 0 .6px rgba(0,0,0,.45);border-radius:{{ l.r }};"></span>{{ l.n }}</div></sc-for>
+            </div>
+            <div style="margin-top:auto;border-top:1px solid #2D3033;padding-top:8px;display:flex;flex-direction:column;gap:5px;">
+              <div style="font-family:'Newsreader',serif;font-size:15px;line-height:1.1;color:#1F2224;">Hausgarten<br>Lindenweg 12</div>
+              <div style="font-size:8px;color:#4A4D4F;line-height:1.45;">Freianlagenplanung · Entwurf<br>60439 Frankfurt am Main</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-family:'Geist Mono',monospace;font-size:7.5px;color:#2D3033;border-top:.6px solid #2D3033;padding-top:5px;"><span>M 1:100</span><span>A3 quer</span><span>06.10.2026</span><span>Blatt 1/1</span><span>J. Kramer</span><span>Index B</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="width:330px;flex:none;padding:24px;display:flex;flex-direction:column;gap:18px;border-left:1px solid var(--line);">
+        <div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-family:'Newsreader',serif;font-size:24px;">Plan exportieren</span><svg width="18" height="18" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="var(--ink3)" stroke-width="1.8" stroke-linecap="round"></path></svg></div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--ink3);">FORMAT</div>
+          <div style="display:flex;gap:2px;padding:3px;background:var(--fld);border-radius:9px;"><div style="flex:1;text-align:center;padding:6px;border-radius:6px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08);font-weight:500;font-size:12.5px;">PDF · Vektor</div><div style="flex:1;text-align:center;padding:6px;border-radius:6px;color:var(--ink2);font-size:12.5px;">PNG</div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+            <div style="padding:8px 10px;border-radius:8px;background:var(--fld);"><div style="font-size:11px;color:var(--ink3);">Papier</div><div style="font-size:12.5px;margin-top:2px;">A3 quer ▾</div></div>
+            <div style="padding:8px 10px;border-radius:8px;background:var(--fld);"><div style="font-size:11px;color:var(--ink3);">Maßstab</div><div style="font-family:'Geist Mono',monospace;font-size:12.5px;margin-top:2px;">1 : 100 ▾</div></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--ink3);">DARSTELLUNG</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+            <sc-for list="{{ looks }}" as="l" hint-placeholder-count="3">
+              <sc-if value="{{ l.on }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:6px;align-items:center;padding:8px 6px;border-radius:9px;background:#fff;box-shadow:0 0 0 1.5px var(--acc);"><div style="width:100%;height:36px;border-radius:5px;background:{{ l.bg }};"></div><span style="font-size:12px;font-weight:500;">{{ l.n }}</span></div></sc-if>
+              <sc-if value="{{ l.off }}" hint-placeholder-val="{{ true }}"><div onClick="{{ l.pick }}" style="display:flex;flex-direction:column;gap:6px;align-items:center;padding:8px 6px;border-radius:9px;background:var(--fld);cursor:pointer;" style-hover="background:rgba(31,34,36,.08);"><div style="width:100%;height:36px;border-radius:5px;background:{{ l.bg }};"></div><span style="font-size:12px;color:var(--ink2);">{{ l.n }}</span></div></sc-if>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:2px;">
+          <div style="font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--ink3);margin-bottom:6px;">INHALT</div>
+          <sc-for list="{{ exportOpts }}" as="o" hint-placeholder-count="6"><div style="display:flex;align-items:center;gap:10px;padding:5px 0;font-size:12.5px;"><sc-if value="{{ o.on }}" hint-placeholder-val="{{ true }}"><span style="width:16px;height:16px;border-radius:4px;background:var(--acc);display:flex;align-items:center;justify-content:center;"><svg width="10" height="10" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"></path></svg></span></sc-if><sc-if value="{{ o.off }}" hint-placeholder-val="{{ false }}"><span style="width:16px;height:16px;border-radius:4px;box-shadow:inset 0 0 0 1.5px rgba(31,34,36,.25);"></span></sc-if><span>{{ o.n }}</span></div></sc-for>
+        </div>
+        <div style="margin-top:auto;display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink3);"><span>300 dpi · ca. 4,2 MB</span><span>1 Blatt</span></div>
+          <div style="padding:11px;border-radius:10px;background:var(--acc);color:#fff;text-align:center;font-weight:500;box-shadow:0 2px 8px rgba(61,91,217,.35);">Exportieren</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { onb: 'poly', doy: 172, hour: 16.5, heat: true, years: 10, lm: 480, k: 3000, ang: 36, scene: 1, look: 'Tag' };
+  sun(doy, clock) {
+    const rad = Math.PI / 180, lat = 50.1 * rad;
+    const dec = 23.44 * Math.sin(2 * Math.PI * (284 + doy) / 365) * rad;
+    const H = ((clock - 2 + 8.7 / 15) - 12) * 15 * rad;
+    const el = Math.asin(Math.sin(lat) * Math.sin(dec) + Math.cos(lat) * Math.cos(dec) * Math.cos(H));
+    const az = Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(lat) - Math.tan(dec) * Math.cos(lat)) + Math.PI;
+    return { el, az };
+  }
+  drag(key, min, max, step) {
+    return (e) => {
+      const el = e.currentTarget, r = el.getBoundingClientRect();
+      const set = (cx) => { let v = min + (max - min) * Math.min(1, Math.max(0, (cx - r.left) / r.width)); v = Math.round(v / step) * step; if (this.state[key] !== v) this.setState({ [key]: v }); };
+      set(e.clientX);
+      const mv = (ev) => set(ev.clientX);
+      const up = () => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); };
+      window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up);
+      e.preventDefault(); e.stopPropagation();
+    };
+  }
+  hm(h) { let H = Math.floor(h), M = Math.round((h - H) * 60); if (M === 60) { H++; M = 0; } return String(H).padStart(2, '0') + ':' + String(M).padStart(2, '0'); }
+  circ(cx, cy, r) { return `M${cx - r} ${cy}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0Z`; }
+  kc(k) {
+    const s = [[2200,[255,165,79]],[2700,[255,192,126]],[3000,[255,208,156]],[4000,[255,236,214]]];
+    for (let i = 0; i < s.length - 1; i++) if (k <= s[i+1][0]) { const t = (k - s[i][0]) / (s[i+1][0] - s[i][0]); return 'rgb(' + s[i][1].map((v, j) => Math.round(v + (s[i+1][1][j] - v) * t)).join(',') + ')'; }
+    return 'rgb(255,236,214)';
+  }
+  glyph(kind, c1, c2) {
+    const C = (x, y, r) => this.circ(x, y, r);
+    const P = (d, f, s) => ({ d, f, s: s ?? 'none' });
+    const ln = 'rgba(30,40,20,.35)';
+    switch (kind) {
+      case 'tree': { const g = []; for (let i = 0; i < 10; i++) { const a = i / 10 * 6.283; g.push(P(C(20 + Math.cos(a) * 11.5, 20 + Math.sin(a) * 11.5, 5.2), c1, ln)); } g.push(P(C(20, 20, 13), c1)); g.push(P(C(16, 15.5, 7), 'rgba(255,253,230,.22)')); g.push(P(C(20, 20, 1.4), '#3B3226')); return g; }
+      case 'shrub': return [P(C(14, 17, 7.5), c1, ln), P(C(26, 15, 7), c1, ln), P(C(21, 26, 8), c1, ln), P(C(18, 18, 5), 'rgba(255,253,230,.2)')];
+      case 'peren': return [[12,13],[20,10],[28,14],[15,21],[24,22],[31,23],[11,29],[19,30],[28,30]].map(([x, y], i) => P(C(x, y, 3.7), i % 3 ? c1 : c2, 'rgba(30,30,20,.25)'));
+      case 'veg': { const g = [P('M5 7h30v26H5Z', '#6B5442')]; [12, 20, 28].forEach(y => [11, 20, 29].forEach(x => g.push(P(C(x, y, 3.4), c1, ln)))); return g; }
+      case 'bed': return [P('M4 12h32v16H4Z', '#A27C56', '#6F5238'), P('M6.5 14.5h27v11h-27Z', '#5B4535'), ...[10, 16, 22, 28].map(x => P(C(x, 20, 2.6), '#93B166'))];
+      case 'shed': return [P('M8 8h12v24H8Z', '#8A745E'), P('M20 8h12v24H20Z', '#6F5C49'), P('M7 7h26v26H7Z', 'none', '#4A3B2D'), P('M20 7V33', 'none', '#4A3B2D')];
+      case 'deck': return [P('M5 9h30v22H5Z', '#B78C61', '#7E5C3D'), P('M5 13.4H35M5 17.8H35M5 22.2H35M5 26.6H35M18 9v4.4M28 13.4v4.4M12 17.8v4.4M24 22.2v4.4', 'none', 'rgba(70,45,25,.55)')];
+      case 'pond': return [P('M8 19C9 10 22 7 29 11C36 15 35 27 27 31C18 35 7 29 8 19Z', '#6E9AA0', '#A69C8C'), P('M13 15C17 11 24 11 28 14', 'none', 'rgba(255,255,255,.5)'), P(C(24, 24, 2.6), '#7C9A5C')];
+      case 'pool': return [P('M9 7h22a3 3 0 0 1 3 3v20a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3V10a3 3 0 0 1 3-3Z', '#DCD4C4', '#A69C8C'), P('M11 10h18a1.5 1.5 0 0 1 1.5 1.5v17a1.5 1.5 0 0 1-1.5 1.5H11a1.5 1.5 0 0 1-1.5-1.5v-17A1.5 1.5 0 0 1 11 10Z', '#8CC6D6'), P('M12 15c3-1.5 6-1.5 9 0', 'none', 'rgba(255,255,255,.6)')];
+      case 'play': return [P('M5 20h14v14H5Z', '#E3D3A8', '#B5A57A'), P('M22 7H36M23 7V22M35 7V22M27 9v7M31 9v7', 'none', '#6B5A47'), P('M25.5 16h3M29.5 16h3', 'none', '#B9724F')];
+      case 'furn': return [P('M14 11h12v18H14Z', '#ECE6D9', '#837A6B'), ...[[8,13],[8,23],[28,13],[28,23]].map(([x, y]) => P(`M${x} ${y}h4v4h-4Z`, '#D9CFBE', '#837A6B'))];
+      case 'hedge': { const g = [P('M4 15H36V25H4Z', '#5B7350')]; for (let x = 6; x <= 34; x += 5.6) { g.push(P(C(x, 15, 3), '#5B7350')); g.push(P(C(x + 2.8, 25, 3), '#5B7350')); } g.push(P('M4 20H36', 'none', 'rgba(255,252,225,.25)')); return g; }
+      case 'glass': return [P('M7 9h26v22H7Z', '#DCE7E5', '#8E9B99'), P('M7 20H33M12.2 9V31M17.4 9V31M22.6 9V31M27.8 9V31', 'none', 'rgba(110,125,123,.6)')];
+      case 'comp': return [P('M5 12h14v16H5Z', '#7E6448', '#57432F'), P('M21 12h14v16H21Z', '#6E553D', '#57432F'), P('M7 14h10v12H7ZM23 14h10v12H23Z', '#4D3C2D')];
+      case 'lamp': return [P(C(20, 20, 13), 'rgba(233,180,94,.28)'), P(C(20, 20, 5), '#FBF8F1', '#2F3234'), P(C(20, 20, 1.8), '#C9963F')];
+    }
+    return [];
+  }
+  renderVals() {
+    const s = this.state;
+    const pct = (v, a, b) => ((v - a) / (b - a) * 100).toFixed(2) + '%';
+
+    const PTS = [[200,232],[652,206],[672,486],[446,548],[205,500]];
+    const SC = 9.4;
+    const names = ['A', 'B', 'C', 'D', 'E'];
+    const cx = PTS.reduce((a, p) => a + p[0], 0) / 5, cy = PTS.reduce((a, p) => a + p[1], 0) / 5;
+    const edges = PTS.map((p, i) => { const q = PTS[(i + 1) % 5]; const L = Math.hypot(q[0] - p[0], q[1] - p[1]) / SC; const mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2; const dx = mx - cx, dy = my - cy, d = Math.hypot(dx, dy); return { n: names[i] + '–' + names[(i + 1) % 5], l: L.toFixed(2).replace('.', ','), px: (mx + dx / d * 22).toFixed(1) + 'px', py: (my + dy / d * 22).toFixed(1) + 'px' }; });
+    let area = 0; PTS.forEach((p, i) => { const q = PTS[(i + 1) % 5]; area += p[0] * q[1] - q[0] * p[1]; }); area = Math.abs(area) / 2 / SC / SC;
+
+    const sn = this.sun(s.doy, s.hour);
+    let rise = null, set = null; const elp = [];
+    for (let h = 3; h <= 23; h += 0.05) { const e = this.sun(s.doy, h).el; if (rise === null && e > 0) rise = h; if (rise !== null && set === null && e < 0 && h > 12) set = h; }
+    for (let h = 5; h <= 21.001; h += 0.25) { const e = Math.max(0, this.sun(s.doy, h).el) * 180 / Math.PI; elp.push([(h - 5) / 16 * 750, 55 - e / 66 * 50]); }
+    const elPath = 'M' + elp.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join('L');
+    const az = sn.az, R = 36, rr = sn.el > 0 ? R * (1 - sn.el / (Math.PI / 2) * 0.6) : R;
+    const arcPts = []; for (let h = (rise ?? 6); h <= (set ?? 20); h += 0.5) { const q = this.sun(s.doy, h); const r2 = R * (1 - Math.max(0, q.el) / (Math.PI / 2) * 0.6); arcPts.push([46 + Math.sin(q.az) * r2, 46 - Math.cos(q.az) * r2]); }
+    const DATES = [['21. März', 80], ['21. Juni', 172], ['23. Sept.', 266], ['21. Dez.', 355]];
+    const dates = DATES.map(([n, d]) => ({ n, on: s.doy === d, off: s.doy !== d, pick: () => this.setState({ doy: d }) }));
+    const dateLabel = (DATES.find(d => d[1] === s.doy) || DATES[1])[0];
+
+    const g = (y, k) => 1 - Math.exp(-y / k);
+    const y = s.years;
+    const lin = 2 * (104 + 46 * g(y, 9)) / 20, app = 2 * (30 + 42 * g(y, 7)) / 20, che = 2 * (34 + 44 * g(y, 7)) / 20, hed = (16 + 14 * g(y, 6)) / 20, shr = 2 * 1.3 * (0.72 + 0.28 * g(y, 4));
+    const fm = (v) => v.toFixed(1).replace('.', ',') + ' m';
+    const growth = [
+      { n: 'Winterlinde', v: 'Ø ' + fm(lin), p: (lin / 15 * 100).toFixed(1) + '%', d: 'heute Ø 10,4 m', max: '15 m' },
+      { n: 'Apfel ›Topaz‹', v: 'Ø ' + fm(app), p: (app / 7.2 * 100).toFixed(1) + '%', d: 'Pflanzung Ø 3,0 m', max: '7 m' },
+      { n: 'Zierkirsche', v: 'Ø ' + fm(che), p: (che / 7.8 * 100).toFixed(1) + '%', d: 'Pflanzung Ø 3,4 m', max: '8 m' },
+      { n: 'Hainbuchenhecke', v: 'b ' + fm(hed), p: (hed / 1.5 * 100).toFixed(1) + '%', d: 'Schnitt auf 1,8 m Höhe', max: '1,5 m' },
+      { n: 'Sträucher (10)', v: 'Ø ' + fm(shr), p: (shr / 2.6 * 100).toFixed(1) + '%', d: 'Hortensie, Schneeball', max: '2,6 m' }
+    ];
+    const stops = [[0, 'Heute'], [5, '5 Jahre'], [10, '10 Jahre'], [20, '20 Jahre']];
+
+    const LT = ['M9 21h6M10 21V9h4v12M8.5 9h7l-1.5-4h-4Z', 'M4 14l6-6 4 4-6 6ZM14 8l5-5M15 21h6', 'M12 21V11M7.5 11h9l-2-4h-5ZM6 21h12', 'M3 7c6 5 12 5 18 0M7 10.5v2M12 12v2M17 10.5v2', 'M6 4v16M6 9h5a3 3 0 0 1 0 6H6', 'M3 18c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0M12 6a3 3 0 1 0 0 6a3 3 0 1 0 0-6Z', 'M8 21l3-6h2l3 6ZM12 15V10M7 7l2 2M17 7l-2 2M12 4v3'];
+    const lampTypes = LT.map((d, i) => ({ d, on: i === 6, off: i !== 6 }));
+    const LLIB = [['Pollerleuchte', '300 lm · 2700 K · 360°', '6', 2700], ['Spot / Strahler', '600 lm · 3000 K · 15–60°', '2', 3000], ['Wegeleuchte', '120 lm · 2200 K · bodennah', '2', 2200], ['Lichterkette', '24 × 20 lm · 2200 K', '1', 2200], ['Wandleuchte', '400 lm · 2700 K · up/down', '2', 2700], ['Unterwasserlicht', '250 lm · 4000 K · IP68', '1', 4000], ['Baumstrahler', '480 lm · 3000 K · 36°', '3', 3000]];
+    const lampLib = LLIB.map(([n, sp, cnt, k], i) => ({ n, s: sp, cnt, c: this.kc(k), d: LT[i] }));
+    const SC2 = [['Ankommen', '18:00–23:30', 'Poller, Wandleuchten, Wege'], ['Abendessen', 'manuell', 'Terrasse, Lichterkette 60 %, Baum'], ['Spätabend', '23:30–01:00', 'nur Wege, 20 %'], ['Abwesend', 'zufällig', 'simuliert Anwesenheit']];
+    const scenes = SC2.map(([n, t, d], i) => ({ n, t, d, on: s.scene === i, off: s.scene !== i, pick: () => this.setState({ scene: i }) }));
+
+    const T = (k, c1, c2) => this.glyph(k, c1, c2);
+    const ring = 'inset 0 0 0 1px rgba(31,34,36,.08)';
+    const toSrc = (g) => 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">${g.map(p => `<path d="${p.d}" fill="${p.f}" stroke="${p.s}" stroke-width=".8" stroke-linecap="round"/>`).join('')}</svg>`);
+    const it = (n, g, act) => ({ n, src: toSrc(g), ring: act ? '0 0 0 1.5px #3D5BD9,0 0 0 4px rgba(61,91,217,.15)' : ring });
+    const libSections = [
+      { h: 'BÄUME', n: '86', items: [it('Felsenbirne', T('tree', '#97AE6E'), true), it('Feldahorn', T('tree', '#6D8656')), it('Zierapfel', T('tree', '#AEBF8B')), it('Kugelahorn', T('tree', '#7E9A5C'))] },
+      { h: 'STRÄUCHER', n: '124', items: [it('Hortensie', T('shrub', '#7E9A6A')), it('Schneeball', T('shrub', '#6E8762')), it('Buchs', T('shrub', '#4F6B45')), it('Flieder', T('shrub', '#8E8FB0'))] },
+      { h: 'STAUDEN & GRÄSER', n: '138', items: [it('Storchschnabel', T('peren', '#C98AA6', '#8FA56C')), it('Salbei', T('peren', '#7466A6', '#6F8A5E')), it('Federgras', T('peren', '#CBBE8F', '#B9AC80')), it('Lavendel', T('peren', '#8C7DB8', '#9AA88A'))] },
+      { h: 'GEMÜSE & KRÄUTER', n: '42', items: [it('Tomate', T('veg', '#6F8F4E')), it('Salat', T('veg', '#A9C47A')), it('Kräuter', T('veg', '#93A07E')), it('Kürbis', T('shrub', '#8BA25E'))] },
+      { h: 'BAUTEN & AUSSTATTUNG', n: '22', items: [it('Hochbeet', T('bed')), it('Gartenhaus', T('shed')), it('Terrasse', T('deck')), it('Teich', T('pond')), it('Pool', T('pool')), it('Spielgeräte', T('play')), it('Möbel', T('furn')), it('Hecke & Zaun', T('hedge')), it('Gewächshaus', T('glass')), it('Kompost', T('comp')), it('Leuchten', T('lamp'))] }
+    ];
+
+    const seasons = [
+      { uid: 'ps1', k: 'spring', n: 'Frühling', m: 'APRIL', d: 'Zierkirsche und Apfel blühen, Krokusse unter der Linde. Junges Laub ist hellgrün.' },
+      { uid: 'ps2', k: 'summer', n: 'Sommer', m: 'JULI', d: 'Volles Laub, Salbei und Storchschnabel blühen, die Äpfel färben sich.' },
+      { uid: 'ps3', k: 'autumn', n: 'Herbst', m: 'OKTOBER', d: 'Die Linde wird goldgelb, Laub liegt auf dem Rasen, Gräser stehen in Ähren.' },
+      { uid: 'ps4', k: 'winter', n: 'Winter', m: 'JANUAR', d: 'Die Laubgehölze sind kahl. Die Hainbuche hält ihr braunes Laub, die Struktur zeigen Gräser.' }
+    ];
+
+    const zones = [
+      { i: '1', n: 'Rasen Nord', d: '3 Versenkregner · 06:00', t: '18 min' },
+      { i: '2', n: 'Rasen Süd', d: '4 Versenkregner · 06:20', t: '18 min' },
+      { i: '3', n: 'Hochbeete', d: 'Tropfschlauch 36 m · 07:00', t: '30 min' },
+      { i: '4', n: 'Staudenbeet', d: 'Tropfschlauch 28 m · 07:30', t: '25 min' }
+    ];
+
+    const sw = { lawn: 'repeating-linear-gradient(100deg,rgba(46,64,28,.3) 0 1px,transparent 1px 3px),#9BAE74', gravel: 'radial-gradient(rgba(80,70,55,.5) .8px,transparent 1.2px) 0 0/4px 4px,#D6CDBB', pave: 'linear-gradient(rgba(85,72,58,.5) 1px,transparent 1px) 0 0/8px 4px,#CFC3AE', deck: 'repeating-linear-gradient(0deg,rgba(70,45,25,.5) 0 1px,transparent 1px 3px),#B78C61', edge: '#A3998A', mulch: '#6E533F', hedge: '#5B7350', tree: '#7E9A5C', shrub: '#6B8460', peren: '#9A86C2', veg: '#93B166', bed: '#A27C56', glass: '#DCE7E5', water: 'linear-gradient(135deg,#93B9B8,#47767F)', light: '#E9B45E', irr: '#2F76B8' };
+    const R2 = (c, n, sub, q, p, t) => ({ c: sw[c], n, s: sub, q, p, t });
+    const costGroups = [
+      { n: 'Flächen & Wege', sum: '9.452 €', rows: [R2('lawn', 'Rollrasen', 'Spiel & Sport', '247 m²', '7,90 €', '1.951 €'), R2('gravel', 'Kies 8/16, Jurakalk', 'Weg, Zugang, Beetfläche', '15,1 m³', '68,00 €', '1.027 €'), R2('pave', 'Terrassenplatten 80 × 40', '219 Stk', '70,0 m²', '64,00 €', '4.480 €'), R2('deck', 'Holzdeck Lärche', 'am Teich', '10,9 m²', '119,00 €', '1.297 €'), R2('edge', 'Kantenstein 8 × 20 × 100', '', '96 m', '6,40 €', '614 €'), R2('mulch', 'Rindenmulch', 'Staudenbeet, 7 cm', '1,7 m³', '49,00 €', '83 €')] },
+      { n: 'Pflanzen', sum: '4.258 €', rows: [R2('hedge', 'Hainbuche 125–150', '3 Stk/m · 146 m', '438 Stk', '6,90 €', '3.022 €'), R2('tree', 'Obst- & Ziergehölze', 'Apfel, Zierkirsche', '2 Stk', '189,00 €', '378 €'), R2('shrub', 'Sträucher', '', '10 Stk', '34,00 €', '340 €'), R2('peren', 'Stauden & Gräser', '9 Arten', '80 Stk', '5,40 €', '432 €'), R2('veg', 'Gemüse-Jungpflanzen', '', '72 Stk', '1,20 €', '86 €')] },
+      { n: 'Bauten & Wasser', sum: '6.074 €', rows: [R2('bed', 'Hochbeet Lärche 300 × 120', '', '6 Stk', '289,00 €', '1.734 €'), R2('glass', 'Gewächshaus 4,0 × 3,5 m', '', '1 Stk', '2.490,00 €', '2.490 €'), R2('water', 'Teich: Folie, Vlies, Pumpe', 'pauschal', '9,4 m²', '–', '1.850 €')] },
+      { n: 'Licht & Bewässerung', sum: '3.800 €', rows: [R2('light', 'Leuchten inkl. Trafo', '7 Typen', '17 Stk', '–', '2.380 €'), R2('irr', 'Regner, Tropfrohr, Steuerung', '4 Zonen', '1 Set', '–', '1.420 €')] }
+    ];
+
+    const legend = [['Rasen', sw.lawn, '1px'], ['Kies 8/16', sw.gravel, '1px'], ['Terrassenplatten', sw.pave, '1px'], ['Holzdeck', sw.deck, '1px'], ['Mulch / Staudenbeet', sw.mulch, '1px'], ['Wasserfläche', sw.water, '1px'], ['Laubbaum, Bestand', sw.tree, '5px'], ['Hecke, Hainbuche', sw.hedge, '3px'], ['Grundstücksgrenze', 'repeating-linear-gradient(90deg,#2D3033 0 5px,transparent 5px 7px) 0 50%/100% 1.2px no-repeat', '0']].map(([n, c, r]) => ({ n, c, r }));
+    const LOOKS = [['Tag', 'linear-gradient(135deg,#9BAE74 0 45%,#D6CDBB 45% 70%,#6D8656 70%)'], ['Nacht', 'radial-gradient(circle at 40% 55%,rgba(255,200,130,.85) 0,rgba(255,200,130,0) 30%),radial-gradient(circle at 75% 35%,rgba(255,200,130,.6) 0,rgba(255,200,130,0) 22%),#0E1724'], ['Strich', 'repeating-linear-gradient(45deg,rgba(0,0,0,.18) 0 1px,transparent 1px 5px),#F4F2EC']];
+    const looks = LOOKS.map(([n, bg]) => ({ n, bg, on: s.look === n, off: s.look !== n, pick: () => this.setState({ look: n }) }));
+    const exportOpts = [['Legende', 1], ['Maßstabsleiste', 1], ['Nordpfeil', 1], ['Titelblock', 1], ['Bemaßung', 1], ['Pflanzenliste als Blatt 2', 0]].map(([n, o]) => ({ n, on: !!o, off: !o }));
+
+    return {
+      onbPoly: s.onb === 'poly', onbRect: s.onb === 'rect', setPoly: () => this.setState({ onb: 'poly' }), setRect: () => this.setState({ onb: 'rect' }),
+      edges, polyArea: area.toFixed(1).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' m²', polyPts: PTS.map(p => p.join(',')).join(' '), polyV: PTS.map(p => ({ x: p[0] - 5, y: p[1] - 5 })),
+      lm: s.lm, k: s.k, ang: s.ang, kColor: this.kc(s.k),
+      lmLabel: s.lm + ' lm', lmPct: pct(s.lm, 100, 1200), kLabel: s.k + ' K', kPct: pct(s.k, 2200, 4000), angLabel: s.ang + '°', angPct: pct(s.ang, 10, 60),
+      watt: (s.lm / 74).toFixed(1).replace('.', ',') + ' W',
+      dragLm: this.drag('lm', 100, 1200, 10), dragK: this.drag('k', 2200, 4000, 50), dragAng: this.drag('ang', 10, 60, 1),
+      lampTypes, lampLib, scenes, libSections,
+      hour: s.hour, doy: s.doy, heat: s.heat, shStrength: 0.32,
+      toggleHeat: () => this.setState({ heat: !s.heat }), heatBg: s.heat ? '#3D5BD9' : 'rgba(31,34,36,.18)', heatKnob: s.heat ? '14px' : '2px',
+      dragHour: this.drag('hour', 5, 21, 0.25), hourPct: pct(s.hour, 5, 21), hourLabel: this.hm(s.hour),
+      riseLabel: rise ? this.hm(rise) : '–', setLabel: set ? this.hm(set) : '–', dateLabel, dates,
+      azLabel: Math.round(az * 180 / Math.PI) + '°', elLabel: Math.round(Math.max(0, sn.el) * 180 / Math.PI) + '°',
+      sunX: (46 + Math.sin(az) * rr).toFixed(1), sunY: (46 - Math.cos(az) * rr).toFixed(1), sunArc: arcPts.length ? 'M' + arcPts.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join('L') : '',
+      elPath, elArea: elPath + 'L750 56L0 56Z',
+      years: y, dragYears: this.drag('years', 0, 20, 1), yearsPct: pct(y, 0, 20),
+      yearsLabel: y === 0 ? 'Heute' : 'in ' + y + (y === 1 ? ' Jahr' : ' Jahren'), yearSub: y === 0 ? 'Oktober 2026, Pflanzgrößen' : 'Herbst ' + (2026 + y) + ', geschätzte Kronen und Heckenbreite',
+      yearNum: String(2026 + y), yearStops: stops.map(([v, n]) => ({ p: pct(v, 0, 20), n })), growth,
+      seasons, zones, costGroups, legend, looks, exportOpts,
+      lookDay: s.look === 'Tag', lookNight: s.look === 'Nacht', lookLine: s.look === 'Strich'
+    };
+  }
+}
+</script>
+</body>
+</html>

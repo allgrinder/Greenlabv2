@@ -1,0 +1,99 @@
+/* Design-Tokens 1:1 aus Gartenwerk.dc.html (Tag / Nacht) */
+:root {
+  --bg: #e9e5dc;
+  --gl: rgba(250, 248, 244, 0.76);
+  --gb: rgba(255, 255, 255, 0.75);
+  --sh: 0 1px 0 rgba(255, 255, 255, 0.7) inset, 0 10px 36px rgba(44, 46, 34, 0.12), 0 1px 3px rgba(44, 46, 34, 0.08);
+  --ink: #1f2224;
+  --ink2: #5d615d;
+  --ink3: #8c8e88;
+  --line: rgba(31, 34, 36, 0.09);
+  --hov: rgba(31, 34, 36, 0.05);
+  --fld: rgba(31, 34, 36, 0.05);
+  --tab: #ffffff;
+  --acc: #3d5bd9;
+  --accs: rgba(61, 91, 217, 0.11);
+  --dot: rgba(31, 34, 36, 0.1);
+  --field-bg: #ffffff;
+
+  --sage: #9bae74;
+  --sand: #d6cdbb;
+  --terracotta: #b9724f;
+  --anthracite: #1f2224;
+  --night: #0e1724;
+
+  --font-ui: 'Geist', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Newsreader', Georgia, serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
+
+  --blur: blur(28px) saturate(1.5);
+  --r-panel: 14px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+[data-mode='night'] {
+  --bg: #0e1724;
+  --gl: rgba(20, 28, 41, 0.72);
+  --gb: rgba(255, 255, 255, 0.08);
+  --sh: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 16px 44px rgba(0, 0, 0, 0.45);
+  --ink: #ece9e2;
+  --ink2: #a6aeb7;
+  --ink3: #6f7986;
+  --line: rgba(255, 255, 255, 0.08);
+  --hov: rgba(255, 255, 255, 0.05);
+  --fld: rgba(255, 255, 255, 0.055);
+  --tab: rgba(255, 255, 255, 0.12);
+  --acc: #5a78f0;
+  --accs: rgba(110, 140, 255, 0.16);
+  --dot: rgba(255, 255, 255, 0.05);
+  --field-bg: rgba(255, 255, 255, 0.06);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+input {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

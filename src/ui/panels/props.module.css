@@ -248,3 +248,29 @@
     width: 270px;
   }
 }
+
+.brushHero {
+  height: 120px;
+  border-radius: 10px;
+  background: #dcd3bf;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brushScale {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #5d615d;
+}
+
+.serif21 {
+  font-family: var(--font-serif);
+  font-size: 21px;
+  line-height: 1.1;
+}

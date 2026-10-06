@@ -4,7 +4,7 @@
  */
 import { snapPoint, constrainAngle, type SnapResult } from '../core/geometry/snap';
 import { dist } from '../core/geometry/vec';
-import { newArea, newPath } from '../core/model/factory';
+import { newArea, newFromCatalog, newHedge, newPath, newPlant } from '../core/model/factory';
 import type { PathGeometry, PlanObject, Vec2 } from '../core/model/types';
 import type { PlanRenderer } from '../render/PlanRenderer';
 import { panBy, zoomAt } from '../render/Viewport';
@@ -14,6 +14,8 @@ import type { ToolId } from '../state/types';
 import { PathBuilderTool } from './PathBuilderTool';
 import { SelectTool } from './SelectTool';
 import { DimensionTool, FreehandTool, PlaceTool, RectTool, TextTool } from './simpleTools';
+import { BackgroundMoveTool, CalibrateTool, DND_MIME } from './BackgroundTools';
+import type { Brush } from '../state/types';
 import type { Tool, ToolContext, WorldPointerEvent } from './Tool';
 
 const KEYS: Record<string, ToolId> = { v: 'select', r: 'rect', p: 'poly', b: 'bezier', f: 'free', w: 'path', m: 'dim', t: 'text', g: 'plant' };
@@ -72,6 +74,9 @@ export class ToolController {
           cmd.addObject(newPath(ctx.doc(), path, def.pathWidth, def.pathMaterial));
         },
       }),
+      hedge: new PathBuilderTool(ctx, { id: 'hedge', closed: false, curves: false, source: 'polygon', min: 2, finish: (path) => cmd.addObject(newHedge(ctx.doc(), path)) }),
+      calibrate: new CalibrateTool(ctx),
+      bgmove: new BackgroundMoveTool(ctx),
       free: new FreehandTool(ctx),
       dim: new DimensionTool(ctx),
       text: new TextTool(ctx),
@@ -102,6 +107,24 @@ export class ToolController {
     });
     on(el, 'wheel', (e) => this.onWheel(e), { passive: false });
     on(el, 'contextmenu', (e) => e.preventDefault());
+    // Drag & Drop aus der Bibliothek
+    on(el, 'dragover', (e) => {
+      if (e.dataTransfer?.types.includes(DND_MIME)) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+      }
+    });
+    on(el, 'drop', (e) => {
+      const data = e.dataTransfer?.getData(DND_MIME);
+      if (!data || !store.getState().doc) return;
+      e.preventDefault();
+      const brush = JSON.parse(data) as Brush;
+      const raw = renderer.toWorld(this.screenOf(e));
+      const p = this.snapAt(raw, {}, { shift: false, alt: e.altKey }).p;
+      const doc = ctx.doc();
+      cmd.addObject(brush.kind === 'plant' ? newPlant(doc, brush.speciesId, p) : newFromCatalog(doc, brush.catalogId, p));
+      store.getState().setSession({ brush });
+    });
     on(window, 'keydown', (e) => this.onKey(e as unknown as KeyboardEvent));
     on(window, 'keyup', (e) => this.onKeyUp(e as unknown as KeyboardEvent));
     on(window, 'blur', () => {
@@ -149,7 +172,7 @@ export class ToolController {
     return snapPoint(p, cands, { tolerance: tol, grid: doc.settings.snapToGrid ? doc.settings.gridStepM : 0, geometry: doc.settings.snapToGeometry });
   }
 
-  private screenOf(e: PointerEvent | WheelEvent): Vec2 {
+  private screenOf(e: PointerEvent | WheelEvent | DragEvent): Vec2 {
     const r = this.el.getBoundingClientRect();
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   }

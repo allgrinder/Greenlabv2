@@ -5,9 +5,9 @@
  * - Zoom/Pan ändern nur die Transformation des Welt-Containers.
  * - Gerendert wird auf Anforderung (dirty-Flag + requestAnimationFrame), nicht im Dauerlauf.
  */
-import { Application, BlurFilter, Container, Graphics, Sprite, Texture } from 'pixi.js';
+import { Application, BlurFilter, Container, Graphics, RenderTexture, Sprite, Texture } from 'pixi.js';
 import { getSpecies } from '../core/catalog/plants';
-import { expandBBox } from '../core/geometry/polygon';
+import { bbox, expandBBox } from '../core/geometry/polygon';
 import type { Id, PlanObject, Project, Vec2 } from '../core/model/types';
 import type { EditorStoreApi, EditorStore } from '../state/store';
 import type { Viewport } from '../state/types';
@@ -74,7 +74,8 @@ export class PlanRenderer {
     this.shadows.filters = [this.shadowBlur];
     this.shadows.alpha = 0.3;
     this.groundTex.alpha = 0.35;
-    this.world.addChild(this.background, this.ground, this.groundTex);
+    // Reihenfolge: Erdton → Mulchstruktur → Hintergrundbild (mit Deckkraft) → Ebenen
+    this.world.addChild(this.ground, this.groundTex, this.background);
     this.app.stage.addChild(this.world, this.hoverG, this.overlay, this.previewG, this.labels.container);
 
     this.resizeObs = new ResizeObserver(() => {
@@ -129,8 +130,66 @@ export class PlanRenderer {
     img.src = url;
   }
 
-  toScreen = (p: Vec2): Vec2 => worldToScreen(this.store.getState().session.viewport, this.size, p);
-  toWorld = (p: Vec2): Vec2 => screenToWorld(this.store.getState().session.viewport, this.size, p);
+  /** Während des Exports: feste Ansicht statt der Sitzungs-Ansicht */
+  private exportView: { vp: Viewport; size: ScreenSize } | null = null;
+
+  private get vp(): Viewport {
+    return this.exportView?.vp ?? this.store.getState().session.viewport;
+  }
+
+  private get viewSize(): ScreenSize {
+    return this.exportView?.size ?? this.size;
+  }
+
+  toScreen = (p: Vec2): Vec2 => worldToScreen(this.vp, this.viewSize, p);
+  toWorld = (p: Vec2): Vec2 => screenToWorld(this.vp, this.viewSize, p);
+
+  /**
+   * Plan als PNG: rendert offscreen in eine RenderTexture im gewünschten Maßstab
+   * (ohne Auswahl, Hover, Raster und Werkzeugvorschau).
+   */
+  async exportPng(opts: { pxPerMeter: number; marginM: number; background: string | null; uiScale?: number }): Promise<{ blob: Blob; width: number; height: number }> {
+    const doc = this.store.getState().doc;
+    if (!doc) throw new Error('Kein Projekt geladen');
+    const b = expandBBox(bbox(doc.site.boundary), opts.marginM);
+    const maxTex = 8192;
+    const ppm = Math.min(opts.pxPerMeter, maxTex / (b.maxX - b.minX), maxTex / (b.maxY - b.minY));
+    const size = { width: Math.round((b.maxX - b.minX) * ppm), height: Math.round((b.maxY - b.minY) * ppm) };
+    const vp: Viewport = { center: { x: (b.minX + b.maxX) / 2, y: (b.minY + b.maxY) / 2 }, pxPerMeter: ppm, rotationDeg: 0 };
+    const rt = RenderTexture.create({ width: size.width, height: size.height, resolution: 1, antialias: true });
+    const bg = new Graphics();
+    if (opts.background) bg.rect(0, 0, size.width, size.height).fill(opts.background);
+    this.exportView = { vp, size };
+    try {
+      const s = this.store.getState();
+      const lod = 2;
+      this.reconcile(doc, lod);
+      this.lastLod = lod;
+      this.lastDoc = doc;
+      this.applyBackground(doc);
+      this.applyViewport(vp);
+      this.cull(doc, vp);
+      // Linien und Maßzahlen in Druckgröße: Overlay in reduzierter Auflösung zeichnen und hochskalieren
+      const k = opts.uiScale ?? 1;
+      this.exportView = { vp: { ...vp, pxPerMeter: ppm / k }, size: { width: size.width / k, height: size.height / k } };
+      this.overlay.scale.set(k);
+      this.labels.container.scale.set(k);
+      this.drawOverlay(s, true);
+      this.app.stage.addChildAt(bg, 0);
+      this.app.renderer.render({ container: this.app.stage, target: rt, clear: true });
+      const canvas = this.app.renderer.extract.canvas(rt) as HTMLCanvasElement;
+      const blob = await new Promise<Blob>((res, rej) => canvas.toBlob((x) => (x ? res(x) : rej(new Error('PNG-Erzeugung fehlgeschlagen'))), 'image/png'));
+      return { blob, ...size };
+    } finally {
+      this.app.stage.removeChild(bg);
+      bg.destroy();
+      this.overlay.scale.set(1);
+      this.labels.container.scale.set(1);
+      rt.destroy(true);
+      this.exportView = null;
+      this.invalidate();
+    }
+  }
 
   private rebuildAll() {
     for (const m of this.mounted.values()) this.unmount(m);
@@ -146,7 +205,7 @@ export class PlanRenderer {
     const t0 = performance.now();
     const s = this.store.getState();
     const doc = s.doc;
-    const vp = s.session.viewport;
+    const vp = this.vp;
     if (doc) {
       const lod = lodFor(vp.pxPerMeter);
       if (doc !== this.lastDoc || lod !== this.lastLod) this.reconcile(doc, lod);
@@ -216,7 +275,7 @@ export class PlanRenderer {
       if (doc.layers[id].kind === 'plants') order.push(this.shadows);
       order.push(c);
     }
-    const base = 3; // background, ground, groundTex
+    const base = 3; // ground, groundTex, background
     order.forEach((c, i) => {
       if (c.parent !== this.world) this.world.addChild(c);
       this.world.setChildIndex(c, base + i);
@@ -254,7 +313,7 @@ export class PlanRenderer {
   }
 
   private applyViewport(vp: Viewport) {
-    const { width, height } = this.size;
+    const { width, height } = this.viewSize;
     this.world.scale.set(vp.pxPerMeter);
     this.world.position.set(width / 2 - vp.center.x * vp.pxPerMeter, height / 2 - vp.center.y * vp.pxPerMeter);
     // Weichzeichnung in Weltmetern konstant halten
@@ -263,7 +322,7 @@ export class PlanRenderer {
 
   /** Nur Objekte im sichtbaren Bereich zeichnen */
   private cull(doc: Project, vp: Viewport) {
-    const visible = new Set(this.index.query(expandBBox(visibleWorldBBox(vp, this.size), 2)));
+    const visible = new Set(this.index.query(expandBBox(visibleWorldBBox(vp, this.viewSize), 2)));
     for (const [id, m] of this.mounted) {
       const o = doc.objects[id];
       const layer = o && doc.layers[o.layerId];
@@ -273,16 +332,18 @@ export class PlanRenderer {
     }
   }
 
-  private drawOverlay(s: EditorStore) {
+  private drawOverlay(s: EditorStore, exporting = false) {
     const g = this.overlay;
     g.clear();
+    this.hoverG.clear();
+    this.previewG.clear();
     this.labels.begin();
     const doc = s.doc;
-    const vp = s.session.viewport;
+    const vp = this.vp;
     const toScreen = this.toScreen;
     if (doc) {
       const plotLayer = doc.layerOrder.map((id) => doc.layers[id]).find((l) => l.kind === 'plot');
-      if (doc.settings.snapToGrid) drawGrid(g, toScreen, vp.pxPerMeter, doc.site.boundary, doc.settings.gridStepM);
+      if (doc.settings.snapToGrid && !exporting) drawGrid(g, toScreen, vp.pxPerMeter, doc.site.boundary, doc.settings.gridStepM);
       if (!plotLayer || plotLayer.visible) drawBoundary(g, toScreen, doc.site.boundary, vp.pxPerMeter, s.session.mode === 'night');
       // Bemaßungen
       for (const lid of doc.layerOrder) {
@@ -292,6 +353,10 @@ export class PlanRenderer {
           const o = doc.objects[id];
           if (o?.type === 'dimension' && !o.hidden) drawDimension(g, this.labels, toScreen, o, doc);
         }
+      }
+      if (exporting) {
+        this.labels.end();
+        return;
       }
       // Hover
       const hover = s.session.hoverId && !s.session.selection.includes(s.session.hoverId) ? doc.objects[s.session.hoverId] : null;

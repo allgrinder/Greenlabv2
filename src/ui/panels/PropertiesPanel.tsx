@@ -15,6 +15,9 @@ import { materialSwatchStyle } from '../../render/textures/materialTextures';
 import { cmd, useEditor } from '../../state';
 import { Field, NumberField, Toggle } from '../components/controls';
 import { Icon } from '../icons';
+import { glyphSrc, SYMBOL_GLYPH } from '../library/glyphs';
+import type { Brush } from '../../state/types';
+import { BackgroundSection } from './BackgroundSection';
 import u from '../components/ui.module.css';
 import s from './props.module.css';
 
@@ -43,11 +46,15 @@ function update<T extends PlanObject>(o: T, label: string, fn: (d: Draft<T>) => 
 export function PropertiesPanel() {
   const doc = useEditor((st) => st.doc);
   const selection = useEditor((st) => st.session.selection);
+  const tool = useEditor((st) => st.session.tool);
+  const brush = useEditor((st) => st.session.brush);
   if (!doc) return null;
   const objs = selection.map((id) => doc.objects[id]).filter(Boolean);
+  const showBrush = objs.length === 0 && tool === 'plant';
   return (
     <aside className={s.panel} aria-label="Eigenschaften" data-testid="properties">
-      {objs.length === 0 && <ProjectInfo doc={doc} />}
+      {showBrush && <BrushDetail brush={brush} />}
+      {objs.length === 0 && !showBrush && <ProjectInfo doc={doc} />}
       {objs.length === 1 && <ObjectProps key={objs[0].id} o={objs[0]} doc={doc} />}
       {objs.length > 1 && <MultiProps objs={objs} />}
     </aside>
@@ -248,7 +255,9 @@ function ObjectProps({ o, doc }: { o: PlanObject; doc: Project }) {
         ? materialSwatchStyle(getMaterial(o.mulchMaterialId), 50)
         : o.type === 'plant' || o.type === 'hedge'
           ? { background: `radial-gradient(circle at 40% 35%, #ffffff44, ${getSpecies(o.speciesId).colors.summer} 60%)` }
-          : { background: 'var(--fld)' };
+          : o.type === 'item'
+            ? { background: `url("${glyphSrc(SYMBOL_GLYPH[getItem(o.catalogId).symbol] ?? 'edge')}") center/32px no-repeat, rgba(255,255,255,.6)` }
+            : { background: 'var(--fld)' };
 
   return (
     <>
@@ -531,6 +540,60 @@ function ProjectInfo({ doc }: { doc: Project }) {
         </div>
         <div className={s.muted} style={{ fontSize: 12, lineHeight: 1.45 }}>
           Mengen werden aus der Zeichnung abgeleitet. Die vollständige Kostenübersicht folgt in Phase 2.
+        </div>
+      </div>
+      <BackgroundSection doc={doc} />
+    </>
+  );
+}
+
+/** Detailkarte des gewählten Bibliothekselements (Design 04, rechts) */
+function BrushDetail({ brush }: { brush: Brush }) {
+  if (brush.kind === 'item') {
+    const it = getItem(brush.catalogId);
+    return (
+      <>
+        <div className={s.brushHero}>
+          <img src={glyphSrc(SYMBOL_GLYPH[it.symbol] ?? 'edge')} width={84} height={84} alt="" />
+          <span className={s.brushScale}>Draufsicht</span>
+        </div>
+        <div>
+          <div className={s.serif21}>{it.name}</div>
+        </div>
+        <div className={s.grid2}>
+          <Field label="Maße" value={`${num(it.width, 2)} × ${num(it.depth, 2)} m`} />
+          <Field label="Höhe" value={meters(it.height)} />
+          <Field label="Preis" value={it.price ? euros(it.price) : '–'} />
+          <Field label="Ebene" value={it.creates === 'item' ? 'Gebäude & Möbel' : 'Flächen'} mono={false} />
+        </div>
+        <div className={s.muted} style={{ fontSize: 12, lineHeight: 1.45 }}>
+          Klicke in den Plan, um es zu setzen. Maße und Drehung lassen sich danach anpassen.
+        </div>
+      </>
+    );
+  }
+  const sp = getSpecies(brush.speciesId);
+  return (
+    <>
+      <div className={s.brushHero} style={{ background: `radial-gradient(circle at 50% 52%, ${sp.colors.summer} 0, ${sp.colors.summer} 34%, transparent 36%), #DCD3BF` }}>
+        <span className={s.brushScale}>Draufsicht · 1:100</span>
+      </div>
+      <div>
+        <div className={s.serif21}>{sp.name}</div>
+        <div className={s.latin}>{sp.latin}</div>
+      </div>
+      <div className={s.grid2}>
+        <Field label="Endgröße" value={`${num(sp.diameterMature, 0)}–${num(sp.heightMature, 0)} m`} />
+        <Field label="Zuwachs" value={`${num(sp.growthPerYear * 100, 0)} cm/J`} />
+        <Field label="Standort" value={SUN[sp.sun]} mono={false} />
+        <Field label="Preis" value={euros(sp.price, sp.price < 10 ? 2 : 0)} />
+      </div>
+      <div className={s.section} style={{ gap: 6 }}>
+        <div className={u.eyebrow}>Jahreslauf</div>
+        <div className={s.phen}>
+          {sp.phenology.map((p, i) => (
+            <div key={i} style={{ background: p === 'leaf' ? sp.colors.summer : p === 'bloom' ? (sp.colors.bloom ?? PHEN_COLOR.bloom) : p === 'autumn' ? (sp.colors.autumn ?? PHEN_COLOR.autumn) : PHEN_COLOR[p] }} />
+          ))}
         </div>
       </div>
     </>

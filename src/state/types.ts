@@ -21,7 +21,9 @@ export type ToolId =
   | 'dim'
   | 'text'
   | 'plant'
-  | 'calibrate';
+  | 'hedge'
+  | 'calibrate'
+  | 'bgmove';
 
 export type LensTab = 'plan' | 'sun' | 'growth' | 'seasons' | 'irrigation' | 'costs';
 

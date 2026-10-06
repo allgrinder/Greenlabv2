@@ -1,3 +1,4 @@
+import type { SaveState } from '../../persistence/autosave';
 import { cmd, useEditor } from '../../state';
 import type { LensTab } from '../../state/types';
 import { Segmented } from '../components/controls';
@@ -13,8 +14,6 @@ const TABS: { v: LensTab; label: string; phase1: boolean }[] = [
   { v: 'irrigation', label: 'Bewässerung', phase1: false },
   { v: 'costs', label: 'Kosten', phase1: false },
 ];
-
-export type SaveState = 'saved' | 'saving' | 'unsaved';
 
 export function TopBar({ saveState, onExport, onProjects }: { saveState: SaveState; onExport: () => void; onProjects: () => void }) {
   const name = useEditor((st) => st.doc?.name ?? '');

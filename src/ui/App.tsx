@@ -6,6 +6,7 @@ import type { PlanRenderer } from '../render/PlanRenderer';
 import { fitBBox } from '../render/Viewport';
 import { editor, useEditor } from '../state';
 import { PlanCanvas } from './canvas/PlanCanvas';
+import { ToolLayer } from './canvas/ToolLayer';
 import { BottomBar } from './chrome/BottomBar';
 import { LayersPanel } from './chrome/LayersPanel';
 import { ToolRail } from './chrome/ToolRail';
@@ -48,6 +49,7 @@ export function App() {
     >
       {hasDoc && (
         <>
+          <ToolLayer onFit={fit} />
           <TopBar saveState="saved" onExport={() => {}} onProjects={() => {}} />
           <ToolRail />
           {panels.layers && <LayersPanel />}

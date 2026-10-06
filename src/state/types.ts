@@ -38,7 +38,13 @@ export interface SessionState {
   lens: LensTab;
   mode: 'day' | 'night';
   panels: { layers: boolean; library: boolean; properties: boolean };
+  /** Was „Pflanze setzen“ bzw. ein Klick aus der Bibliothek platziert */
+  brush: Brush;
+  /** Vorgaben für neu gezeichnete Objekte */
+  defaults: { areaMaterial: string; pathMaterial: string; pathWidth: number };
 }
+
+export type Brush = { kind: 'plant'; speciesId: string } | { kind: 'item'; catalogId: string };
 
 export interface Viewport {
   /** Weltpunkt in der Bildschirmmitte */

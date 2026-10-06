@@ -34,7 +34,8 @@ export function createCommands(store: EditorStoreApi) {
       },
       { mergeKey },
     );
-  const name = (o: PlanObject) => o.name ?? 'Objekt';
+  const TYPE: Record<PlanObject['type'], string> = { area: 'Fläche', path: 'Weg', plant: 'Pflanze', planting: 'Pflanzung', hedge: 'Hecke', item: 'Objekt', dimension: 'Bemaßung', text: 'Text', lamp: 'Leuchte' };
+  const name = (o: PlanObject) => o.name ?? TYPE[o.type];
 
   function detach(d: Draft<Project>, id: Id) {
     const o = d.objects[id];

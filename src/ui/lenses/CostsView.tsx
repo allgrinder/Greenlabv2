@@ -2,7 +2,7 @@
  * Linse „Kosten“ (Screen 10): Mengen live aus dem Plan, Einzelpreise editierbar,
  * Summen netto/brutto, Anteile je Bereich, Export als CSV und PDF.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { getItem } from '../../core/catalog/items';
 import { getLamp, kelvinHex } from '../../core/catalog/lamps';
 import type { LampType } from '../../core/model/types';
@@ -153,11 +153,15 @@ export function CostsView({ onClose, onPdf }: { onClose: () => void; onPdf: () =
   const [view, setView] = useState<View>('area');
   const report = useMemo(() => (doc ? costReport(doc) : null), [doc]);
 
+  // Listener nur einmal registrieren: Escape leert auch die Auswahl, das rendert synchron neu –
+  // ein dabei neu angemeldeter Listener würde für dieses Ereignis nicht mehr aufgerufen.
+  const close = useRef(onClose);
+  close.current = onClose;
   useEffect(() => {
-    const k = (e: KeyboardEvent) => e.key === 'Escape' && !(e.target instanceof HTMLInputElement) && onClose();
+    const k = (e: KeyboardEvent) => e.key === 'Escape' && !(e.target instanceof HTMLInputElement) && close.current();
     window.addEventListener('keydown', k);
     return () => window.removeEventListener('keydown', k);
-  }, [onClose]);
+  }, []);
 
   if (!doc || !report) return null;
   const overrides = doc.priceOverrides;

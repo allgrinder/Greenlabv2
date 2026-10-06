@@ -6,10 +6,10 @@
 |---|---|
 | `npm install` | Abhängigkeiten installieren |
 | `npm run dev` | Dev-Server auf http://localhost:5173 |
-| `npm test` | Unit-Tests (Vitest): Geometrie, Mengen, Undo/Redo, JSON-Import |
+| `npm test` | Unit-Tests (Vitest): Geometrie, Mengen, Undo/Redo, JSON-Import, Sonne, Schatten, Wachstum, Bewässerung, Licht, Kosten, Blattaufteilung |
 | `npm run typecheck` | TypeScript strikt prüfen |
 | `npm run build` | Produktions-Build nach `dist/` (statisch hostbar) |
-| `npm run e2e` | Browser-Smoke-Test der Kernabläufe (Dev-Server muss laufen; Chromium über `PLAYWRIGHT_CHROMIUM`) |
+| `npm run e2e` | Browser-Smoke-Test der Kernabläufe aus Phase 1 und 2 (Dev-Server muss laufen; Chromium über `PLAYWRIGHT_CHROMIUM`, andere Adresse über `GW_URL`) |
 
 ## Nützliche URLs
 
@@ -35,9 +35,21 @@ Umgesetzt sind alle acht Kernfunktionen der Phase 1 sowie PNG-Export (siehe `ARC
 
 **Auswahl:** Doppelklick oder Alt-Klick auf eine Kante fügt einen Punkt ein. Alt-Ziehen an einem Griff löst die Kopplung der beiden Griffe.
 
+## Stand Phase 2
+
+9. **Nacht:** Schalter „Nacht“ unten. Lichtszenen (Ankommen, Abendessen, Spätabend, Alle an) oder Zeitpläne je Leuchte, Uhrzeit-Regler, Gesamtleistung und Stromkosten pro Abend. Leuchten aus der Bibliothek (Abschnitt „Licht“) mit Lumen, Kelvin, Abstrahlwinkel, Richtung und Zeitplan. Gebäude und Hecken verdecken das Licht, Wasser spiegelt es.
+10. **Sonne:** Tab „Sonne“. Uhrzeit über der Höhenkurve ziehen (←/→ in Viertelstunden), Datum wählen. Schatten aus Standort und Nordrichtung, Heatmap der Sonnenstunden mit Pflanzempfehlungen.
+11. **Wachstum und Jahreszeiten:** Zeitreise 0–20 Jahre mit Entwicklung je Gehölz und Hinweis, wann Kronen an Wege, Bauten oder die Grenze heranwachsen. Jahreszeiten als Vergleich 4× oder einzeln groß.
+12. **Bewässerung:** Regner (Wurfradius, Sektor, Durchfluss), Tropfschlauch, Leitungen, Verteiler und Anschluss aus der Bibliothek. Zonen mit Name, Startzeit und Laufzeit bearbeitbar. Unbewässerte Flächen sind rot schraffiert. „Regner verteilen“ und „Tropfschlauch verlegen“ planen ausgewählte Flächen automatisch.
+13. **Kosten:** Tab „Kosten“. Nach Bereich, nach Material oder als Einkaufsliste; Einzelpreise anklicken und ändern (gilt nur für das Projekt, ↺ stellt den Katalogpreis wieder her). Export als CSV (Excel, deutsches Format) oder PDF.
+
+**Export:** PDF als Architektenplan (A4 bis A1 quer, Normmaßstab passend zum Blatt, Darstellung Tag/Nacht/Strich, Legende, Maßstabsleiste, Nordpfeil, Titelblock, optional Pflanzenliste als Blatt 2) oder PNG im Maßstab.
+
 ## Bekannte Grenzen
 
-- Nachtmodus, Sonne/Schatten nach Datum, Wachstum, Jahreszeiten, Bewässerung, Kostenübersicht und PDF-Export folgen in Phase 2. Die Tabs und Schalter dafür sind sichtbar, aber deaktiviert.
+- Im PDF ist der Plan selbst ein Rasterbild (150 oder 300 dpi, im exakten Maßstab); Rahmen, Schrift, Legende, Maßstab und Nordpfeil sind Vektoren. Die Texturen, Schatten und Lichteffekte stammen aus dem WebGL-Renderer.
+- Der Architektenplan zeigt die Planansicht ohne Bewässerung. Einen eigenen Bewässerungsplan gibt es als PNG aus der Bewässerungs-Linse noch nicht.
+- Anschlussdruck und maximaler Durchfluss sind feste Annahmen (3,5 bar, 30 l/min je Zone), Strompreis 0,35 €/kWh.
 - PDF-Lagepläne müssen vorher als Bild exportiert werden (PNG, JPEG oder WebP).
 - Die Standortsuche hat kein Geocoding. Breite und Länge kommen aus der Browser-Ortung, ohne Ortung gilt der Vorgabewert Frankfurt.
-- Das Bundle ist ungeteilt (~250 kB gzip). Code-Splitting lohnt sich, sobald Phase 2 hinzukommt.
+- Das Haupt-Bundle hat rund 290 kB gzip; jsPDF (≈130 kB gzip) wird erst beim ersten PDF-Export nachgeladen.

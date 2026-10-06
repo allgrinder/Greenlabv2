@@ -1,5 +1,5 @@
 /**
- * Browser-Smoke-Test der Kernabläufe (Phase 1). Voraussetzung: `npm run dev` läuft.
+ * Browser-Smoke-Test der Kernabläufe (Phase 1 und 2). Voraussetzung: `npm run dev` läuft.
  *   npm run e2e            (Chromium aus PLAYWRIGHT_CHROMIUM oder /opt/pw-browsers/chromium)
  */
 import { chromium } from 'playwright-core';
@@ -114,6 +114,7 @@ step('Autosave und Wiederherstellen');
 
 // PNG-Export
 await p.click('[data-testid=export-btn]');
+await p.click('[data-testid=export-dialog] >> text=PNG');
 await p.waitForSelector('[data-testid=export-dialog] img', { timeout: 30000 });
 const [png] = await Promise.all([p.waitForEvent('download'), p.click('[data-testid=export-run]')]);
 assert.match(png.suggestedFilename(), /^Smoke_M1-100\.png$/);
@@ -131,6 +132,64 @@ d = await doc();
 assert.equal(Object.keys(d.objects).length, n);
 assert.ok(d.background);
 step('JSON-Export und -Import');
+
+// Phase 2 am Beispielprojekt
+await p.click('button[aria-label=Projekte]');
+await p.click('[data-testid=menu-sample]');
+await p.waitForFunction(() => window.__gw.editor.getState().doc?.name.includes('Lindenweg'));
+const tab = (name) => p.click(`header >> text=${name}`);
+
+await tab('Sonne');
+await p.waitForSelector('[data-testid=sun-panel] >> text=Hochbeete');
+await p.click('[data-testid=sun-date-355]');
+assert.equal((await p.evaluate(() => window.__gw.editor.getState().session.sun.doy)), 355);
+step('Sonne: Datum, Heatmap-Empfehlungen');
+
+await tab('Wachstum');
+await p.focus('[data-testid=growth-slider]');
+await p.keyboard.press('ArrowRight');
+assert.ok((await p.textContent('[data-testid=growth-label]')).startsWith('in '));
+await p.waitForSelector('[data-testid=growth-warning]');
+step('Wachstum: Zeitreise und Konflikthinweis');
+
+await tab('Jahreszeiten');
+await p.waitForSelector('[data-testid=season-winter] img', { timeout: 60000 });
+step('Jahreszeiten: vier Vorschauen');
+
+await tab('Bewässerung');
+const lawnIds = await p.evaluate(() => Object.values(window.__gw.editor.getState().doc.objects).filter((o) => o.type === 'area' && o.materialId === 'lawn').map((o) => o.id));
+await p.evaluate((ids) => window.__gw.editor.getState().setSession({ selection: ids }), lawnIds);
+await p.click('[data-testid=auto-sprinklers]');
+d = await doc();
+assert.ok(Object.values(d.objects).filter((o) => o.type === 'sprinkler').length > 20);
+assert.match(await p.textContent('[data-testid=coverage]'), /\d+ % bewässert/);
+step('Bewässerung: Regner verteilen, Überdeckung');
+
+await tab('Kosten');
+await p.click('[data-testid="price-mat:lawn"]');
+await p.keyboard.press('Control+A');
+await p.keyboard.type('10');
+await p.keyboard.press('Enter');
+assert.equal((await doc()).priceOverrides['mat:lawn'], 10);
+const [csv] = await Promise.all([p.waitForEvent('download'), p.click('[data-testid=cost-csv]')]);
+assert.match(csv.suggestedFilename(), /_Kosten\.csv$/);
+await p.keyboard.press('Escape');
+assert.equal(await p.evaluate(() => window.__gw.editor.getState().session.lens), 'plan');
+step('Kosten: Preis ändern, CSV');
+
+await p.click('[data-testid=night-btn]');
+await p.click('[data-testid=scene-dinner]');
+assert.match(await p.textContent('[data-testid=night-pill]'), /Abendessen/);
+await p.click('[data-testid=day-btn]');
+step('Nacht: Lichtszene');
+
+await p.click('[data-testid=export-btn]');
+await p.waitForSelector('[data-testid=pdf-preview] img', { timeout: 30000 });
+await p.click('[data-testid=export-dialog] >> text=150 dpi');
+const [pdf] = await Promise.all([p.waitForEvent('download', { timeout: 120000 }), p.click('[data-testid=export-run]')]);
+assert.match(pdf.suggestedFilename(), /_A3_M1-200\.pdf$/);
+await p.keyboard.press('Escape');
+step('PDF-Architektenplan');
 
 assert.deepEqual(errors, []);
 console.log('Alle Smoke-Tests bestanden.');

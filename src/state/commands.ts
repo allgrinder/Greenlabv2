@@ -228,7 +228,9 @@ export function createCommands(store: EditorStoreApi) {
           d.layers[o.layerId].objectOrder.push(o.id);
         }
       });
-      store.getState().setSession({ selection: add.map((o) => o.id) });
+      // Auswahl (z. B. die Rasenfläche) bleibt, damit die Aktion wiederholt werden kann
+      const sel = store.getState().session.selection;
+      store.getState().setSession({ selection: sel.filter((id) => !remove.includes(id)) });
     },
 
     addZone(zone: IrrigationZone) {

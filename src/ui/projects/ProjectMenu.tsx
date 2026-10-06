@@ -77,7 +77,7 @@ export function ProjectMenu({
         <button type="button" className={s.action} onClick={onNew} data-testid="menu-new">
           <Icon name="plus" size={14} /> Neues Projekt
         </button>
-        <button type="button" className={s.action} onClick={onSample}>
+        <button type="button" className={s.action} onClick={onSample} data-testid="menu-sample">
           Beispielgarten
         </button>
         <button type="button" className={s.action} onClick={() => file.current?.click()} data-testid="menu-import">

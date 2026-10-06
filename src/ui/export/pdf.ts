@@ -7,7 +7,7 @@
  * vom WebGL-Renderer im exakten Maßstab gerastert (Texturen, Schatten, Licht) und eingebettet.
  */
 import type { jsPDF as JsPDF } from 'jspdf';
-import { legendEntries, plantList, scaleBarMeters, sheetLayout, type PaperId, type Rect } from '../../core/export/sheet';
+import { legendEntries, PDF_MARGIN_M, plantList, scaleBarMeters, sheetLayout, type PaperId, type Rect } from '../../core/export/sheet';
 import { euros, num, unitLabel } from '../../core/format';
 import { expandBBox, bbox } from '../../core/geometry/polygon';
 import type { Project } from '../../core/model/types';
@@ -29,8 +29,6 @@ export interface PlanPdfOptions {
   plantSheet: boolean;
 }
 
-/** Rand um die Grundstücksgrenze im Planfeld, m */
-export const PDF_MARGIN_M = 1;
 
 const INK = '#2D3033';
 const NIGHT_BG = '#0E1724';

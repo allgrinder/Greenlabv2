@@ -20,6 +20,9 @@ export const PAPERS: Record<PaperId, { w: number; h: number }> = {
   A1: { w: 841, h: 594 },
 };
 
+/** Rand um die Grundstücksgrenze im Planfeld, m */
+export const PDF_MARGIN_M = 1;
+
 export const SCALES = [50, 100, 200, 250, 500, 1000];
 
 export interface Rect {

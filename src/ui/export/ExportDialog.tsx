@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
-import { fits, legendEntries, PAPERS, SCALES, sheetLayout, type PaperId } from '../../core/export/sheet';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { fits, legendEntries, PAPERS, PDF_MARGIN_M, SCALES, sheetLayout, type PaperId } from '../../core/export/sheet';
 import { bbox, expandBBox } from '../../core/geometry/polygon';
-import { PDF_MARGIN_M, type Look, type PlanPdfOptions } from './pdf';
+import type { Look, PlanPdfOptions } from './pdf';
 import { num } from '../../core/format';
 import { useRenderer } from '../canvas/PlanCanvas';
 import { useEditor } from '../../state';
@@ -65,6 +65,9 @@ const CONTENT: {
 export function ExportDialog({ onClose }: { onClose: () => void }) {
   const renderer = useRenderer();
   const doc = useEditor((st) => st.doc);
+  // stabiler Listener (siehe CostsView)
+  const close = useRef(onClose);
+  close.current = onClose;
   const name = doc?.name ?? 'Garten';
   const [format, setFormat] = useState<Format>('pdf');
   const [paper, setPaper] = useState<PaperId>('A3');
@@ -117,10 +120,10 @@ export function ExportDialog({ onClose }: { onClose: () => void }) {
   }, [renderer, bg, night, dims, format]);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close.current();
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  }, []);
 
   const run = async () => {
     if (!renderer || !doc) return;

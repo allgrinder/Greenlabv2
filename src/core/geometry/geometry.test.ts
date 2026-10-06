@@ -100,6 +100,25 @@ describe('Offset und Boolesche Operationen', () => {
     }
   });
 
+  it('enge Kehre (Radius < halbe Breite): Band ohne Selbstüberschneidung', () => {
+    const fr = offsetPolyline([{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 0.5 }, { x: 0, y: 0.5 }], 2, 'round');
+    const ring = fr[0].outer;
+    const n = ring.length;
+    let crossings = 0;
+    const cross = (a: { x: number; y: number }, b: { x: number; y: number }, c: { x: number; y: number }, d: { x: number; y: number }) => {
+      const o = (p: typeof a, q: typeof a, r: typeof a) => Math.sign((q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x));
+      return o(a, b, c) * o(a, b, d) < 0 && o(c, d, a) * o(c, d, b) < 0;
+    };
+    for (let i = 0; i < n; i++) for (let j = i + 2; j < n; j++) {
+      if (i === 0 && j === n - 1) continue;
+      if (cross(ring[i], ring[(i + 1) % n], ring[j], ring[(j + 1) % n])) crossings++;
+    }
+    expect(crossings).toBe(0);
+    // Abgedeckt: 10 × 2,5 m Rechteck plus runde Außenkehre
+    expect(area(ring)).toBeGreaterThan(25);
+    expect(area(ring)).toBeLessThan(28);
+  });
+
   it('Differenz erzeugt Loch, Vereinigung verschmilzt', () => {
     const d = difference([{ outer: sq(0, 0, 10), holes: [] }], [{ outer: sq(3, 3, 2), holes: [] }]);
     expect(d).toHaveLength(1);

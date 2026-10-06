@@ -139,7 +139,11 @@ export class PlanRenderer {
     this.invalidate();
   }
 
+  /** Letzte Frame-Dauern in ms (Abgleich + Zeichnen), für Benchmarks */
+  readonly frameTimes: number[] = [];
+
   private renderNow(): void {
+    const t0 = performance.now();
     const s = this.store.getState();
     const doc = s.doc;
     const vp = s.session.viewport;
@@ -154,6 +158,8 @@ export class PlanRenderer {
     if (doc) this.cull(doc, vp);
     this.drawOverlay(s);
     this.app.render();
+    this.frameTimes.push(performance.now() - t0);
+    if (this.frameTimes.length > 240) this.frameTimes.shift();
   }
 
   /** Szenengraph an das Dokument angleichen */

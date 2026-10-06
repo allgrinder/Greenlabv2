@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { bbox } from '../core/geometry/polygon';
+import { createBenchmark } from '../core/sample/benchmark';
 import { createLindenweg12 } from '../core/sample/lindenweg12';
 import { fitBBox } from '../render/Viewport';
 import { editor, useEditor } from '../state';
@@ -9,7 +10,9 @@ export function App() {
   const mode = useEditor((s) => s.session.mode);
 
   useEffect(() => {
-    if (!editor.getState().doc) editor.getState().loadProject(createLindenweg12());
+    if (editor.getState().doc) return;
+    const bench = Number(new URLSearchParams(location.search).get('bench'));
+    editor.getState().loadProject(bench > 0 ? createBenchmark(bench) : createLindenweg12());
   }, []);
 
   useEffect(() => {

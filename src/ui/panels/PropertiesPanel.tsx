@@ -22,6 +22,10 @@ import u from '../components/ui.module.css';
 import s from './props.module.css';
 
 const TYPE_LABEL: Record<PlanObject['type'], string> = {
+  sprinkler: 'Versenkregner',
+  drip: 'Tropfschlauch',
+  pipe: 'Leitung',
+  fixture: 'Anschluss',
   area: 'Fläche',
   path: 'Weg',
   plant: 'Pflanze',

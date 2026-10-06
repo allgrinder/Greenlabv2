@@ -4,10 +4,17 @@
  */
 import { getItem } from '../catalog/items';
 import { getSpecies } from '../catalog/plants';
+import { getLamp } from '../catalog/lamps';
 import { defaultLayerKind, layerOfKind, objectBase } from './defaults';
 import type {
   AreaObject,
   DimensionObject,
+  DripObject,
+  FixtureObject,
+  LampObject,
+  LampType,
+  PipeObject,
+  SprinklerObject,
   HedgeObject,
   ItemObject,
   LayerKind,
@@ -86,3 +93,37 @@ export function newText(doc: Project, position: Vec2, text = 'Beschriftung', siz
 
 /** Standard-Ebene für einen Objekttyp im Projekt */
 export const layerIdFor = (doc: Project, o: Pick<PlanObject, 'type'>) => layerFor(doc, defaultLayerKind(o));
+
+/** Leuchte mit den Vorgaben ihres Typs; Lichterketten bekommen einen Verlauf */
+export function newLamp(doc: Project, lampType: LampType, position: Vec2, path: PathGeometry | null = null): LampObject {
+  const spec = getLamp(lampType);
+  return {
+    ...objectBase(layerFor(doc, 'light')),
+    type: 'lamp',
+    lampType,
+    position: path ? { ...path.nodes[0].p } : { ...position },
+    lumen: spec.lumen,
+    kelvin: spec.kelvin,
+    beamAngleDeg: spec.beamDeg,
+    directionDeg: 0,
+    path: path ? { ...path, closed: false } : null,
+    schedule: { from: 'dusk', to: '23:30', weekdays: [true, true, true, true, true, true, true] },
+    on: true,
+  };
+}
+
+export function newSprinkler(doc: Project, position: Vec2, zone = 1, radius = 6.5, arc: [number, number] = [0, 360]): SprinklerObject {
+  return { ...objectBase(layerFor(doc, 'water')), type: 'sprinkler', position: { ...position }, radius, arcStartDeg: arc[0], arcEndDeg: arc[1], flowLpm: 6, zone };
+}
+
+export function newDrip(doc: Project, path: PathGeometry, zone = 3): DripObject {
+  return { ...objectBase(layerFor(doc, 'water')), type: 'drip', path: { ...path, closed: false }, lphPerMeter: 6.7, wetWidth: 0.6, zone };
+}
+
+export function newPipe(doc: Project, path: PathGeometry, kind: PipeObject['kind'] = 'water'): PipeObject {
+  return { ...objectBase(layerFor(doc, 'pipes')), type: 'pipe', path: { ...path, closed: false }, kind, diameterMm: kind === 'water' ? 32 : 0 };
+}
+
+export function newFixture(doc: Project, kind: FixtureObject['kind'], position: Vec2): FixtureObject {
+  return { ...objectBase(layerFor(doc, 'water')), type: 'fixture', kind, position: { ...position }, valves: kind === 'manifold' ? 4 : 0 };
+}

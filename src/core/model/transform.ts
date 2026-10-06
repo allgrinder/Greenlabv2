@@ -35,7 +35,13 @@ export function translateObject(o: PlanObject, d: Vec2): void {
     case 'plant':
     case 'item':
     case 'text':
+    case 'sprinkler':
+    case 'fixture':
       move(o.position, d);
+      break;
+    case 'drip':
+    case 'pipe':
+      movePath(o.path, d);
       break;
     case 'lamp':
       move(o.position, d);
@@ -63,6 +69,11 @@ function nodePath(o: PlanObject): PathGeometry | null {
     case 'path':
     case 'hedge':
       return o.centerline;
+    case 'drip':
+    case 'pipe':
+      return o.path;
+    case 'lamp':
+      return o.path;
     default:
       return null;
   }
@@ -70,7 +81,13 @@ function nodePath(o: PlanObject): PathGeometry | null {
 
 /** Knoten an neue Position setzen. Griffe wandern relativ mit (sie sind relativ gespeichert). */
 export function setNode(o: PlanObject, index: number, p: Vec2): void {
-  if (o.type === 'plant' || o.type === 'item' || o.type === 'text' || o.type === 'lamp') {
+  if (o.type === 'lamp' && o.path) {
+    const n = o.path.nodes[index];
+    if (n) n.p = { ...p };
+    if (index === 0) o.position = { ...p };
+    return;
+  }
+  if (o.type === 'plant' || o.type === 'item' || o.type === 'text' || o.type === 'lamp' || o.type === 'sprinkler' || o.type === 'fixture') {
     if (index === 0) o.position = { ...p };
     return;
   }

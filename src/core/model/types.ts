@@ -394,7 +394,7 @@ export interface PlantSpecies {
 export interface CatalogItem {
   id: string;
   name: string;
-  category: 'raisedBed' | 'shed' | 'terrace' | 'pond' | 'pool' | 'play' | 'furniture' | 'fence' | 'greenhouse' | 'compost' | 'edging';
+  category: 'building' | 'raisedBed' | 'shed' | 'terrace' | 'pond' | 'pool' | 'play' | 'furniture' | 'fence' | 'greenhouse' | 'compost' | 'edging';
   defaultLayer: LayerKind;
   width: number;
   depth: number;

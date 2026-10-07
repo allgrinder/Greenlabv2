@@ -260,3 +260,10 @@ In Phase 1 waren die Linsen-Tabs sichtbar, aber deaktiviert. Seit Phase 2 sind s
 - Automatisch geplante Regner und Schläuche ersetzen die vorhandenen in der Fläche in **einem** Undo-Schritt (`cmd.replaceObjects`).
 - Die Heatmap rechnet in einem Raster von 1 m (Linse) bzw. 0,5 m mit 20- bis 30-Minuten-Schritten und wird entprellt neu berechnet.
 - Hochbeete werfen Schatten, ihre eigene Oberseite liegt aber in der Sonne.
+
+## 13. Grafik B, Spalier, Pinsel, Einsehbarkeit (Schema 3)
+
+- **Modell:** neue Objekttypen `espalier` (Pflanzlinie, Art, Abstand, Stammhöhe, Oberkante, Schirmtiefe, Form) und `scatter` (Pflanzgruppe: Liste aus Art + Position); `Project.observers` für Blickpunkte. Migration 2 → 3 ergänzt `observers: []`.
+- **Kern:** `core/espalier.ts` (Stammpositionen, Grundriss, Blickdichte je Jahreszeit, Pinseltupfer mit Poisson-Scheiben-Abstand, Radierer), `core/privacy.ts` (Hindernisraster mit Höhenbereichen, Sichtlinien in 2,5D, Anteil einsehbarer Fläche), Schattenwerfer `raised` für schwebende Schirme.
+- **Darstellung:** `render/symbols/foliage.ts` malt Kronen aus beleuchteten Laubballen, Astgerüste, Polster, Grashorste und Spalierschirme mit Canvas 2D; `plantSprites.ts` setzt sie als Sprites. Texturen werden je Art/Jahreszeit/Größenstufe/Variante zwischengespeichert. `effects/PrivacyLayer.ts` zeigt die Einsehbarkeit.
+- **Werkzeuge:** `espalier` (Linienwerkzeug), `brush` (Pinsel, Alt = Radierer, Befehl `eraseScatter` mit mergeKey als ein Schritt), `observer` (Blickpunkte setzen und ziehen).

@@ -9,6 +9,13 @@ import type { PlantKind } from '../../core/model/types';
 import { useEditor } from '../../state';
 import type { Brush } from '../../state/types';
 import { DND_MIME } from '../../tools/BackgroundTools';
+import { brushable } from '../../tools/GardenTools';
+
+const BRUSH_GLYPH =
+  'data:image/svg+xml,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="14" fill="none" stroke="#3D5BD9" stroke-width="1.4" stroke-dasharray="3 2.5"/><circle cx="15" cy="16" r="3.4" fill="#8E8CC4"/><circle cx="23" cy="14" r="3" fill="#C8678F"/><circle cx="25" cy="23" r="3.6" fill="#E2B23A"/><circle cx="16" cy="25" r="3.2" fill="#7E9A6A"/><circle cx="20" cy="20" r="2.6" fill="#CBBE8F"/></svg>',
+  );
 import { LAMPS, kelvinRgb } from '../../core/catalog/lamps';
 import { irrGlyph, lampGlyph } from './glyphs';
 import { glyphSrc, SYMBOL_GLYPH, type GlyphKind } from './glyphs';
@@ -23,7 +30,7 @@ interface Entry {
   key: string;
   name: string;
   src: string;
-  brush: Brush | 'hedge' | 'drip' | 'pipe' | 'lights';
+  brush: Brush | 'hedge' | 'drip' | 'pipe' | 'lights' | 'brush';
   search: string;
   filter: Filter[];
   sub?: string;
@@ -34,6 +41,7 @@ interface Entry {
 const PLANT_SECTIONS: { h: string; kinds: PlantKind[]; glyph: GlyphKind }[] = [
   { h: 'Bäume', kinds: ['tree'], glyph: 'tree' },
   { h: 'Sträucher', kinds: ['shrub'], glyph: 'shrub' },
+  { h: 'Spalierbäume · Sichtschutz', kinds: ['espalier'], glyph: 'hedge' },
   { h: 'Stauden & Gräser', kinds: ['perennial', 'grass'], glyph: 'peren' },
   { h: 'Gemüse & Kräuter', kinds: ['vegetable'], glyph: 'veg' },
 ];
@@ -46,11 +54,15 @@ function useSections() {
         key: `plant:${p.id}`,
         name: p.name,
         src: glyphSrc(sec.glyph, p.colors.bloom && sec.glyph === 'peren' ? p.colors.summer : p.colors.summer, p.colors.spring ?? '#8FA56C'),
-        brush: { kind: 'plant', speciesId: p.id } as Brush,
+        brush: (p.kind === 'espalier' ? { kind: 'espalier', speciesId: p.id } : { kind: 'plant', speciesId: p.id }) as Brush,
         search: `${p.name} ${p.latin}`.toLowerCase(),
         filter: ['all', 'plants'] as Filter[],
+        sub: p.kind === 'espalier' ? `${p.deciduous ? (p.marcescent ? 'hält Laub im Winter' : 'laubabwerfend') : 'immergrün'} · ${p.price} € je Baum` : undefined,
       })),
     }));
+    // Pinsel vorn in „Stauden & Gräser“
+    const per = sections.find((x) => x.h === 'Stauden & Gräser');
+    per?.items.unshift({ key: 'tool:brush', name: 'Pinsel', src: BRUSH_GLYPH, brush: 'brush', search: 'pinsel malen streuen stauden blumen', filter: ['all', 'plants'], sub: 'Mischung im Radius malen, Alt radiert' });
     const build: Entry[] = ITEMS.filter((i) => i.category !== 'edging' && i.category !== 'building').map((i) => ({
       key: `item:${i.id}`,
       name: i.name.replace(/ \d.*$/, '').replace(/,.*$/, ''),
@@ -93,6 +105,7 @@ export function LibraryPanel() {
   const [filter, setFilter] = useState<Filter>('all');
   const brush = useEditor((st) => st.session.brush);
   const tool = useEditor((st) => st.session.tool);
+  const paint = useEditor((st) => st.session.paint);
   const setSession = useEditor((st) => st.setSession);
   const total = sections.reduce((a, x) => a + x.items.length, 0);
 
@@ -101,9 +114,22 @@ export function LibraryPanel() {
     const water = e.key.startsWith('irr:');
     const lens = water ? { lens: 'irrigation' as const } : {};
     if (typeof e.brush === 'string') setSession({ tool: e.brush, selection: [], ...lens });
-    else setSession({ brush: e.brush, tool: 'plant', selection: [], ...lens });
+    else if (e.brush.kind === 'espalier') setSession({ brush: e.brush, tool: 'espalier', selection: [] });
+    else if (tool === 'brush' && e.brush.kind === 'plant' && brushable(e.brush.speciesId)) {
+      // Pinsel aktiv: Staude in die Mischung aufnehmen bzw. herausnehmen
+      const id = e.brush.speciesId;
+      const mix = paint.mix.includes(id) ? paint.mix.filter((x) => x !== id) : [...paint.mix, id];
+      setSession({ paint: { ...paint, mix } });
+    } else setSession({ brush: e.brush, tool: 'plant', selection: [], ...lens });
   };
-  const isOn = (e: Entry) => (typeof e.brush === 'string' ? tool === e.brush : tool === 'plant' && JSON.stringify(brush) === JSON.stringify(e.brush));
+  const isOn = (e: Entry) =>
+    typeof e.brush === 'string'
+      ? tool === e.brush
+      : e.brush.kind === 'espalier'
+        ? tool === 'espalier' && JSON.stringify(brush) === JSON.stringify(e.brush)
+        : tool === 'brush' && e.brush.kind === 'plant'
+          ? paint.mix.includes(e.brush.speciesId)
+          : tool === 'plant' && JSON.stringify(brush) === JSON.stringify(e.brush);
 
   const query = q.trim().toLowerCase();
   const FILTERS: { v: Filter; label: string }[] = [

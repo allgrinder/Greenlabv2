@@ -216,6 +216,38 @@ assert.match(await p.textContent('[data-testid=night-pill]'), /Abendessen/);
 await p.click('[data-testid=day-btn]');
 step('Nacht: Lichtszene');
 
+// Spalierbäume, Pflanzpinsel, Einsehbarkeit
+await tab('Planen');
+await p.evaluate(() => { const st = window.__gw.editor.getState(); st.setSession({ selection: [], tool: 'select', panels: { ...st.session.panels, library: true, layers: false }, viewport: { center: { x: 25, y: 15 }, pxPerMeter: 20, rotationDeg: 0 } }); });
+await p.click('[data-testid="lib-plant:carpinus-espalier"]');
+for (const [x, y] of [[20, 28.5], [32, 28.5]]) { const q = await w2s(x, y); await p.mouse.click(q.x, q.y); }
+await p.keyboard.press('Enter');
+d = await doc();
+const esp = Object.values(d.objects).filter((o) => o.type === 'espalier' && o.speciesId === 'carpinus-espalier');
+assert.equal(esp.length, 1);
+assert.equal(Math.round(Math.hypot(esp[0].centerline.nodes[1].p.x - esp[0].centerline.nodes[0].p.x, 0)), 12);
+step('Spalierreihe zeichnen');
+
+await p.keyboard.press('Escape');
+await p.click('[data-testid="lib-tool:brush"]');
+const groups0 = Object.values((await doc()).objects).filter((o) => o.type === 'scatter').length;
+let qa = await w2s(30, 20), qb = await w2s(34, 21);
+await p.mouse.move(qa.x, qa.y); await p.mouse.down(); await p.mouse.move(qb.x, qb.y, { steps: 12 }); await p.mouse.up();
+d = await doc();
+const groups = Object.values(d.objects).filter((o) => o.type === 'scatter');
+assert.equal(groups.length, groups0 + 1);
+assert.ok(groups[groups.length - 1].plants.length >= 8);
+assert.equal(await p.evaluate(() => window.__gw.editor.getState().history.past.slice(-1)[0].label), 'Pflanzgruppe hinzufügen');
+step('Pflanzpinsel: eine Gruppe je Strich');
+
+await p.keyboard.press('Escape');
+await p.evaluate(() => { const st = window.__gw.editor.getState(); st.setSession({ selection: [], tool: 'select', panels: { ...st.session.panels, library: false } }); });
+await p.click('[data-testid=privacy-open]');
+await p.waitForSelector('[data-testid=privacy-ratio]', { timeout: 20000 });
+assert.match(await p.textContent('[data-testid=privacy-ratio]'), /\d+ %/);
+await p.click('[data-testid=privacy-close]');
+step('Einsehbarkeit');
+
 await p.click('[data-testid=export-btn]');
 await p.waitForSelector('[data-testid=pdf-preview] img', { timeout: 30000 });
 await p.click('[data-testid=export-dialog] >> text=150 dpi');

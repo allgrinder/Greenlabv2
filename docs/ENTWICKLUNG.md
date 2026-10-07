@@ -51,10 +51,19 @@ Umgesetzt sind alle acht Kernfunktionen der Phase 1 sowie PNG-Export (siehe `ARC
 - **Bild ausrichten:** Zwei Punkte im Bild anklicken und den passenden Grundstücksecken zuordnen. Maßstab, Drehung und Lage werden daraus berechnet; bei genordetem Bild auch die Nordrichtung. Danach lässt sich das Bild ziehen (Assistent) bzw. mit „Verschieben“ und den Pfeiltasten nachjustieren (10 cm, ⇧ 1 m). „Nur Maßstab“ kalibriert wie bisher über eine bekannte Strecke.
 - **Standort:** Für Sonne und Schatten zählen nur Breitengrad und Zeitzone, daher genügt eine Stadt aus der Liste (Deutschland, Österreich, Schweiz) oder die Ortung. Die Adresse ist reiner Text für Titelblock und Anzeige. Es wird kein externer Dienst abgefragt.
 
+## Grafik, Spalier, Pinsel, Einsehbarkeit
+
+- **Darstellung (Stil B, fotorealistisch):** Bäume, Sträucher, Hecken, Spaliere und Stauden werden je Art, Jahreszeit und Größenstufe einmal als Bild gemalt (`render/symbols/foliage.ts`) und als Sprites gezeichnet. Bodenbeläge sind nahtlos kachelbare, prozedurale Foto-Texturen (`render/textures/materialTextures.ts`). In der Pflanzenebene liegen niedrige Pflanzen immer unter Hecken, Spalieren und Kronen.
+- **Spalierbäume:** Bibliothek → „Spalierbäume · Sichtschutz“, Pflanzlinie klicken, ↵ beendet. Bäume im Abstand (Standard 1,5 m), Stammhöhe, Oberkante und Schirmtiefe einstellbar; Dachspalier (Platane) mit breitem, niedrigem Schirm. Schatten beginnt erst in Stammhöhe; Kosten je Baum.
+- **Pflanzpinsel:** Bibliothek → „Stauden & Gräser“ → „Pinsel“. Stauden und Gräser anklicken stellt die Mischung zusammen; Radius und Dichte rechts, `[` `]` ändern die Größe, Alt radiert. Jeder Strich wird eine Pflanzgruppe (ein Objekt, ein Rückgängig-Schritt); der Abstand richtet sich nach der Endgröße, vorhandene Pflanzen werden respektiert.
+- **Einsehbarkeit:** Grundstück-Panel → „Einsehbarkeit prüfen“. Blickpunkte setzen (Nachbarfenster, Straße) mit Augenhöhe; Person sitzend, stehend oder liegend; Sommer oder Winter. Rot = einsehbar, grün = geschützt, dazu der Anteil für den Garten und die Sitzplätze. Berücksichtigt Haus, Hecken, Spalierschirme ab Stammhöhe und Baumkronen mit jahreszeitlicher Blickdichte.
+
 ## Bekannte Grenzen
 
 - Im PDF ist der Plan selbst ein Rasterbild (150 oder 300 dpi, im exakten Maßstab); Rahmen, Schrift, Legende, Maßstab und Nordpfeil sind Vektoren. Die Texturen, Schatten und Lichteffekte stammen aus dem WebGL-Renderer.
 - Der Architektenplan zeigt die Planansicht ohne Bewässerung. Einen eigenen Bewässerungsplan gibt es als PNG aus der Bewässerungs-Linse noch nicht.
+- Echte Foto-Texturen (CC0) ließen sich im Container nicht laden; Rasen, Kies, Pflaster, Holz und Mulch sind prozedural erzeugt. Gebäude und Möbel sind noch im bisherigen Zeichenstil.
+- Die Einsehbarkeit rechnet in 2,5D mit Höhenbereichen je 0,5-m-Rasterzelle, ohne Gelände und ohne Zäune unter 30 cm.
 - Anschlussdruck und maximaler Durchfluss sind feste Annahmen (3,5 bar, 30 l/min je Zone), Strompreis 0,35 €/kWh.
 - PDF-Lagepläne müssen vorher als Bild exportiert werden (PNG, JPEG oder WebP).
 - Die Standortsuche hat kein Geocoding. Breite und Länge kommen aus der Browser-Ortung, ohne Ortung gilt der Vorgabewert Frankfurt.

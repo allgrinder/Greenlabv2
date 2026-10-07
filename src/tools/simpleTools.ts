@@ -6,7 +6,7 @@ import { num } from '../core/format';
 import { smoothFreehand } from '../core/geometry/smooth';
 import type { SnapResult } from '../core/geometry/snap';
 import { add, dist, normalize, perp, scale, sub, dot } from '../core/geometry/vec';
-import { newArea, newDimension, newFixture, newFromCatalog, newLamp, newPath, newPlant, newSprinkler, newText } from '../core/model/factory';
+import { newArea, newDimension, newEspalier, newFixture, newFromCatalog, newLamp, newPath, newPlant, newSprinkler, newText } from '../core/model/factory';
 import { getLamp } from '../core/catalog/lamps';
 import type { PlanObject, Project } from '../core/model/types';
 import type { Brush } from '../state/types';
@@ -237,7 +237,7 @@ export class PlaceTool implements Tool {
       g.circle(P.x, P.y, r).fill({ color: parseInt(sp.colors.summer.slice(1), 16), alpha: 0.55 }).stroke({ color: ACCENT, width: 1.5 });
       g.circle(P.x, P.y, rm).stroke({ color: ACCENT, width: 1, alpha: 0.6 });
       labels.mono(`${sp.name} · Ø ${num(sp.diameterPlanted, 1)} → ${num(sp.diameterMature, 1)} m`, P.x, P.y + rm + 14, 0, ACCENT);
-    } else {
+    } else if (brush.kind === 'item') {
       const it = getItem(brush.catalogId);
       const w = it.width * ppm;
       const d = it.depth * ppm;
@@ -258,5 +258,8 @@ export function objectFromBrush(doc: Project, brush: Brush, p: Vec2): PlanObject
       return newLamp(doc, brush.lampType, p);
     case 'irr':
       return brush.what === 'sprinkler' ? newSprinkler(doc, p, 1, 6, [0, 360]) : newFixture(doc, brush.what, p);
+    case 'espalier':
+      // abgelegt aus der Bibliothek: Reihe aus zwei Bäumen, danach Punkte ziehen
+      return newEspalier(doc, { kind: 'path', closed: false, source: 'polygon', nodes: [{ p: { x: p.x - 1.5, y: p.y } }, { p: { x: p.x + 1.5, y: p.y } }] }, brush.speciesId);
   }
 }

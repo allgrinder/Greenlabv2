@@ -14,6 +14,7 @@ import type {
   BackgroundImage,
   Id,
   IrrigationZone,
+  Observer,
   PlanObject,
   PlotSpec,
   Project,
@@ -239,6 +240,41 @@ export function createCommands(store: EditorStoreApi) {
       // Auswahl (z. B. die Rasenfläche) bleibt, damit die Aktion wiederholt werden kann
       const sel = store.getState().session.selection;
       store.getState().setSession({ selection: sel.filter((id) => !remove.includes(id)) });
+    },
+
+    /** Radierer des Pflanzpinsels: Pflanzen im Kreis entfernen, leere Gruppen löschen */
+    eraseScatter(c: Vec2, r: number, mergeKey: string) {
+      const doc = store.getState().doc;
+      if (!doc) return;
+      const hit = Object.values(doc.objects).filter((o) => o.type === 'scatter' && !o.locked && o.plants.some((q) => Math.hypot(q.p.x - c.x, q.p.y - c.y) <= r));
+      if (!hit.length) return;
+      apply('Pflanzen radieren', (d) => {
+        for (const o of hit) {
+          const x = d.objects[o.id];
+          if (!x || x.type !== 'scatter') continue;
+          x.plants = x.plants.filter((q) => Math.hypot(q.p.x - c.x, q.p.y - c.y) > r);
+          if (!x.plants.length) detach(d, o.id);
+        }
+      }, mergeKey);
+    },
+
+    addObserver(o: Observer) {
+      apply('Blickpunkt setzen', (d) => {
+        d.observers.push(o);
+      });
+    },
+
+    updateObserver(id: Id, patch: Partial<Omit<Observer, 'id'>>, mergeKey?: string) {
+      apply('Blickpunkt ändern', (d) => {
+        const o = d.observers.find((x) => x.id === id);
+        if (o) Object.assign(o, patch);
+      }, mergeKey);
+    },
+
+    removeObserver(id: Id) {
+      apply('Blickpunkt entfernen', (d) => {
+        d.observers = d.observers.filter((x) => x.id !== id);
+      });
     },
 
     addZone(zone: IrrigationZone) {

@@ -7,7 +7,7 @@ import { footprint } from '../geometry/objects';
 import { flatToRegion, polygonPath, simpleRegion } from '../geometry/regions';
 import { flattenRegion } from '../geometry/shape';
 import { createProject, layerOfKind, objectBase } from '../model/defaults';
-import { newDrip, newFixture, newLamp, newPipe } from '../model/factory';
+import { newDrip, newEspalier, newFixture, newLamp, newPipe, newScatter } from '../model/factory';
 import { autoDripPath } from '../irrigation';
 import { sprinklersFor } from '../irrigationLayout';
 import { cubicAt, cubicDerivative } from '../geometry/bezier';
@@ -228,6 +228,7 @@ export function createLindenweg12(): Project {
 
   addLighting(p, add);
   addIrrigation(p, add);
+  addPrivacy(p, add);
   return p;
 }
 
@@ -277,4 +278,21 @@ function addIrrigation(p: Project, add: (o: PlanObject) => PlanObject) {
   add(newPipe(p, line([[40.05, 13.1], [40.6, 13.1], [40.6, 20.5]])));
   add(newFixture(p, 'tap', P(11.4, 7.6)));
   add(newFixture(p, 'manifold', P(39.5, 13.1)));
+}
+
+/** Sichtschutz: Glanzmispel-Spalier an der Nordgrenze, Pinsel-Staudengruppe davor, Blickpunkt Nachbarhaus */
+function addPrivacy(p: Project, add: (o: PlanObject) => PlanObject) {
+  const line = (pts: [number, number][]): PathGeometry => ({ kind: 'path', closed: false, source: 'polygon', nodes: pts.map(([x, y]) => ({ p: P(x, y) })) });
+  add({ ...newEspalier(p, line([[24, 1.25], [36, 1.25]]), 'photinia-espalier'), name: 'Spalier Glanzmispel' });
+  // Staudenband vor dem Spalier, wie mit dem Pinsel gemalt (deterministisch)
+  const mix = ['nepeta', 'echinacea', 'calamagrostis', 'rudbeckia', 'salvia'];
+  const plants: { speciesId: string; p: Vec2 }[] = [];
+  let k = 0;
+  for (let x = 24.4; x < 35.8; x += 0.55)
+    for (const y of [2.15, 2.75]) {
+      const id = mix[(k++ * 7 + Math.floor(x)) % mix.length];
+      plants.push({ speciesId: id, p: P(x + (y > 2.5 ? 0.27 : 0), y + Math.sin(x * 3.1) * 0.08) });
+    }
+  add({ ...newScatter(p, plants), name: 'Staudenband' });
+  p.observers.push({ id: 'nachbar-ost', name: 'Nachbarhaus, 1. OG', position: P(30, -7), eyeHeight: 4.5 });
 }

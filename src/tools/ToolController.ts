@@ -4,7 +4,7 @@
  */
 import { snapPoint, constrainAngle, type SnapResult } from '../core/geometry/snap';
 import { dist } from '../core/geometry/vec';
-import { newArea, newDrip, newHedge, newLamp, newPath, newPipe } from '../core/model/factory';
+import { newArea, newDrip, newEspalier, newHedge, newLamp, newPath, newPipe } from '../core/model/factory';
 import { objectFromBrush } from './simpleTools';
 import { lensShowsLayer } from '../core/lens';
 import type { PathGeometry, PlanObject, Vec2 } from '../core/model/types';
@@ -18,6 +18,7 @@ import { SelectTool } from './SelectTool';
 import { DimensionTool, FreehandTool, PlaceTool, RectTool, TextTool } from './simpleTools';
 import { BackgroundMoveTool, CalibrateTool, DND_MIME } from './BackgroundTools';
 import { BackgroundAlignTool, PlotEditTool } from './SiteTools';
+import { BrushTool, ObserverTool } from './GardenTools';
 import type { Brush } from '../state/types';
 import type { Tool, ToolContext, WorldPointerEvent } from './Tool';
 
@@ -84,6 +85,19 @@ export class ToolController {
       calibrate: new CalibrateTool(ctx),
       bgmove: new BackgroundMoveTool(ctx),
       plotedit: new PlotEditTool(ctx),
+      espalier: new PathBuilderTool(ctx, {
+        id: 'espalier',
+        closed: false,
+        curves: false,
+        source: 'polygon',
+        min: 2,
+        finish: (path) => {
+          const b = store.getState().session.brush;
+          cmd.addObject(newEspalier(ctx.doc(), path, b.kind === 'espalier' ? b.speciesId : undefined));
+        },
+      }),
+      brush: new BrushTool(ctx),
+      observer: new ObserverTool(ctx),
       bgalign: new BackgroundAlignTool(ctx),
       free: new FreehandTool(ctx),
       dim: new DimensionTool(ctx),

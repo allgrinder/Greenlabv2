@@ -25,6 +25,7 @@ import { SeasonsView } from './lenses/SeasonsView';
 import { SunBar, SunPanel } from './lenses/SunLens';
 import { NewProjectWizard } from './onboarding/NewProjectWizard';
 import { PropertiesPanel } from './panels/PropertiesPanel';
+import { PrivacyDock } from './panels/PrivacyPanel';
 import { ProjectMenu } from './projects/ProjectMenu';
 import ps from './projects/projects.module.css';
 
@@ -41,7 +42,7 @@ export function App() {
   const night = useEditor((s) => s.session.mode === 'night');
   const hasSelection = useEditor((s) => s.session.selection.length > 0);
   const techSelected = useEditor((s) => s.session.selection.some((id) => ['sprinkler', 'drip', 'pipe', 'fixture'].includes(s.doc?.objects[id]?.type ?? '')));
-  const leftPanels = lens === 'plan' || lens === 'irrigation';
+  const leftPanels = lens === 'plan' || lens === 'irrigation' || lens === 'privacy';
   const bgBlobId = useEditor((s) => s.doc?.background?.blobId ?? null);
   const [screen, setScreen] = useState<Screen>('boot');
   const [saveState, setSaveState] = useState<SaveState>('saved');
@@ -182,9 +183,10 @@ export function App() {
             </>
           )}
           {lens === 'seasons' && <SeasonsView />}
+          {lens === 'privacy' && (hasSelection ? panels.properties && <PropertiesPanel /> : <PrivacyDock />)}
           {lens === 'irrigation' && (techSelected ? panels.properties && <PropertiesPanel /> : <IrrigationPanel />)}
           {(lens === 'plan' || lens === 'costs') && (night && !hasSelection ? <NightPanel /> : panels.properties && <PropertiesPanel />)}
-          {night && lens !== 'seasons' && <NightPill />}
+          {night && lens !== 'seasons' && lens !== 'privacy' && <NightPill />}
           {lens === 'costs' && <CostsView onClose={() => editor.getState().setSession({ lens: 'plan' })} onPdf={costPdf} />}
           <BottomBar onFit={fit} />
           {menu && (

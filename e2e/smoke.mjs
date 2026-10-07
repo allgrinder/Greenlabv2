@@ -242,10 +242,15 @@ step('Pflanzpinsel: eine Gruppe je Strich');
 
 await p.keyboard.press('Escape');
 await p.evaluate(() => { const st = window.__gw.editor.getState(); st.setSession({ selection: [], tool: 'select', panels: { ...st.session.panels, library: false } }); });
-await p.click('[data-testid=privacy-open]');
+// eigener Reiter, auch bei Auswahl erreichbar; Knopf im Grundstück-Panel führt dorthin
+await tab('Sichtschutz');
 await p.waitForSelector('[data-testid=privacy-ratio]', { timeout: 20000 });
 assert.match(await p.textContent('[data-testid=privacy-ratio]'), /\d+ %/);
 await p.click('[data-testid=privacy-close]');
+assert.equal(await p.evaluate(() => window.__gw.editor.getState().session.lens), 'plan');
+await p.click('[data-testid=privacy-open]');
+assert.equal(await p.evaluate(() => window.__gw.editor.getState().session.lens), 'privacy');
+await tab('Planen');
 step('Einsehbarkeit');
 
 // Schrägansicht: reine Anzeige mit festem Winkel; Zeichenwerkzeuge schalten zurück

@@ -91,7 +91,7 @@ export function App() {
   const fit = useCallback(() => {
     const doc = editor.getState().doc;
     if (!renderer || !doc) return;
-    editor.getState().setSession({ viewport: fitBBox(bbox(doc.site.boundary), renderer.size, PLAN_INSETS) });
+    editor.getState().setSession({ viewport: fitBBox(bbox(doc.site.boundary), renderer.size, PLAN_INSETS, 40, editor.getState().session.viewport.tiltDeg ?? 0) });
   }, [renderer]);
 
   // Neues Projekt → einpassen

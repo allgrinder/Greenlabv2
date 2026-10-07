@@ -12,14 +12,26 @@ export interface ScreenSize {
   height: number;
 }
 
+/** Fester Kippwinkel der Schrägansicht (Grad aus der Senkrechten) */
+export const OBLIQUE_TILT_DEG = 35;
+
+/**
+ * Verkürzung der Bodenebene in der Schrägansicht (cos des Kippwinkels; 1 = Draufsicht).
+ * Parallelprojektion: ein Punkt in Höhe z erscheint um z · tan(Kippwinkel) Meter weiter „oben“.
+ */
+export const tiltCos = (v: Viewport) => Math.cos(((v.tiltDeg ?? 0) * Math.PI) / 180);
+export const tiltTan = (v: Viewport) => Math.tan(((v.tiltDeg ?? 0) * Math.PI) / 180);
+
+/** Bodenpunkt (z = 0) → Bildschirm */
 export const worldToScreen = (v: Viewport, s: ScreenSize, p: Vec2): Vec2 => ({
   x: (p.x - v.center.x) * v.pxPerMeter + s.width / 2,
-  y: (p.y - v.center.y) * v.pxPerMeter + s.height / 2,
+  y: (p.y - v.center.y) * v.pxPerMeter * tiltCos(v) + s.height / 2,
 });
 
+/** Bildschirm → Bodenpunkt (z = 0) */
 export const screenToWorld = (v: Viewport, s: ScreenSize, p: Vec2): Vec2 => ({
   x: (p.x - s.width / 2) / v.pxPerMeter + v.center.x,
-  y: (p.y - s.height / 2) / v.pxPerMeter + v.center.y,
+  y: (p.y - s.height / 2) / (v.pxPerMeter * tiltCos(v)) + v.center.y,
 });
 
 export const clampZoom = (ppm: number) => Math.min(MAX_PX_PER_M, Math.max(MIN_PX_PER_M, ppm));
@@ -30,27 +42,28 @@ export function zoomAt(v: Viewport, s: ScreenSize, screen: Vec2, factor: number)
   const anchor = screenToWorld(v, s, screen);
   const center = {
     x: anchor.x - (screen.x - s.width / 2) / ppm,
-    y: anchor.y - (screen.y - s.height / 2) / ppm,
+    y: anchor.y - (screen.y - s.height / 2) / (ppm * tiltCos(v)),
   };
   return { ...v, pxPerMeter: ppm, center };
 }
 
 export const panBy = (v: Viewport, dxScreen: number, dyScreen: number): Viewport => ({
   ...v,
-  center: { x: v.center.x - dxScreen / v.pxPerMeter, y: v.center.y - dyScreen / v.pxPerMeter },
+  center: { x: v.center.x - dxScreen / v.pxPerMeter, y: v.center.y - dyScreen / (v.pxPerMeter * tiltCos(v)) },
 });
 
 /** Bereich einpassen; `insets` = von Panels verdeckte Ränder in px */
-export function fitBBox(b: BBox, s: ScreenSize, insets = { left: 0, right: 0, top: 0, bottom: 0 }, margin = 40): Viewport {
+export function fitBBox(b: BBox, s: ScreenSize, insets = { left: 0, right: 0, top: 0, bottom: 0 }, margin = 40, tiltDeg = 0): Viewport {
+  const ky = Math.cos((tiltDeg * Math.PI) / 180);
   const w = Math.max(1, s.width - insets.left - insets.right - margin * 2);
   const h = Math.max(1, s.height - insets.top - insets.bottom - margin * 2);
-  const ppm = clampZoom(Math.min(w / Math.max(0.1, b.maxX - b.minX), h / Math.max(0.1, b.maxY - b.minY)));
+  const ppm = clampZoom(Math.min(w / Math.max(0.1, b.maxX - b.minX), h / Math.max(0.1, (b.maxY - b.minY) * ky)));
   // Mitte des sichtbaren Bereichs auf die Mitte der Box legen
   const visCx = insets.left + margin + w / 2;
   const visCy = insets.top + margin + h / 2;
   const cx = (b.minX + b.maxX) / 2 - (visCx - s.width / 2) / ppm;
-  const cy = (b.minY + b.maxY) / 2 - (visCy - s.height / 2) / ppm;
-  return { center: { x: cx, y: cy }, pxPerMeter: ppm, rotationDeg: 0 };
+  const cy = (b.minY + b.maxY) / 2 - (visCy - s.height / 2) / (ppm * ky);
+  return { center: { x: cx, y: cy }, pxPerMeter: ppm, rotationDeg: 0, ...(tiltDeg ? { tiltDeg } : {}) };
 }
 
 export function visibleWorldBBox(v: Viewport, s: ScreenSize): BBox {

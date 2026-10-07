@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { num } from '../../core/format';
-import { PX_PER_M_AT_1_100, clampZoom, scaleLabel, zoomAt, zoomPercent } from '../../render/Viewport';
+import { OBLIQUE_TILT_DEG, PX_PER_M_AT_1_100, clampZoom, scaleLabel, zoomAt, zoomPercent } from '../../render/Viewport';
 import { cmd, editor, useEditor } from '../../state';
 import { useRenderer } from '../canvas/PlanCanvas';
 import { Icon, Sun } from '../icons';
@@ -142,6 +142,31 @@ export function BottomBar({ onFit }: { onFit: () => void }) {
         </button>
         <button type="button" className={`${u.iconBtn} ${u.tipUp}`} data-tip={canRedo ? `Wiederholen: ${redoLabel}` : 'Wiederholen'} disabled={!canRedo} onClick={redo} aria-label="Wiederholen" data-testid="redo">
           <Icon name="redo" />
+        </button>
+      </div>
+      <div className={u.divider} />
+      <div className={s.daynight} role="group" aria-label="Blickwinkel">
+        <button
+          type="button"
+          className={`${!vp.tiltDeg ? s.dnBtnOn : s.dnBtn} ${u.tipUp}`}
+          data-tip="Draufsicht – zum Zeichnen und Bearbeiten"
+          onClick={() => setSession({ viewport: { ...vp, tiltDeg: 0 } })}
+          aria-pressed={!vp.tiltDeg}
+          data-testid="view-top"
+        >
+          <Icon name="top" size={13} width={1.6} />
+          Plan
+        </button>
+        <button
+          type="button"
+          className={`${vp.tiltDeg ? s.dnBtnOn : s.dnBtn} ${u.tipUp}`}
+          data-tip="Schrägansicht – nur zum Anschauen; Zeichenwerkzeuge schalten zurück"
+          onClick={() => setSession({ viewport: { ...vp, tiltDeg: OBLIQUE_TILT_DEG } })}
+          aria-pressed={!!vp.tiltDeg}
+          data-testid="view-oblique"
+        >
+          <Icon name="cube" size={13} width={1.6} />
+          Schräg
         </button>
       </div>
       <div className={u.divider} />

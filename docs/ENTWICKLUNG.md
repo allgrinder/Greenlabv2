@@ -58,11 +58,17 @@ Umgesetzt sind alle acht Kernfunktionen der Phase 1 sowie PNG-Export (siehe `ARC
 - **Pflanzpinsel:** Bibliothek → „Stauden & Gräser“ → „Pinsel“. Stauden und Gräser anklicken stellt die Mischung zusammen; Radius und Dichte rechts, `[` `]` ändern die Größe, Alt radiert. Jeder Strich wird eine Pflanzgruppe (ein Objekt, ein Rückgängig-Schritt); der Abstand richtet sich nach der Endgröße, vorhandene Pflanzen werden respektiert.
 - **Einsehbarkeit:** Grundstück-Panel → „Einsehbarkeit prüfen“. Blickpunkte setzen (Nachbarfenster, Straße) mit Augenhöhe; Person sitzend, stehend oder liegend; Sommer oder Winter. Rot = einsehbar, grün = geschützt, dazu der Anteil für den Garten und die Sitzplätze. Berücksichtigt Haus, Hecken, Spalierschirme ab Stammhöhe und Baumkronen mit jahreszeitlicher Blickdichte.
 
+## Gebäude, Möbel und Schrägansicht
+
+- **Gebäude und Möbel** (Wohnhaus, Gartenhaus, Gewächshaus, Kompost, Regentonne, Hochbeet, Tisch, Liege, Kübel, Pool, Spielturm, Zaun, Kantenstein) sind im selben fotorealistischen Stil gemalt wie die Pflanzen.
+- **Schrägansicht:** Unterleiste → „Schräg“. Fester Blick von Süden (unten im Plan), 35° aus der Senkrechten. Häuser zeigen Fassade mit Fenstern und Dach, Bäume Stamm und Krone, Hecken und Spaliere ihre Laubwand. Zoomen, Verschieben, Auswählen und alle Linsen funktionieren; sobald ein Zeichenwerkzeug gewählt wird, springt die Ansicht zurück auf „Plan“. Exporte sind immer Draufsicht.
+
 ## Bekannte Grenzen
 
 - Im PDF ist der Plan selbst ein Rasterbild (150 oder 300 dpi, im exakten Maßstab); Rahmen, Schrift, Legende, Maßstab und Nordpfeil sind Vektoren. Die Texturen, Schatten und Lichteffekte stammen aus dem WebGL-Renderer.
 - Der Architektenplan zeigt die Planansicht ohne Bewässerung. Einen eigenen Bewässerungsplan gibt es als PNG aus der Bewässerungs-Linse noch nicht.
-- Echte Foto-Texturen (CC0) ließen sich im Container nicht laden; Rasen, Kies, Pflaster, Holz und Mulch sind prozedural erzeugt. Gebäude und Möbel sind noch im bisherigen Zeichenstil.
+- Echte Foto-Texturen (CC0) ließen sich im Container nicht laden; Rasen, Kies, Pflaster, Holz und Mulch sind prozedural erzeugt.
+- In der Schrägansicht werden Körper je Objekt nach Tiefe sortiert; bei langen Hecken neben Bäumen kann die Überdeckung an einzelnen Stellen falsch herum sein. Der Spielturm ist eine Platte ohne aufrechte Pfosten.
 - Die Einsehbarkeit rechnet in 2,5D mit Höhenbereichen je 0,5-m-Rasterzelle, ohne Gelände und ohne Zäune unter 30 cm.
 - Anschlussdruck und maximaler Durchfluss sind feste Annahmen (3,5 bar, 30 l/min je Zone), Strompreis 0,35 €/kWh.
 - PDF-Lagepläne müssen vorher als Bild exportiert werden (PNG, JPEG oder WebP).

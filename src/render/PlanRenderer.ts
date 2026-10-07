@@ -27,7 +27,7 @@ import { ShadowLayer } from './effects/ShadowLayer';
 import { LabelPool, drawBoundary, drawDimension, drawGrid, drawSelection, type ToScreen } from './overlays/overlay';
 import { SpatialIndex } from './SpatialIndex';
 import { buildObjectView, viewKey, type ObjectView, type ViewContext } from './views/objectView';
-import { screenToWorld, visibleWorldBBox, worldToScreen, type ScreenSize } from './Viewport';
+import { screenToWorld, tiltCos, tiltTan, visibleWorldBBox, worldToScreen, type ScreenSize } from './Viewport';
 import { materialPattern } from './textures/materialTextures';
 import { getMaterial } from '../core/catalog/materials';
 
@@ -92,6 +92,8 @@ export class PlanRenderer {
   private groundTex = new Graphics();
   private background = new Sprite(Texture.EMPTY);
   private layers = new Map<Id, Container>();
+  /** Schrägansicht: Körper aller Ebenen, nach Tiefe sortiert */
+  private solids = new Container();
   private shadowLayer = new ShadowLayer();
   private heatLayer = new HeatLayer();
   private gapLayer = new GapLayer();
@@ -139,6 +141,7 @@ export class PlanRenderer {
     this.app.canvas.style.touchAction = 'none';
 
     this.groundTex.alpha = 0.35;
+    this.solids.label = 'solids';
     // Reihenfolge: Erdton → Mulchstruktur → Hintergrundbild (mit Deckkraft) → Ebenen
     this.world.addChild(this.ground, this.groundTex, this.background);
     this.nightGlowWrap.addChild(this.night.glow);
@@ -311,12 +314,14 @@ export class PlanRenderer {
 
   private viewCtx(doc: Project, lod: number): ViewContext {
     const p = this.params;
-    return { lod, years: p.years, season: p.season, lens: p.lens, night: p.night, northDeg: doc.site.northDeg };
+    const vp = this.vp;
+    const tilt = vp.tiltDeg ? { tan: tiltTan(vp), cos: tiltCos(vp) } : null;
+    return { lod, years: p.years, season: p.season, lens: p.lens, night: p.night, northDeg: doc.site.northDeg, tilt };
   }
 
   private ctxKey(doc: Project): string {
     const p = this.params;
-    return `${p.years}|${p.season}|${p.lens}|${p.night}|${doc.site.northDeg}`;
+    return `${p.years}|${p.season}|${p.lens}|${p.night}|${doc.site.northDeg}|${this.vp.tiltDeg ?? 0}`;
   }
 
   private reconcile(doc: Project, lod: number) {
@@ -346,7 +351,9 @@ export class PlanRenderer {
       const layer = doc.layers[lid];
       const c = this.layers.get(lid)!;
       // Pflanzen: Bodendecker und Stauden unter Hecken, Spalieren, Sträuchern und Kronen
-      const order = layer.kind === 'plants' ? [...layer.objectOrder].sort((a, b) => heightRank(doc.objects[a]) - heightRank(doc.objects[b])) : layer.objectOrder;
+      const sorted = layer.kind === 'plants' ? [...layer.objectOrder].sort((a, b) => heightRank(doc.objects[a]) - heightRank(doc.objects[b])) : layer.objectOrder;
+      // Körper der Schrägansicht liegen im gemeinsamen Tiefen-Container
+      const order = sorted.filter((id) => this.mounted.get(id)?.view.depth === undefined);
       order.forEach((id, i) => {
         const m = this.mounted.get(id);
         if (!m) return;
@@ -354,6 +361,11 @@ export class PlanRenderer {
         if (c.getChildIndex(m.view.node) !== i) c.setChildIndex(m.view.node, Math.min(i, c.children.length - 1));
       });
     }
+    const solids = [...this.mounted.values()].filter((m) => m.view.depth !== undefined).sort((a, b) => a.view.depth! - b.view.depth!);
+    solids.forEach((m, i) => {
+      if (m.view.node.parent !== this.solids) this.solids.addChild(m.view.node);
+      if (this.solids.getChildIndex(m.view.node) !== i) this.solids.setChildIndex(m.view.node, Math.min(i, this.solids.children.length - 1));
+    });
     this.drawGround(doc);
     this.shadowLayer.setClip(doc.site.boundary);
   }
@@ -379,7 +391,7 @@ export class PlanRenderer {
       // Bewässerungslücken über der Bewässerungsebene
       if (doc.layers[id].kind === 'water') order.push(this.gapLayer.container);
     }
-    order.push(this.privacyLayer.container);
+    order.push(this.solids, this.privacyLayer.container);
     const base = 3; // ground, groundTex, background
     order.forEach((c, i) => {
       if (c.parent !== this.world) this.world.addChild(c);
@@ -418,8 +430,9 @@ export class PlanRenderer {
 
   private applyViewport(vp: Viewport) {
     const { width, height } = this.viewSize;
-    this.world.scale.set(vp.pxPerMeter);
-    this.world.position.set(width / 2 - vp.center.x * vp.pxPerMeter, height / 2 - vp.center.y * vp.pxPerMeter);
+    const ky = tiltCos(vp);
+    this.world.scale.set(vp.pxPerMeter, vp.pxPerMeter * ky);
+    this.world.position.set(width / 2 - vp.center.x * vp.pxPerMeter, height / 2 - vp.center.y * vp.pxPerMeter * ky);
     // Weichzeichnung in Weltmetern konstant halten
     this.shadowLayer.setScale(vp.pxPerMeter);
     this.heatLayer.setScale(vp.pxPerMeter);
@@ -428,7 +441,10 @@ export class PlanRenderer {
 
   /** Nur Objekte im sichtbaren Bereich zeichnen */
   private cull(doc: Project, vp: Viewport) {
-    const visible = new Set(this.index.query(expandBBox(visibleWorldBBox(vp, this.viewSize), 2)));
+    const vb = expandBBox(visibleWorldBBox(vp, this.viewSize), 2);
+    // Schrägansicht: hohe Körper unterhalb des Bildrands ragen ins Bild
+    if (vp.tiltDeg) vb.maxY += 25 * tiltTan(vp);
+    const visible = new Set(this.index.query(vb));
     const p = this.params;
     for (const [id, m] of this.mounted) {
       const o = doc.objects[id];
@@ -521,7 +537,7 @@ export class PlanRenderer {
       const t = this.sunTimes(doc, p.sun.doy);
       const wd = (new Date().getDay() + 6) % 7;
       const level = (l: LampObject) => lampLevel(l, p.scene, () => scheduledOn(l, p.nightHour % 24, wd, t.sunset, t.sunrise));
-      this.night.update(this.app.renderer, { doc, level, world: { scale: this.world.scale.x, x: this.world.position.x, y: this.world.position.y }, size: this.viewSize });
+      this.night.update(this.app.renderer, { doc, level, world: { scale: this.world.scale.x, scaleY: this.world.scale.y, x: this.world.position.x, y: this.world.position.y }, size: this.viewSize });
     }
   }
 

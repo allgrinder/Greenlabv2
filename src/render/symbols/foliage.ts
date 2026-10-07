@@ -8,10 +8,10 @@
  */
 import { Texture } from 'pixi.js';
 
-type RGB = [number, number, number];
-const L = [-0.62, -0.78] as const;
+export type RGB = [number, number, number];
+export const L = [-0.62, -0.78] as const;
 
-function prng(seed: number) {
+export function prng(seed: number) {
   let s = seed >>> 0 || 1;
   return () => {
     s = (s + 0x6d2b79f5) >>> 0;
@@ -22,10 +22,10 @@ function prng(seed: number) {
   };
 }
 
-const rgbOf = (h: string): RGB => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
-const mix = (a: RGB, b: RGB, t: number): RGB => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
-const mul = (a: RGB, k: number): RGB => [a[0] * k, a[1] * k, a[2] * k];
-const css = (c: RGB, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
+export const rgbOf = (h: string): RGB => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+export const mix = (a: RGB, b: RGB, t: number): RGB => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+export const mul = (a: RGB, k: number): RGB => [a[0] * k, a[1] * k, a[2] * k];
+export const css = (c: RGB, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
 const SUN: RGB = [255, 244, 200];
 
 /** Dunkel-, Mittel- und Lichtton aus einer Laubfarbe */
@@ -48,7 +48,7 @@ function softBlob(g: CanvasRenderingContext2D, X: number, Y: number, R: number, 
 }
 
 /** ein Büschel: Kugelverlauf mit Lichtseite oben links */
-function tuft(g: CanvasRenderingContext2D, X: number, Y: number, R: number, l: number, [dark, mid, light]: [RGB, RGB, RGB], rnd: () => number) {
+export function tuft(g: CanvasRenderingContext2D, X: number, Y: number, R: number, l: number, [dark, mid, light]: [RGB, RGB, RGB], rnd: () => number) {
   const gr = g.createRadialGradient(X + L[0] * R * 0.35, Y + L[1] * R * 0.35, R * 0.05, X, Y, R);
   gr.addColorStop(0, css(mix(mid, light, l)));
   gr.addColorStop(0.65, css(mix(dark, mid, 0.35 + l * 0.6)));

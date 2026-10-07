@@ -70,7 +70,7 @@ export interface Region {
 /* Projekt                                                             */
 /* ------------------------------------------------------------------ */
 
-export const SCHEMA_VERSION = 2 as const;
+export const SCHEMA_VERSION = 3 as const;
 
 export interface Project {
   schemaVersion: typeof SCHEMA_VERSION;
@@ -92,6 +92,8 @@ export interface Project {
   settings: ProjectSettings;
   /** Bewässerungszonen (Schema 2); Objekte verweisen über `zone` (Index + 1) */
   zones: IrrigationZone[];
+  /** Einsehbarkeit: Standorte, von denen in den Garten geschaut wird (Schema 3) */
+  observers: Observer[];
 }
 
 export interface IrrigationZone {
@@ -100,6 +102,15 @@ export interface IrrigationZone {
   /** Startzeit „HH:MM“ */
   start: string;
   minutes: number;
+}
+
+/** Blickpunkt für die Einsehbarkeits-Prüfung (Nachbarfenster, Straße, Balkon …) */
+export interface Observer {
+  id: Id;
+  name: string;
+  position: Vec2;
+  /** Augenhöhe über Gelände, m (Straße 1,7; Fenster im 1. OG ≈ 4,5) */
+  eyeHeight: number;
 }
 
 export interface Site {
@@ -277,6 +288,37 @@ export interface HedgeObject extends ObjectBase {
   plantsPerMeter: number;
 }
 
+/**
+ * Reihe Spalierbäume als Sichtschutz: Bäume im Abstand entlang einer Linie, Schirm
+ * von Stammhöhe bis Oberkante (Flachspalier) oder waagerechtes Dach (Dachspalier).
+ */
+export interface EspalierObject extends ObjectBase {
+  type: 'espalier';
+  centerline: PathGeometry;
+  speciesId: string;
+  plantedYear: number;
+  /** Pflanzabstand = Schirmbreite je Baum, m */
+  spacing: number;
+  /** Stammhöhe bis Schirmbeginn, m */
+  stemHeight: number;
+  /** Oberkante des Schirms, m */
+  height: number;
+  /** Schirmtiefe quer zur Reihe, m (Flachspalier ≈ 0,4; Dachspalier ≈ 2) */
+  depth: number;
+  form: 'flat' | 'roof';
+}
+
+/** Pflanzgruppe aus einem Pinselstrich: viele Stauden/Gräser als ein Objekt */
+export interface ScatterObject extends ObjectBase {
+  type: 'scatter';
+  plants: ScatterPlant[];
+}
+
+export interface ScatterPlant {
+  speciesId: string;
+  p: Vec2;
+}
+
 /** Katalogobjekt mit realen Maßen: Gartenhaus, Hochbeet, Möbel, Gewächshaus, Kompost … */
 export interface ItemObject extends ObjectBase {
   type: 'item';
@@ -383,6 +425,8 @@ export type PlanObject =
   | PlantObject
   | PlantingObject
   | HedgeObject
+  | EspalierObject
+  | ScatterObject
   | ItemObject
   | DimensionObject
   | TextObject
@@ -428,7 +472,7 @@ export interface Material {
   price: number; // pro Einheit, netto
 }
 
-export type PlantKind = 'tree' | 'shrub' | 'perennial' | 'grass' | 'vegetable' | 'hedge';
+export type PlantKind = 'tree' | 'shrub' | 'perennial' | 'grass' | 'vegetable' | 'hedge' | 'espalier';
 
 export interface PlantSpecies {
   id: string;
@@ -447,6 +491,8 @@ export interface PlantSpecies {
   /** Jahreslauf, 12 Monate, für die Bibliotheksdetailansicht */
   phenology: ('bare' | 'leaf' | 'bloom' | 'fruit' | 'autumn')[];
   price: number;
+  /** hält trockenes Laub im Winter (Hainbuche, Buche) – Sichtschutz bleibt teilweise */
+  marcescent?: boolean;
 }
 
 export interface CatalogItem {

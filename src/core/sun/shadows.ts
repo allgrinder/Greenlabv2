@@ -5,6 +5,7 @@
  * (extrudierter Grundriss). Schatten werden als Polygone geliefert; die Heatmap rastert sie
  * per Scanline in ein Gitter und summiert die besonnte Zeit über den Tag.
  */
+import { espalierDensity, espalierFootprint } from '../espalier';
 import { getItem } from '../catalog/items';
 import { getSpecies } from '../catalog/plants';
 import { diameterAt, heightAt, hedgeWidthAt, shadeDensity, type Season } from '../growth';
@@ -19,7 +20,9 @@ export type Caster =
   /** Krone als Zylinder von Kronenansatz h0 bis Kronenspitze h1 */
   | { kind: 'disc'; c: Vec2; r: number; h0: number; h1: number; density: number }
   /** Extrudierter Grundriss; `selfLit`: Oberseite wird bepflanzt (Hochbeet) und liegt selbst in der Sonne */
-  | { kind: 'prism'; outlines: Polygon[]; h: number; density: number; selfLit?: boolean };
+  | { kind: 'prism'; outlines: Polygon[]; h: number; density: number; selfLit?: boolean }
+  /** Angehobener Körper von h0 bis h1 (Spalierschirm): Schatten beginnt erst in Stammhöhe */
+  | { kind: 'raised'; outlines: Polygon[]; h0: number; h1: number; density: number };
 
 export function collectCasters(doc: Project, years: number, season: Season): Caster[] {
   const out: Caster[] = [];
@@ -40,6 +43,8 @@ export function collectCasters(doc: Project, years: number, season: Season): Cas
         const sp = getSpecies(o.speciesId);
         const outline = offsetPolyline(flattenPath(o.centerline, 0.05), hedgeWidthAt(o, years), 'round').map((r) => r.outer);
         out.push({ kind: 'prism', outlines: outline, h: o.height, density: season === 'winter' ? 0.8 : shadeDensity(sp, season) });
+      } else if (o.type === 'espalier') {
+        out.push({ kind: 'raised', outlines: espalierFootprint(o).map((r) => r.outer), h0: o.stemHeight, h1: o.height, density: espalierDensity(o.speciesId, season) });
       } else if (o.type === 'item') {
         const h = itemSize(o).height;
         if (h <= 0.05) continue;
@@ -73,6 +78,18 @@ export function shadowPolygons(c: Caster, sv: Vec2): Polygon[] {
       ]);
     }
     return polys;
+  }
+  if (c.kind === 'raised') {
+    const lo = { x: sv.x * c.h0, y: sv.y * c.h0 };
+    const hi = { x: sv.x * c.h1, y: sv.y * c.h1 };
+    const out: Polygon[] = [];
+    for (const o of c.outlines) {
+      const a = shift(o, lo);
+      const b = shift(o, hi);
+      out.push(a, b);
+      for (let i = 0; i < o.length; i++) out.push([a[i], a[(i + 1) % o.length], b[(i + 1) % o.length], b[i]]);
+    }
+    return out;
   }
   const d = { x: sv.x * c.h, y: sv.y * c.h };
   const polys: Polygon[] = [];

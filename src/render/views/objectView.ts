@@ -16,7 +16,8 @@ import type { PlanObject } from '../../core/model/types';
 import type { LensTab } from '../../state/types';
 import { DARK_SYMBOLS, drawItem } from '../symbols/items';
 import { waterGradient } from '../symbols/gradients';
-import { drawHedge, drawPlanting, drawShrub, drawSmallPlant, drawTree } from '../symbols/plants';
+import { drawPlanting } from '../symbols/plants';
+import { crownSprite, espalierNode, hedgeNode, perennialSprite, plantingNode, scatterNode } from '../symbols/plantSprites';
 import { drawDrip, drawFixture, drawLampDay, drawPipe, drawSprinkler } from '../symbols/tech';
 import { materialPattern } from '../textures/materialTextures';
 import { hex, seedFrom } from '../util/rng';
@@ -44,8 +45,10 @@ export function viewKey(o: PlanObject, c: ViewContext): string {
     case 'plant':
       return `${c.years}|${c.season}|${c.lens === 'growth'}|${getSpecies(o.speciesId).kind === 'tree' ? c.lod : 0}`;
     case 'hedge':
+    case 'espalier':
       return `${c.years}|${c.season}`;
     case 'planting':
+    case 'scatter':
       return `${c.season}|${c.lod}`;
     case 'area':
       return o.materialId === 'lawn' ? c.season : '';
@@ -155,8 +158,8 @@ export function buildObjectView(o: PlanObject, ctx: ViewContext): ObjectView {
         const sp = getSpecies(x.speciesId);
         return { sp, share: x.share, color: inBloom(sp, ctx.season) && sp.colors.bloom ? sp.colors.bloom : seasonColor(sp, ctx.season) };
       });
-      const scale = ctx.season === 'spring' ? 0.75 : ctx.season === 'winter' ? 0.8 : 1;
-      if (ctx.lod >= 1) for (const r of fp) drawPlanting(g, r, mix, o.perSquareMeter, seed, scale);
+      if (ctx.lod >= 1) for (const r of fp) node.addChild(plantingNode(r, mix, o.perSquareMeter, seed, ctx.season));
+      else for (const r of fp) drawPlanting(g, r, mix, o.perSquareMeter, seed, 1);
       break;
     }
     case 'hedge': {
@@ -164,20 +167,34 @@ export function buildObjectView(o: PlanObject, ctx: ViewContext): ObjectView {
       const w = hedgeWidthAt(o, ctx.years);
       const line = flattenPath(o.centerline, 0.02);
       const fp = ctx.years ? offsetPolyline(line, w, 'round') : footprint(o);
-      drawHedge(g, fp, line, w, sp, seasonColor(sp, ctx.season));
+      void fp;
+      node.addChild(hedgeNode(line, w, sp, ctx.season, seed));
       break;
     }
+    case 'espalier':
+      node.addChild(espalierNode(o, ctx.season));
+      break;
+    case 'scatter':
+      node.addChild(scatterNode(o.plants, ctx.season, seed));
+      break;
     case 'plant': {
       const sp = getSpecies(o.speciesId);
       const d = diameterAt(o, ctx.years);
       const color = seasonColor(sp, ctx.season);
+      const bare = isBare(sp, ctx.season);
       if (sp.kind === 'tree') {
         const bloom = inBloom(sp, ctx.season) ? (sp.colors.bloom ?? null) : null;
         const fruitSeason = sp.phenology[ctx.season === 'summer' ? 6 : 9] === 'fruit';
-        drawTree(g, o.position, d, sp, seed, ctx.lod, { color, bare: isBare(sp, ctx.season), bloom, fruit: fruitSeason ? '#B9472F' : null });
-        if (ctx.lens === 'growth') growthRings(g, o.position, diameterAt(o, 0), sp.diameterMature);
-      } else if (sp.kind === 'shrub' || sp.kind === 'hedge') drawShrub(g, o.position, d, sp, seed, isBare(sp, ctx.season) ? '#7E806C' : color);
-      else drawSmallPlant(g, o.position, d, sp, color);
+        node.addChild(crownSprite(sp, o.position, d, seed, { color, bare, bloom, fruit: fruitSeason ? '#B9472F' : null }));
+        if (ctx.lens === 'growth') {
+          const rings = new Graphics();
+          growthRings(rings, o.position, diameterAt(o, 0), sp.diameterMature);
+          node.addChild(rings);
+        }
+      } else if (sp.kind === 'shrub' || sp.kind === 'hedge' || sp.kind === 'espalier') {
+        const bloom = inBloom(sp, ctx.season) ? (sp.colors.bloom ?? null) : null;
+        node.addChild(crownSprite(sp, o.position, d, seed, { color: bare ? '#7E806C' : color, bare: false, bloom, fruit: null }, true));
+      } else node.addChild(perennialSprite(sp, o.position, d, seed, ctx.season));
       break;
     }
     case 'item': {

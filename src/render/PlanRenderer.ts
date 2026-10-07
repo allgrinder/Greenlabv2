@@ -7,8 +7,11 @@
  */
 import { Application, Container, Graphics, RenderTexture, Sprite, Texture } from 'pixi.js';
 import type { Season } from '../core/growth';
+import { getSpecies } from '../core/catalog/plants';
 import { coverage } from '../core/irrigation';
 import { lensShowsLayer } from '../core/lens';
+import { privacyGrid } from '../core/privacy';
+import { PrivacyLayer } from './effects/PrivacyLayer';
 import { lampLevel, scheduledOn } from '../core/lighting';
 import { bbox, expandBBox } from '../core/geometry/polygon';
 import type { FlatRegion } from '../core/geometry/shape';
@@ -51,6 +54,19 @@ const DESIGN_SHADOW: Vec2 = { x: 0.12, y: 0.15 };
 
 export const seasonOfDoy = (doy: number): Season => (doy < 80 || doy >= 355 ? 'winter' : doy < 172 ? 'spring' : doy < 266 ? 'summer' : 'autumn');
 
+/** Zeichenreihenfolge in der Pflanzenebene: niedrig vor hoch (stabil innerhalb einer Stufe) */
+function heightRank(o: PlanObject | undefined): number {
+  if (!o) return 0;
+  if (o.type === 'planting' || o.type === 'scatter') return 0;
+  if (o.type === 'hedge') return 2;
+  if (o.type === 'espalier') return 3;
+  if (o.type === 'plant') {
+    const k = getSpecies(o.speciesId).kind;
+    return k === 'tree' ? 5 : k === 'shrub' || k === 'espalier' || k === 'hedge' ? 4 : 1;
+  }
+  return 1;
+}
+
 export function viewParamsFrom(s: SessionState): ViewParams {
   return {
     lens: s.lens,
@@ -79,6 +95,10 @@ export class PlanRenderer {
   private shadowLayer = new ShadowLayer();
   private heatLayer = new HeatLayer();
   private gapLayer = new GapLayer();
+  private privacyLayer = new PrivacyLayer();
+  private privacyKey = '';
+  private privacyDoc: Project | null = null;
+  private privacyTimer: ReturnType<typeof setTimeout> | null = null;
   private night = new NightLayer();
   private nightGlowWrap = new Container();
   private heatKey = '';
@@ -325,7 +345,9 @@ export class PlanRenderer {
     for (const lid of doc.layerOrder) {
       const layer = doc.layers[lid];
       const c = this.layers.get(lid)!;
-      layer.objectOrder.forEach((id, i) => {
+      // Pflanzen: Bodendecker und Stauden unter Hecken, Spalieren, Sträuchern und Kronen
+      const order = layer.kind === 'plants' ? [...layer.objectOrder].sort((a, b) => heightRank(doc.objects[a]) - heightRank(doc.objects[b])) : layer.objectOrder;
+      order.forEach((id, i) => {
         const m = this.mounted.get(id);
         if (!m) return;
         if (m.view.node.parent !== c) c.addChild(m.view.node);
@@ -357,6 +379,7 @@ export class PlanRenderer {
       // Bewässerungslücken über der Bewässerungsebene
       if (doc.layers[id].kind === 'water') order.push(this.gapLayer.container);
     }
+    order.push(this.privacyLayer.container);
     const base = 3; // ground, groundTex, background
     order.forEach((c, i) => {
       if (c.parent !== this.world) this.world.addChild(c);
@@ -400,6 +423,7 @@ export class PlanRenderer {
     // Weichzeichnung in Weltmetern konstant halten
     this.shadowLayer.setScale(vp.pxPerMeter);
     this.heatLayer.setScale(vp.pxPerMeter);
+    this.privacyLayer.setScale(vp.pxPerMeter);
   }
 
   /** Nur Objekte im sichtbaren Bereich zeichnen */
@@ -468,6 +492,24 @@ export class PlanRenderer {
       }
     }
     this.gapLayer.set(irr ? this.gaps : null);
+    // Einsehbarkeit (nur im Editor, nicht im Export)
+    const pv = this.store.getState().session.privacy;
+    if (!pv.on || exporting || p.lens !== 'plan') this.privacyLayer.hide();
+    else {
+      const key = `${pv.pose}|${pv.season}`;
+      if (key !== this.privacyKey || this.privacyDoc !== doc) {
+        this.privacyKey = key;
+        this.privacyDoc = doc;
+        if (this.privacyTimer) clearTimeout(this.privacyTimer);
+        this.privacyTimer = setTimeout(() => {
+          const d = this.store.getState().doc;
+          if (!d) return;
+          if (d.observers.length) this.privacyLayer.set(privacyGrid(d, { season: pv.season, pose: pv.pose }), d.site.boundary, d.observers);
+          else this.privacyLayer.hide();
+          this.invalidate();
+        }, 150);
+      } else if (doc.observers.length) this.privacyLayer.container.visible = true;
+    }
     for (const lid of doc.layerOrder) {
       const kind = doc.layers[lid].kind;
       const c = this.layers.get(lid);

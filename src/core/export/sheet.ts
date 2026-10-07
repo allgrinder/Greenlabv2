@@ -107,6 +107,8 @@ export function legendEntries(doc: Project, night: boolean): LegendEntry[] {
       kind: 'line',
       color: '#5B7350',
     });
+  if (objs.some((o) => o.type === 'espalier')) out.push({ label: 'Spalierbäume (Sichtschutz)', kind: 'line', color: '#5E7438' });
+  if (objs.some((o) => o.type === 'scatter')) out.push({ label: 'Stauden, gemalt', kind: 'circle', color: '#9A86C2' });
   const items = new Set(objs.filter((o) => o.type === 'item').map((o) => getItem((o as Extract<PlanObject, { type: 'item' }>).catalogId).category));
   if (items.has('raisedBed')) out.push({ label: 'Hochbeet', kind: 'fill', color: '#A27C56' });
   if (items.has('building') || items.has('shed') || items.has('greenhouse')) out.push({ label: 'Gebäude', kind: 'fill', color: '#D9D3C7' });

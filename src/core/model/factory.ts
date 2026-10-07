@@ -16,6 +16,9 @@ import type {
   PipeObject,
   SprinklerObject,
   HedgeObject,
+  EspalierObject,
+  ScatterObject,
+  ScatterPlant,
   ItemObject,
   LayerKind,
   PathGeometry,
@@ -36,6 +39,28 @@ export function newArea(doc: Project, region: Region, materialId: string): AreaO
 
 export function newPath(doc: Project, centerline: PathGeometry, width: number, materialId: string): PathObject {
   return { ...objectBase(layerFor(doc, 'paths')), type: 'path', centerline: { ...centerline, closed: false }, width, join: 'round', materialId, edging: null };
+}
+
+/** Spalierreihe; Dachspalier (Platane) mit breitem, niedrigem Schirm */
+export function newEspalier(doc: Project, centerline: PathGeometry, speciesId = 'photinia-espalier'): EspalierObject {
+  const roof = speciesId === 'platanus-roof';
+  const sp = getSpecies(speciesId);
+  return {
+    ...objectBase(layerFor(doc, 'plants')),
+    type: 'espalier',
+    centerline: { ...centerline, closed: false },
+    speciesId,
+    plantedYear: new Date().getFullYear(),
+    spacing: roof ? 2.5 : 1.5,
+    stemHeight: roof ? 2.2 : 1.8,
+    height: roof ? 2.6 : sp.heightMature,
+    depth: roof ? 2.2 : 0.45,
+    form: roof ? 'roof' : 'flat',
+  };
+}
+
+export function newScatter(doc: Project, plants: ScatterPlant[]): ScatterObject {
+  return { ...objectBase(layerFor(doc, 'plants')), type: 'scatter', plants };
 }
 
 export function newHedge(doc: Project, centerline: PathGeometry, speciesId = 'carpinus-hedge'): HedgeObject {

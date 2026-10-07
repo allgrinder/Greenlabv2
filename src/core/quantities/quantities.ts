@@ -1,6 +1,7 @@
 /**
  * Mengen und Kosten, abgeleitet aus der Geometrie. Nichts davon wird gespeichert.
  */
+import { espalierCount, scatterCounts } from '../espalier';
 import { getItem } from '../catalog/items';
 import { getMaterial } from '../catalog/materials';
 import { getSpecies } from '../catalog/plants';
@@ -124,6 +125,19 @@ export function objectQuantities(o: PlanObject, prices: Prices = {}): ObjectQuan
       length = pathLength(o.centerline);
       const sp = getSpecies(o.speciesId);
       lines.push(line(prices, `plant:${sp.id}`, sp.name, Math.ceil(length * o.plantsPerMeter - 1e-9), 'pcs', sp.price));
+      break;
+    }
+    case 'espalier': {
+      length = pathLength(o.centerline);
+      const sp = getSpecies(o.speciesId);
+      lines.push(line(prices, `plant:${sp.id}`, sp.name, espalierCount(o), 'pcs', sp.price));
+      break;
+    }
+    case 'scatter': {
+      for (const [id, n] of scatterCounts(o)) {
+        const sp = getSpecies(id);
+        lines.push(line(prices, `plant:${sp.id}`, sp.name, n, 'pcs', sp.price));
+      }
       break;
     }
     case 'plant': {

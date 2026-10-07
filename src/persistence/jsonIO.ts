@@ -10,7 +10,7 @@ import { migrate } from './migrations';
 export const FILE_FORMAT = 'gartenwerk';
 
 const vec = z.object({ x: z.number().finite(), y: z.number().finite() });
-const OBJECT_TYPES = ['area', 'path', 'plant', 'planting', 'hedge', 'item', 'dimension', 'text', 'lamp', 'sprinkler', 'drip', 'pipe', 'fixture'] as const;
+const OBJECT_TYPES = ['area', 'path', 'plant', 'planting', 'hedge', 'espalier', 'scatter', 'item', 'dimension', 'text', 'lamp', 'sprinkler', 'drip', 'pipe', 'fixture'] as const;
 
 /** Bewusst schlank: prüft Struktur und Kernfelder, Details übernimmt der Renderer defensiv */
 const fileSchema = z.object({

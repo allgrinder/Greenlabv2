@@ -28,7 +28,10 @@ export type ToolId =
   | 'pipe'
   | 'lights'
   | 'plotedit'
-  | 'bgalign';
+  | 'bgalign'
+  | 'espalier'
+  | 'brush'
+  | 'observer';
 
 export type LensTab = 'plan' | 'sun' | 'growth' | 'seasons' | 'irrigation' | 'costs';
 
@@ -57,6 +60,10 @@ export interface SessionState {
   seasonFocus: 'spring' | 'summer' | 'autumn' | 'winter' | null;
   /** Nachtmodus: Uhrzeit für Zeitpläne, aktive Lichtszene */
   night: { hour: number; scene: string | null };
+  /** Pflanzpinsel: Radius (m), Dichte (0,2–1), Mischung, nur in Beeten */
+  paint: { radius: number; density: number; mix: string[]; bedsOnly: boolean };
+  /** Einsehbarkeits-Prüfung: Overlay an, beobachtete Person, Jahreszeit */
+  privacy: { on: boolean; pose: 'sitting' | 'standing' | 'lying'; season: 'summer' | 'winter' };
   /** Vorgaben für neu gezeichnete Objekte */
   defaults: { areaMaterial: string; pathMaterial: string; pathWidth: number };
 }
@@ -65,7 +72,8 @@ export type Brush =
   | { kind: 'plant'; speciesId: string }
   | { kind: 'item'; catalogId: string }
   | { kind: 'lamp'; lampType: import('../core/model/types').LampType }
-  | { kind: 'irr'; what: 'sprinkler' | 'tap' | 'manifold' };
+  | { kind: 'irr'; what: 'sprinkler' | 'tap' | 'manifold' }
+  | { kind: 'espalier'; speciesId: string };
 
 export interface Viewport {
   /** Weltpunkt in der Bildschirmmitte */

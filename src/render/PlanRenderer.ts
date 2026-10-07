@@ -9,7 +9,7 @@ import { Application, Container, Graphics, RenderTexture, Sprite, Texture } from
 import type { Season } from '../core/growth';
 import { getSpecies } from '../core/catalog/plants';
 import { coverage } from '../core/irrigation';
-import { lensShowsLayer } from '../core/lens';
+import { lensShowsObject } from '../core/lens';
 import { privacyGrid } from '../core/privacy';
 import { PrivacyLayer } from './effects/PrivacyLayer';
 import { lampLevel, scheduledOn } from '../core/lighting';
@@ -449,7 +449,7 @@ export class PlanRenderer {
     for (const [id, m] of this.mounted) {
       const o = doc.objects[id];
       const layer = o && doc.layers[o.layerId];
-      const on = !!o && !!layer && layer.visible && lensShowsLayer(layer.kind, p.lens, p.night) && !o.hidden && visible.has(id);
+      const on = !!o && !!layer && layer.visible && lensShowsObject(layer.kind, o, p.lens, p.night) && !o.hidden && visible.has(id);
       m.view.node.visible = on;
     }
   }
@@ -529,7 +529,7 @@ export class PlanRenderer {
     for (const lid of doc.layerOrder) {
       const kind = doc.layers[lid].kind;
       const c = this.layers.get(lid);
-      if (c) c.alpha = irr && kind !== 'water' && kind !== 'pipes' && kind !== 'plot' ? 0.55 : 1;
+      if (c) c.alpha = (doc.layers[lid].opacity ?? 1) * (irr && kind !== 'water' && kind !== 'pipes' && kind !== 'plot' ? 0.55 : 1);
     }
     // Nacht
     this.night.setVisible(p.night);

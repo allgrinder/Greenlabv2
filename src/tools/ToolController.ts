@@ -6,7 +6,7 @@ import { snapPoint, constrainAngle, type SnapResult } from '../core/geometry/sna
 import { dist } from '../core/geometry/vec';
 import { newArea, newDrip, newEspalier, newHedge, newLamp, newPath, newPipe } from '../core/model/factory';
 import { objectFromBrush } from './simpleTools';
-import { lensShowsLayer } from '../core/lens';
+import { lensShowsObject } from '../core/lens';
 import type { PathGeometry, PlanObject, Vec2 } from '../core/model/types';
 import type { PlanRenderer } from '../render/PlanRenderer';
 import { panBy, zoomAt } from '../render/Viewport';
@@ -163,7 +163,7 @@ export class ToolController {
   private selectable(o: PlanObject): boolean {
     const st = this.store.getState();
     const l = st.doc?.layers[o.layerId];
-    return !!l && l.visible && lensShowsLayer(l.kind, st.session.lens, st.session.mode === 'night') && !l.locked && !o.hidden;
+    return !!l && l.visible && lensShowsObject(l.kind, o, st.session.lens, st.session.mode === 'night') && !l.locked && !o.hidden;
   }
 
   private activate(t: Tool) {

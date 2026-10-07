@@ -270,6 +270,51 @@ assert.match(pdf.suggestedFilename(), /_A3_M1-200\.pdf$/);
 await p.keyboard.press('Escape');
 step('PDF-Architektenplan');
 
+// Ebenen wie in Photoshop: eigene Ebene, neue Objekte darin, Objekte und Ebenen ziehen, Deckkraft, löschen
+await p.evaluate(() => { const st = window.__gw.editor.getState(); st.setSession({ selection: [], tool: 'select', panels: { ...st.session.panels, layers: true, library: false, properties: false }, viewport: { center: { x: 25, y: 15 }, pxPerMeter: 20, rotationDeg: 0 } }); });
+await p.click('[data-testid=layer-add]');
+await p.dblclick('[data-testid="layer-Neue Ebene"] >> text=Neue Ebene');
+await p.fill('[data-testid=layer-rename]', 'Neue Wege');
+await p.keyboard.press('Enter');
+d = await doc();
+const nl = Object.values(d.layers).find((l) => l.name === 'Neue Wege');
+assert.equal(nl?.kind, 'custom');
+assert.match(await p.textContent('[data-testid=layer-target]'), /Neue Wege/);
+await p.keyboard.press('w');
+for (const [x, y] of [[28, 24], [34, 25.5], [34, 25.5]]) { const q = await w2s(x, y); await p.mouse.click(q.x, q.y); }
+await p.keyboard.press('Escape');
+d = await doc();
+assert.equal(d.layers[nl.id].objectOrder.length, 1);
+const newPathId = d.layers[nl.id].objectOrder[0];
+assert.equal(d.objects[newPathId].type, 'path');
+// Objekt aus der eigenen Ebene in „Wege“ ziehen, dann rückgängig
+await p.click('[data-testid="layer-open-Neue Wege"]');
+await p.locator(`[data-testid=obj-row-${newPathId}]`).dragTo(p.locator('[data-testid=layer-paths]'));
+d = await doc();
+const pathsLayer = Object.values(d.layers).find((l) => l.kind === 'paths');
+assert.equal(d.objects[newPathId].layerId, pathsLayer.id);
+assert.equal(pathsLayer.objectOrder.at(-1), newPathId);
+await p.keyboard.press('Control+z');
+assert.equal((await doc()).objects[newPathId].layerId, nl.id);
+// Ebene unter „Flächen“ ziehen
+const idxBefore = (await doc()).layerOrder.indexOf(nl.id);
+await p.locator('[data-testid="layer-Neue Wege"]').dragTo(p.locator('[data-testid=layer-areas]'));
+d = await doc();
+assert.ok(d.layerOrder.indexOf(nl.id) < idxBefore);
+assert.equal(d.layerOrder.indexOf(nl.id), d.layerOrder.indexOf(Object.values(d.layers).find((l) => l.kind === 'areas').id) + 1);
+// Deckkraft 50 %
+const sl = await p.locator('[data-testid=layer-opacity]').boundingBox();
+await p.mouse.click(sl.x + sl.width / 2, sl.y + sl.height / 2);
+assert.ok(Math.abs((await doc()).layers[nl.id].opacity - 0.5) < 0.06);
+// löschen mit Rückfrage (Ebene enthält ein Objekt)
+await p.click('[data-testid=layer-delete]');
+assert.ok((await doc()).layers[nl.id]);
+await p.click('[data-testid=layer-delete]');
+d = await doc();
+assert.equal(d.layers[nl.id], undefined);
+assert.equal(d.objects[newPathId], undefined);
+step('Ebenen wie in Photoshop');
+
 assert.deepEqual(errors, []);
 console.log('Alle Smoke-Tests bestanden.');
 await b.close();

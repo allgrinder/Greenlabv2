@@ -4,7 +4,9 @@
  */
 import { snapPoint, constrainAngle, type SnapResult } from '../core/geometry/snap';
 import { dist } from '../core/geometry/vec';
-import { newArea, newFromCatalog, newHedge, newPath, newPlant } from '../core/model/factory';
+import { newArea, newDrip, newHedge, newLamp, newPath, newPipe } from '../core/model/factory';
+import { objectFromBrush } from './simpleTools';
+import { lensShowsLayer } from '../core/lens';
 import type { PathGeometry, PlanObject, Vec2 } from '../core/model/types';
 import type { PlanRenderer } from '../render/PlanRenderer';
 import { panBy, zoomAt } from '../render/Viewport';
@@ -15,6 +17,7 @@ import { PathBuilderTool } from './PathBuilderTool';
 import { SelectTool } from './SelectTool';
 import { DimensionTool, FreehandTool, PlaceTool, RectTool, TextTool } from './simpleTools';
 import { BackgroundMoveTool, CalibrateTool, DND_MIME } from './BackgroundTools';
+import { BackgroundAlignTool, PlotEditTool } from './SiteTools';
 import type { Brush } from '../state/types';
 import type { Tool, ToolContext, WorldPointerEvent } from './Tool';
 
@@ -75,8 +78,13 @@ export class ToolController {
         },
       }),
       hedge: new PathBuilderTool(ctx, { id: 'hedge', closed: false, curves: false, source: 'polygon', min: 2, finish: (path) => cmd.addObject(newHedge(ctx.doc(), path)) }),
+      drip: new PathBuilderTool(ctx, { id: 'drip', closed: false, curves: true, source: 'polygon', min: 2, finish: (path) => cmd.addObject(newDrip(ctx.doc(), path, 3)) }),
+      pipe: new PathBuilderTool(ctx, { id: 'pipe', closed: false, curves: false, source: 'polygon', min: 2, finish: (path) => cmd.addObject(newPipe(ctx.doc(), path)) }),
+      lights: new PathBuilderTool(ctx, { id: 'lights', closed: false, curves: true, source: 'polygon', min: 2, finish: (path) => cmd.addObject(newLamp(ctx.doc(), 'stringLights', path.nodes[0].p, path)) }),
       calibrate: new CalibrateTool(ctx),
       bgmove: new BackgroundMoveTool(ctx),
+      plotedit: new PlotEditTool(ctx),
+      bgalign: new BackgroundAlignTool(ctx),
       free: new FreehandTool(ctx),
       dim: new DimensionTool(ctx),
       text: new TextTool(ctx),
@@ -121,9 +129,8 @@ export class ToolController {
       const brush = JSON.parse(data) as Brush;
       const raw = renderer.toWorld(this.screenOf(e));
       const p = this.snapAt(raw, {}, { shift: false, alt: e.altKey }).p;
-      const doc = ctx.doc();
-      cmd.addObject(brush.kind === 'plant' ? newPlant(doc, brush.speciesId, p) : newFromCatalog(doc, brush.catalogId, p));
-      store.getState().setSession({ brush });
+      cmd.addObject(objectFromBrush(ctx.doc(), brush, p));
+      store.getState().setSession(brush.kind === 'irr' ? { brush, lens: 'irrigation' } : { brush });
     });
     on(window, 'keydown', (e) => this.onKey(e as unknown as KeyboardEvent));
     on(window, 'keyup', (e) => this.onKeyUp(e as unknown as KeyboardEvent));
@@ -140,8 +147,9 @@ export class ToolController {
   }
 
   private selectable(o: PlanObject): boolean {
-    const l = this.store.getState().doc?.layers[o.layerId];
-    return !!l && l.visible && !l.locked && !o.hidden;
+    const st = this.store.getState();
+    const l = st.doc?.layers[o.layerId];
+    return !!l && l.visible && lensShowsLayer(l.kind, st.session.lens, st.session.mode === 'night') && !l.locked && !o.hidden;
   }
 
   private activate(t: Tool) {

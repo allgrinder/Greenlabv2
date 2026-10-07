@@ -4,6 +4,7 @@
 import { getItem } from '../catalog/items';
 import { getMaterial } from '../catalog/materials';
 import { getSpecies } from '../catalog/plants';
+import { IRRIGATION_PRICES, getLamp } from '../catalog/lamps';
 import { footprint, itemSize } from '../geometry/objects';
 import { areaWithHoles, perimeter } from '../geometry/polygon';
 import { pathLength } from '../geometry/shape';
@@ -136,7 +137,30 @@ export function objectQuantities(o: PlanObject, prices: Prices = {}): ObjectQuan
       lines.push(line(prices, `item:${it.id}`, it.name, q, it.unit, it.price));
       break;
     }
-    case 'lamp':
+    case 'lamp': {
+      const spec = getLamp(o.lampType);
+      lines.push(line(prices, `lamp:${o.lampType}`, spec.name, 1, 'pcs', spec.price));
+      if (o.path) length = pathLength(o.path);
+      return { ...EMPTY, length, lines, total: lines[0].total };
+    }
+    case 'sprinkler': {
+      const ip = IRRIGATION_PRICES.sprinkler;
+      lines.push(line(prices, 'irr:sprinkler', ip.name, 1, ip.unit, ip.price));
+      return { ...EMPTY, lines, total: lines[0].total };
+    }
+    case 'drip':
+    case 'pipe': {
+      length = pathLength(o.path);
+      const ip = o.type === 'drip' ? IRRIGATION_PRICES.drip : o.kind === 'power' ? IRRIGATION_PRICES.pipePower : IRRIGATION_PRICES.pipeWater;
+      const key = o.type === 'drip' ? 'irr:drip' : o.kind === 'power' ? 'irr:pipePower' : 'irr:pipeWater';
+      lines.push(line(prices, key, ip.name, length, 'm', ip.price));
+      return { ...EMPTY, length, lines, total: lines[0].total };
+    }
+    case 'fixture': {
+      const ip = IRRIGATION_PRICES[o.kind];
+      lines.push(line(prices, `irr:${o.kind}`, ip.name, 1, 'pcs', ip.price));
+      return { ...EMPTY, lines, total: lines[0].total };
+    }
     case 'dimension':
     case 'text':
       return EMPTY;

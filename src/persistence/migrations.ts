@@ -1,3 +1,4 @@
+import { defaultZones } from '../core/model/defaults';
 import { SCHEMA_VERSION, type Project } from '../core/model/types';
 
 /**
@@ -5,7 +6,8 @@ import { SCHEMA_VERSION, type Project } from '../core/model/types';
  * Läuft beim Laden aus der DB und beim JSON-Import.
  */
 const STEPS: Record<number, (p: Record<string, unknown>) => Record<string, unknown>> = {
-  // 1 → 2: kommt mit der Bewässerungsebene (Phase 2)
+  // 1 → 2: Bewässerungszonen; neue Objekttypen brauchen keine Umwandlung
+  1: (p) => ({ ...p, zones: Array.isArray(p.zones) ? p.zones : defaultZones() }),
 };
 
 export function migrate(raw: unknown): Project {

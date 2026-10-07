@@ -70,7 +70,7 @@ export interface Region {
 /* Projekt                                                             */
 /* ------------------------------------------------------------------ */
 
-export const SCHEMA_VERSION = 1 as const;
+export const SCHEMA_VERSION = 2 as const;
 
 export interface Project {
   schemaVersion: typeof SCHEMA_VERSION;
@@ -90,6 +90,16 @@ export interface Project {
   /** projektbezogene Preise, überschreiben den Katalog (Phase 2: Kostenübersicht) */
   priceOverrides: Record<string, number>;
   settings: ProjectSettings;
+  /** Bewässerungszonen (Schema 2); Objekte verweisen über `zone` (Index + 1) */
+  zones: IrrigationZone[];
+}
+
+export interface IrrigationZone {
+  id: Id;
+  name: string;
+  /** Startzeit „HH:MM“ */
+  start: string;
+  minutes: number;
 }
 
 export interface Site {
@@ -123,7 +133,10 @@ export interface PlotEdge {
 export interface GeoLocation {
   lat: number;
   lon: number;
-  label: string; // „Lindenweg 12, Frankfurt“
+  /** Adresse, nur für Titelblock und Anzeige („Lindenweg 12, Frankfurt“) */
+  label: string;
+  /** Ort, aus dem Breite/Länge stammen (für den Sonnenstand), z. B. „Frankfurt am Main“ */
+  place?: string;
   /** IANA-Zeitzone für SunCalc, z. B. Europe/Berlin */
   timeZone: string;
 }
@@ -319,7 +332,52 @@ export interface LampSchedule {
   weekdays: boolean[]; // Mo..So, Länge 7
 }
 
+/* ---------------- Bewässerung (Schema 2) ---------------- */
+
+/** Versenkregner mit Wurfradius und Sektor (Winkel im Bildschirmsystem: 0 = Osten, im Uhrzeigersinn) */
+export interface SprinklerObject extends ObjectBase {
+  type: 'sprinkler';
+  position: Vec2;
+  radius: number;
+  arcStartDeg: number;
+  arcEndDeg: number;
+  /** Durchfluss in l/min */
+  flowLpm: number;
+  zone: number;
+}
+
+/** Tropfschlauch entlang einer Linie */
+export interface DripObject extends ObjectBase {
+  type: 'drip';
+  path: PathGeometry;
+  /** Liter pro Stunde und Meter (2 l/h je 30 cm ≈ 6,7) */
+  lphPerMeter: number;
+  /** benetzte Breite in m */
+  wetWidth: number;
+  zone: number;
+}
+
+/** Leitung (Hauptleitung PE, Strom für Licht) */
+export interface PipeObject extends ObjectBase {
+  type: 'pipe';
+  path: PathGeometry;
+  kind: 'water' | 'power';
+  diameterMm: number;
+}
+
+/** Punktbauteile: Wasseranschluss, Verteiler mit Magnetventilen */
+export interface FixtureObject extends ObjectBase {
+  type: 'fixture';
+  kind: 'tap' | 'manifold';
+  position: Vec2;
+  valves: number;
+}
+
 export type PlanObject =
+  | SprinklerObject
+  | DripObject
+  | PipeObject
+  | FixtureObject
   | AreaObject
   | PathObject
   | PlantObject

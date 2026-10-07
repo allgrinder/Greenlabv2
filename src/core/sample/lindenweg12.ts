@@ -7,11 +7,18 @@ import { footprint } from '../geometry/objects';
 import { flatToRegion, polygonPath, simpleRegion } from '../geometry/regions';
 import { flattenRegion } from '../geometry/shape';
 import { createProject, layerOfKind, objectBase } from '../model/defaults';
+import { newDrip, newFixture, newLamp, newPipe } from '../model/factory';
+import { autoDripPath } from '../irrigation';
+import { sprinklersFor } from '../irrigationLayout';
+import { cubicAt, cubicDerivative } from '../geometry/bezier';
+import { pathSegments } from '../geometry/shape';
 import type {
   AreaObject,
   DimensionObject,
   HedgeObject,
   ItemObject,
+  LampObject,
+  LampType,
   LayerKind,
   PathGeometry,
   PathObject,
@@ -77,7 +84,7 @@ export function createLindenweg12(): Project {
     name: 'Garten Lindenweg 12',
     plot: { kind: 'rect', width: 50, depth: 30 },
     northDeg: -12,
-    location: { lat: 50.1488, lon: 8.6247, label: 'Lindenweg 12, Frankfurt', timeZone: 'Europe/Berlin' },
+    location: { lat: 50.1488, lon: 8.6247, label: 'Lindenweg 12, Frankfurt', place: 'Frankfurt am Main', timeZone: 'Europe/Berlin' },
   });
   const L = (k: LayerKind) => layerOfKind(p, k).id;
   const add = (o: PlanObject) => {
@@ -219,5 +226,55 @@ export function createLindenweg12(): Project {
   add(dim(P(0, 0), P(50, 0), -1.2));
   add(dim(P(50, 0), P(50, 30), -1.2));
 
+  addLighting(p, add);
+  addIrrigation(p, add);
   return p;
+}
+
+/** Beleuchtung aus Screen 03: Poller am Kiesweg, Wand- und Wegeleuchten, Lichterkette, Strahler */
+function addLighting(p: Project, add: (o: PlanObject) => PlanObject) {
+  const lamp = (t: LampType, x: number, y: number, extra: Partial<LampObject> = {}) => add({ ...newLamp(p, t, P(x, y)), ...extra });
+  // Poller links und rechts entlang des Kieswegs, 1,3 m neben der Mittellinie
+  const segs = pathSegments(KIESWEG_CENTERLINE);
+  ([[0, 0.3, 1], [0, 0.78, -1], [1, 0.22, 1], [1, 0.58, -1], [1, 0.93, 1], [2, 0.55, -1]] as const).forEach(([si, t, side]) => {
+    const c = cubicAt(segs[si], t);
+    const d = cubicDerivative(segs[si], t);
+    const l = Math.hypot(d.x, d.y);
+    lamp('bollard', c.x - (d.y / l) * side * 1.3, c.y + (d.x / l) * side * 1.3, { name: 'Poller' });
+  });
+  lamp('wall', 11.15, 8.8, { name: 'Wandleuchte', directionDeg: 102 });
+  lamp('wall', 11.15, 19.2, { name: 'Wandleuchte', directionDeg: 102 });
+  lamp('pathLight', 28.5, 22.6);
+  lamp('pathLight', 28.5, 25.7);
+  lamp('underwater', 33.4, 23.5, { name: 'Unterwasserlicht' });
+  // Strahler: Richtung als Kompasswinkel (Plan um −12° gedreht)
+  lamp('treeUplight', 22.75, 11.25, { name: 'Baumstrahler', directionDeg: 57, beamAngleDeg: 36, lumen: 480 });
+  lamp('spot', 41.9, 10.3, { name: 'Spot Gartenhaus', directionDeg: 38, beamAngleDeg: 34, lumen: 600 });
+  lamp('spot', 34.5, 18.6, { name: 'Spot Zierkirsche', directionDeg: 49, beamAngleDeg: 56, lumen: 400 });
+  const zig: [number, number][] = [[11.1, 8], [15.9, 9.75], [11.1, 11.5], [15.9, 13.25], [11.1, 15], [15.9, 16.75], [11.1, 18.5], [15.9, 20.25]];
+  add({ ...newLamp(p, 'stringLights', P(11.1, 8), { kind: 'path', closed: false, source: 'polygon', nodes: zig.map(([x, y]) => ({ p: P(x, y) })) }), name: 'Lichterkette Terrasse' });
+}
+
+/** Bewässerung aus Screen 09: Versenkregner (Zonen 1/2), Tropfschläuche (3/4), Hauptleitung, Verteiler */
+function addIrrigation(p: Project, add: (o: PlanObject) => PlanObject) {
+  const line = (pts: [number, number][]): PathGeometry => ({ kind: 'path', closed: false, source: 'polygon', nodes: pts.map(([x, y]) => ({ p: P(x, y) })) });
+  // Regner Kopf an Kopf über alle Rasenflächen; Zone 1 = nördlicher Rasen, Zone 2 = südlicher
+  for (const o of Object.values(p.objects)) {
+    if (o.type !== 'area' || o.materialId !== 'lawn') continue;
+    for (const r of footprint(o)) for (const sp of sprinklersFor(p, r, 1)) add({ ...sp, zone: sp.position.y < 14 ? 1 : 2 });
+  }
+  // Tropfschläuche: Ring in jedem Hochbeet, Mäander im Staudenbeet
+  [[42.5, 15.1], [46.5, 15.1], [42.5, 17.6], [46.5, 17.6], [42.5, 20.1], [46.5, 20.1]].forEach(([x, y]) =>
+    add({ ...newDrip(p, line([[x - 1.2, y - 0.3], [x + 1.2, y - 0.3], [x + 1.2, y + 0.3], [x - 1.2, y + 0.3], [x - 1.2, y - 0.25]]), 3), name: 'Tropfschlauch Hochbeet' }),
+  );
+  const beet = Object.values(p.objects).find((o) => o.type === 'planting');
+  if (beet) {
+    const meander = autoDripPath(footprint(beet)[0], 0.55);
+    if (meander.length >= 2) add({ ...newDrip(p, { kind: 'path', closed: false, source: 'polygon', nodes: meander.map((q) => ({ p: q })) }, 4), name: 'Tropfschlauch Staudenbeet' });
+  }
+  add(newPipe(p, line([[11.4, 7.6], [16.5, 7.6], [16.5, 13.1], [39, 13.1]])));
+  add(newPipe(p, line([[16.5, 13.1], [16.5, 22.3]])));
+  add(newPipe(p, line([[40.05, 13.1], [40.6, 13.1], [40.6, 20.5]])));
+  add(newFixture(p, 'tap', P(11.4, 7.6)));
+  add(newFixture(p, 'manifold', P(39.5, 13.1)));
 }

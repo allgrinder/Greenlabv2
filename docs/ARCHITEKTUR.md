@@ -1,8 +1,8 @@
-# Gartenwerk – Architektur & Datenmodell (Phase 1)
+# Gartenwerk – Architektur & Datenmodell
 
 Stand: 06.10.2026 · Grundlage: Design-Handoff `project/Gartenwerk.dc.html` (inkl. `Chrome`, `GardenPlan`)
 
-Dieses Dokument ist zur Abstimmung gedacht, bevor die UI gebaut wird. Maßgeblich für das Datenmodell ist der Code:
+Dieses Dokument wurde vor dem UI-Bau abgestimmt und beschreibt jetzt den Stand nach Phase 2 (Abschnitt 12). Maßgeblich für das Datenmodell ist der Code:
 `src/core/model/types.ts` (Projekt, Ebenen, Objekte, Katalog) und `src/state/types.ts` (Sitzung, Undo-Historie). Beide Dateien sind typgeprüft (`tsc --strict`).
 
 ---
@@ -109,6 +109,9 @@ Objekte werden flach als `Record` gespeichert. Die Reihenfolge steht in `layer.o
 Die Eingabe bleibt gespeichert, damit sie später editierbar ist. `boundary` ist das daraus berechnete Polygon.
 
 ### Hintergrund & Kalibrierung
+
+Ausrichten an zwei Punkten (`core/calibration.ts → alignTwoPoints`): Bildpunkte a, b und Grundstücksecken A, B ergeben eine Ähnlichkeitstransformation – Maßstab |AB|/|ab|, Drehung ∠AB − ∠ab, Lage so, dass a auf A fällt. Bei genordetem Bild ist die Nordrichtung gleich der Bilddrehung. Wird die Kontur im Editor bearbeitet, wird sie als `drawn` (absolute Punkte) gespeichert, damit alle Objekte an ihrer Stelle bleiben.
+
 `BackgroundImage { blobId, origin, metersPerPixel, rotationDeg, opacity, visible, locked, calibration: {a, b, distanceM} }`. Die beiden Punkte a und b liegen in **Bildpixeln**. Daraus folgt `metersPerPixel = distanceM / |b − a|`. So bleibt die Kalibrierung gültig, wenn das Bild verschoben wird.
 
 ### Geometrie
@@ -133,9 +136,13 @@ Region = { outer: ShapeGeometry, holes: PathGeometry[] }
 | `item` | Gartenhaus, Hochbeet, Möbel … | Punkt + Drehung + reale Maße aus dem Katalog | build |
 | `dimension` | Bemaßung | 2 Anker (frei oder an Objektknoten gebunden) | annotation |
 | `text` | Planbeschriftung | Punkt, Größe in Weltmetern | annotation |
-| `lamp` | Phase 2 | Typ, Lumen, Kelvin, Winkel, Richtung, Zeitplan | light |
+| `lamp` | Leuchte | Punkt (Lichterkette: Linie), Typ, Lumen, Kelvin, Abstrahlwinkel, Richtung, Zeitplan | light |
+| `sprinkler` | Versenkregner | Punkt, Wurfradius, Sektor, Durchfluss, Zone | water |
+| `drip` | Tropfschlauch | Linie, l/h je m, benetzte Breite, Zone | water |
+| `pipe` | Leitung (Wasser/Strom) | Linie, Art, Durchmesser | pipes |
+| `fixture` | Wasseranschluss, Verteiler | Punkt, Anzahl Magnetventile | water |
 
-Alle Objekte haben die gemeinsamen Felder `layerId, name, locked, hidden, elevation, notes`. `lamp` steht schon jetzt im Modell, damit Phase 2 keine Schema-Migration braucht. Bewässerung (Phase 2) kommt als weitere Union-Variante dazu, mit `schemaVersion` 2 und Migration.
+Alle Objekte haben die gemeinsamen Felder `layerId, name, locked, hidden, elevation, notes`. Mit Phase 2 ist `schemaVersion` 2: Das Projekt hat zusätzlich `zones` (Bewässerungszonen mit Name, Startzeit, Laufzeit). Die Migration 1 → 2 legt die vier Standardzonen an.
 
 ### Katalog (statisch, versioniert mit der App)
 - `Material` – Textur-Schlüssel, Kachelgröße in m, **Verankerung** `world` (Rasen, Kies: Muster liegt fest im Raster) oder `object` (Pflaster, Dielen: Fugen bleiben kantenparallel), Abrechnungseinheit (m², m³ × Schichtdicke, Stück aus Steinformat), Preis.
@@ -144,7 +151,7 @@ Alle Objekte haben die gemeinsamen Felder `layerId, name, locked, hidden, elevat
 
 Phase-1-Materialien: Rasen, Kies, Pflaster, Holz, Mulch, Rindenmulch, Erde/Beet, Wasser.
 
-### Wachstum (vorbereitet für Phase 2)
+### Wachstum
 `Ø(t) = Ø₀ + (Ø_end − Ø₀) · (1 − e^(−t/k))`, dieselbe Kurve wie im Design-Prototyp. `k` wird aus `growthPerYear` abgeleitet, sodass die Anfangssteigung dem Zuwachs pro Jahr entspricht: `k = (Ø_end − Ø₀) / growthPerYear`.
 
 ## 4. State, Commands, Undo/Redo
@@ -163,9 +170,10 @@ Phase-1-Materialien: Rasen, Kies, Pflaster, Holz, Mulch, Rindenmulch, Erde/Beet,
 - **Culling:** Ein rbush-Index über die Objekt-Bounding-Boxes. Pro Frame mit geändertem Viewport werden nur Objekte im sichtbaren Bereich (plus Rand) auf `visible` gesetzt. Derselbe Index dient für Hit-Tests und Fang.
 - **LOD:** Baumkronen haben drei Detailstufen (Lappen, Büschel, Licht/Schatten wie in `GardenPlan`), abhängig von px/m. Stauden werden bei kleinem Zoom zu einer Fläche zusammengefasst.
 - **Texturen:** Sie werden beim Start prozedural per Canvas 2D erzeugt (Halmstruktur, Kieskörnung, Fugenraster, Dielen, Mulch, Wasserglanz). Farben und Muster kommen aus dem Design. Gefüllt wird mit `Graphics.fill({ texture, matrix })`. Die Matrix setzt die Verankerung um (Welt oder Objekt) und skaliert die Kachel auf ihre Größe in Metern. Externe Bilddateien und Lizenzen sind nicht nötig.
-- **Schatten (Phase 1):** Weiche Schlagschatten mit festem Versatz, wie im Design (Sonnenvektor ≈ Südost). Sie liegen auf einem eigenen Container mit `BlurFilter` und werden zwischengespeichert (`cacheAsTexture`) und nur bei Änderungen neu berechnet. In Phase 2 kommt der Vektor aus SunCalc.
+- **Schatten:** Weiche Schlagschatten auf einem eigenen Container mit `BlurFilter`, nur bei Änderungen neu berechnet. In der Planansicht mit festem Versatz wie im Design (Sonne ≈ Südost), in der Sonnen-Linse aus SunCalc für Datum, Uhrzeit, Standort und Nordrichtung. Kronen sind Zylinder vom Kronenansatz bis zur Spitze, Gebäude und Hecken extrudierte Grundrisse.
 - **Overlays** (Auswahl, Griffe, Fangführungen, Maßlinien) werden im Bildschirmraum gezeichnet, damit sie bei jedem Zoom haarfein bleiben. Maßzahlen und Kantenlängen-Pills (Geist Mono, wie im Onboarding) sind ein schlankes DOM-Overlay über dem Canvas. Das ergibt scharfe Schrift und exakt das Design-Styling.
-- **Vorbereitet für Phase 2:** Licht wird additiv in eine RenderTexture akkumuliert und multiplikativ über die abgedunkelte Szene gelegt. Die Verdeckung erfolgt über 2D-Schattenpolygone von Gebäuden und Hecken.
+- **Nacht:** Licht wird additiv (Farbtemperatur → RGB) in eine RenderTexture mit halber Auflösung akkumuliert und multiplikativ über die abgedunkelte Szene gelegt. Gebäude und Hecken verdecken über eine inverse Maske; Wasser spiegelt Licht.
+- **Linsen:** Jede Linse wählt, welche Ebenen gezeichnet werden (`core/lens.ts`): Bewässerung und Leitungen nur in der Bewässerungs-Linse, Leuchten in der Planansicht und bei Nacht. Wachstum und Jahreszeit fließen über einen `ViewContext` in die Symbole ein; Objekte werden nur neu gebaut, wenn sich ihr `viewKey` ändert.
 
 Ziel: 60 fps bei über 500 Objekten. Ein Benchmark-Projekt mit 1.000 Objekten wird generiert und per Playwright-Frame-Timing gemessen.
 
@@ -213,12 +221,12 @@ interface Tool {
 | UI | React 19, TypeScript, Vite | wie gewünscht |
 | Rendering | pixi.js 8 | WebGL, WebGPU später optional |
 | State | zustand 5 + immer | Patches für Undo |
-| Sonnenstand | suncalc | Phase 2 |
+| Sonnenstand | suncalc | liefert Grad und Kompass-Azimut |
 | Flächenoperationen | **polygon-clipping** | Ursprünglich war clipper2-js geplant (wegen des Offsets). In der Praxis lieferte dessen JS-Portierung gezackte Offsets und zerfallende Vereinigungen. Der Weg-Offset wird jetzt selbst gebaut (Segment-Rechtecke plus Gelenkkeile, vereinigt mit polygon-clipping), abgesichert durch einen Regressionstest. Alles ist in `clip.ts` gekapselt. |
 | Fläche und Umfang | **eigene Funktionen statt turf** | turf rechnet geodätisch auf Längen- und Breitengraden. Unsere Welt ist eben und in Metern, dort ist die Gaußsche Trapezformel exakt und schneller. Die Funktionen sind getestet. |
 | Räumlicher Index | rbush | Culling, Hit-Test, Fang |
 | Persistenz | idb, zod | IndexedDB, Import-Validierung |
-| Export | jsPDF | PNG über `renderer.extract` |
+| Export | jsPDF (nachgeladen) | PNG über `renderer.extract`; PDF-Rahmen, Schrift, Legende als Vektor, Plan als Rasterbild im Maßstab |
 | Tests | vitest | |
 
 ## 10. Plan für Phase 1
@@ -231,9 +239,24 @@ interface Tool {
 6. **Bibliothek** mit Drag & Drop (Pflanzen, Objekte mit realen Maßen).
 7. **Persistenz:** Projektliste, Autosave, JSON-Import/-Export.
 
-Die Linsen-Tabs (Sonne, Wachstum, Jahreszeiten, Bewässerung, Kosten) sind in Phase 1 sichtbar, aber deaktiviert.
+In Phase 1 waren die Linsen-Tabs sichtbar, aber deaktiviert. Seit Phase 2 sind sie alle aktiv.
 
 ## 11. Entschieden
 
 1. **Export:** PNG kommt in Phase 1, der PDF-Architektenplan mit Titelblock, Legende, Maßstab und Nordpfeil in Phase 2.
 2. **Mulch und Rindenmulch** sind zwei Materialien: „Mulch“ als Holzhäcksel (Design-Farbe #6E533F) und „Rindenmulch“ mit dunklerer, gröberer Textur.
+
+## 12. Phase 2
+
+| Funktion | Kern (`core/`) | Darstellung und UI |
+|---|---|---|
+| 9 Nachtmodus | `lighting.ts` (Szenen, Zeitpläne, Leistung und Stromkosten pro Abend), `catalog/lamps.ts` (7 Typen, Kelvin → RGB, Reichweite) | `render/effects/NightLayer.ts`, `ui/lenses/NightPanel.tsx`, `ui/panels/TechProps.tsx` (Typ, Lumen, Kelvin, Winkel, Richtung, Zeitplan) |
+| 10 Sonne und Schatten | `sun/sun.ts` (SunCalc, Ortszeit, Sonnenvektor), `sun/shadows.ts` (Schattenpolygone, Heatmap per Scanline), `sun/recommend.ts` | `render/effects/ShadowLayer.ts`, `HeatLayer.ts`, `ui/lenses/SunLens.tsx` |
+| 11 Wachstum und Jahreszeiten | `growth.ts` (Kronen-Ø, Höhe, Farben, Blüte, Kahlheit), `growthReport.ts` (Entwicklung, Konflikte mit Wegen/Bauten/Grenze, Jahreszeiten-Text) | `ui/lenses/GrowthLens.tsx`, `SeasonsView.tsx` (vier Offscreen-Renderings) |
+| 12 Bewässerung | `irrigation.ts` (Zielflächen, Überdeckung mit Lücken, Zonen, Bedarf), `irrigationLayout.ts` (Regner Kopf an Kopf, Sektoren nach innen, Tropfschlauch-Mäander) | `render/effects/GapLayer.ts`, `ui/lenses/IrrigationPanel.tsx` |
+| 13 Material und Kosten | `quantities/costReport.ts` (Gruppen, netto/brutto, Kennzahlen, CSV) | `ui/lenses/CostsView.tsx` (Preise editierbar, Einkaufsliste) |
+| Architektenplan | `export/sheet.ts` (Papier, Normmaßstab, Legende, Pflanzenliste) | `ui/export/pdf.ts`, `ExportDialog.tsx` |
+
+- Automatisch geplante Regner und Schläuche ersetzen die vorhandenen in der Fläche in **einem** Undo-Schritt (`cmd.replaceObjects`).
+- Die Heatmap rechnet in einem Raster von 1 m (Linse) bzw. 0,5 m mit 20- bis 30-Minuten-Schritten und wird entprellt neu berechnet.
+- Hochbeete werfen Schatten, ihre eigene Oberseite liegt aber in der Sonne.

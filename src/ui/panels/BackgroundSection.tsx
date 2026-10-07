@@ -6,18 +6,37 @@ import { newId } from '../../core/model/ids';
 import type { Project } from '../../core/model/types';
 import { putBlob } from '../../persistence/db';
 import { CALIB_EVENT, type CalibPoints } from '../../tools/BackgroundTools';
+import { ALIGN_EVENT, BackgroundAlignTool, type AlignStep } from '../../tools/SiteTools';
+
+const ALIGN_TEXT: Record<AlignStep, string> = {
+  image1: 'Klicke im Plan Punkt 1 auf dem Bild an, z. B. eine Grundstücksecke.',
+  image2: 'Jetzt Punkt 2 auf dem Bild, möglichst weit von Punkt 1 entfernt.',
+  corner1: 'Klicke die Grundstücksecke an, auf die Punkt 1 gehört.',
+  corner2: 'Und die Ecke für Punkt 2 – danach sitzt das Bild.',
+};
 import { cmd, editor, useEditor } from '../../state';
 import { Toggle } from '../components/controls';
 import u from '../components/ui.module.css';
 import s from './props.module.css';
 
-/** Hintergrundbild im laufenden Projekt: Deckkraft, Sichtbarkeit, Sperre, Kalibrieren, Verschieben, Ersetzen */
+/** Hintergrundbild im laufenden Projekt: Deckkraft, Sichtbarkeit, Sperre, an zwei Ecken ausrichten, Maßstab, Verschieben, Ersetzen */
 export function BackgroundSection({ doc }: { doc: Project }) {
   const bg = doc.background;
   const tool = useEditor((st) => st.session.tool);
   const setSession = useEditor((st) => st.setSession);
   const [points, setPoints] = useState<CalibPoints | null>(null);
   const [dist, setDist] = useState('');
+  const [step, setStep] = useState<AlignStep>('image1');
+  const [northUp, setNorthUp] = useState(BackgroundAlignTool.northUp);
+
+  useEffect(() => {
+    const on = (e: Event) => setStep((e as CustomEvent<AlignStep>).detail);
+    window.addEventListener(ALIGN_EVENT, on);
+    return () => window.removeEventListener(ALIGN_EVENT, on);
+  }, []);
+  useEffect(() => {
+    if (tool !== 'bgalign') setStep('image1');
+  }, [tool]);
   const file = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -53,7 +72,7 @@ export function BackgroundSection({ doc }: { doc: Project }) {
         locked: false,
         calibration: null,
       });
-      setSession({ tool: 'calibrate' });
+      setSession({ tool: 'bgalign' });
     };
     img.onerror = () => alert('Das Bild konnte nicht gelesen werden (PNG, JPEG, WebP).');
     img.src = url;
@@ -122,9 +141,16 @@ export function BackgroundSection({ doc }: { doc: Project }) {
         <span className={s.muted}>Maßstab</span>
         <span className={u.mono}>{bg.calibration ? `1 px = ${num(bg.metersPerPixel * 100, 2)} cm` : 'nicht kalibriert'}</span>
       </div>
+      <div className={s.row}>
+        <span className={s.muted}>Drehung</span>
+        <span className={u.mono}>{num(bg.rotationDeg, 1)}°</span>
+      </div>
       <div className={s.actions}>
+        <button type="button" className={s.action} onClick={() => setSession({ tool: tool === 'bgalign' ? 'select' : 'bgalign', selection: [] })} style={tool === 'bgalign' ? { color: 'var(--acc)', background: 'var(--accs)' } : undefined} data-testid="bg-align">
+          Ausrichten
+        </button>
         <button type="button" className={s.action} onClick={() => setSession({ tool: tool === 'calibrate' ? 'select' : 'calibrate', selection: [] })} style={tool === 'calibrate' ? { color: 'var(--acc)', background: 'var(--accs)' } : undefined} data-testid="bg-calibrate">
-          Kalibrieren
+          Nur Maßstab
         </button>
         <button type="button" className={s.action} disabled={bg.locked} title={bg.locked ? 'Zum Verschieben entsperren' : undefined} onClick={() => setSession({ tool: tool === 'bgmove' ? 'select' : 'bgmove', selection: [] })} style={tool === 'bgmove' ? { color: 'var(--acc)', background: 'var(--accs)' } : bg.locked ? { opacity: 0.5 } : undefined}>
           Verschieben
@@ -136,6 +162,29 @@ export function BackgroundSection({ doc }: { doc: Project }) {
           Entfernen
         </button>
       </div>
+      {tool === 'bgalign' && (
+        <div className={s.note} style={{ background: 'var(--accs)', flexDirection: 'column', gap: 8 }} data-testid="bg-align-note">
+          <div style={{ fontSize: 12.5, lineHeight: 1.45 }}>
+            <b style={{ fontWeight: 600 }}>An zwei Ecken ausrichten.</b> {ALIGN_TEXT[step]}
+          </div>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12.5 }}>
+            <input
+              type="checkbox"
+              checked={northUp}
+              onChange={(e) => {
+                BackgroundAlignTool.northUp = e.target.checked;
+                setNorthUp(e.target.checked);
+              }}
+            />
+            Bild ist genordet – Nordrichtung übernehmen
+          </label>
+        </div>
+      )}
+      {tool === 'bgmove' && (
+        <div className={s.muted} style={{ fontSize: 12, lineHeight: 1.45 }}>
+          Bild im Plan ziehen oder mit den Pfeiltasten verschieben (10 cm, mit ⇧ 1 m). Esc beendet.
+        </div>
+      )}
       {tool === 'calibrate' && (
         <div className={s.note} style={{ background: 'var(--accs)', flexDirection: 'column', gap: 8 }}>
           <div style={{ fontSize: 12.5, lineHeight: 1.45 }}>

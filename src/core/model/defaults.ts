@@ -3,6 +3,7 @@ import { newId } from './ids';
 import {
   SCHEMA_VERSION,
   type GeoLocation,
+  type IrrigationZone,
   type Layer,
   type LayerKind,
   type PlanObject,
@@ -31,6 +32,16 @@ export const DEFAULT_SETTINGS: ProjectSettings = {
   scaleDenominator: 100,
   currency: 'EUR',
 };
+
+/** Vier Bewässerungszonen wie im Design (Screen 09) */
+export function defaultZones(): IrrigationZone[] {
+  return [
+    { id: newId(), name: 'Rasen Nord', start: '06:00', minutes: 18 },
+    { id: newId(), name: 'Rasen Süd', start: '06:20', minutes: 18 },
+    { id: newId(), name: 'Hochbeete', start: '07:00', minutes: 30 },
+    { id: newId(), name: 'Staudenbeet', start: '07:30', minutes: 25 },
+  ];
+}
 
 export interface NewProjectInput {
   name: string;
@@ -66,6 +77,7 @@ export function createProject(input: NewProjectInput, now = new Date()): Project
     objects: {},
     priceOverrides: {},
     settings: { ...DEFAULT_SETTINGS },
+    zones: defaultZones(),
   };
 }
 
@@ -90,6 +102,12 @@ export function defaultLayerKind(o: Pick<PlanObject, 'type'>): LayerKind {
       return 'build';
     case 'lamp':
       return 'light';
+    case 'sprinkler':
+    case 'drip':
+    case 'fixture':
+      return 'water';
+    case 'pipe':
+      return 'pipes';
     case 'dimension':
     case 'text':
       return 'annotation';

@@ -1,5 +1,5 @@
 /**
- * Browser-Smoke-Test der Kernabläufe (Phase 1). Voraussetzung: `npm run dev` läuft.
+ * Browser-Smoke-Test der Kernabläufe (Phase 1 und 2). Voraussetzung: `npm run dev` läuft.
  *   npm run e2e            (Chromium aus PLAYWRIGHT_CHROMIUM oder /opt/pw-browsers/chromium)
  */
 import { chromium } from 'playwright-core';
@@ -33,8 +33,14 @@ const img = await p.locator('[data-testid=calib-stage] img').boundingBox();
 const k = img.width / 1200;
 await p.mouse.click(img.x + 100 * k, img.y + 700 * k);
 await p.mouse.click(img.x + 1100 * k, img.y + 700 * k);
+await p.click('[data-testid=align-mode-distance]');
 await p.fill('[data-testid=calib-distance]', '50');
 await p.click('[data-testid=calib-apply]');
+// Punkt C in der Vorschau ziehen, Ort wählen
+await p.click('[data-testid=stage-contour]');
+const vc = await p.locator('[data-testid=vertex-2]').boundingBox();
+await p.mouse.move(vc.x + 6, vc.y + 6); await p.mouse.down(); await p.mouse.move(vc.x + 30, vc.y + 20, { steps: 5 }); await p.mouse.up();
+await p.fill('[data-testid=place]', 'Hamburg');
 await p.fill('[data-testid=project-name]', 'Smoke');
 await p.click('[data-testid=create-project]');
 await p.waitForSelector('[data-testid=tool-rail]');
@@ -42,7 +48,9 @@ let d = await doc();
 assert.equal(d.site.boundary.length, 5);
 assert.equal(d.site.northDeg, -12);
 assert.ok(Math.abs(d.background.metersPerPixel - 0.05) < 1e-9);
-step('Onboarding mit Polygon und Kalibrierung');
+assert.equal(d.site.location.place, 'Hamburg');
+assert.ok(Math.abs(d.site.location.lat - 53.55) < 0.01);
+step('Onboarding mit Polygon, Punkt ziehen, Kalibrierung, Ort');
 
 // Rechteck zeichnen, verschieben, Ecke ziehen, rückgängig
 await p.keyboard.press('r');
@@ -102,6 +110,31 @@ assert.ok(Object.values(d.objects).some((o) => o.type === 'plant' && o.position.
 assert.ok(Object.values(d.objects).some((o) => o.type === 'item' && o.catalogId === 'raised-bed-300x120'));
 step('Bibliothek: Drag & Drop und Klick');
 
+// Kontur im Editor bearbeiten und Hintergrund an zwei Ecken ausrichten
+await p.keyboard.press('Escape');
+await p.evaluate(() => { const st = window.__gw.editor.getState(); st.setSession({ selection: [], tool: 'select', panels: { ...st.session.panels, library: false } }); });
+await p.click('[data-testid=plot-edit]');
+d = await doc();
+const corner = d.site.boundary[1];
+a = await w2s(corner.x, corner.y); c = await w2s(corner.x + 2, corner.y - 1);
+await p.mouse.move(a.x, a.y); await p.mouse.down(); await p.mouse.move(c.x, c.y, { steps: 5 }); await p.mouse.up();
+d = await doc();
+assert.equal(d.site.plot.kind, 'drawn');
+assert.ok(Math.abs(d.site.boundary[1].x - (corner.x + 2)) < 0.11);
+await p.keyboard.press('Escape');
+await p.click('[data-testid=bg-align]');
+const g0 = d.background;
+const i2w = (x, y) => { const r = (g0.rotationDeg * Math.PI) / 180; const X = x * g0.metersPerPixel, Y = y * g0.metersPerPixel; return { x: g0.origin.x + X * Math.cos(r) - Y * Math.sin(r), y: g0.origin.y + X * Math.sin(r) + Y * Math.cos(r) }; };
+for (const [x, y] of [[400, 300], [800, 500]]) { const w = i2w(x, y); const q = await w2s(w.x, w.y); await p.mouse.click(q.x, q.y); await p.waitForTimeout(350); }
+const B0 = d.site.boundary[0], B2 = d.site.boundary[2];
+for (const P of [B0, B2]) { const q = await w2s(P.x + 0.2, P.y + 0.2); await p.mouse.click(q.x, q.y); await p.waitForTimeout(350); }
+d = await doc();
+// der geklickte Bildpunkt 1 liegt jetzt exakt auf Ecke A
+const p1 = (() => { const g = d.background; const a = g.calibration.a; const r = (g.rotationDeg * Math.PI) / 180; const X = a.x * g.metersPerPixel, Y = a.y * g.metersPerPixel; return { x: g.origin.x + X * Math.cos(r) - Y * Math.sin(r), y: g.origin.y + X * Math.sin(r) + Y * Math.cos(r) }; })();
+assert.ok(Math.hypot(p1.x - B0.x, p1.y - B0.y) < 1e-6);
+assert.equal(d.site.northDeg, Math.round(d.background.rotationDeg * 1000) / 1000);
+step('Editor: Kontur ziehen, Bild an zwei Ecken ausrichten');
+
 // Persistenz
 await p.waitForFunction(() => document.querySelector('[data-testid=save-state]')?.textContent === 'Gespeichert');
 const n = Object.keys(d.objects).length;
@@ -114,6 +147,7 @@ step('Autosave und Wiederherstellen');
 
 // PNG-Export
 await p.click('[data-testid=export-btn]');
+await p.click('[data-testid=export-dialog] >> text=PNG');
 await p.waitForSelector('[data-testid=export-dialog] img', { timeout: 30000 });
 const [png] = await Promise.all([p.waitForEvent('download'), p.click('[data-testid=export-run]')]);
 assert.match(png.suggestedFilename(), /^Smoke_M1-100\.png$/);
@@ -131,6 +165,64 @@ d = await doc();
 assert.equal(Object.keys(d.objects).length, n);
 assert.ok(d.background);
 step('JSON-Export und -Import');
+
+// Phase 2 am Beispielprojekt
+await p.click('button[aria-label=Projekte]');
+await p.click('[data-testid=menu-sample]');
+await p.waitForFunction(() => window.__gw.editor.getState().doc?.name.includes('Lindenweg'));
+const tab = (name) => p.click(`header >> text=${name}`);
+
+await tab('Sonne');
+await p.waitForSelector('[data-testid=sun-panel] >> text=Hochbeete');
+await p.click('[data-testid=sun-date-355]');
+assert.equal((await p.evaluate(() => window.__gw.editor.getState().session.sun.doy)), 355);
+step('Sonne: Datum, Heatmap-Empfehlungen');
+
+await tab('Wachstum');
+await p.focus('[data-testid=growth-slider]');
+await p.keyboard.press('ArrowRight');
+assert.ok((await p.textContent('[data-testid=growth-label]')).startsWith('in '));
+await p.waitForSelector('[data-testid=growth-warning]');
+step('Wachstum: Zeitreise und Konflikthinweis');
+
+await tab('Jahreszeiten');
+await p.waitForSelector('[data-testid=season-winter] img', { timeout: 60000 });
+step('Jahreszeiten: vier Vorschauen');
+
+await tab('Bewässerung');
+const lawnIds = await p.evaluate(() => Object.values(window.__gw.editor.getState().doc.objects).filter((o) => o.type === 'area' && o.materialId === 'lawn').map((o) => o.id));
+await p.evaluate((ids) => window.__gw.editor.getState().setSession({ selection: ids }), lawnIds);
+await p.click('[data-testid=auto-sprinklers]');
+d = await doc();
+assert.ok(Object.values(d.objects).filter((o) => o.type === 'sprinkler').length > 20);
+assert.match(await p.textContent('[data-testid=coverage]'), /\d+ % bewässert/);
+step('Bewässerung: Regner verteilen, Überdeckung');
+
+await tab('Kosten');
+await p.click('[data-testid="price-mat:lawn"]');
+await p.keyboard.press('Control+A');
+await p.keyboard.type('10');
+await p.keyboard.press('Enter');
+assert.equal((await doc()).priceOverrides['mat:lawn'], 10);
+const [csv] = await Promise.all([p.waitForEvent('download'), p.click('[data-testid=cost-csv]')]);
+assert.match(csv.suggestedFilename(), /_Kosten\.csv$/);
+await p.keyboard.press('Escape');
+assert.equal(await p.evaluate(() => window.__gw.editor.getState().session.lens), 'plan');
+step('Kosten: Preis ändern, CSV');
+
+await p.click('[data-testid=night-btn]');
+await p.click('[data-testid=scene-dinner]');
+assert.match(await p.textContent('[data-testid=night-pill]'), /Abendessen/);
+await p.click('[data-testid=day-btn]');
+step('Nacht: Lichtszene');
+
+await p.click('[data-testid=export-btn]');
+await p.waitForSelector('[data-testid=pdf-preview] img', { timeout: 30000 });
+await p.click('[data-testid=export-dialog] >> text=150 dpi');
+const [pdf] = await Promise.all([p.waitForEvent('download', { timeout: 120000 }), p.click('[data-testid=export-run]')]);
+assert.match(pdf.suggestedFilename(), /_A3_M1-200\.pdf$/);
+await p.keyboard.press('Escape');
+step('PDF-Architektenplan');
 
 assert.deepEqual(errors, []);
 console.log('Alle Smoke-Tests bestanden.');

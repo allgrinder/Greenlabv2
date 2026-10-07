@@ -13,6 +13,7 @@ import type {
   AreaObject,
   BackgroundImage,
   Id,
+  IrrigationZone,
   PlanObject,
   PlotSpec,
   Project,
@@ -34,7 +35,7 @@ export function createCommands(store: EditorStoreApi) {
       },
       { mergeKey },
     );
-  const TYPE: Record<PlanObject['type'], string> = { area: 'Fläche', path: 'Weg', plant: 'Pflanze', planting: 'Pflanzung', hedge: 'Hecke', item: 'Objekt', dimension: 'Bemaßung', text: 'Text', lamp: 'Leuchte' };
+  const TYPE: Record<PlanObject['type'], string> = { sprinkler: 'Regner', drip: 'Tropfschlauch', pipe: 'Leitung', fixture: 'Anschluss', area: 'Fläche', path: 'Weg', plant: 'Pflanze', planting: 'Pflanzung', hedge: 'Hecke', item: 'Objekt', dimension: 'Bemaßung', text: 'Text', lamp: 'Leuchte' };
   const name = (o: PlanObject) => o.name ?? TYPE[o.type];
 
   function detach(d: Draft<Project>, id: Id) {
@@ -185,11 +186,11 @@ export function createCommands(store: EditorStoreApi) {
       store.getState().setSession({ selection: result.length ? [target.id, ...extraIds] : [] });
     },
 
-    setPlot(plot: PlotSpec) {
+    setPlot(plot: PlotSpec, mergeKey?: string) {
       apply('Grundstück ändern', (d) => {
         d.site.plot = plot;
         d.site.boundary = boundaryFromPlot(plot);
-      });
+      }, mergeKey);
     },
 
     updateSite(patch: Partial<Omit<Site, 'plot' | 'boundary'>>, mergeKey?: string) {
@@ -199,6 +200,14 @@ export function createCommands(store: EditorStoreApi) {
     setBackground(bg: BackgroundImage | null) {
       apply(bg ? 'Hintergrund setzen' : 'Hintergrund entfernen', (d) => {
         d.background = bg;
+      });
+    },
+
+    /** Hintergrund ausrichten und – bei genordetem Bild – die Nordrichtung setzen, ein Undo-Schritt */
+    alignBackground(patch: Partial<BackgroundImage>, northDeg: number | null) {
+      apply('Hintergrund ausrichten', (d) => {
+        if (d.background) Object.assign(d.background, patch);
+        if (northDeg !== null) d.site.northDeg = northDeg;
       });
     },
 
@@ -214,6 +223,42 @@ export function createCommands(store: EditorStoreApi) {
       apply('Preis ändern', (d) => {
         if (price === null) delete d.priceOverrides[key];
         else d.priceOverrides[key] = price;
+      });
+    },
+
+    /** Objekte in einem Schritt ersetzen (z. B. Regner automatisch verteilen) */
+    replaceObjects(label: string, remove: Id[], add: PlanObject[]) {
+      if (!remove.length && !add.length) return;
+      apply(label, (d) => {
+        remove.forEach((id) => detach(d, id));
+        for (const o of add) {
+          d.objects[o.id] = o as Draft<PlanObject>;
+          d.layers[o.layerId].objectOrder.push(o.id);
+        }
+      });
+      // Auswahl (z. B. die Rasenfläche) bleibt, damit die Aktion wiederholt werden kann
+      const sel = store.getState().session.selection;
+      store.getState().setSession({ selection: sel.filter((id) => !remove.includes(id)) });
+    },
+
+    addZone(zone: IrrigationZone) {
+      apply('Zone hinzufügen', (d) => {
+        d.zones.push(zone);
+      });
+    },
+
+    updateZone(index: number, patch: Partial<Omit<IrrigationZone, 'id'>>, mergeKey?: string) {
+      apply('Zone ändern', (d) => d.zones[index] && Object.assign(d.zones[index], patch), mergeKey);
+    },
+
+    /** Zone löschen; Regner und Schläuche der Zone wandern in die vorherige, höhere Nummern rücken nach */
+    removeZone(index: number) {
+      apply('Zone löschen', (d) => {
+        if (d.zones.length <= 1) return;
+        d.zones.splice(index, 1);
+        const n = index + 1;
+        for (const o of Object.values(d.objects))
+          if ((o.type === 'sprinkler' || o.type === 'drip') && o.zone >= n) o.zone = Math.max(1, o.zone === n ? n - 1 : o.zone - 1);
       });
     },
 

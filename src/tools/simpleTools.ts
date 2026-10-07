@@ -6,7 +6,10 @@ import { num } from '../core/format';
 import { smoothFreehand } from '../core/geometry/smooth';
 import type { SnapResult } from '../core/geometry/snap';
 import { add, dist, normalize, perp, scale, sub, dot } from '../core/geometry/vec';
-import { newArea, newDimension, newFromCatalog, newPath, newPlant, newText } from '../core/model/factory';
+import { newArea, newDimension, newFixture, newFromCatalog, newLamp, newPath, newPlant, newSprinkler, newText } from '../core/model/factory';
+import { getLamp } from '../core/catalog/lamps';
+import type { PlanObject, Project } from '../core/model/types';
+import type { Brush } from '../state/types';
 import type { Vec2 } from '../core/model/types';
 import { ACCENT, dashed, type LabelPool, type ToScreen } from '../render/overlays/overlay';
 import { drawSnap, edgeLabel } from './preview';
@@ -209,10 +212,7 @@ export class PlaceTool implements Tool {
 
   down(e: WorldPointerEvent) {
     if (e.button !== 0) return;
-    const doc = this.ctx.doc();
-    const brush = this.ctx.store.getState().session.brush;
-    const o = brush.kind === 'plant' ? newPlant(doc, brush.speciesId, e.p) : newFromCatalog(doc, brush.catalogId, e.p);
-    this.ctx.cmd.addObject(o);
+    this.ctx.cmd.addObject(objectFromBrush(this.ctx.doc(), this.ctx.store.getState().session.brush, e.p));
   }
   move(e: WorldPointerEvent) {
     this.hover = e.p;
@@ -225,7 +225,12 @@ export class PlaceTool implements Tool {
     const brush = this.ctx.store.getState().session.brush;
     const P = toScreen(this.hover);
     const ppm = this.ctx.store.getState().session.viewport.pxPerMeter;
-    if (brush.kind === 'plant') {
+    if (brush.kind === 'lamp' || brush.kind === 'irr') {
+      const label = brush.kind === 'lamp' ? getLamp(brush.lampType).name : { sprinkler: 'Versenkregner · 6 m', tap: 'Wasseranschluss', manifold: 'Verteiler' }[brush.what];
+      if (brush.kind === 'irr' && brush.what === 'sprinkler') g.circle(P.x, P.y, 6 * ppm).fill({ color: 0x3a84c4, alpha: 0.1 }).stroke({ color: 0x2f76b8, width: 1, alpha: 0.6 });
+      g.circle(P.x, P.y, 6).fill(0xffffff).stroke({ color: ACCENT, width: 1.5 });
+      labels.mono(label, P.x, P.y + 18, 0, ACCENT);
+    } else if (brush.kind === 'plant') {
       const sp = getSpecies(brush.speciesId);
       const r = (sp.diameterPlanted / 2) * ppm;
       const rm = (sp.diameterMature / 2) * ppm;
@@ -239,5 +244,19 @@ export class PlaceTool implements Tool {
       g.rect(P.x - w / 2, P.y - d / 2, w, d).fill({ color: ACCENT, alpha: 0.08 }).stroke({ color: ACCENT, width: 1.5 });
       labels.mono(`${it.name} · ${num(it.width, 2)} × ${num(it.depth, 2)} m`, P.x, P.y + d / 2 + 14, 0, ACCENT);
     }
+  }
+}
+
+/** Objekt aus dem aktuellen Bibliotheks-Pinsel erzeugen */
+export function objectFromBrush(doc: Project, brush: Brush, p: Vec2): PlanObject {
+  switch (brush.kind) {
+    case 'plant':
+      return newPlant(doc, brush.speciesId, p);
+    case 'item':
+      return newFromCatalog(doc, brush.catalogId, p);
+    case 'lamp':
+      return newLamp(doc, brush.lampType, p);
+    case 'irr':
+      return brush.what === 'sprinkler' ? newSprinkler(doc, p, 1, 6, [0, 360]) : newFixture(doc, brush.what, p);
   }
 }

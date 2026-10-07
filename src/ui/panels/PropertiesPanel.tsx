@@ -15,13 +15,21 @@ import { materialSwatchStyle } from '../../render/textures/materialTextures';
 import { cmd, useEditor } from '../../state';
 import { Field, NumberField, Toggle } from '../components/controls';
 import { Icon } from '../icons';
-import { glyphSrc, SYMBOL_GLYPH } from '../library/glyphs';
+import { glyphSrc, irrGlyph, SYMBOL_GLYPH } from '../library/glyphs';
 import type { Brush } from '../../state/types';
 import { BackgroundSection } from './BackgroundSection';
+import { LocationFields } from '../components/LocationFields';
+import { DEFAULT_LOCATION } from '../../core/sun/sun';
+import { DripProps, FixtureProps, LampProps, PipeProps, SprinklerProps } from './TechProps';
+import { getLamp, kelvinHex, kelvinRgb } from '../../core/catalog/lamps';
 import u from '../components/ui.module.css';
 import s from './props.module.css';
 
 const TYPE_LABEL: Record<PlanObject['type'], string> = {
+  sprinkler: 'Versenkregner',
+  drip: 'Tropfschlauch',
+  pipe: 'Leitung',
+  fixture: 'Anschluss',
   area: 'Fläche',
   path: 'Weg',
   plant: 'Pflanze',
@@ -109,6 +117,8 @@ function defaultName(o: PlanObject): string {
       return getItem(o.catalogId).name;
     case 'text':
       return o.text;
+    case 'lamp':
+      return getLamp(o.lampType).name;
     default:
       return TYPE_LABEL[o.type];
   }
@@ -257,7 +267,11 @@ function ObjectProps({ o, doc }: { o: PlanObject; doc: Project }) {
           ? { background: `radial-gradient(circle at 40% 35%, #ffffff44, ${getSpecies(o.speciesId).colors.summer} 60%)` }
           : o.type === 'item'
             ? { background: `url("${glyphSrc(SYMBOL_GLYPH[getItem(o.catalogId).symbol] ?? 'edge')}") center/32px no-repeat, rgba(255,255,255,.6)` }
-            : { background: 'var(--fld)' };
+            : o.type === 'lamp'
+              ? { background: `radial-gradient(circle at 50% 60%, ${kelvinHex(o.kelvin)} 0, rgba(255,200,140,.25) 40%, rgba(20,28,41,0) 72%), #121A27` }
+              : o.type === 'sprinkler' || o.type === 'drip' || o.type === 'pipe' || o.type === 'fixture'
+                ? { background: `url("${irrGlyph(o.type === 'sprinkler' ? 'sprinkler' : o.type === 'fixture' ? o.kind : 'drip')}") center/30px no-repeat, rgba(255,255,255,.6)` }
+                : { background: 'var(--fld)' };
 
   return (
     <>
@@ -270,6 +284,11 @@ function ObjectProps({ o, doc }: { o: PlanObject; doc: Project }) {
       {o.type === 'item' && <ItemProps o={o} doc={doc} />}
       {o.type === 'text' && <TextProps o={o} />}
       {o.type === 'dimension' && <DimensionProps o={o} doc={doc} />}
+      {o.type === 'lamp' && <LampProps o={o} />}
+      {o.type === 'sprinkler' && <SprinklerProps o={o} doc={doc} />}
+      {o.type === 'drip' && <DripProps o={o} doc={doc} />}
+      {o.type === 'pipe' && <PipeProps o={o} />}
+      {o.type === 'fixture' && <FixtureProps o={o} />}
       <Costs q={q} />
       <Notes o={o} />
       <Actions o={o} />
@@ -511,6 +530,20 @@ function MultiProps({ objs }: { objs: PlanObject[] }) {
   );
 }
 
+function PlotEditButton() {
+  const tool = useEditor((st) => st.session.tool);
+  const setSession = useEditor((st) => st.setSession);
+  const on = tool === 'plotedit';
+  return (
+    <div className={s.section} style={{ gap: 8 }}>
+      <button type="button" className={s.action} onClick={() => setSession({ tool: on ? 'select' : 'plotedit', selection: [] })} style={on ? { color: 'var(--acc)', background: 'var(--accs)' } : undefined} data-testid="plot-edit">
+        {on ? 'Kontur fertig' : 'Kontur bearbeiten'}
+      </button>
+      {on && <div className={s.muted} style={{ fontSize: 12, lineHeight: 1.45 }}>Punkte ziehen, Doppelklick auf eine Kante fügt einen Punkt ein, Doppelklick auf einen Punkt oder Entf entfernt ihn. Esc beendet.</div>}
+    </div>
+  );
+}
+
 function ProjectInfo({ doc }: { doc: Project }) {
   const summary = useMemo(() => projectSummary(doc), [doc]);
   const b = doc.site.boundary;
@@ -520,13 +553,18 @@ function ProjectInfo({ doc }: { doc: Project }) {
         <div className={s.title} style={{ pointerEvents: 'none' }}>
           Grundstück
         </div>
-        <div className={s.sub}>{doc.site.location?.label ?? 'Kein Standort'} · Nichts ausgewählt</div>
+        <div className={s.sub}>{doc.site.location?.label || doc.site.location?.place || 'Kein Standort'} · Nichts ausgewählt</div>
       </div>
       <div className={s.grid2}>
         <Field label="Fläche" value={squareMeters(area(b))} />
         <Field label="Umfang" value={meters(perimeter(b), 1)} />
         <NumberField label="Nord-Abweichung" value={doc.site.northDeg} format={degrees} min={-180} max={180} onCommit={(v) => cmd.updateSite({ northDeg: v })} testId="prop-north" />
         <Field label="Objekte" value={String(Object.keys(doc.objects).length)} />
+      </div>
+      <PlotEditButton />
+      <div className={s.section} style={{ gap: 8 }}>
+        <div className={u.eyebrow}>Standort · für Sonne und Schatten</div>
+        <LocationFields compact value={doc.site.location ?? { ...DEFAULT_LOCATION, label: '' }} onChange={(l) => cmd.updateSite({ location: l }, 'site-location')} />
       </div>
       <div className={s.section} style={{ gap: 8 }}>
         <div className={u.eyebrow}>Kosten gesamt</div>
@@ -539,7 +577,7 @@ function ProjectInfo({ doc }: { doc: Project }) {
           </span>
         </div>
         <div className={s.muted} style={{ fontSize: 12, lineHeight: 1.45 }}>
-          Mengen werden aus der Zeichnung abgeleitet. Die vollständige Kostenübersicht folgt in Phase 2.
+          Mengen werden aus der Zeichnung abgeleitet. Preise und Einkaufsliste im Tab „Kosten“.
         </div>
       </div>
       <BackgroundSection doc={doc} />
@@ -549,6 +587,31 @@ function ProjectInfo({ doc }: { doc: Project }) {
 
 /** Detailkarte des gewählten Bibliothekselements (Design 04, rechts) */
 function BrushDetail({ brush }: { brush: Brush }) {
+  if (brush.kind === 'lamp' || brush.kind === 'irr') {
+    const name = brush.kind === 'lamp' ? getLamp(brush.lampType).name : { sprinkler: 'Versenkregner', tap: 'Wasseranschluss', manifold: 'Verteiler' }[brush.what];
+    const spec = brush.kind === 'lamp' ? getLamp(brush.lampType) : null;
+    return (
+      <>
+        <div className={s.brushHero} style={{ background: spec ? `radial-gradient(circle at 50% 55%, rgb(${kelvinRgb(spec.kelvin).join(',')}) 0, rgba(255,190,120,.2) 38%, transparent 70%), #101826` : '#DCE6EC' }}>
+          <span className={s.brushScale} style={spec ? { color: '#A6AEB7' } : undefined}>
+            {spec ? 'Lichtwirkung im Nachtmodus' : 'Draufsicht'}
+          </span>
+        </div>
+        <div className={s.serif21}>{name}</div>
+        {spec && (
+          <div className={s.grid2}>
+            <Field label="Lichtstrom" value={`${spec.lumen} lm`} />
+            <Field label="Farbe" value={`${spec.kelvin} K`} />
+            <Field label="Abstrahlung" value={spec.beamDeg >= 360 ? 'rundum' : `${spec.beamDeg}°`} />
+            <Field label="Preis" value={euros(spec.price)} />
+          </div>
+        )}
+        <div className={s.muted} style={{ fontSize: 12, lineHeight: 1.45 }}>
+          Klicke in den Plan, um es zu setzen.{spec?.directional ? ' Richtung und Abstrahlwinkel stellst du danach rechts ein.' : ''}
+        </div>
+      </>
+    );
+  }
   if (brush.kind === 'item') {
     const it = getItem(brush.catalogId);
     return (

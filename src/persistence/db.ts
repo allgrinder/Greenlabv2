@@ -44,7 +44,7 @@ export const metaOf = (p: Project): ProjectMeta => ({
   createdAt: p.createdAt,
   areaM2: area(p.site.boundary),
   objectCount: Object.keys(p.objects).length,
-  location: p.site.location?.label ?? null,
+  location: p.site.location?.label || p.site.location?.place || null,
 });
 
 export async function saveProject(p: Project): Promise<void> {

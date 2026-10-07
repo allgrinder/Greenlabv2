@@ -45,6 +45,12 @@ Umgesetzt sind alle acht Kernfunktionen der Phase 1 sowie PNG-Export (siehe `ARC
 
 **Export:** PDF als Architektenplan (A4 bis A1 quer, Normmaßstab passend zum Blatt, Darstellung Tag/Nacht/Strich, Legende, Maßstabsleiste, Nordpfeil, Titelblock, optional Pflanzenliste als Blatt 2) oder PNG im Maßstab.
 
+## Grundstück und Hintergrund
+
+- **Kontur:** Im Assistenten Punkte direkt in der Vorschau ziehen (ein Rechteck wird dabei zum Polygon); Doppelklick auf eine Kante fügt einen Punkt ein, Doppelklick auf einen Punkt entfernt ihn. Die Kantentabelle rechnet live mit. Im Editor: Grundstück-Panel → „Kontur bearbeiten“ (Ziehen mit Fang, Doppelklick, Entf, Esc).
+- **Bild ausrichten:** Zwei Punkte im Bild anklicken und den passenden Grundstücksecken zuordnen. Maßstab, Drehung und Lage werden daraus berechnet; bei genordetem Bild auch die Nordrichtung. Danach lässt sich das Bild ziehen (Assistent) bzw. mit „Verschieben“ und den Pfeiltasten nachjustieren (10 cm, ⇧ 1 m). „Nur Maßstab“ kalibriert wie bisher über eine bekannte Strecke.
+- **Standort:** Für Sonne und Schatten zählen nur Breitengrad und Zeitzone, daher genügt eine Stadt aus der Liste (Deutschland, Österreich, Schweiz) oder die Ortung. Die Adresse ist reiner Text für Titelblock und Anzeige. Es wird kein externer Dienst abgefragt.
+
 ## Bekannte Grenzen
 
 - Im PDF ist der Plan selbst ein Rasterbild (150 oder 300 dpi, im exakten Maßstab); Rahmen, Schrift, Legende, Maßstab und Nordpfeil sind Vektoren. Die Texturen, Schatten und Lichteffekte stammen aus dem WebGL-Renderer.

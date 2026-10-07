@@ -186,11 +186,11 @@ export function createCommands(store: EditorStoreApi) {
       store.getState().setSession({ selection: result.length ? [target.id, ...extraIds] : [] });
     },
 
-    setPlot(plot: PlotSpec) {
+    setPlot(plot: PlotSpec, mergeKey?: string) {
       apply('Grundstück ändern', (d) => {
         d.site.plot = plot;
         d.site.boundary = boundaryFromPlot(plot);
-      });
+      }, mergeKey);
     },
 
     updateSite(patch: Partial<Omit<Site, 'plot' | 'boundary'>>, mergeKey?: string) {
@@ -200,6 +200,14 @@ export function createCommands(store: EditorStoreApi) {
     setBackground(bg: BackgroundImage | null) {
       apply(bg ? 'Hintergrund setzen' : 'Hintergrund entfernen', (d) => {
         d.background = bg;
+      });
+    },
+
+    /** Hintergrund ausrichten und – bei genordetem Bild – die Nordrichtung setzen, ein Undo-Schritt */
+    alignBackground(patch: Partial<BackgroundImage>, northDeg: number | null) {
+      apply('Hintergrund ausrichten', (d) => {
+        if (d.background) Object.assign(d.background, patch);
+        if (northDeg !== null) d.site.northDeg = northDeg;
       });
     },
 

@@ -26,7 +26,9 @@ export type ToolId =
   | 'bgmove'
   | 'drip'
   | 'pipe'
-  | 'lights';
+  | 'lights'
+  | 'plotedit'
+  | 'bgalign';
 
 export type LensTab = 'plan' | 'sun' | 'growth' | 'seasons' | 'irrigation' | 'costs';
 

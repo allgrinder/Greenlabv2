@@ -109,6 +109,9 @@ Objekte werden flach als `Record` gespeichert. Die Reihenfolge steht in `layer.o
 Die Eingabe bleibt gespeichert, damit sie später editierbar ist. `boundary` ist das daraus berechnete Polygon.
 
 ### Hintergrund & Kalibrierung
+
+Ausrichten an zwei Punkten (`core/calibration.ts → alignTwoPoints`): Bildpunkte a, b und Grundstücksecken A, B ergeben eine Ähnlichkeitstransformation – Maßstab |AB|/|ab|, Drehung ∠AB − ∠ab, Lage so, dass a auf A fällt. Bei genordetem Bild ist die Nordrichtung gleich der Bilddrehung. Wird die Kontur im Editor bearbeitet, wird sie als `drawn` (absolute Punkte) gespeichert, damit alle Objekte an ihrer Stelle bleiben.
+
 `BackgroundImage { blobId, origin, metersPerPixel, rotationDeg, opacity, visible, locked, calibration: {a, b, distanceM} }`. Die beiden Punkte a und b liegen in **Bildpixeln**. Daraus folgt `metersPerPixel = distanceM / |b − a|`. So bleibt die Kalibrierung gültig, wenn das Bild verschoben wird.
 
 ### Geometrie

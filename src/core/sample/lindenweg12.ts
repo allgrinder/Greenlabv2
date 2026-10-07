@@ -84,7 +84,7 @@ export function createLindenweg12(): Project {
     name: 'Garten Lindenweg 12',
     plot: { kind: 'rect', width: 50, depth: 30 },
     northDeg: -12,
-    location: { lat: 50.1488, lon: 8.6247, label: 'Lindenweg 12, Frankfurt', timeZone: 'Europe/Berlin' },
+    location: { lat: 50.1488, lon: 8.6247, label: 'Lindenweg 12, Frankfurt', place: 'Frankfurt am Main', timeZone: 'Europe/Berlin' },
   });
   const L = (k: LayerKind) => layerOfKind(p, k).id;
   const add = (o: PlanObject) => {

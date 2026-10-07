@@ -77,3 +77,40 @@ export function edgesFromPolygon(points: Vec2[]): { length: number; angleDeg: nu
     return { length: dist(p, next), angleDeg: 180 - norm180(hout - hin) };
   });
 }
+
+/**
+ * Kanteneingabe (Richtung der ersten Kante, Innenwinkel der übrigen) aus Punkten.
+ * Die letzte Kante zurück zu A bleibt die berechnete Schlusskante. Volle Genauigkeit,
+ * damit `polygonFromEdges` die Punkte (relativ zu A) exakt wiederherstellt.
+ */
+export function plotEdgesFromPoints(points: Vec2[]): PlotEdge[] {
+  const n = points.length;
+  const out: PlotEdge[] = [];
+  for (let i = 0; i < n - 1; i++) {
+    const p = points[i];
+    const q = points[i + 1];
+    if (i === 0) out.push({ length: dist(p, q), angleDeg: angleDeg(sub(q, p)) });
+    else {
+      const hin = angleDeg(sub(p, points[i - 1]));
+      const hout = angleDeg(sub(q, p));
+      out.push({ length: dist(p, q), angleDeg: 180 - norm180(hout - hin) });
+    }
+  }
+  return out;
+}
+
+/** Punkte aus der Kanteneingabe, verschoben so, dass A auf `anchor` liegt */
+export function pointsFromEdges(edges: PlotEdge[], anchor: Vec2): Vec2[] {
+  return polygonFromEdges(edges).points.map((p) => add(p, anchor));
+}
+
+/** Kontur im Uhrzeigersinn (Bildschirmsystem, y nach unten) – wie die Kanteneingabe es erwartet */
+export function clockwise(points: Vec2[]): Vec2[] {
+  let s = 0;
+  for (let i = 0; i < points.length; i++) {
+    const a = points[i];
+    const b = points[(i + 1) % points.length];
+    s += a.x * b.y - b.x * a.y;
+  }
+  return s >= 0 ? points : [points[0], ...points.slice(1).reverse()];
+}

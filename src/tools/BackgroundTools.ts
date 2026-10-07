@@ -91,4 +91,18 @@ export class BackgroundMoveTool implements Tool {
     this.seq++;
     this.ctx.store.getState().endGesture();
   }
+  /** Pfeiltasten: 10 cm, mit ⇧ 1 m; Esc beendet */
+  key(e: KeyboardEvent): boolean {
+    const bg = this.ctx.doc().background;
+    if (e.key === 'Escape') {
+      this.ctx.store.getState().setSession({ tool: 'select' });
+      return true;
+    }
+    const dir: Record<string, Vec2> = { ArrowLeft: { x: -1, y: 0 }, ArrowRight: { x: 1, y: 0 }, ArrowUp: { x: 0, y: -1 }, ArrowDown: { x: 0, y: 1 } };
+    const d = dir[e.key];
+    if (!d || !bg || bg.locked) return false;
+    const step = e.shiftKey ? 1 : 0.1;
+    this.ctx.cmd.updateBackground({ origin: { x: bg.origin.x + d.x * step, y: bg.origin.y + d.y * step } }, 'bg-nudge');
+    return true;
+  }
 }

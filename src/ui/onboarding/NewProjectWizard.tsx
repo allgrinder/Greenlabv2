@@ -1,17 +1,20 @@
 /**
  * Neues Projekt (Design-Screen 01): Kontur als Rechteck oder Polygon mit exakten
- * Kantenlängen und Innenwinkeln, Nordausrichtung, Standort, optional Lageplan/Luftbild
- * mit 2-Punkt-Maßstabskalibrierung und Deckkraft.
+ * Kantenlängen und Innenwinkeln – Punkte auch direkt in der Vorschau ziehbar –,
+ * Nordausrichtung, Ort für den Sonnenstand, optional Lageplan/Luftbild, das an zwei
+ * Grundstücksecken ausgerichtet (Maßstab, Drehung, Lage) und danach verschoben wird.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { metersPerPixel } from '../../core/calibration';
+import { alignTwoPoints, applyCalibration, metersPerPixel, northFromImageRotation } from '../../core/calibration';
+import { findPlace } from '../../core/geo/places';
 import { num, parseNumber, squareMeters } from '../../core/format';
 import { area, bbox } from '../../core/geometry/polygon';
-import { boundaryFromPlot, edgesFromPolygon, polygonFromEdges } from '../../core/geometry/plot';
+import { plotEdgesFromPoints, pointsFromEdges, polygonFromEdges } from '../../core/geometry/plot';
 import { dist } from '../../core/geometry/vec';
 import { createProject } from '../../core/model/defaults';
 import { newId } from '../../core/model/ids';
 import type { BackgroundImage, GeoLocation, PlotEdge, PlotSpec, Project, Vec2 } from '../../core/model/types';
+import { LocationFields } from '../components/LocationFields';
 import { Icon, Logo } from '../icons';
 import s from './onboarding.module.css';
 
@@ -23,13 +26,6 @@ const DESIGN_POLY: Vec2[] = [
   { x: 26.17, y: 36.383 },
   { x: 0.532, y: 28.511 },
 ];
-
-function defaultEdges(): PlotEdge[] {
-  const e = edgesFromPolygon(DESIGN_POLY);
-  const dir = (Math.atan2(DESIGN_POLY[1].y - DESIGN_POLY[0].y, DESIGN_POLY[1].x - DESIGN_POLY[0].x) * 180) / Math.PI;
-  const r = (v: number, d = 2) => Math.round(v * 10 ** d) / 10 ** d;
-  return [{ length: r(e[0].length), angleDeg: r(dir, 1) }, ...e.slice(1, 4).map((x) => ({ length: r(x.length), angleDeg: r(x.angleDeg, 1) }))];
-}
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -45,11 +41,21 @@ interface BgDraft {
   w: number;
   h: number;
   opacity: number;
+  /** zwei Punkte im Bild (Pixel) */
   a: Vec2 | null;
   b: Vec2 | null;
   distance: number | null;
-  mpp: number | null;
+  /** Lage nach dem Ausrichten; null = noch nicht ausgerichtet */
+  place: Placement | null;
+  mode: 'corners' | 'distance';
+  /** zugeordnete Ecken (Index in der Kontur) */
+  ca: number;
+  cb: number;
+  /** Bild ist genordet → Nordrichtung aus der Drehung */
+  northUp: boolean;
 }
+
+const DEFAULT_PLACE = findPlace('Frankfurt am Main')!;
 
 function NumInput({ value, onChange, unit, label, testId, autoFocus }: { value: number; onChange: (v: number) => void; unit: string; label?: string; testId?: string; autoFocus?: boolean }) {
   const [text, setText] = useState(num(value, 2));
@@ -95,28 +101,64 @@ function Cell({ value, onChange, unit, digits = 2, testId }: { value: number; on
   );
 }
 
+/** Lage des Bildes im Assistenten (Weltkoordinaten des Assistenten) */
+interface Placement {
+  origin: Vec2;
+  metersPerPixel: number;
+  rotationDeg: number;
+}
+
+const rectPoints = (w: number, d: number): Vec2[] => [
+  { x: 0, y: 0 },
+  { x: w, y: 0 },
+  { x: w, y: d },
+  { x: 0, y: d },
+];
+
+/** Gezogene Punkte auf 1 cm runden */
+const cm = (p: Vec2): Vec2 => ({ x: Math.round(p.x * 100) / 100, y: Math.round(p.y * 100) / 100 });
+
 export function NewProjectWizard({ onCreate, onCancel, onSample, canCancel }: { onCreate: (r: WizardResult) => void; onCancel: () => void; onSample: () => void; canCancel: boolean }) {
   const [kind, setKind] = useState<'rect' | 'edges'>('rect');
   const [width, setWidth] = useState(30);
   const [depth, setDepth] = useState(50);
-  const [edges, setEdges] = useState<PlotEdge[]>(defaultEdges);
+  /** Polygon als Punkte (A zuerst, im Uhrzeigersinn); die Kantentabelle wird daraus abgeleitet */
+  const [poly, setPoly] = useState<Vec2[]>(DESIGN_POLY);
   const [north, setNorth] = useState(0);
-  const [loc, setLoc] = useState<GeoLocation>({ label: '', lat: 50.11, lon: 8.68, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Berlin' });
+  const [loc, setLoc] = useState<GeoLocation>({ label: '', place: DEFAULT_PLACE.name, lat: DEFAULT_PLACE.lat, lon: DEFAULT_PLACE.lon, timeZone: DEFAULT_PLACE.timeZone });
   const [bg, setBg] = useState<BgDraft | null>(null);
   const [stageTab, setStageTab] = useState<'contour' | 'calib'>('contour');
   const [name, setName] = useState('');
 
-  const plot: PlotSpec = kind === 'rect' ? { kind: 'rect', width, depth } : { kind: 'edges', edges };
-  const boundary = useMemo(() => boundaryFromPlot(plot), [kind, width, depth, edges]); // eslint-disable-line react-hooks/exhaustive-deps
+  const boundary = useMemo(() => (kind === 'rect' ? rectPoints(width, depth) : poly), [kind, width, depth, poly]);
+  const edges = useMemo(() => plotEdgesFromPoints(poly), [poly]);
   const closing = useMemo(() => (kind === 'edges' ? polygonFromEdges(edges).closing : null), [kind, edges]);
   const A = area(boundary);
   const valid = boundary.length >= 3 && A > 0.5 && (kind === 'rect' || (closing !== null && closing.length > 0.01));
+
+  const editEdge = (i: number, patch: Partial<PlotEdge>) => setPoly(pointsFromEdges(edges.map((e, j) => (j === i ? { ...e, ...patch } : e)), poly[0]));
+
+  /** Punkt in der Vorschau gezogen; ein Rechteck wird dabei zum Polygon */
+  const moveVertex = (i: number, p: Vec2) => {
+    const base = kind === 'rect' ? rectPoints(width, depth) : poly;
+    setPoly(base.map((q, j) => (j === i ? cm(p) : q)));
+    if (kind === 'rect') setKind('edges');
+  };
+  const insertVertex = (afterIndex: number, p: Vec2) => {
+    const base = kind === 'rect' ? rectPoints(width, depth) : poly;
+    setPoly([...base.slice(0, afterIndex + 1), cm(p), ...base.slice(afterIndex + 1)]);
+    if (kind === 'rect') setKind('edges');
+  };
+  const deleteVertex = (i: number) => {
+    if (kind !== 'edges' || poly.length <= 3) return;
+    setPoly(poly.filter((_, j) => j !== i));
+  };
 
   const pickFile = async (f: File) => {
     const url = URL.createObjectURL(f);
     const img = new Image();
     img.onload = () => {
-      setBg({ blob: f, url, name: f.name, w: img.naturalWidth, h: img.naturalHeight, opacity: 0.6, a: null, b: null, distance: null, mpp: null });
+      setBg({ blob: f, url, name: f.name, w: img.naturalWidth, h: img.naturalHeight, opacity: 0.6, a: null, b: null, distance: null, place: null, mode: 'corners', ca: 0, cb: 1, northUp: true });
       setStageTab('calib');
     };
     img.onerror = () => {
@@ -126,22 +168,48 @@ export function NewProjectWizard({ onCreate, onCancel, onSample, canCancel }: { 
     img.src = url;
   };
 
+  /** Ohne Ausrichtung: Bild mittig auf das Grundstück, Bildbreite = Grundstücksbreite */
+  const defaultPlacement = (d: BgDraft, mpp?: number): Placement => {
+    const b = bbox(boundary);
+    const m = mpp ?? (b.maxX - b.minX) / d.w;
+    return { origin: { x: (b.minX + b.maxX) / 2 - (d.w * m) / 2, y: (b.minY + b.maxY) / 2 - (d.h * m) / 2 }, metersPerPixel: m, rotationDeg: 0 };
+  };
+
+  const applyCorners = () => {
+    if (!bg?.a || !bg.b) return;
+    const r = alignTwoPoints(bg.a, bg.b, boundary[bg.ca], boundary[bg.cb]);
+    setBg({ ...bg, place: r, distance: r.calibration.distanceM });
+    if (bg.northUp) setNorth(northFromImageRotation(r.rotationDeg));
+    setStageTab('contour');
+  };
+  const applyDistance = () => {
+    if (!bg?.a || !bg.b) return;
+    const d = bg.distance ?? 10;
+    const mpp = metersPerPixel({ a: bg.a, b: bg.b, distanceM: d });
+    // vorhandene Lage behalten (Punkt a bleibt stehen), sonst mittig einpassen
+    const place = bg.place ? applyCalibration({ ...bg.place, calibration: null }, { a: bg.a, b: bg.b, distanceM: d }) : defaultPlacement(bg, mpp);
+    setBg({ ...bg, distance: d, place: { origin: place.origin, metersPerPixel: place.metersPerPixel, rotationDeg: place.rotationDeg } });
+    setStageTab('contour');
+  };
+
   const create = () => {
-    const project = createProject({ name: name.trim() || (loc.label ? `Garten ${loc.label.split(',')[0]}` : 'Neuer Garten'), plot, northDeg: north, location: loc.label ? loc : null });
+    const plot: PlotSpec = kind === 'rect' ? { kind: 'rect', width, depth } : { kind: 'edges', edges };
+    const place = loc.place || loc.label;
+    const project = createProject({ name: name.trim() || (place ? `Garten ${(loc.label || place).split(',')[0]}` : 'Neuer Garten'), plot, northDeg: north, location: loc });
+    // Das Projekt beginnt bei A = (0,0); Bildlage entsprechend verschieben
+    const offset = kind === 'rect' ? { x: 0, y: 0 } : poly[0];
     let background: BackgroundImage | null = null;
     if (bg) {
-      const mpp = bg.mpp ?? Math.max(...boundary.map((p) => p.x)) / bg.w; // ohne Kalibrierung: Bildbreite = Grundstücksbreite
-      const b = bbox(project.site.boundary);
+      const p = bg.place ?? defaultPlacement(bg);
       background = {
         blobId: newId(),
         fileName: bg.name,
         mime: bg.blob.type || 'image/png',
         pixelWidth: bg.w,
         pixelHeight: bg.h,
-        // Bildmitte auf die Grundstücksmitte legen; verschieben lässt es sich später
-        origin: { x: (b.minX + b.maxX) / 2 - (bg.w * mpp) / 2, y: (b.minY + b.maxY) / 2 - (bg.h * mpp) / 2 },
-        metersPerPixel: mpp,
-        rotationDeg: 0,
+        origin: { x: p.origin.x - offset.x, y: p.origin.y - offset.y },
+        metersPerPixel: p.metersPerPixel,
+        rotationDeg: p.rotationDeg,
         opacity: bg.opacity,
         visible: true,
         locked: true,
@@ -227,9 +295,16 @@ export function NewProjectWizard({ onCreate, onCancel, onSample, canCancel }: { 
                     {LETTERS[i]}–{LETTERS[i + 1]}
                   </span>
                   <span className={s.edgeLabel}>{i === 0 ? 'Richtung' : `Winkel bei ${LETTERS[i]}`}</span>
-                  <Cell value={e.length} unit="m" onChange={(v) => setEdges(edges.map((x, j) => (j === i ? { ...x, length: Math.max(0, v) } : x)))} testId={`edge-${i}-len`} />
-                  <Cell value={e.angleDeg} unit="°" digits={1} onChange={(v) => setEdges(edges.map((x, j) => (j === i ? { ...x, angleDeg: v } : x)))} testId={`edge-${i}-ang`} />
-                  <button type="button" aria-label="Kante entfernen" disabled={edges.length <= 2} onClick={() => setEdges(edges.filter((_, j) => j !== i))} style={{ color: 'var(--ink3)', opacity: edges.length <= 2 ? 0.3 : 1 }}>
+                  <Cell value={e.length} unit="m" onChange={(v) => v > 0 && editEdge(i, { length: v })} testId={`edge-${i}-len`} />
+                  <Cell value={e.angleDeg} unit="°" digits={1} onChange={(v) => editEdge(i, { angleDeg: v })} testId={`edge-${i}-ang`} />
+                  <button
+                    type="button"
+                    aria-label={`Punkt ${LETTERS[i + 1]} entfernen`}
+                    title={`Punkt ${LETTERS[i + 1]} entfernen`}
+                    disabled={poly.length <= 3}
+                    onClick={() => deleteVertex(i + 1)}
+                    style={{ color: 'var(--ink3)', opacity: poly.length <= 3 ? 0.3 : 1 }}
+                  >
                     <Icon name="close" size={12} />
                   </button>
                 </div>
@@ -248,11 +323,11 @@ export function NewProjectWizard({ onCreate, onCancel, onSample, canCancel }: { 
                 </div>
               )}
               <div className={s.edgeFoot}>
-                <button type="button" className={s.linkBtn} onClick={() => setEdges([...edges, { length: 10, angleDeg: 90 }])} data-testid="add-edge">
+                <button type="button" className={s.linkBtn} onClick={() => setPoly(pointsFromEdges([...edges, { length: 10, angleDeg: 90 }], poly[0]))} data-testid="add-edge">
                   + Kante
                 </button>
                 <span>
-                  Fläche · {edges.length + 1} Punkte{' '}
+                  Fläche · {poly.length} Punkte{' '}
                   <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--ink)', marginLeft: 6 }} data-testid="plot-area">
                     {squareMeters(A)}
                   </span>
@@ -260,39 +335,30 @@ export function NewProjectWizard({ onCreate, onCancel, onSample, canCancel }: { 
               </div>
             </div>
           )}
+          <div className={s.hint}>Punkte in der Vorschau ziehen. Doppelklick auf eine Kante fügt einen Punkt ein, Doppelklick auf einen Punkt entfernt ihn.</div>
         </div>
 
         <div className={s.block}>
           <div className={s.blockHead}>
             <span className={s.num}>02</span>
             <span className={s.blockTitle}>Ausrichtung & Standort</span>
-            <span className={s.blockNote}>für den Sonnenstand</span>
+            <span className={s.blockNote}>für Sonne und Schatten</span>
           </div>
           <div className={s.orient}>
             <Compass value={north} onChange={setNorth} />
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
               <div className={s.fieldCard} style={{ justifyContent: 'space-between' }}>
                 <span style={{ fontSize: 12.5, color: 'var(--ink2)' }}>Nord-Abweichung</span>
                 <div style={{ width: 90 }}>
-                  <Cell value={north} unit="°" digits={0} onChange={(v) => setNorth(Math.max(-180, Math.min(180, v)))} testId="north" />
+                  <Cell value={north} unit="°" digits={1} onChange={(v) => setNorth(Math.max(-180, Math.min(180, v)))} testId="north" />
                 </div>
               </div>
-              <div className={s.fieldCard}>
-                <Icon name="pin" size={14} color="var(--ink2)" />
-                <input placeholder="Adresse oder Ort" value={loc.label} onChange={(e) => setLoc({ ...loc, label: e.target.value })} aria-label="Standort" data-testid="location" />
-                <button
-                  type="button"
-                  className={s.num}
-                  title="Aktuellen Standort verwenden"
-                  onClick={() =>
-                    navigator.geolocation?.getCurrentPosition((p) => setLoc({ ...loc, lat: p.coords.latitude, lon: p.coords.longitude, label: loc.label || 'Aktueller Standort' }))
-                  }
-                >
-                  {num(Math.abs(loc.lat), 2)}° {loc.lat >= 0 ? 'N' : 'S'}
-                </button>
+              <div className={s.hint} style={{ margin: 0 }}>
+                {bg?.place && bg.northUp ? 'Aus dem genordeten Hintergrundbild übernommen.' : 'Wohin zeigt Norden, wenn der Plan oben liegt? Kompass ziehen oder Grad eingeben.'}
               </div>
             </div>
           </div>
+          <LocationFields value={loc} onChange={setLoc} />
         </div>
 
         <div className={s.block}>
@@ -306,37 +372,10 @@ export function NewProjectWizard({ onCreate, onCancel, onSample, canCancel }: { 
             <>
               <label style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 12.5, color: 'var(--ink2)' }}>
                 Deckkraft
-                <input className={s.slider} type="range" min={0.1} max={1} step={0.05} value={bg.opacity} onChange={(e) => setBg({ ...bg, opacity: +e.target.value })} />
+                <input className={s.slider} type="range" min={0.05} max={1} step={0.05} value={bg.opacity} onChange={(e) => setBg({ ...bg, opacity: +e.target.value })} data-testid="wiz-opacity" />
                 <span style={{ fontFamily: 'var(--font-mono)', width: 52, flex: 'none', textAlign: 'right' }}>{num(bg.opacity * 100, 0)} %</span>
               </label>
-              <div className={s.calib}>
-                <div className={s.calibBadge}>{bg.mpp ? '✓' : `${(bg.a ? 1 : 0) + (bg.b ? 1 : 0)}/2`}</div>
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <div style={{ fontSize: 13, lineHeight: 1.45 }}>
-                    <b style={{ fontWeight: 600 }}>Maßstab kalibrieren.</b> Klicke zwei Punkte mit bekanntem Abstand und gib die Distanz ein.
-                  </div>
-                  {bg.a && bg.b && (
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <div style={{ flex: 1 }}>
-                        <NumInput value={bg.distance ?? 10} onChange={(v) => setBg({ ...bg, distance: v })} unit="m" label="Distanz" testId="calib-distance" autoFocus />
-                      </div>
-                      <button
-                        type="button"
-                        style={{ padding: '8px 14px', borderRadius: 8, background: 'var(--acc)', color: '#fff', fontWeight: 500 }}
-                        onClick={() => {
-                          const d = bg.distance ?? 10;
-                          setBg({ ...bg, distance: d, mpp: metersPerPixel({ a: bg.a!, b: bg.b!, distanceM: d }) });
-                          setStageTab('contour');
-                        }}
-                        data-testid="calib-apply"
-                      >
-                        Übernehmen
-                      </button>
-                    </div>
-                  )}
-                  {bg.mpp && <div style={{ fontSize: 12, color: 'var(--ink2)' }}>1 px = {num(bg.mpp * 100, 2)} cm · Bild {num(bg.w * bg.mpp, 1)} × {num(bg.h * bg.mpp, 1)} m</div>}
-                </div>
-              </div>
+              <AlignBox bg={bg} setBg={setBg} corners={boundary.length} onCorners={applyCorners} onDistance={applyDistance} onStart={() => setStageTab('calib')} />
             </>
           )}
         </div>
@@ -366,17 +405,115 @@ export function NewProjectWizard({ onCreate, onCancel, onSample, canCancel }: { 
 
       <div className={s.stage}>
         <div className={s.stageInner}>
-          {stageTab === 'calib' && bg ? <CalibStage bg={bg} onPoint={(a, b) => setBg({ ...bg, a, b, mpp: null })} /> : <ContourStage boundary={boundary} kind={kind} closingIndex={kind === 'edges' ? edges.length : -1} bg={bg} north={north} />}
+          {stageTab === 'calib' && bg ? (
+            <CalibStage bg={bg} onPoint={(a, b) => setBg({ ...bg, a, b })} />
+          ) : (
+            <ContourStage
+              boundary={boundary}
+              kind={kind}
+              closingIndex={kind === 'edges' ? poly.length - 1 : -1}
+              bg={bg}
+              north={north}
+              onMoveVertex={moveVertex}
+              onInsertVertex={insertVertex}
+              onDeleteVertex={deleteVertex}
+              onMoveImage={(d) => bg?.place && setBg({ ...bg, place: { ...bg.place, origin: { x: bg.place.origin.x + d.x, y: bg.place.origin.y + d.y } } })}
+            />
+          )}
         </div>
         <div className={s.stageTabs}>
-          <button type="button" className={stageTab === 'contour' ? s.stageTabOn : s.stageTab} onClick={() => setStageTab('contour')}>
+          <button type="button" className={stageTab === 'contour' ? s.stageTabOn : s.stageTab} onClick={() => setStageTab('contour')} data-testid="stage-contour">
             Kontur
           </button>
-          <button type="button" className={stageTab === 'calib' ? s.stageTabOn : s.stageTab} onClick={() => bg && setStageTab('calib')} disabled={!bg} style={{ opacity: bg ? 1 : 0.5 }}>
-            Kalibrieren
+          <button type="button" className={stageTab === 'calib' ? s.stageTabOn : s.stageTab} onClick={() => bg && setStageTab('calib')} disabled={!bg} style={{ opacity: bg ? 1 : 0.5 }} data-testid="stage-calib">
+            Bild ausrichten
           </button>
           {bg && <span className={s.stageTab}>Hintergrund {num(bg.opacity * 100, 0)} %</span>}
         </div>
+      </div>
+    </div>
+  );
+}
+
+/** Ausrichten: zwei Bildpunkte den Grundstücksecken zuordnen – oder nur den Maßstab über eine Strecke setzen */
+function AlignBox({ bg, setBg, corners, onCorners, onDistance, onStart }: { bg: BgDraft; setBg: (b: BgDraft) => void; corners: number; onCorners: () => void; onDistance: () => void; onStart: () => void }) {
+  const n = (bg.a ? 1 : 0) + (bg.b ? 1 : 0);
+  const letters = Array.from({ length: corners }, (_, i) => LETTERS[i]);
+  return (
+    <div className={s.calib} data-testid="align-box">
+      <div className={s.calibBadge}>{bg.place ? '✓' : `${n}/2`}</div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 }}>
+        <div style={{ fontSize: 13, lineHeight: 1.45 }}>
+          <b style={{ fontWeight: 600 }}>Bild ausrichten.</b>{' '}
+          {n < 2 ? (
+            <>
+              Klicke im Bild zwei markante Punkte an, z. B. zwei Grundstücksecken.{' '}
+              {!bg.a && (
+                <button type="button" className={s.linkBtn} onClick={onStart}>
+                  Jetzt setzen
+                </button>
+              )}
+            </>
+          ) : (
+            'Ordne die Punkte den Ecken der Kontur zu – Maßstab, Drehung und Lage werden berechnet.'
+          )}
+        </div>
+        {n === 2 && (
+          <>
+            <div className={s.segRow}>
+              {(['corners', 'distance'] as const).map((m) => (
+                <button key={m} type="button" className={bg.mode === m ? s.segOn : s.seg} onClick={() => setBg({ ...bg, mode: m })} data-testid={`align-mode-${m}`}>
+                  {m === 'corners' ? 'Ecken zuordnen' : 'Nur Maßstab'}
+                </button>
+              ))}
+            </div>
+            {bg.mode === 'corners' ? (
+              <>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12.5 }}>
+                  <span className={s.pointTag}>1</span>
+                  <span>=</span>
+                  <select className={s.select} value={bg.ca} onChange={(e) => setBg({ ...bg, ca: +e.target.value })} aria-label="Ecke für Punkt 1" data-testid="corner-1">
+                    {letters.map((l, i) => (
+                      <option key={l} value={i}>
+                        Ecke {l}
+                      </option>
+                    ))}
+                  </select>
+                  <span className={s.pointTag}>2</span>
+                  <span>=</span>
+                  <select className={s.select} value={bg.cb} onChange={(e) => setBg({ ...bg, cb: +e.target.value })} aria-label="Ecke für Punkt 2" data-testid="corner-2">
+                    {letters.map((l, i) => (
+                      <option key={l} value={i}>
+                        Ecke {l}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12.5, color: 'var(--ink2)' }}>
+                  <input type="checkbox" checked={bg.northUp} onChange={(e) => setBg({ ...bg, northUp: e.target.checked })} data-testid="north-up" />
+                  Bild ist genordet – Nordrichtung übernehmen
+                </label>
+                <button type="button" className={s.applyBtn} disabled={bg.ca === bg.cb} onClick={onCorners} data-testid="align-apply">
+                  Ausrichten
+                </button>
+              </>
+            ) : (
+              <div style={{ display: 'flex', gap: 8 }}>
+                <div style={{ flex: 1 }}>
+                  <NumInput value={bg.distance ?? 10} onChange={(v) => setBg({ ...bg, distance: v })} unit="m" label="Distanz" testId="calib-distance" autoFocus />
+                </div>
+                <button type="button" className={s.applyBtn} onClick={onDistance} data-testid="calib-apply">
+                  Übernehmen
+                </button>
+              </div>
+            )}
+          </>
+        )}
+        {bg.place && (
+          <div style={{ fontSize: 12, color: 'var(--ink2)' }} data-testid="align-info">
+            1 px = {num(bg.place.metersPerPixel * 100, 2)} cm · Drehung {num(bg.place.rotationDeg, 1)}° · Bild in der Vorschau ziehen zum Nachjustieren
+          </div>
+        )}
       </div>
     </div>
   );
@@ -458,47 +595,166 @@ function Compass({ value, onChange }: { value: number; onChange: (v: number) => 
   );
 }
 
-/** Vorschau der Kontur mit Kantenlängen-Pills; bei kalibriertem Hintergrund liegt das Bild darunter */
-function ContourStage({ boundary, kind, closingIndex, bg, north }: { boundary: Vec2[]; kind: string; closingIndex: number; bg: BgDraft | null; north: number }) {
+
+type View = { k: number; ox: number; oy: number };
+
+/**
+ * Vorschau der Kontur mit Kantenlängen und Eckbuchstaben. Punkte lassen sich ziehen,
+ * Doppelklick auf eine Kante fügt einen Punkt ein, auf einen Punkt entfernt ihn.
+ * Ein ausgerichtetes Hintergrundbild liegt darunter und lässt sich verschieben.
+ */
+function ContourStage({
+  boundary,
+  kind,
+  closingIndex,
+  bg,
+  north,
+  onMoveVertex,
+  onInsertVertex,
+  onDeleteVertex,
+  onMoveImage,
+}: {
+  boundary: Vec2[];
+  kind: string;
+  closingIndex: number;
+  bg: BgDraft | null;
+  north: number;
+  onMoveVertex: (i: number, p: Vec2) => void;
+  onInsertVertex: (afterIndex: number, p: Vec2) => void;
+  onDeleteVertex: (i: number) => void;
+  onMoveImage: (d: Vec2) => void;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 800, h: 700 });
+  const [drag, setDrag] = useState<{ kind: 'vertex'; i: number; from: Vec2; moved: boolean } | { kind: 'image'; last: Vec2 } | null>(null);
+  const frozen = useRef<View | null>(null);
   useEffect(() => {
     const ro = new ResizeObserver(() => ref.current && setSize({ w: ref.current.clientWidth, h: ref.current.clientHeight }));
     if (ref.current) ro.observe(ref.current);
     return () => ro.disconnect();
   }, []);
   if (boundary.length < 2) return <div ref={ref} style={{ position: 'absolute', inset: 0 }} />;
-  const b = bbox(boundary);
-  const pad = 90;
-  const k = Math.min((size.w - pad * 2) / Math.max(1, b.maxX - b.minX), (size.h - pad * 2) / Math.max(1, b.maxY - b.minY));
-  const ox = (size.w - (b.maxX - b.minX) * k) / 2 - b.minX * k;
-  const oy = (size.h - (b.maxY - b.minY) * k) / 2 - b.minY * k;
+
+  // Ansicht einpassen – während des Ziehens eingefroren, damit nichts springt
+  let view: View;
+  if (drag && frozen.current) view = frozen.current;
+  else {
+    const b = bbox(boundary);
+    const pad = 90;
+    const k = Math.min((size.w - pad * 2) / Math.max(1, b.maxX - b.minX), (size.h - pad * 2) / Math.max(1, b.maxY - b.minY));
+    view = { k, ox: (size.w - (b.maxX - b.minX) * k) / 2 - b.minX * k, oy: (size.h - (b.maxY - b.minY) * k) / 2 - b.minY * k };
+  }
+  const { k, ox, oy } = view;
   const T = (p: Vec2) => ({ x: ox + p.x * k, y: oy + p.y * k });
+  const toWorld = (e: React.PointerEvent | React.MouseEvent): Vec2 => {
+    const r = ref.current!.getBoundingClientRect();
+    return { x: (e.clientX - r.left - ox) / k, y: (e.clientY - r.top - oy) / k };
+  };
   const pts = boundary.map(T);
   const cx = pts.reduce((a, p) => a + p.x, 0) / pts.length;
   const cy = pts.reduce((a, p) => a + p.y, 0) / pts.length;
-  const bgW = bg?.mpp ? bg.w * bg.mpp : null;
+  const place = bg?.place ?? null;
+
+  const start = (d: NonNullable<typeof drag>, e: React.PointerEvent) => {
+    e.stopPropagation();
+    (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
+    frozen.current = view;
+    setDrag(d);
+  };
+
   return (
-    <div ref={ref} style={{ position: 'absolute', inset: 0 }}>
+    <div
+      ref={ref}
+      style={{ position: 'absolute', inset: 0, cursor: drag?.kind === 'image' ? 'grabbing' : place ? 'grab' : 'default', touchAction: 'none', userSelect: 'none' }}
+      onPointerDown={(e) => place && start({ kind: 'image', last: toWorld(e) }, e)}
+      onPointerMove={(e) => {
+        if (!drag) return;
+        const w = toWorld(e);
+        if (drag.kind === 'vertex') {
+          // erst ab 3 px Bewegung ziehen – ein Klick verändert nichts
+          if (!drag.moved && Math.hypot(e.clientX - drag.from.x, e.clientY - drag.from.y) < 3) return;
+          if (!drag.moved) setDrag({ ...drag, moved: true });
+          onMoveVertex(drag.i, w);
+        }
+        else {
+          onMoveImage({ x: w.x - drag.last.x, y: w.y - drag.last.y });
+          setDrag({ kind: 'image', last: w });
+        }
+      }}
+      onPointerUp={() => {
+        setDrag(null);
+        frozen.current = null;
+      }}
+      data-testid="contour-stage"
+    >
       <svg width={size.w} height={size.h} style={{ position: 'absolute', inset: 0 }}>
-        {bg && bgW && (
+        {bg && place && (
           <image
             href={bg.url}
             opacity={bg.opacity}
-            x={ox + ((b.minX + b.maxX) / 2 - bgW / 2) * k}
-            y={oy + ((b.minY + b.maxY) / 2 - (bg.h * bg.mpp!) / 2) * k}
-            width={bgW * k}
-            height={bg.h * bg.mpp! * k}
+            x={0}
+            y={0}
+            width={bg.w}
+            height={bg.h}
+            preserveAspectRatio="none"
+            transform={`translate(${ox + place.origin.x * k} ${oy + place.origin.y * k}) rotate(${place.rotationDeg}) scale(${place.metersPerPixel * k})`}
+            style={{ pointerEvents: 'none' }}
           />
         )}
-        <polygon points={pts.map((p) => `${p.x},${p.y}`).join(' ')} fill="rgba(61,91,217,.08)" stroke="#3D5BD9" strokeWidth="2" strokeLinejoin="round" />
-        {pts.map((p, i) => (
-          <rect key={i} x={p.x - 5} y={p.y - 5} width="10" height="10" rx="2" fill="#fff" stroke="#3D5BD9" strokeWidth="1.6" />
-        ))}
+        <polygon points={pts.map((p) => `${p.x},${p.y}`).join(' ')} fill="rgba(61,91,217,.08)" stroke="#3D5BD9" strokeWidth="2" strokeLinejoin="round" style={{ pointerEvents: 'none' }} />
         {kind === 'edges' && pts.length > 2 && (
-          <path d={`M${pts[pts.length - 1].x} ${pts[pts.length - 1].y}L${pts[0].x} ${pts[0].y}`} stroke="#3D5BD9" strokeWidth="1" strokeDasharray="4 4" />
+          <path d={`M${pts[pts.length - 1].x} ${pts[pts.length - 1].y}L${pts[0].x} ${pts[0].y}`} stroke="#3D5BD9" strokeWidth="1" strokeDasharray="4 4" style={{ pointerEvents: 'none' }} />
         )}
-        <g transform={`translate(${size.w - 60} 60) rotate(${north})`}>
+        {/* breite, unsichtbare Kanten für Doppelklick = Punkt einfügen */}
+        {pts.map((p, i) => {
+          const q = pts[(i + 1) % pts.length];
+          return (
+            <line
+              key={`e${i}`}
+              x1={p.x}
+              y1={p.y}
+              x2={q.x}
+              y2={q.y}
+              stroke="transparent"
+              strokeWidth="12"
+              style={{ cursor: 'copy' }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onDoubleClick={(e) => onInsertVertex(i, toWorld(e))}
+              data-testid={`edge-hit-${i}`}
+            />
+          );
+        })}
+        {pts.map((p, i) => (
+          <g key={i}>
+            <rect
+              x={p.x - 6}
+              y={p.y - 6}
+              width="12"
+              height="12"
+              rx="2.5"
+              fill={drag?.kind === 'vertex' && drag.i === i ? '#3D5BD9' : '#fff'}
+              stroke="#3D5BD9"
+              strokeWidth="1.6"
+              style={{ cursor: 'move' }}
+              onPointerDown={(e) => start({ kind: 'vertex', i, from: { x: e.clientX, y: e.clientY }, moved: false }, e)}
+              onDoubleClick={() => onDeleteVertex(i)}
+              data-testid={`vertex-${i}`}
+            />
+            <text
+              x={p.x + ((p.x - cx) / (Math.hypot(p.x - cx, p.y - cy) || 1)) * 18}
+              y={p.y + ((p.y - cy) / (Math.hypot(p.x - cx, p.y - cy) || 1)) * 18 + 4}
+              textAnchor="middle"
+              fontFamily="Geist Mono, monospace"
+              fontSize="11"
+              fontWeight="600"
+              fill="#3D5BD9"
+              style={{ pointerEvents: 'none' }}
+            >
+              {LETTERS[i]}
+            </text>
+          </g>
+        ))}
+        <g transform={`translate(${size.w - 60} 60) rotate(${north})`} style={{ pointerEvents: 'none' }}>
           <circle r="26" fill="#fff" stroke="rgba(31,34,36,.15)" />
           <path d="M0 -18l6 18h-12Z" fill="#C4553A" />
           <path d="M0 18l-6-18h12Z" fill="#B9BBB5" />
@@ -518,11 +774,21 @@ function ContourStage({ boundary, kind, closingIndex, bg, north }: { boundary: V
           </div>
         );
       })}
+      {bg && !place && (
+        <div className={s.tipDark} style={{ left: 20, bottom: 20 }}>
+          Hintergrund erscheint hier, sobald er ausgerichtet ist („Bild ausrichten“).
+        </div>
+      )}
+      {place && !drag && (
+        <div className={s.tipDark} style={{ left: 20, bottom: 20 }}>
+          Bild ziehen zum Verschieben · Punkte ziehen ändert die Kontur
+        </div>
+      )}
     </div>
   );
 }
 
-/** Kalibrieren: Bild einpassen, zwei Punkte setzen (Bildpixel) */
+/** Ausrichten: Bild einpassen, zwei Punkte setzen (Bildpixel) */
 function CalibStage({ bg, onPoint }: { bg: BgDraft; onPoint: (a: Vec2 | null, b: Vec2 | null) => void }) {
   const ref = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 800, h: 700 });
@@ -557,25 +823,27 @@ function CalibStage({ bg, onPoint }: { bg: BgDraft; onPoint: (a: Vec2 | null, b:
       }}
       data-testid="calib-stage"
     >
-      <img src={bg.url} alt="" style={{ position: 'absolute', left: ox, top: oy, width: bg.w * k, height: bg.h * k, opacity: Math.max(0.6, bg.opacity), pointerEvents: 'none' }} />
+      <img src={bg.url} alt="" style={{ position: 'absolute', left: ox, top: oy, width: bg.w * k, height: bg.h * k, opacity: bg.opacity, pointerEvents: 'none' }} />
       <svg width={size.w} height={size.h} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
         {A && B && <path d={`M${A.x} ${A.y}L${B.x} ${B.y}`} stroke="#E0567A" strokeWidth="2" />}
         {[A, bg.b && B].map((P, i) =>
           P ? (
             <g key={i}>
-              <circle cx={P.x} cy={P.y} r="7" fill="#fff" stroke="#E0567A" strokeWidth="2" />
-              <circle cx={P.x} cy={P.y} r="2" fill="#E0567A" />
+              <circle cx={P.x} cy={P.y} r="9" fill="#fff" stroke="#E0567A" strokeWidth="2" />
+              <text x={P.x} y={P.y + 3.5} textAnchor="middle" fontFamily="Geist Mono, monospace" fontSize="10" fontWeight="700" fill="#E0567A">
+                {i + 1}
+              </text>
             </g>
           ) : null,
         )}
       </svg>
       {A && B && (
         <div className={s.pillPink} style={{ left: (A.x + B.x) / 2, top: (A.y + B.y) / 2 - 18 }}>
-          {bg.distance && bg.b ? `${num(bg.distance, 2)} m` : `${num(pxLen, 0)} px`}
+          {num(pxLen, 0)} px
         </div>
       )}
       <div className={s.tipDark} style={{ left: 20, bottom: 20 }}>
-        {!bg.a ? 'Ersten Punkt mit bekanntem Abstand anklicken' : !bg.b ? 'Zweiten Punkt anklicken' : 'Distanz links eingeben und übernehmen'}
+        {!bg.a ? 'Punkt 1 anklicken, z. B. eine Grundstücksecke' : !bg.b ? 'Punkt 2 anklicken, möglichst weit entfernt' : 'Links die Ecken zuordnen und „Ausrichten“ – erneut klicken setzt neu'}
       </div>
     </div>
   );

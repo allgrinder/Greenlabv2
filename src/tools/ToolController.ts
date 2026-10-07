@@ -17,6 +17,7 @@ import { PathBuilderTool } from './PathBuilderTool';
 import { SelectTool } from './SelectTool';
 import { DimensionTool, FreehandTool, PlaceTool, RectTool, TextTool } from './simpleTools';
 import { BackgroundMoveTool, CalibrateTool, DND_MIME } from './BackgroundTools';
+import { BackgroundAlignTool, PlotEditTool } from './SiteTools';
 import type { Brush } from '../state/types';
 import type { Tool, ToolContext, WorldPointerEvent } from './Tool';
 
@@ -82,6 +83,8 @@ export class ToolController {
       lights: new PathBuilderTool(ctx, { id: 'lights', closed: false, curves: true, source: 'polygon', min: 2, finish: (path) => cmd.addObject(newLamp(ctx.doc(), 'stringLights', path.nodes[0].p, path)) }),
       calibrate: new CalibrateTool(ctx),
       bgmove: new BackgroundMoveTool(ctx),
+      plotedit: new PlotEditTool(ctx),
+      bgalign: new BackgroundAlignTool(ctx),
       free: new FreehandTool(ctx),
       dim: new DimensionTool(ctx),
       text: new TextTool(ctx),

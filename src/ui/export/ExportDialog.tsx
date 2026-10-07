@@ -244,7 +244,7 @@ export function ExportDialog({ onClose }: { onClose: () => void }) {
                         {doc?.site.location && (
                           <>
                             <br />
-                            {doc.site.location.label}
+                            {doc.site.location.label || doc.site.location.place}
                           </>
                         )}
                       </div>

@@ -133,7 +133,10 @@ export interface PlotEdge {
 export interface GeoLocation {
   lat: number;
   lon: number;
-  label: string; // „Lindenweg 12, Frankfurt“
+  /** Adresse, nur für Titelblock und Anzeige („Lindenweg 12, Frankfurt“) */
+  label: string;
+  /** Ort, aus dem Breite/Länge stammen (für den Sonnenstand), z. B. „Frankfurt am Main“ */
+  place?: string;
   /** IANA-Zeitzone für SunCalc, z. B. Europe/Berlin */
   timeZone: string;
 }

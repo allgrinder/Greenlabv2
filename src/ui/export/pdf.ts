@@ -172,7 +172,8 @@ function titleBlock(pdf: JsPDF, doc: Project, side: Rect, o: PlanPdfOptions, she
   pdf.setTextColor('#4A4D4F');
   const ty = y + 7 * k + Math.min(2, name.length) * 5 * k;
   pdf.text(o.look === 'night' ? 'Lichtplanung · Entwurf' : 'Freianlagenplanung · Entwurf', x, ty);
-  if (doc.site.location) pdf.text(t(doc.site.location.label), x, ty + 3.6 * k, { maxWidth: w });
+  const where = doc.site.location ? doc.site.location.label || doc.site.location.place || '' : '';
+  if (where) pdf.text(t(where), x, ty + 3.6 * k, { maxWidth: w });
   const gy = y + h - 13 * k;
   pdf.setLineWidth(0.2);
   pdf.line(x, gy, x + w, gy);

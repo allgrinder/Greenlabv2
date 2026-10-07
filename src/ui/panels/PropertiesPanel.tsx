@@ -18,6 +18,8 @@ import { Icon } from '../icons';
 import { glyphSrc, irrGlyph, SYMBOL_GLYPH } from '../library/glyphs';
 import type { Brush } from '../../state/types';
 import { BackgroundSection } from './BackgroundSection';
+import { LocationFields } from '../components/LocationFields';
+import { DEFAULT_LOCATION } from '../../core/sun/sun';
 import { DripProps, FixtureProps, LampProps, PipeProps, SprinklerProps } from './TechProps';
 import { getLamp, kelvinHex, kelvinRgb } from '../../core/catalog/lamps';
 import u from '../components/ui.module.css';
@@ -528,6 +530,20 @@ function MultiProps({ objs }: { objs: PlanObject[] }) {
   );
 }
 
+function PlotEditButton() {
+  const tool = useEditor((st) => st.session.tool);
+  const setSession = useEditor((st) => st.setSession);
+  const on = tool === 'plotedit';
+  return (
+    <div className={s.section} style={{ gap: 8 }}>
+      <button type="button" className={s.action} onClick={() => setSession({ tool: on ? 'select' : 'plotedit', selection: [] })} style={on ? { color: 'var(--acc)', background: 'var(--accs)' } : undefined} data-testid="plot-edit">
+        {on ? 'Kontur fertig' : 'Kontur bearbeiten'}
+      </button>
+      {on && <div className={s.muted} style={{ fontSize: 12, lineHeight: 1.45 }}>Punkte ziehen, Doppelklick auf eine Kante fügt einen Punkt ein, Doppelklick auf einen Punkt oder Entf entfernt ihn. Esc beendet.</div>}
+    </div>
+  );
+}
+
 function ProjectInfo({ doc }: { doc: Project }) {
   const summary = useMemo(() => projectSummary(doc), [doc]);
   const b = doc.site.boundary;
@@ -537,13 +553,18 @@ function ProjectInfo({ doc }: { doc: Project }) {
         <div className={s.title} style={{ pointerEvents: 'none' }}>
           Grundstück
         </div>
-        <div className={s.sub}>{doc.site.location?.label ?? 'Kein Standort'} · Nichts ausgewählt</div>
+        <div className={s.sub}>{doc.site.location?.label || doc.site.location?.place || 'Kein Standort'} · Nichts ausgewählt</div>
       </div>
       <div className={s.grid2}>
         <Field label="Fläche" value={squareMeters(area(b))} />
         <Field label="Umfang" value={meters(perimeter(b), 1)} />
         <NumberField label="Nord-Abweichung" value={doc.site.northDeg} format={degrees} min={-180} max={180} onCommit={(v) => cmd.updateSite({ northDeg: v })} testId="prop-north" />
         <Field label="Objekte" value={String(Object.keys(doc.objects).length)} />
+      </div>
+      <PlotEditButton />
+      <div className={s.section} style={{ gap: 8 }}>
+        <div className={u.eyebrow}>Standort · für Sonne und Schatten</div>
+        <LocationFields compact value={doc.site.location ?? { ...DEFAULT_LOCATION, label: '' }} onChange={(l) => cmd.updateSite({ location: l }, 'site-location')} />
       </div>
       <div className={s.section} style={{ gap: 8 }}>
         <div className={u.eyebrow}>Kosten gesamt</div>

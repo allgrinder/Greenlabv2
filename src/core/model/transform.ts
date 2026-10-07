@@ -30,7 +30,11 @@ export function translateObject(o: PlanObject, d: Vec2): void {
       break;
     case 'path':
     case 'hedge':
+    case 'espalier':
       movePath(o.centerline, d);
+      break;
+    case 'scatter':
+      o.plants.forEach((q) => move(q.p, d));
       break;
     case 'plant':
     case 'item':
@@ -68,6 +72,7 @@ function nodePath(o: PlanObject): PathGeometry | null {
       return o.region.outer as PathGeometry;
     case 'path':
     case 'hedge':
+    case 'espalier':
       return o.centerline;
     case 'drip':
     case 'pipe':

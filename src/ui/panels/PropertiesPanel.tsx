@@ -26,6 +26,8 @@ import u from '../components/ui.module.css';
 import s from './props.module.css';
 
 const TYPE_LABEL: Record<PlanObject['type'], string> = {
+  espalier: 'Spalierbäume',
+  scatter: 'Pflanzgruppe',
   sprinkler: 'Versenkregner',
   drip: 'Tropfschlauch',
   pipe: 'Leitung',

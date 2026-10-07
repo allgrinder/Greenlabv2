@@ -78,6 +78,7 @@ export function createProject(input: NewProjectInput, now = new Date()): Project
     priceOverrides: {},
     settings: { ...DEFAULT_SETTINGS },
     zones: defaultZones(),
+    observers: [],
   };
 }
 
@@ -97,6 +98,8 @@ export function defaultLayerKind(o: Pick<PlanObject, 'type'>): LayerKind {
     case 'plant':
     case 'planting':
     case 'hedge':
+    case 'espalier':
+    case 'scatter':
       return 'plants';
     case 'item':
       return 'build';

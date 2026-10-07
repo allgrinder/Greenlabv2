@@ -2,6 +2,7 @@
  * Abgeleitete Geometrie je Planobjekt: Grundfläche, Bounding-Box, Fangpunkte.
  * Ergebnisse werden pro Objekt-Referenz gecacht – Immer erzeugt bei Änderung eine neue Referenz.
  */
+import { espalierFootprint, scatterFootprint } from '../espalier';
 import { getItem } from '../catalog/items';
 import { getSpecies } from '../catalog/plants';
 import type { DimensionAnchor, PlanObject, Vec2 } from '../model/types';
@@ -59,6 +60,12 @@ export function footprint(o: PlanObject): FlatRegion[] {
     case 'hedge':
       r = offsetPolyline(flattenPath(o.centerline), hedgeWidth(o), 'round');
       break;
+    case 'espalier':
+      r = espalierFootprint(o);
+      break;
+    case 'scatter':
+      r = scatterFootprint(o);
+      break;
     case 'plant':
       r = [{ outer: circlePolygon(o.position, plantDiameter(o) / 2), holes: [] }];
       break;
@@ -107,7 +114,10 @@ export function editableNodes(o: PlanObject): Vec2[] {
       return toPath(o.region.outer).nodes.map((n) => n.p);
     case 'path':
     case 'hedge':
+    case 'espalier':
       return o.centerline.nodes.map((n) => n.p);
+    case 'scatter':
+      return [];
     case 'plant':
     case 'text':
     case 'sprinkler':
@@ -170,7 +180,7 @@ export function snapGeometry(o: PlanObject): { vertices: Vec2[]; segments: [Vec2
     const ring = o.type === 'item' ? vertices : flattenRegion(o.region).outer;
     // Bei Kurven nur jeden Teilpunkt der flachgelegten Kontur – reicht für Kantenfang
     for (let i = 0; i < ring.length; i++) segments.push([ring[i], ring[(i + 1) % ring.length]]);
-  } else if (o.type === 'path' || o.type === 'hedge') {
+  } else if (o.type === 'path' || o.type === 'hedge' || o.type === 'espalier') {
     for (const r of footprint(o)) for (let i = 0; i < r.outer.length; i++) segments.push([r.outer[i], r.outer[(i + 1) % r.outer.length]]);
   }
   return { vertices, segments };

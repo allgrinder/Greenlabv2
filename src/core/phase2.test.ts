@@ -220,11 +220,13 @@ describe('Kostenübersicht', () => {
 });
 
 describe('Migration', () => {
-  it('Schema 1 → 2 ergänzt Bewässerungszonen', () => {
+  it('Schema 1 → 3 ergänzt Bewässerungszonen und Blickpunkte', () => {
     const v1 = { ...createLindenweg12(), schemaVersion: 1 } as Record<string, unknown>;
     delete v1.zones;
+    delete v1.observers;
     const p = migrate(v1);
-    expect(p.schemaVersion).toBe(2);
+    expect(p.schemaVersion).toBe(3);
     expect(p.zones).toHaveLength(4);
+    expect(p.observers).toEqual([]);
   });
 });

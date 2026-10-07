@@ -8,6 +8,8 @@ import { SCHEMA_VERSION, type Project } from '../core/model/types';
 const STEPS: Record<number, (p: Record<string, unknown>) => Record<string, unknown>> = {
   // 1 → 2: Bewässerungszonen; neue Objekttypen brauchen keine Umwandlung
   1: (p) => ({ ...p, zones: Array.isArray(p.zones) ? p.zones : defaultZones() }),
+  // 2 → 3: Blickpunkte für die Einsehbarkeit; Spalier und Pflanzgruppen sind neue Objekttypen
+  2: (p) => ({ ...p, observers: Array.isArray(p.observers) ? p.observers : [] }),
 };
 
 export function migrate(raw: unknown): Project {

@@ -56,7 +56,7 @@ export function seasonColor(sp: PlantSpecies, season: Season): string {
 }
 
 /** Laubabwerfende Gehölze im Winter: kahl (Hainbuche hält trockenes Laub, hat aber eine Winterfarbe) */
-export const isBare = (sp: PlantSpecies, season: Season) => season === 'winter' && sp.deciduous && sp.kind !== 'hedge' && sp.kind !== 'perennial' && sp.kind !== 'grass';
+export const isBare = (sp: PlantSpecies, season: Season) => season === 'winter' && sp.deciduous && !sp.marcescent && sp.kind !== 'hedge' && sp.kind !== 'perennial' && sp.kind !== 'grass';
 
 /** Blüte sichtbar? Aus dem Jahreslauf (Monat der Jahreszeit) */
 export function inBloom(sp: PlantSpecies, season: Season): boolean {

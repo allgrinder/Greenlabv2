@@ -35,7 +35,7 @@ export function createCommands(store: EditorStoreApi) {
       },
       { mergeKey },
     );
-  const TYPE: Record<PlanObject['type'], string> = { sprinkler: 'Regner', drip: 'Tropfschlauch', pipe: 'Leitung', fixture: 'Anschluss', area: 'Fläche', path: 'Weg', plant: 'Pflanze', planting: 'Pflanzung', hedge: 'Hecke', item: 'Objekt', dimension: 'Bemaßung', text: 'Text', lamp: 'Leuchte' };
+  const TYPE: Record<PlanObject['type'], string> = { sprinkler: 'Regner', drip: 'Tropfschlauch', pipe: 'Leitung', fixture: 'Anschluss', area: 'Fläche', path: 'Weg', plant: 'Pflanze', planting: 'Pflanzung', hedge: 'Hecke', espalier: 'Spalier', scatter: 'Pflanzgruppe', item: 'Objekt', dimension: 'Bemaßung', text: 'Text', lamp: 'Leuchte' };
   const name = (o: PlanObject) => o.name ?? TYPE[o.type];
 
   function detach(d: Draft<Project>, id: Id) {

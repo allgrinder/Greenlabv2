@@ -11,6 +11,7 @@ const TABS: { v: LensTab; label: string }[] = [
   { v: 'sun', label: 'Sonne' },
   { v: 'growth', label: 'Wachstum' },
   { v: 'seasons', label: 'Jahreszeiten' },
+  { v: 'privacy', label: 'Sichtschutz' },
   { v: 'irrigation', label: 'Bewässerung' },
   { v: 'costs', label: 'Kosten' },
 ];

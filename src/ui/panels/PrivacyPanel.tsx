@@ -45,7 +45,7 @@ export function PrivacyPanel() {
           <div className={s.serif21}>Einsehbarkeit</div>
           <div className={s.sub}>Wer sieht in den Garten?</div>
         </div>
-        <button type="button" className={u.iconBtn} aria-label="Einsehbarkeit schließen" onClick={() => editor.getState().setSession({ privacy: { ...pv, on: false }, tool: tool === 'observer' ? 'select' : tool })} data-testid="privacy-close">
+        <button type="button" className={u.iconBtn} aria-label="Einsehbarkeit schließen" onClick={() => editor.getState().setSession({ lens: 'plan', tool: tool === 'observer' ? 'select' : tool })} data-testid="privacy-close">
           <Icon name="close" size={14} />
         </button>
       </div>
@@ -141,5 +141,14 @@ export function PrivacyPanel() {
         {hasEspalier && lowView && ' Von der Straße aus sieht man unter Spalierschirmen hindurch – eine niedrige Hecke davor schließt die Lücke.'}
       </div>
     </>
+  );
+}
+
+/** Rechte Leiste der Linse „Sichtschutz“ */
+export function PrivacyDock() {
+  return (
+    <aside className={s.panel} aria-label="Sichtschutz" data-testid="privacy-dock">
+      <PrivacyPanel />
+    </aside>
   );
 }

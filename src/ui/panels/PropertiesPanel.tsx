@@ -19,7 +19,6 @@ import { glyphSrc, irrGlyph, SYMBOL_GLYPH } from '../library/glyphs';
 import type { Brush } from '../../state/types';
 import { BackgroundSection } from './BackgroundSection';
 import { BrushPaintPanel, EspalierProps, EspalierToolPanel, ScatterProps } from './GardenProps';
-import { PrivacyPanel } from './PrivacyPanel';
 import { LocationFields } from '../components/LocationFields';
 import { DEFAULT_LOCATION } from '../../core/sun/sun';
 import { DripProps, FixtureProps, LampProps, PipeProps, SprinklerProps } from './TechProps';
@@ -60,19 +59,16 @@ export function PropertiesPanel() {
   const selection = useEditor((st) => st.session.selection);
   const tool = useEditor((st) => st.session.tool);
   const brush = useEditor((st) => st.session.brush);
-  const privacyOn = useEditor((st) => st.session.privacy.on);
   if (!doc) return null;
   const objs = selection.map((id) => doc.objects[id]).filter(Boolean);
   const showBrush = objs.length === 0 && tool === 'plant';
   const toolPanel = objs.length === 0 && (tool === 'brush' || tool === 'espalier');
-  const privacy = objs.length === 0 && privacyOn && !toolPanel && !showBrush;
   return (
     <aside className={s.panel} aria-label="Eigenschaften" data-testid="properties">
       {showBrush && <BrushDetail brush={brush} />}
       {objs.length === 0 && tool === 'brush' && <BrushPaintPanel />}
       {objs.length === 0 && tool === 'espalier' && <EspalierToolPanel />}
-      {privacy && <PrivacyPanel />}
-      {objs.length === 0 && !showBrush && !toolPanel && !privacy && <ProjectInfo doc={doc} />}
+      {objs.length === 0 && !showBrush && !toolPanel && <ProjectInfo doc={doc} />}
       {objs.length === 1 && <ObjectProps key={objs[0].id} o={objs[0]} doc={doc} />}
       {objs.length > 1 && <MultiProps objs={objs} />}
     </aside>
@@ -579,7 +575,7 @@ function ProjectInfo({ doc }: { doc: Project }) {
       <PlotEditButton />
       <div className={s.section} style={{ gap: 8 }}>
         <div className={u.eyebrow}>Sichtschutz</div>
-        <button type="button" className={s.action} onClick={() => editor.getState().setSession({ privacy: { ...editor.getState().session.privacy, on: true }, lens: 'plan', tool: doc.observers.length ? 'select' : 'observer' })} data-testid="privacy-open">
+        <button type="button" className={s.action} onClick={() => editor.getState().setSession({ lens: 'privacy', tool: doc.observers.length ? 'select' : 'observer' })} data-testid="privacy-open">
           Einsehbarkeit prüfen{doc.observers.length ? ` · ${doc.observers.length} Blickpunkte` : ''}
         </button>
       </div>

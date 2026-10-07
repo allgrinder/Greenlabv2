@@ -280,4 +280,5 @@ In Phase 1 waren die Linsen-Tabs sichtbar, aber deaktiviert. Seit Phase 2 sind s
 - **Modell:** `LayerKind` um `custom` erweitert, `Layer.opacity` optional (ohne Migration, fehlt = 1). In eigenen Ebenen entscheidet bei Linsen die Objektart (`lensShowsObject`).
 - **Commands:** `addLayer`, `renameLayer`, `setLayerOpacity` (mergeKey je Geste), `deleteLayer` (nur `custom`, mit Inhalt), `moveObject(id, layerId, index)` für Ziehen innerhalb und zwischen Ebenen. `addObject` legt neue Objekte in die aktive eigene Ebene, sonst nach Art.
 - **Darstellung:** Deckkraft wirkt als Alpha des Ebenen-Containers (multipliziert mit der Abblendung der Bewässerungs-Linse).
+- **Sichtschutz-Linse:** `LensTab` `privacy`; das Einsehbarkeits-Overlay erscheint nur in dieser Linse (`session.privacy.on` ist nicht mehr nötig), Pflanzen zeigen die dort gewählte Jahreszeit. Rechte Leiste: `PrivacyDock`, bei Auswahl die Eigenschaften.
 

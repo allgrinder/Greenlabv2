@@ -33,7 +33,7 @@ export type ToolId =
   | 'brush'
   | 'observer';
 
-export type LensTab = 'plan' | 'sun' | 'growth' | 'seasons' | 'irrigation' | 'costs';
+export type LensTab = 'plan' | 'sun' | 'growth' | 'seasons' | 'privacy' | 'irrigation' | 'costs';
 
 export interface SessionState {
   tool: ToolId;
@@ -62,7 +62,7 @@ export interface SessionState {
   night: { hour: number; scene: string | null };
   /** Pflanzpinsel: Radius (m), Dichte (0,2–1), Mischung, nur in Beeten */
   paint: { radius: number; density: number; mix: string[]; bedsOnly: boolean };
-  /** Einsehbarkeits-Prüfung: Overlay an, beobachtete Person, Jahreszeit */
+  /** Einsehbarkeits-Prüfung (Linse „Sichtschutz“): beobachtete Person, Jahreszeit; `on` ist veraltet */
   privacy: { on: boolean; pose: 'sitting' | 'standing' | 'lying'; season: 'summer' | 'winter' };
   /** Vorgaben für neu gezeichnete Objekte */
   defaults: { areaMaterial: string; pathMaterial: string; pathWidth: number };

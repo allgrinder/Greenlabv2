@@ -6,7 +6,7 @@
 import { defaultLayerKind } from './model/defaults';
 import type { LayerKind, PlanObject } from './model/types';
 
-export type Lens = 'plan' | 'sun' | 'growth' | 'seasons' | 'irrigation' | 'costs';
+export type Lens = 'plan' | 'sun' | 'growth' | 'seasons' | 'privacy' | 'irrigation' | 'costs';
 
 export function lensShowsLayer(kind: LayerKind, lens: Lens, night: boolean): boolean {
   if (kind === 'water' || kind === 'pipes') return lens === 'irrigation';

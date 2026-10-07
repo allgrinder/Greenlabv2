@@ -72,7 +72,7 @@ export function viewParamsFrom(s: SessionState): ViewParams {
     lens: s.lens,
     night: s.mode === 'night',
     years: s.lens === 'growth' ? s.years : 0,
-    season: s.lens === 'seasons' ? s.season : s.lens === 'sun' ? seasonOfDoy(s.sun.doy) : 'summer',
+    season: s.lens === 'seasons' ? s.season : s.lens === 'sun' ? seasonOfDoy(s.sun.doy) : s.lens === 'privacy' ? s.privacy.season : 'summer',
     sun: s.sun,
     nightHour: s.night.hour,
     scene: s.night.scene,
@@ -510,7 +510,7 @@ export class PlanRenderer {
     this.gapLayer.set(irr ? this.gaps : null);
     // Einsehbarkeit (nur im Editor, nicht im Export)
     const pv = this.store.getState().session.privacy;
-    if (!pv.on || exporting || p.lens !== 'plan') this.privacyLayer.hide();
+    if (exporting || p.lens !== 'privacy') this.privacyLayer.hide();
     else {
       const key = `${pv.pose}|${pv.season}`;
       if (key !== this.privacyKey || this.privacyDoc !== doc) {

@@ -117,7 +117,7 @@ export interface NightParams {
   /** Helligkeit 0–1 je Leuchten-ID */
   level: (l: LampObject) => number;
   /** Welt → Bildschirm: Skalierung und Verschiebung des Welt-Containers */
-  world: { scale: number; x: number; y: number };
+  world: { scale: number; scaleY?: number; x: number; y: number };
   size: ScreenSize;
 }
 
@@ -168,11 +168,11 @@ export class NightLayer {
       this.rt = RenderTexture.create({ width: w, height: h, resolution: 1 });
       this.overlay.texture = this.rt;
     }
-    this.lightWorld.scale.set(p.world.scale * RT_SCALE);
+    this.lightWorld.scale.set(p.world.scale * RT_SCALE, (p.world.scaleY ?? p.world.scale) * RT_SCALE);
     this.lightWorld.position.set(p.world.x * RT_SCALE, p.world.y * RT_SCALE);
     renderer.render({ container: this.lightRoot, target: this.rt, clear: true, clearColor: AMBIENT });
     this.overlay.scale.set(1 / RT_SCALE);
-    this.glow.scale.set(p.world.scale);
+    this.glow.scale.set(p.world.scale, p.world.scaleY ?? p.world.scale);
     this.glow.position.set(p.world.x, p.world.y);
   }
 

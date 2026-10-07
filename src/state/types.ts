@@ -82,6 +82,8 @@ export interface Viewport {
   pxPerMeter: number;
   /** Plan wird um −northDeg gedreht dargestellt? (Standard: Grundstück achsparallel) */
   rotationDeg: number;
+  /** Schrägansicht: Kippwinkel der Kamera aus der Senkrechten (0 = Draufsicht) */
+  tiltDeg?: number;
 }
 
 export interface HistoryEntry {

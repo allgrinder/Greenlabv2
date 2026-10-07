@@ -248,6 +248,20 @@ assert.match(await p.textContent('[data-testid=privacy-ratio]'), /\d+ %/);
 await p.click('[data-testid=privacy-close]');
 step('Einsehbarkeit');
 
+// Schrägansicht: reine Anzeige mit festem Winkel; Zeichenwerkzeuge schalten zurück
+await p.evaluate(() => { const st = window.__gw.editor.getState(); st.setSession({ privacy: { ...st.session.privacy, on: false }, tool: 'select' }); });
+await p.click('[data-testid=view-oblique]');
+await p.waitForTimeout(1500);
+assert.equal(await p.evaluate(() => window.__gw.editor.getState().session.viewport.tiltDeg), 35);
+// Körper (Häuser, Bäume, Hecken) liegen nach Tiefe sortiert in einem eigenen Container
+const solids = await p.evaluate(() => window.__gw.renderer.app.stage.children[0].children.find((x) => x.label === 'solids')?.children.length ?? 0);
+assert.ok(solids > 20, `Körper in der Schrägansicht: ${solids}`);
+await p.click('[data-testid=tool-rect]');
+assert.equal(await p.evaluate(() => window.__gw.editor.getState().session.viewport.tiltDeg), 0);
+await p.click('[data-testid=view-oblique]');
+await p.keyboard.press('Escape');
+step('Schrägansicht');
+
 await p.click('[data-testid=export-btn]');
 await p.waitForSelector('[data-testid=pdf-preview] img', { timeout: 30000 });
 await p.click('[data-testid=export-dialog] >> text=150 dpi');

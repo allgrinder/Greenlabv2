@@ -120,7 +120,15 @@ export function createEditorStore(clock: () => number = Date.now) {
 
     setSession(patch) {
       const s = get().session;
-      set({ session: { ...s, ...(typeof patch === 'function' ? patch(s) : patch) } });
+      const p = typeof patch === 'function' ? patch(s) : patch;
+      const next = { ...s, ...p };
+      // Schrägansicht ist eine reine Anzeige: Zeichenwerkzeuge schalten zurück in die Draufsicht,
+      // das Einschalten der Schrägansicht wechselt zur Auswahl
+      if (next.viewport.tiltDeg && next.tool !== 'select') {
+        if (p.tool !== undefined && p.tool !== s.tool) next.viewport = { ...next.viewport, tiltDeg: 0 };
+        else next.tool = 'select';
+      }
+      set({ session: next });
     },
   }));
 }

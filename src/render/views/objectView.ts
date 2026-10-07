@@ -14,16 +14,19 @@ import type { Polygon } from '../../core/geometry/polygon';
 import { type FlatRegion, flattenPath } from '../../core/geometry/shape';
 import type { PlanObject } from '../../core/model/types';
 import type { LensTab } from '../../state/types';
-import { DARK_SYMBOLS, drawItem } from '../symbols/items';
+import { DARK_SYMBOLS, itemSprite } from '../symbols/items';
 import { waterGradient } from '../symbols/gradients';
 import { drawPlanting } from '../symbols/plants';
 import { crownSprite, espalierNode, hedgeNode, perennialSprite, plantingNode, scatterNode } from '../symbols/plantSprites';
 import { drawDrip, drawFixture, drawLampDay, drawPipe, drawSprinkler } from '../symbols/tech';
 import { materialPattern } from '../textures/materialTextures';
+import { buildSolid, type Tilt } from './obliqueView';
 import { hex, seedFrom } from '../util/rng';
 
 export interface ObjectView {
   node: Container;
+  /** Schrägansicht: Körper, der nach Tiefe sortiert über den Ebenen liegt */
+  depth?: number;
 }
 
 export interface ViewContext {
@@ -34,6 +37,8 @@ export interface ViewContext {
   lens: LensTab;
   night: boolean;
   northDeg: number;
+  /** Schrägansicht (null = Draufsicht) */
+  tilt: Tilt | null;
 }
 
 /**
@@ -41,6 +46,10 @@ export interface ViewContext {
  * Ändert er sich, wird der Knoten neu gebaut; sonst bleibt er auf der GPU.
  */
 export function viewKey(o: PlanObject, c: ViewContext): string {
+  return `${baseKey(o, c)}|${c.tilt ? 'o' : ''}`;
+}
+
+function baseKey(o: PlanObject, c: ViewContext): string {
   switch (o.type) {
     case 'plant':
       return `${c.years}|${c.season}|${c.lens === 'growth'}|${getSpecies(o.speciesId).kind === 'tree' ? c.lod : 0}`;
@@ -80,7 +89,7 @@ function strokeRegions(g: Graphics, regions: FlatRegion[], stroke: StrokeInput) 
   }
 }
 
-function labelText(text: string, sizeM: number, dark: boolean): Text {
+export function labelText(text: string, sizeM: number, dark: boolean): Text {
   const px = 48;
   const t = new Text({
     text,
@@ -115,6 +124,10 @@ function growthRings(g: Graphics, c: { x: number; y: number }, today: number, ma
 }
 
 export function buildObjectView(o: PlanObject, ctx: ViewContext): ObjectView {
+  if (ctx.tilt) {
+    const solid = buildSolid(o, ctx, ctx.tilt);
+    if (solid) return solid;
+  }
   const node = new Container();
   node.label = o.id;
   const g = new Graphics();
@@ -200,11 +213,7 @@ export function buildObjectView(o: PlanObject, ctx: ViewContext): ObjectView {
     case 'item': {
       const it = getItem(o.catalogId);
       const s = itemSize(o);
-      const local = new Graphics();
-      drawItem(local, it.symbol, s.width, s.depth, seed);
-      local.position.set(o.position.x, o.position.y);
-      local.rotation = (o.rotationDeg * Math.PI) / 180;
-      node.addChild(local);
+      node.addChild(itemSprite(it.symbol, o.position, s.width, s.depth, o.rotationDeg, seed));
       if (o.name && DARK_SYMBOLS.has(it.symbol)) {
         const t = labelText(o.name, it.category === 'building' ? 0.75 : 0.55, true);
         t.position.set(o.position.x, o.position.y + 0.3);

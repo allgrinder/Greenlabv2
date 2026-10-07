@@ -275,3 +275,9 @@ In Phase 1 waren die Linsen-Tabs sichtbar, aber deaktiviert. Seit Phase 2 sind s
 - **Körper:** `render/views/obliqueView.ts` baut für Gebäude (Wände mit Fenstern, Dach als `MeshSimple` mit der Draufsicht-Textur, Ecken auf Trauf- und Firsthöhe), Tonnen/Kübel (Zylinder), Tische/Liegen (Platte auf Beinen), Bäume (Stamm, Krone als Ellipsoid gestreckt), Sträucher, Hecken und Spaliere (Laubwände aus nahtloser Kachel). Sichtbar sind nur Wände mit Außennormale zur Kamera. Alle Körper liegen in einem gemeinsamen Container `solids` über den Ebenen und werden nach Tiefe (vorderstes y) sortiert; flache Objekte bleiben in ihren Ebenen.
 - **Nur Anzeige:** `setSession` schaltet beim Wechsel auf ein Zeichenwerkzeug zurück in die Draufsicht und beim Einschalten der Schrägansicht auf die Auswahl. Exporte (PNG, PDF, Jahreszeiten-Vorschau) rendern immer die Draufsicht.
 
+## 15. Ebenen wie in Photoshop
+
+- **Modell:** `LayerKind` um `custom` erweitert, `Layer.opacity` optional (ohne Migration, fehlt = 1). In eigenen Ebenen entscheidet bei Linsen die Objektart (`lensShowsObject`).
+- **Commands:** `addLayer`, `renameLayer`, `setLayerOpacity` (mergeKey je Geste), `deleteLayer` (nur `custom`, mit Inhalt), `moveObject(id, layerId, index)` für Ziehen innerhalb und zwischen Ebenen. `addObject` legt neue Objekte in die aktive eigene Ebene, sonst nach Art.
+- **Darstellung:** Deckkraft wirkt als Alpha des Ebenen-Containers (multipliziert mit der Abblendung der Bewässerungs-Linse).
+

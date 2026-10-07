@@ -49,6 +49,12 @@ export function createCommands(store: EditorStoreApi) {
 
   return {
     addObject(o: PlanObject, select = true) {
+      // Wie in Photoshop: Ist eine eigene Ebene aktiv (und nicht gesperrt), landen neue Objekte dort.
+      // Grundebenen behalten ihre Art (sonst verschwände z. B. ein Weg in der Bewässerungsebene).
+      const doc = store.getState().doc;
+      const active = store.getState().session.activeLayerId;
+      const al = active ? doc?.layers[active] : undefined;
+      if (al && al.kind === 'custom' && !al.locked && al.id !== o.layerId) o = { ...o, layerId: al.id };
       apply(`${name(o)} hinzufügen`, (d) => {
         d.objects[o.id] = o as Draft<PlanObject>;
         d.layers[o.layerId].objectOrder.push(o.id);
@@ -143,6 +149,62 @@ export function createCommands(store: EditorStoreApi) {
       apply(locked ? 'Ebene sperren' : 'Ebene entsperren', (d) => {
         d.layers[layerId].locked = locked;
       });
+    },
+
+    /** Objekt an eine Stelle einer Ebene ziehen (Index in Zeichenreihenfolge, 0 = ganz unten) */
+    moveObject(id: Id, layerId: Id, toIndex: number) {
+      apply('Reihenfolge ändern', (d) => {
+        const o = d.objects[id];
+        const target = d.layers[layerId];
+        if (!o || !target) return;
+        const from = d.layers[o.layerId];
+        const i = from.objectOrder.indexOf(id);
+        if (i >= 0) from.objectOrder.splice(i, 1);
+        // Beim Verschieben innerhalb derselben Ebene rückt das Ziel nach dem Entfernen nach
+        const j = from === target && i >= 0 && i < toIndex ? toIndex - 1 : toIndex;
+        target.objectOrder.splice(Math.max(0, Math.min(target.objectOrder.length, j)), 0, id);
+        o.layerId = layerId;
+      });
+    },
+
+    /** Neue eigene Ebene über `aboveId` (oder ganz oben); liefert die Id */
+    addLayer(name = 'Neue Ebene', aboveId?: Id | null): Id {
+      const id = newId();
+      const doc = store.getState().doc;
+      const n = doc ? Object.values(doc.layers).filter((l) => l.name.startsWith(name)).length : 0;
+      apply('Ebene anlegen', (d) => {
+        d.layers[id] = { id, kind: 'custom', name: n ? `${name} ${n + 1}` : name, color: '#7A8CA8', visible: true, locked: false, opacity: 1, objectOrder: [] };
+        const at = aboveId ? d.layerOrder.indexOf(aboveId) + 1 : d.layerOrder.length;
+        d.layerOrder.splice(at > 0 ? at : d.layerOrder.length, 0, id);
+      });
+      store.getState().setSession({ activeLayerId: id });
+      return id;
+    },
+
+    renameLayer(layerId: Id, name: string) {
+      apply('Ebene umbenennen', (d) => {
+        if (d.layers[layerId] && name.trim()) d.layers[layerId].name = name.trim();
+      });
+    },
+
+    setLayerOpacity(layerId: Id, opacity: number, mergeKey?: string) {
+      apply('Deckkraft ändern', (d) => {
+        if (d.layers[layerId]) d.layers[layerId].opacity = Math.max(0, Math.min(1, opacity));
+      }, mergeKey);
+    },
+
+    /** Eigene Ebene samt Inhalt löschen (Grundebenen bleiben, weil Werkzeuge sie als Ziel brauchen) */
+    deleteLayer(layerId: Id) {
+      const doc = store.getState().doc;
+      const l = doc?.layers[layerId];
+      if (!l || l.kind !== 'custom') return;
+      apply('Ebene löschen', (d) => {
+        for (const id of [...d.layers[layerId].objectOrder]) delete d.objects[id];
+        delete d.layers[layerId];
+        d.layerOrder = d.layerOrder.filter((x) => x !== layerId);
+      });
+      const s = store.getState().session;
+      store.getState().setSession({ activeLayerId: s.activeLayerId === layerId ? null : s.activeLayerId, selection: s.selection.filter((id) => store.getState().doc?.objects[id]) });
     },
 
     moveLayer(layerId: Id, toIndex: number) {

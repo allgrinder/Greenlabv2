@@ -63,6 +63,12 @@ Umgesetzt sind alle acht Kernfunktionen der Phase 1 sowie PNG-Export (siehe `ARC
 - **Gebäude und Möbel** (Wohnhaus, Gartenhaus, Gewächshaus, Kompost, Regentonne, Hochbeet, Tisch, Liege, Kübel, Pool, Spielturm, Zaun, Kantenstein) sind im selben fotorealistischen Stil gemalt wie die Pflanzen.
 - **Schrägansicht:** Unterleiste → „Schräg“. Fester Blick von Süden (unten im Plan), 35° aus der Senkrechten. Häuser zeigen Fassade mit Fenstern und Dach, Bäume Stamm und Krone, Hecken und Spaliere ihre Laubwand. Zoomen, Verschieben, Auswählen und alle Linsen funktionieren; sobald ein Zeichenwerkzeug gewählt wird, springt die Ansicht zurück auf „Plan“. Exporte sind immer Draufsicht.
 
+## Ebenen
+
+- **Wie in Photoshop:** oben im Panel = oben im Plan. „+“ legt eine eigene Ebene über der aktiven an (Doppelklick auf den Namen benennt um). Ist eine eigene Ebene aktiv, landen neue Objekte dort; „automatisch“ bzw. erneutes Anklicken schaltet zurück auf die Ablage nach Art.
+- Pfeil vor der Ebene klappt die Objektliste auf (Klick wählt aus, Umschalt-Klick ergänzt). Objekte per Ziehen umsortieren oder auf eine andere Ebene ziehen, Ebenen per Ziehen umsortieren – z. B. „Neue Wege“ über „Wege“.
+- Deckkraft je Ebene unten im Panel; eigene Ebenen lassen sich samt Inhalt löschen (Rückfrage, rückgängig machbar). Die Grundebenen (Flächen, Wege, Pflanzen …) bleiben, weil die Werkzeuge sie als Ziel brauchen. In der Pflanzen-Ebene ordnen sich Pflanzen zusätzlich nach Höhe.
+
 ## Bekannte Grenzen
 
 - Im PDF ist der Plan selbst ein Rasterbild (150 oder 300 dpi, im exakten Maßstab); Rahmen, Schrift, Legende, Maßstab und Nordpfeil sind Vektoren. Die Texturen, Schatten und Lichteffekte stammen aus dem WebGL-Renderer.

@@ -199,7 +199,8 @@ export type LayerKind =
   | 'light' // Beleuchtung (Phase 2)
   | 'water' // Bewässerung (Phase 2)
   | 'pipes' // Leitungen
-  | 'annotation'; // Bemaßung, Text
+  | 'annotation' // Bemaßung, Text
+  | 'custom'; // eigene Ebene (beliebige Objekte)
 
 export interface Layer {
   id: Id;
@@ -208,6 +209,8 @@ export interface Layer {
   color: string; // Swatch im Ebenen-Panel
   visible: boolean;
   locked: boolean;
+  /** Deckkraft 0–1 (fehlt = 1) */
+  opacity?: number;
   /** Zeichenreihenfolge der Objekte innerhalb der Ebene (unten → oben) */
   objectOrder: Id[];
 }

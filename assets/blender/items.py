@@ -10,7 +10,7 @@ import math
 
 from mathutils import Vector
 
-from lib import P, box, cylinder, foliage_ball, plate, poly_mesh, rng
+from lib import P, box, cylinder, foliage_ball, foliage_carpet, plate, poly_mesh, rng, veg_clump
 
 # ------------------------------------------------------------------ Gebäude
 
@@ -116,17 +116,8 @@ def house(w: float, d: float, h: float):
 
 
 def shed(w: float, d: float, h: float):
-    """Modernes Gartenhaus: Flachdach mit Attika und dunklem Kies, Wände aus vergrauten Latten"""
+    """Modernes Gartenhaus: Flachdach mit Attika, Gründach (Sedum) und Solarmodulen, Wände aus vergrauten Latten"""
     box("walls", -w / 2 + 0.1, -d / 2 + 0.1, 0, w / 2 - 0.1, d / 2 - 0.1, h - 0.2, "wood_grey")
-    # senkrechte Lattung (Fugen)
-    x = -w / 2 + 0.1
-    while x < w / 2 - 0.1:
-        box("slatgap", x, d / 2 - 0.1, 0.02, x + 0.012, d / 2 - 0.095, h - 0.22, "anthracite")
-        x += 0.12
-    y = -d / 2 + 0.1
-    while y < d / 2 - 0.1:
-        box("slatgap", w / 2 - 0.1, y, 0.02, w / 2 - 0.095, y + 0.012, h - 0.22, "anthracite")
-        y += 0.12
     # Tür und Fensterband zur Gartenseite (Plan-Süden)
     box("door", -0.55, d / 2 - 0.1, 0, 0.45, d / 2 - 0.06, 2.05, "anthracite", 0.005)
     box("doorglass", -0.45, d / 2 - 0.065, 0.3, 0.35, d / 2 - 0.055, 1.95, "window")
@@ -136,7 +127,20 @@ def shed(w: float, d: float, h: float):
     box("roof", -w / 2, -d / 2, h - 0.2, w / 2, d / 2, h - 0.08, "anthracite", 0.01)
     for (a, b_, c, d_) in ((-w / 2, -d / 2, w / 2, -d / 2 + 0.08), (-w / 2, d / 2 - 0.08, w / 2, d / 2), (-w / 2, -d / 2, -w / 2 + 0.08, d / 2), (w / 2 - 0.08, -d / 2, w / 2, d / 2)):
         box("attika", a, b_, h - 0.08, c, d_, h, "anthracite", 0.005)
-    box("gravel", -w / 2 + 0.08, -d / 2 + 0.08, h - 0.08, w / 2 - 0.08, d / 2 - 0.08, h - 0.05, "gravel_dark")
+    # Kiesstreifen am Rand, Sedum-Teppich, zwei Solarmodule aufgeständert
+    box("gravel", -w / 2 + 0.08, -d / 2 + 0.08, h - 0.08, w / 2 - 0.08, d / 2 - 0.08, h - 0.06, "gravel_dark")
+    x0, y0, x1, y1 = -w / 2 + 0.3, -d / 2 + 0.3, w / 2 - 0.3, d / 2 - 0.3
+    foliage_carpet("sedum_g", x0, y0, x1, y1, h - 0.06, 2600, 0.03, "leaf_sedum", seed=4)
+    foliage_carpet("sedum_r", x0, y0, x1, y1, h - 0.055, 700, 0.028, "leaf_sedum_red", seed=9)
+    a = math.radians(12)
+    e = Vector((1, 0, 0))
+    s_ = Vector((0, math.cos(a), math.sin(a)))  # Plan-Norden hoch, Modul neigt sich nach Süden
+    nrm = e.cross(s_)
+    pw, pl = min(1.7, (w - 1.0) / 2 - 0.05), 1.0
+    for i in range(2):
+        org = P(-w / 2 + 0.5 + i * (pw + 0.08), -0.2, h + 0.08)
+        plate("pv", org, e, s_, nrm, pw, pl, 0.035, "solar")
+        plate("pvframe", org - e * 0.015 - s_ * 0.015 - nrm * 0.004, e, s_, nrm, pw + 0.03, pl + 0.03, 0.03, "graphite")
 
 
 def greenhouse(w: float, d: float, h: float):
@@ -152,7 +156,7 @@ def greenhouse(w: float, d: float, h: float):
         y = -d / 2 + 0.4
         while y < d / 2 - 0.3:
             x = side * (0.35 + (w / 2 - 0.45) * (0.3 + r.random() * 0.4))
-            foliage_ball("veg", P(x, y, 0.4 + r.random() * 0.25), 0.2 + r.random() * 0.12, 260, 0.04, seed=r.randint(1, 999))
+            veg_clump(r.choice(["chard", "kale", "lettuce"]), P(x, y, 0.25), r, 1.5)
             y += 0.55
     # Rahmen
     t = 0.045
@@ -244,15 +248,19 @@ def raised_bed(w: float, d: float, h: float):
     for (a, b_, c, d_) in ((-w / 2 - 0.02, -d / 2 - 0.02, w / 2 + 0.02, -d / 2 + 0.05), (-w / 2 - 0.02, d / 2 - 0.05, w / 2 + 0.02, d / 2 + 0.02), (-w / 2 - 0.02, -d / 2, -w / 2 + 0.05, d / 2), (w / 2 - 0.05, -d / 2, w / 2 + 0.02, d / 2)):
         box("rim", a, b_, h - 0.01, c, d_, h + 0.01, "anthracite", 0.004)
     box("soil", -w / 2 + t, -d / 2 + t, 0, w / 2 - t, d / 2 - t, h - 0.06, "soil")
+    # üppige Mischkultur: Reihen aus Mangold, Grünkohl, Salaten und Kräutern, dicht und leicht über den Rand
     r = rng(int(w * 100 + d * 10))
-    rows = max(1, int((d - 0.2) // 0.36))
+    rows = max(2, int((d - 0.1) // 0.3))
+    kinds = ["chard", "lettuce", "kale", "redlettuce", "herb"]
     for i in range(rows):
-        y = -d / 2 + 0.1 + (d - 0.2) * (i + 0.5) / rows
-        red = i == 1
-        x = -w / 2 + 0.25
-        while x < w / 2 - 0.15:
-            foliage_ball("veg", P(x + (r.random() - 0.5) * 0.04, y, h - 0.02), 0.11 + r.random() * 0.03, 150, 0.03, "leaf_red" if red else "leaf", r.randint(1, 999))
-            x += 0.32
+        y = -d / 2 + 0.06 + (d - 0.12) * (i + 0.5) / rows
+        kind = kinds[(i + int(w * 10)) % len(kinds)]
+        x = -w / 2 + 0.16
+        while x < w / 2 - 0.1:
+            k = kind if r.random() > 0.18 else r.choice(kinds)
+            veg_clump(k, P(x + (r.random() - 0.5) * 0.05, y + (r.random() - 0.5) * 0.06, h - 0.06), r)
+            x += 0.24 + r.random() * 0.06
+    foliage_carpet("weeds", -w / 2 + t, -d / 2 + t, w / 2 - t, d / 2 - t, h - 0.06, 500, 0.02, "leaf", "soil", seed=2)
 
 
 # ------------------------------------------------------------------ Möbel
@@ -288,7 +296,7 @@ def table(w: float, d: float, h: float):
     cs = 0.56
     tw = max(0.8, w - 2 * cs - 0.05)
     td = max(1.4, d - 2 * cs - 0.1)
-    box("top", -tw / 2, -td / 2, h - 0.03, tw / 2, td / 2, h, "concrete", 0.006)
+    box("top", -tw / 2, -td / 2, h - 0.035, tw / 2, td / 2, h, "wood_light", 0.006)
     box("apron", -tw / 2 + 0.05, -td / 2 + 0.05, h - 0.09, tw / 2 - 0.05, td / 2 - 0.05, h - 0.03, "anthracite")
     for sx in (-1, 1):
         for sy in (-1, 1):

@@ -20,6 +20,7 @@ import { drawPlanting } from '../symbols/plants';
 import { crownSprite, espalierNode, hedgeNode, perennialSprite, plantingNode, scatterNode } from '../symbols/plantSprites';
 import { drawDrip, drawFixture, drawLampDay, drawPipe, drawSprinkler } from '../symbols/tech';
 import { lawnMacroPattern, materialPattern } from '../textures/materialTextures';
+import { plantAssetSprite } from '../assets/plantAssets';
 import { buildSolid, type Tilt } from './obliqueView';
 import { hex, seedFrom } from '../util/rng';
 
@@ -204,7 +205,16 @@ export function buildObjectView(o: PlanObject, ctx: ViewContext): ObjectView {
       const d = diameterAt(o, ctx.years);
       const color = seasonColor(sp, ctx.season);
       const bare = isBare(sp, ctx.season);
-      if (sp.kind === 'tree') {
+      // Blender-Bild (Draufsicht), leicht gedreht je Exemplar; sonst gemalt
+      const rendered = plantAssetSprite(sp, ctx.season, seed, o.position, { view: 'top', width: d, rotation: (((seed % 41) - 20) * Math.PI) / 180 });
+      if (rendered) {
+        node.addChild(rendered);
+        if (sp.kind === 'tree' && ctx.lens === 'growth') {
+          const rings = new Graphics();
+          growthRings(rings, o.position, diameterAt(o, 0), sp.diameterMature);
+          node.addChild(rings);
+        }
+      } else if (sp.kind === 'tree') {
         const bloom = inBloom(sp, ctx.season) ? (sp.colors.bloom ?? null) : null;
         const fruitSeason = sp.phenology[ctx.season === 'summer' ? 6 : 9] === 'fruit';
         node.addChild(crownSprite(sp, o.position, d, seed, { color, bare, bloom, fruit: fruitSeason ? '#B9472F' : null }));

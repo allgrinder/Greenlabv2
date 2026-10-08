@@ -23,6 +23,9 @@ from PIL import Image  # noqa: E402
 import lib  # noqa: E402
 from items import GENERATORS  # noqa: E402
 
+#: im Boden liegende Objekte: kein Licht-Boden (er würde das Becken abschatten)
+NO_GROUND = {"pool"}
+
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 
@@ -52,6 +55,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--only", default="")
     ap.add_argument("--quick", action="store_true")
+    ap.add_argument("--preview", action="store_true", help="mittlere Qualität, nur Drehung 0")
     ap.add_argument("--out", default=os.path.join(ROOT, "public/assets/items"))
     args = ap.parse_args(sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else sys.argv[1:])
     os.makedirs(args.out, exist_ok=True)
@@ -64,11 +68,11 @@ def main():
             continue
         w, d, h = sizes[sym]
         t0 = time.time()
-        lib.reset_scene(16 if args.quick else 96)
+        lib.reset_scene(16 if args.quick else 40 if args.preview else 64, ground=sym not in NO_GROUND)
         gen(w, d, h)
-        ppm = ppm_for(w, d, args.quick)
+        ppm = ppm_for(w, d, args.quick) / (1.6 if args.preview else 1)
         entry = {"w": w, "d": d, "h": h, "ppm": round(ppm, 3), "top": [], "oblique": []}
-        rots = [0] if args.quick else [0, 90, 180, 270]
+        rots = [0] if args.quick or args.preview else [0, 90, 180, 270]
         for k, rot in enumerate(rots):
             if k:
                 lib.rotate_all(90)

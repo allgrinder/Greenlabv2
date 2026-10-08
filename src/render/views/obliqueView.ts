@@ -19,6 +19,7 @@ import type { PlanObject, Vec2 } from '../../core/model/types';
 import { L, css, mul, palette, prng, rgbOf, tuft } from '../symbols/foliage';
 import { gableFaces, hipFaces, itemSolid, type ItemSolid } from '../symbols/itemPaint';
 import { itemAssetSprite } from '../assets/itemAssets';
+import { plantAssetSprite } from '../assets/plantAssets';
 import { DARK_SYMBOLS, itemTexture } from '../symbols/items';
 import { crownSprite, espalierNode, hedgeNode } from '../symbols/plantSprites';
 import { seedFrom } from '../util/rng';
@@ -152,6 +153,12 @@ function plantSolid(o: Extract<PlanObject, { type: 'plant' }>, ctx: ViewContext,
   const color = seasonColor(sp, ctx.season);
   const bare = isBare(sp, ctx.season);
   const bloom = inBloom(sp, ctx.season) ? (sp.colors.bloom ?? null) : null;
+  // Blender-Bild der Schrägansicht (Stamm und Krone), verankert am Stammfuß
+  const rendered = plantAssetSprite(sp, ctx.season, seed, o.position, { view: 'oblique', width: d, height: h, tiltCos: t.cos });
+  if (rendered) {
+    node.addChild(rendered);
+    return { node, depth: o.position.y };
+  }
   if (sp.kind === 'tree') {
     const g = new Graphics();
     const z0 = h * 0.28;

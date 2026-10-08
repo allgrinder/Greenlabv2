@@ -30,6 +30,7 @@ import { buildObjectView, viewKey, type ObjectView, type ViewContext } from './v
 import { screenToWorld, tiltCos, tiltTan, visibleWorldBBox, worldToScreen, type ScreenSize } from './Viewport';
 import { materialPattern } from './textures/materialTextures';
 import { loadItemAssets } from './assets/itemAssets';
+import { loadPlantAssets, preloadPlants } from './assets/plantAssets';
 import { getMaterial } from '../core/catalog/materials';
 
 interface Mounted {
@@ -159,6 +160,7 @@ export class PlanRenderer {
     this.unsub = this.store.subscribe(() => this.invalidate());
     // Blender-Bilder der Objekte im Hintergrund laden, danach neu aufbauen
     void loadItemAssets(() => this.rebuildAll());
+    void loadPlantAssets(() => this.rebuildAll());
     // Schriften können nach dem ersten Frame nachladen
     document.fonts?.ready.then(() => this.rebuildAll());
     this.invalidate();
@@ -223,6 +225,11 @@ export class PlanRenderer {
   async exportPng(opts: { pxPerMeter: number; marginM: number; background: string | null; uiScale?: number; view?: Partial<ViewParams>; overlays?: boolean }): Promise<{ blob: Blob; width: number; height: number }> {
     const doc = this.store.getState().doc;
     if (!doc) throw new Error('Kein Projekt geladen');
+    // Pflanzenbilder der Export-Jahreszeit vorher laden (sonst gemalte Ersatzdarstellung)
+    const season = opts.view?.season ?? 'summer';
+    const ids = new Set(Object.values(doc.objects).flatMap((o) => ('speciesId' in o ? [o.speciesId] : o.type === 'planting' ? o.mix.map((m) => m.speciesId) : o.type === 'scatter' ? o.plants.map((p) => p.speciesId) : [])));
+    await preloadPlants([...ids].map((id) => getSpecies(id)), [season]);
+    this.rebuildAll();
     const b = expandBBox(bbox(doc.site.boundary), opts.marginM);
     const maxTex = 8192;
     const ppm = Math.min(opts.pxPerMeter, maxTex / (b.maxX - b.minX), maxTex / (b.maxY - b.minY));

@@ -12,8 +12,11 @@ import sys
 
 from PIL import Image
 
-GAMMA = 0.7
-GAIN = (1.2, 1.18, 0.75)
+GAMMA = 0.8
+GAIN = (1.06, 1.12, 0.9)
+#: frühere Anpassung (zu gelb) – für die Umrechnung vorhandener Bilder
+OLD_GAMMA = 0.7
+OLD_GAIN = (1.2, 1.18, 0.75)
 
 
 def _lut(gain: float) -> list[int]:
@@ -27,6 +30,19 @@ def grade(im: Image.Image) -> Image.Image:
     im = im.convert("RGBA")
     r, g, b, a = im.split()
     return Image.merge("RGBA", (r.point(LUTS[0]), g.point(LUTS[1]), b.point(LUTS[2]), a))
+
+
+def regrade(im: Image.Image) -> Image.Image:
+    """Bild mit alter Anpassung auf die neue umrechnen (Kanal für Kanal: alte Kurve umkehren, neue anwenden)"""
+    im = im.convert("RGBA")
+    chans = list(im.split())
+    for k in range(3):
+        inv = []
+        for v in range(256):
+            x = min(1.0, v / 255 / OLD_GAIN[k]) ** (1 / OLD_GAMMA)
+            inv.append(min(255, round(255 * x ** GAMMA * GAIN[k])))
+        chans[k] = chans[k].point(inv)
+    return Image.merge("RGBA", chans)
 
 
 def grade_dir(path: str):

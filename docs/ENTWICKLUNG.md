@@ -69,6 +69,11 @@ Umgesetzt sind alle acht Kernfunktionen der Phase 1 sowie PNG-Export (siehe `ARC
 - Pfeil vor der Ebene klappt die Objektliste auf (Klick wählt aus, Umschalt-Klick ergänzt). Objekte per Ziehen umsortieren oder auf eine andere Ebene ziehen, Ebenen per Ziehen umsortieren – z. B. „Neue Wege“ über „Wege“.
 - Deckkraft je Ebene unten im Panel; eigene Ebenen lassen sich samt Inhalt löschen (Rückfrage, rückgängig machbar). Die Grundebenen (Flächen, Wege, Pflanzen …) bleiben, weil die Werkzeuge sie als Ziel brauchen. In der Pflanzen-Ebene ordnen sich Pflanzen zusätzlich nach Höhe.
 
+## Objekte aus Blender
+
+- Gebäude, Möbel und Ausstattung sind in Blender modelliert und gerendert (modern, grau/anthrazit): Draufsicht und Schrägansicht in vier Drehungen, ohne Schlagschatten (den wirft die App). Skripte und Anleitung: `assets/blender/README.md`.
+- Gedrehte Objekte nutzen die nächste vorgerenderte Drehung; der Rest wird in der Draufsicht gedreht, in der Schrägansicht nicht. Abweichende Maße strecken das Bild.
+
 ## Bekannte Grenzen
 
 - Im PDF ist der Plan selbst ein Rasterbild (150 oder 300 dpi, im exakten Maßstab); Rahmen, Schrift, Legende, Maßstab und Nordpfeil sind Vektoren. Die Texturen, Schatten und Lichteffekte stammen aus dem WebGL-Renderer.

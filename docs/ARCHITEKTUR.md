@@ -282,3 +282,8 @@ In Phase 1 waren die Linsen-Tabs sichtbar, aber deaktiviert. Seit Phase 2 sind s
 - **Darstellung:** Deckkraft wirkt als Alpha des Ebenen-Containers (multipliziert mit der Abblendung der Bewässerungs-Linse).
 - **Sichtschutz-Linse:** `LensTab` `privacy`; das Einsehbarkeits-Overlay erscheint nur in dieser Linse (`session.privacy.on` ist nicht mehr nötig), Pflanzen zeigen die dort gewählte Jahreszeit. Rechte Leiste: `PrivacyDock`, bei Auswahl die Eigenschaften.
 
+## 16. Assets aus Blender
+
+- **Pipeline:** `assets/blender/` (bpy 5.2 ohne Oberfläche): Generatoren je Katalogsymbol, Cycles, orthografische Kamera für Draufsicht und 35°-Schrägansicht, vier Drehungen; WebP + `manifest.json` nach `public/assets/items/`. Licht aus derselben Richtung wie die App-Schatten, kein Boden.
+- **App:** `render/assets/itemAssets.ts` lädt Manifest und Bilder im Hintergrund und baut danach neu auf. `itemSprite` (Draufsicht) und die Schrägansicht (`obliqueView`) bevorzugen die Bilder; der Ankerpunkt im Manifest ist der Bodenursprung, in der Schrägansicht wird y durch cos(Kippwinkel) geteilt, weil die Welt gestaucht ist. Ohne Manifest bleibt die gemalte Darstellung aus `itemPaint.ts`.
+

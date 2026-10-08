@@ -1,9 +1,11 @@
 /**
  * Katalogobjekte (Gebäude, Möbel, Ausstattung) als Sprites im fotorealistischen Stil.
- * Gemalt wird in itemPaint.ts; hier nur Cache und Platzierung in Weltmetern.
+ * Vorrang haben die in Blender gerenderten Bilder (render/assets/itemAssets.ts);
+ * ohne sie wird in itemPaint.ts gemalt. Hier nur Cache und Platzierung in Weltmetern.
  */
 import { Sprite } from 'pixi.js';
 import type { Vec2 } from '../../core/model/types';
+import { itemAssetSprite } from '../assets/itemAssets';
 import { foliageTexture } from './foliage';
 import { paintItem } from './itemPaint';
 
@@ -18,6 +20,9 @@ export function itemTexture(symbol: string, w: number, d: number, seed: number) 
 }
 
 export function itemSprite(symbol: string, at: Vec2, w: number, d: number, rotationDeg: number, seed: number): Sprite {
+  // In Blender gerendertes Bild, sonst gemalt
+  const asset = itemAssetSprite(symbol, at, w, d, rotationDeg, null);
+  if (asset) return asset;
   const tex = itemTexture(symbol, w, d, seed);
   const s = new Sprite(tex);
   s.anchor.set(0.5);

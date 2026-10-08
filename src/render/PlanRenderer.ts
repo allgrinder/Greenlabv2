@@ -29,6 +29,7 @@ import { SpatialIndex } from './SpatialIndex';
 import { buildObjectView, viewKey, type ObjectView, type ViewContext } from './views/objectView';
 import { screenToWorld, tiltCos, tiltTan, visibleWorldBBox, worldToScreen, type ScreenSize } from './Viewport';
 import { materialPattern } from './textures/materialTextures';
+import { loadItemAssets } from './assets/itemAssets';
 import { getMaterial } from '../core/catalog/materials';
 
 interface Mounted {
@@ -156,6 +157,8 @@ export class PlanRenderer {
     this.size = { width: host.clientWidth, height: host.clientHeight };
 
     this.unsub = this.store.subscribe(() => this.invalidate());
+    // Blender-Bilder der Objekte im Hintergrund laden, danach neu aufbauen
+    void loadItemAssets(() => this.rebuildAll());
     // Schriften können nach dem ersten Frame nachladen
     document.fonts?.ready.then(() => this.rebuildAll());
     this.invalidate();

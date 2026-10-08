@@ -959,6 +959,175 @@
      ]
     }
    }
+  },
+  "viburnum": {
+   "kind": "shrub",
+   "w": 2.6,
+   "d": 2.6,
+   "h": 3,
+   "ppm": 170.0,
+   "looks": {
+    "#6E8762|0||": {
+     "seasons": [
+      "spring",
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "viburnum_0_0_top.webp",
+       "px": [
+        371,
+        387
+       ],
+       "anchor": [
+        0.4506,
+        0.5523
+       ]
+      },
+      {
+       "file": "viburnum_0_1_top.webp",
+       "px": [
+        348,
+        397
+       ],
+       "anchor": [
+        0.5396,
+        0.5153
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "viburnum_0_0_oblique.webp",
+       "px": [
+        371,
+        465
+       ],
+       "anchor": [
+        0.4506,
+        0.7857
+       ]
+      },
+      {
+       "file": "viburnum_0_1_oblique.webp",
+       "px": [
+        348,
+        409
+       ],
+       "anchor": [
+        0.5396,
+        0.8662
+       ]
+      }
+     ]
+    },
+    "#A3583A|0||": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "viburnum_1_0_top.webp",
+       "px": [
+        353,
+        367
+       ],
+       "anchor": [
+        0.4657,
+        0.4741
+       ]
+      },
+      {
+       "file": "viburnum_1_1_top.webp",
+       "px": [
+        404,
+        368
+       ],
+       "anchor": [
+        0.5055,
+        0.5093
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "viburnum_1_0_oblique.webp",
+       "px": [
+        353,
+        460
+       ],
+       "anchor": [
+        0.4657,
+        0.826
+       ]
+      },
+      {
+       "file": "viburnum_1_1_oblique.webp",
+       "px": [
+        404,
+        408
+       ],
+       "anchor": [
+        0.5055,
+        0.8461
+       ]
+      }
+     ]
+    },
+    "#7E806C|1||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "viburnum_2_0_top.webp",
+       "px": [
+        373,
+        352
+       ],
+       "anchor": [
+        0.4792,
+        0.4824
+       ]
+      },
+      {
+       "file": "viburnum_2_1_top.webp",
+       "px": [
+        298,
+        336
+       ],
+       "anchor": [
+        0.4983,
+        0.5308
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "viburnum_2_0_oblique.webp",
+       "px": [
+        373,
+        427
+       ],
+       "anchor": [
+        0.4792,
+        0.9427
+       ]
+      },
+      {
+       "file": "viburnum_2_1_oblique.webp",
+       "px": [
+        298,
+        429
+       ],
+       "anchor": [
+        0.4983,
+        0.8483
+       ]
+      }
+     ]
+    }
+   }
   }
  }
 }

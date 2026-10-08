@@ -1128,6 +1128,71 @@
      ]
     }
    }
+  },
+  "buxus": {
+   "kind": "shrub",
+   "w": 1,
+   "d": 1,
+   "h": 1,
+   "ppm": 170.0,
+   "looks": {
+    "#4F6B45|0||": {
+     "seasons": [
+      "spring",
+      "summer",
+      "autumn",
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "buxus_0_0_top.webp",
+       "px": [
+        130,
+        156
+       ],
+       "anchor": [
+        0.5066,
+        0.5109
+       ]
+      },
+      {
+       "file": "buxus_0_1_top.webp",
+       "px": [
+        152,
+        123
+       ],
+       "anchor": [
+        0.4633,
+        0.5104
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "buxus_0_0_oblique.webp",
+       "px": [
+        130,
+        139
+       ],
+       "anchor": [
+        0.5066,
+        0.8954
+       ]
+      },
+      {
+       "file": "buxus_0_1_oblique.webp",
+       "px": [
+        152,
+        124
+       ],
+       "anchor": [
+        0.4633,
+        0.9464
+       ]
+      }
+     ]
+    }
+   }
   }
  }
 }

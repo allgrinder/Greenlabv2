@@ -3795,6 +3795,235 @@
      "oblique": []
     }
    }
+  },
+  "pumpkin": {
+   "kind": "vegetable",
+   "w": 2,
+   "d": 2,
+   "h": 0.5,
+   "ppm": 170.0,
+   "looks": {
+    "#8BA25E|0||": {
+     "seasons": [
+      "spring",
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "pumpkin_0_0_top.webp",
+       "px": [
+        207,
+        322
+       ],
+       "anchor": [
+        0.4443,
+        0.554
+       ]
+      },
+      {
+       "file": "pumpkin_0_1_top.webp",
+       "px": [
+        253,
+        198
+       ],
+       "anchor": [
+        0.623,
+        0.6743
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#80855a|0||": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "pumpkin_1_0_top.webp",
+       "px": [
+        263,
+        301
+       ],
+       "anchor": [
+        0.5144,
+        0.4809
+       ]
+      },
+      {
+       "file": "pumpkin_1_1_top.webp",
+       "px": [
+        317,
+        258
+       ],
+       "anchor": [
+        0.5354,
+        0.5114
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#7d7464|0||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "pumpkin_2_0_top.webp",
+       "px": [
+        238,
+        175
+       ],
+       "anchor": [
+        0.389,
+        0.5113
+       ]
+      },
+      {
+       "file": "pumpkin_2_1_top.webp",
+       "px": [
+        266,
+        271
+       ],
+       "anchor": [
+        0.5626,
+        0.4769
+       ]
+      }
+     ],
+     "oblique": []
+    }
+   }
+  },
+  "carpinus-hedge": {
+   "kind": "hedge",
+   "w": 1.5,
+   "d": 1.5,
+   "h": 1.8,
+   "ppm": 170.0,
+   "looks": {
+    "#86A35F|0||": {
+     "seasons": [
+      "spring"
+     ],
+     "top": [
+      {
+       "file": "carpinus-hedge_0_0_top.webp",
+       "px": [
+        234,
+        187
+       ],
+       "anchor": [
+        0.4736,
+        0.4971
+       ]
+      },
+      {
+       "file": "carpinus-hedge_0_1_top.webp",
+       "px": [
+        203,
+        196
+       ],
+       "anchor": [
+        0.483,
+        0.5466
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#5B7350|0||": {
+     "seasons": [
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "carpinus-hedge_1_0_top.webp",
+       "px": [
+        203,
+        201
+       ],
+       "anchor": [
+        0.4386,
+        0.4672
+       ]
+      },
+      {
+       "file": "carpinus-hedge_1_1_top.webp",
+       "px": [
+        200,
+        190
+       ],
+       "anchor": [
+        0.598,
+        0.543
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#A4813F|0||": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "carpinus-hedge_2_0_top.webp",
+       "px": [
+        195,
+        195
+       ],
+       "anchor": [
+        0.4873,
+        0.5497
+       ]
+      },
+      {
+       "file": "carpinus-hedge_2_1_top.webp",
+       "px": [
+        174,
+        197
+       ],
+       "anchor": [
+        0.5167,
+        0.5718
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#957C59|0||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "carpinus-hedge_3_0_top.webp",
+       "px": [
+        181,
+        205
+       ],
+       "anchor": [
+        0.5747,
+        0.4639
+       ]
+      },
+      {
+       "file": "carpinus-hedge_3_1_top.webp",
+       "px": [
+        185,
+        232
+       ],
+       "anchor": [
+        0.4766,
+        0.4368
+       ]
+      }
+     ],
+     "oblique": []
+    }
+   }
   }
  }
 }

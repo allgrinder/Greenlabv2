@@ -18,6 +18,7 @@ import { flattenPath } from '../../core/geometry/shape';
 import type { PlanObject, Vec2 } from '../../core/model/types';
 import { L, css, mul, palette, prng, rgbOf, tuft } from '../symbols/foliage';
 import { gableFaces, hipFaces, itemSolid, type ItemSolid } from '../symbols/itemPaint';
+import { itemAssetSprite } from '../assets/itemAssets';
 import { DARK_SYMBOLS, itemTexture } from '../symbols/items';
 import { crownSprite, espalierNode, hedgeNode } from '../symbols/plantSprites';
 import { seedFrom } from '../util/rng';
@@ -242,6 +243,22 @@ function wallDetails(g: Graphics, e: { a: Vec2; b: Vec2; n: Vec2 }, s: ItemSolid
 function itemSolidView(o: Extract<PlanObject, { type: 'item' }>, t: Tilt): SolidView | null {
   const it = getItem(o.catalogId);
   const sz = itemSize(o);
+  const rendered = itemAssetSprite(it.symbol, o.position, sz.width, sz.depth, o.rotationDeg, t.cos);
+  if (rendered) {
+    // Blender-Bild der Schrägansicht: ein Sprite, verankert am Bodenursprung
+    const node = new Container();
+    node.label = o.id;
+    node.addChild(rendered);
+    const r = (o.rotationDeg * Math.PI) / 180;
+    const ext = Math.abs(Math.sin(r)) * sz.width / 2 + Math.abs(Math.cos(r)) * sz.depth / 2;
+    if (o.name && DARK_SYMBOLS.has(it.symbol)) {
+      const lb = labelText(o.name, it.category === 'building' ? 0.75 : 0.55, true);
+      const p = up(o.position, sz.height, t);
+      lb.position.set(p.x, p.y + 0.3);
+      node.addChild(lb);
+    }
+    return { node, depth: o.position.y + ext };
+  }
   const s = itemSolid(it.symbol, sz.height);
   if (s.kind === 'flat' || sz.height <= 0.05) return null;
   const seed = seedFrom(o.id);

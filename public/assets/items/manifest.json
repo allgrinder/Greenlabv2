@@ -1,0 +1,1277 @@
+{
+ "version": 1,
+ "items": {
+  "house": {
+   "w": 10.0,
+   "d": 14.0,
+   "h": 7.0,
+   "ppm": 100.0,
+   "top": [
+    {
+     "file": "house_top_0.webp",
+     "rot": 0,
+     "px": [
+      1119,
+      1519
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "house_top_90.webp",
+     "rot": 90,
+     "px": [
+      1519,
+      1119
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "house_top_180.webp",
+     "rot": 180,
+     "px": [
+      1119,
+      1519
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "house_top_270.webp",
+     "rot": 270,
+     "px": [
+      1519,
+      1119
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    }
+   ],
+   "oblique": [
+    {
+     "file": "house_oblique_0.webp",
+     "rot": 0,
+     "px": [
+      1119,
+      1443
+     ],
+     "anchor": [
+      0.5,
+      0.5966
+     ]
+    },
+    {
+     "file": "house_oblique_90.webp",
+     "rot": 90,
+     "px": [
+      1519,
+      1116
+     ],
+     "anchor": [
+      0.5,
+      0.625
+     ]
+    },
+    {
+     "file": "house_oblique_180.webp",
+     "rot": 180,
+     "px": [
+      1119,
+      1443
+     ],
+     "anchor": [
+      0.5,
+      0.5966
+     ]
+    },
+    {
+     "file": "house_oblique_270.webp",
+     "rot": 270,
+     "px": [
+      1519,
+      1125
+     ],
+     "anchor": [
+      0.5,
+      0.628
+     ]
+    }
+   ]
+  },
+  "shed": {
+   "w": 4.0,
+   "d": 4.0,
+   "h": 2.6,
+   "ppm": 220.0,
+   "top": [
+    {
+     "file": "shed_top_0.webp",
+     "rot": 0,
+     "px": [
+      915,
+      915
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "shed_top_90.webp",
+     "rot": 90,
+     "px": [
+      915,
+      915
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "shed_top_180.webp",
+     "rot": 180,
+     "px": [
+      915,
+      915
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "shed_top_270.webp",
+     "rot": 270,
+     "px": [
+      915,
+      915
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    }
+   ],
+   "oblique": [
+    {
+     "file": "shed_oblique_0.webp",
+     "rot": 0,
+     "px": [
+      915,
+      1072
+     ],
+     "anchor": [
+      0.5,
+      0.658
+     ]
+    },
+    {
+     "file": "shed_oblique_90.webp",
+     "rot": 90,
+     "px": [
+      915,
+      1066
+     ],
+     "anchor": [
+      0.5,
+      0.6622
+     ]
+    },
+    {
+     "file": "shed_oblique_180.webp",
+     "rot": 180,
+     "px": [
+      915,
+      1066
+     ],
+     "anchor": [
+      0.5,
+      0.6622
+     ]
+    },
+    {
+     "file": "shed_oblique_270.webp",
+     "rot": 270,
+     "px": [
+      915,
+      1066
+     ],
+     "anchor": [
+      0.5,
+      0.6622
+     ]
+    }
+   ]
+  },
+  "greenhouse": {
+   "w": 4.0,
+   "d": 3.5,
+   "h": 2.4,
+   "ppm": 220.0,
+   "top": [
+    {
+     "file": "greenhouse_top_0.webp",
+     "rot": 0,
+     "px": [
+      922,
+      805
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "greenhouse_top_90.webp",
+     "rot": 90,
+     "px": [
+      805,
+      922
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "greenhouse_top_180.webp",
+     "rot": 180,
+     "px": [
+      922,
+      805
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "greenhouse_top_270.webp",
+     "rot": 270,
+     "px": [
+      805,
+      922
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    }
+   ],
+   "oblique": [
+    {
+     "file": "greenhouse_oblique_0.webp",
+     "rot": 0,
+     "px": [
+      922,
+      974
+     ],
+     "anchor": [
+      0.5,
+      0.6582
+     ]
+    },
+    {
+     "file": "greenhouse_oblique_90.webp",
+     "rot": 90,
+     "px": [
+      805,
+      970
+     ],
+     "anchor": [
+      0.5,
+      0.6104
+     ]
+    },
+    {
+     "file": "greenhouse_oblique_180.webp",
+     "rot": 180,
+     "px": [
+      922,
+      974
+     ],
+     "anchor": [
+      0.5,
+      0.6582
+     ]
+    },
+    {
+     "file": "greenhouse_oblique_270.webp",
+     "rot": 270,
+     "px": [
+      805,
+      970
+     ],
+     "anchor": [
+      0.5,
+      0.6104
+     ]
+    }
+   ]
+  },
+  "compost": {
+   "w": 1.75,
+   "d": 2.5,
+   "h": 1.0,
+   "ppm": 220.0,
+   "top": [
+    {
+     "file": "compost_top_0.webp",
+     "rot": 0,
+     "px": [
+      420,
+      585
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "compost_top_90.webp",
+     "rot": 90,
+     "px": [
+      585,
+      420
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "compost_top_180.webp",
+     "rot": 180,
+     "px": [
+      420,
+      585
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "compost_top_270.webp",
+     "rot": 270,
+     "px": [
+      585,
+      420
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    }
+   ],
+   "oblique": [
+    {
+     "file": "compost_oblique_0.webp",
+     "rot": 0,
+     "px": [
+      420,
+      616
+     ],
+     "anchor": [
+      0.5,
+      0.6065
+     ]
+    },
+    {
+     "file": "compost_oblique_90.webp",
+     "rot": 90,
+     "px": [
+      585,
+      481
+     ],
+     "anchor": [
+      0.5,
+      0.6364
+     ]
+    },
+    {
+     "file": "compost_oblique_180.webp",
+     "rot": 180,
+     "px": [
+      420,
+      616
+     ],
+     "anchor": [
+      0.5,
+      0.6065
+     ]
+    },
+    {
+     "file": "compost_oblique_270.webp",
+     "rot": 270,
+     "px": [
+      585,
+      481
+     ],
+     "anchor": [
+      0.5,
+      0.6364
+     ]
+    }
+   ]
+  },
+  "barrel": {
+   "w": 0.9,
+   "d": 0.9,
+   "h": 1.1,
+   "ppm": 220.0,
+   "top": [
+    {
+     "file": "barrel_top_0.webp",
+     "rot": 0,
+     "px": [
+      233,
+      238
+     ],
+     "anchor": [
+      0.5,
+      0.4896
+     ]
+    },
+    {
+     "file": "barrel_top_90.webp",
+     "rot": 90,
+     "px": [
+      238,
+      233
+     ],
+     "anchor": [
+      0.5104,
+      0.5
+     ]
+    },
+    {
+     "file": "barrel_top_180.webp",
+     "rot": 180,
+     "px": [
+      233,
+      238
+     ],
+     "anchor": [
+      0.5,
+      0.5104
+     ]
+    },
+    {
+     "file": "barrel_top_270.webp",
+     "rot": 270,
+     "px": [
+      238,
+      233
+     ],
+     "anchor": [
+      0.4896,
+      0.5
+     ]
+    }
+   ],
+   "oblique": [
+    {
+     "file": "barrel_oblique_0.webp",
+     "rot": 0,
+     "px": [
+      233,
+      328
+     ],
+     "anchor": [
+      0.5,
+      0.7141
+     ]
+    },
+    {
+     "file": "barrel_oblique_90.webp",
+     "rot": 90,
+     "px": [
+      238,
+      328
+     ],
+     "anchor": [
+      0.5104,
+      0.7141
+     ]
+    },
+    {
+     "file": "barrel_oblique_180.webp",
+     "rot": 180,
+     "px": [
+      233,
+      328
+     ],
+     "anchor": [
+      0.5,
+      0.7141
+     ]
+    },
+    {
+     "file": "barrel_oblique_270.webp",
+     "rot": 270,
+     "px": [
+      238,
+      328
+     ],
+     "anchor": [
+      0.4896,
+      0.7141
+     ]
+    }
+   ]
+  },
+  "raisedBed": {
+   "w": 3.0,
+   "d": 1.2,
+   "h": 0.8,
+   "ppm": 220.0,
+   "top": [
+    {
+     "file": "raisedBed_top_0.webp",
+     "rot": 0,
+     "px": [
+      704,
+      308
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "raisedBed_top_90.webp",
+     "rot": 90,
+     "px": [
+      308,
+      704
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "raisedBed_top_180.webp",
+     "rot": 180,
+     "px": [
+      704,
+      308
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "raisedBed_top_270.webp",
+     "rot": 270,
+     "px": [
+      308,
+      704
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    }
+   ],
+   "oblique": [
+    {
+     "file": "raisedBed_oblique_0.webp",
+     "rot": 0,
+     "px": [
+      704,
+      356
+     ],
+     "anchor": [
+      0.5,
+      0.6485
+     ]
+    },
+    {
+     "file": "raisedBed_oblique_90.webp",
+     "rot": 90,
+     "px": [
+      308,
+      681
+     ],
+     "anchor": [
+      0.5,
+      0.5778
+     ]
+    },
+    {
+     "file": "raisedBed_oblique_180.webp",
+     "rot": 180,
+     "px": [
+      704,
+      356
+     ],
+     "anchor": [
+      0.5,
+      0.6485
+     ]
+    },
+    {
+     "file": "raisedBed_oblique_270.webp",
+     "rot": 270,
+     "px": [
+      308,
+      681
+     ],
+     "anchor": [
+      0.5,
+      0.5778
+     ]
+    }
+   ]
+  },
+  "table": {
+   "w": 2.6,
+   "d": 3.6,
+   "h": 0.75,
+   "ppm": 220.0,
+   "top": [
+    {
+     "file": "table_top_0.webp",
+     "rot": 0,
+     "px": [
+      579,
+      779
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "table_top_90.webp",
+     "rot": 90,
+     "px": [
+      779,
+      579
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "table_top_180.webp",
+     "rot": 180,
+     "px": [
+      579,
+      779
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "table_top_270.webp",
+     "rot": 270,
+     "px": [
+      779,
+      579
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    }
+   ],
+   "oblique": [
+    {
+     "file": "table_oblique_0.webp",
+     "rot": 0,
+     "px": [
+      579,
+      744
+     ],
+     "anchor": [
+      0.5,
+      0.5775
+     ]
+    },
+    {
+     "file": "table_oblique_90.webp",
+     "rot": 90,
+     "px": [
+      779,
+      580
+     ],
+     "anchor": [
+      0.5,
+      0.5994
+     ]
+    },
+    {
+     "file": "table_oblique_180.webp",
+     "rot": 180,
+     "px": [
+      579,
+      744
+     ],
+     "anchor": [
+      0.5,
+      0.5775
+     ]
+    },
+    {
+     "file": "table_oblique_270.webp",
+     "rot": 270,
+     "px": [
+      779,
+      580
+     ],
+     "anchor": [
+      0.5,
+      0.5994
+     ]
+    }
+   ]
+  },
+  "lounger": {
+   "w": 2.3,
+   "d": 0.75,
+   "h": 0.4,
+   "ppm": 220.0,
+   "top": [
+    {
+     "file": "lounger_top_0.webp",
+     "rot": 0,
+     "px": [
+      541,
+      200
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "lounger_top_90.webp",
+     "rot": 90,
+     "px": [
+      200,
+      541
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "lounger_top_180.webp",
+     "rot": 180,
+     "px": [
+      541,
+      200
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "lounger_top_270.webp",
+     "rot": 270,
+     "px": [
+      200,
+      541
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    }
+   ],
+   "oblique": [
+    {
+     "file": "lounger_oblique_0.webp",
+     "rot": 0,
+     "px": [
+      541,
+      270
+     ],
+     "anchor": [
+      0.5,
+      0.6845
+     ]
+    },
+    {
+     "file": "lounger_oblique_90.webp",
+     "rot": 90,
+     "px": [
+      200,
+      515
+     ],
+     "anchor": [
+      0.5,
+      0.5856
+     ]
+    },
+    {
+     "file": "lounger_oblique_180.webp",
+     "rot": 180,
+     "px": [
+      541,
+      270
+     ],
+     "anchor": [
+      0.5,
+      0.6845
+     ]
+    },
+    {
+     "file": "lounger_oblique_270.webp",
+     "rot": 270,
+     "px": [
+      200,
+      478
+     ],
+     "anchor": [
+      0.5,
+      0.5485
+     ]
+    }
+   ]
+  },
+  "planter": {
+   "w": 0.7,
+   "d": 0.7,
+   "h": 0.6,
+   "ppm": 220.0,
+   "top": [
+    {
+     "file": "planter_top_0.webp",
+     "rot": 0,
+     "px": [
+      189,
+      189
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "planter_top_90.webp",
+     "rot": 90,
+     "px": [
+      189,
+      189
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "planter_top_180.webp",
+     "rot": 180,
+     "px": [
+      189,
+      189
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "planter_top_270.webp",
+     "rot": 270,
+     "px": [
+      189,
+      189
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    }
+   ],
+   "oblique": [
+    {
+     "file": "planter_oblique_0.webp",
+     "rot": 0,
+     "px": [
+      189,
+      254
+     ],
+     "anchor": [
+      0.5,
+      0.688
+     ]
+    },
+    {
+     "file": "planter_oblique_90.webp",
+     "rot": 90,
+     "px": [
+      189,
+      255
+     ],
+     "anchor": [
+      0.5,
+      0.6882
+     ]
+    },
+    {
+     "file": "planter_oblique_180.webp",
+     "rot": 180,
+     "px": [
+      189,
+      254
+     ],
+     "anchor": [
+      0.5,
+      0.688
+     ]
+    },
+    {
+     "file": "planter_oblique_270.webp",
+     "rot": 270,
+     "px": [
+      189,
+      254
+     ],
+     "anchor": [
+      0.5,
+      0.6879
+     ]
+    }
+   ]
+  },
+  "pool": {
+   "w": 8.0,
+   "d": 4.0,
+   "h": 0.0,
+   "ppm": 175.0,
+   "top": [
+    {
+     "file": "pool_top_0.webp",
+     "rot": 0,
+     "px": [
+      1427,
+      727
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "pool_top_90.webp",
+     "rot": 90,
+     "px": [
+      727,
+      1427
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "pool_top_180.webp",
+     "rot": 180,
+     "px": [
+      1427,
+      727
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "pool_top_270.webp",
+     "rot": 270,
+     "px": [
+      727,
+      1427
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    }
+   ],
+   "oblique": [
+    {
+     "file": "pool_oblique_0.webp",
+     "rot": 0,
+     "px": [
+      1427,
+      604
+     ],
+     "anchor": [
+      0.5,
+      0.4967
+     ]
+    },
+    {
+     "file": "pool_oblique_90.webp",
+     "rot": 90,
+     "px": [
+      727,
+      1177
+     ],
+     "anchor": [
+      0.5,
+      0.4983
+     ]
+    },
+    {
+     "file": "pool_oblique_180.webp",
+     "rot": 180,
+     "px": [
+      1427,
+      604
+     ],
+     "anchor": [
+      0.5,
+      0.4967
+     ]
+    },
+    {
+     "file": "pool_oblique_270.webp",
+     "rot": 270,
+     "px": [
+      727,
+      1177
+     ],
+     "anchor": [
+      0.5,
+      0.4983
+     ]
+    }
+   ]
+  },
+  "play": {
+   "w": 4.5,
+   "d": 3.0,
+   "h": 3.0,
+   "ppm": 220.0,
+   "top": [
+    {
+     "file": "play_top_0.webp",
+     "rot": 0,
+     "px": [
+      1025,
+      872
+     ],
+     "anchor": [
+      0.5107,
+      0.4114
+     ]
+    },
+    {
+     "file": "play_top_90.webp",
+     "rot": 90,
+     "px": [
+      872,
+      1025
+     ],
+     "anchor": [
+      0.5886,
+      0.5107
+     ]
+    },
+    {
+     "file": "play_top_180.webp",
+     "rot": 180,
+     "px": [
+      1025,
+      872
+     ],
+     "anchor": [
+      0.4893,
+      0.5886
+     ]
+    },
+    {
+     "file": "play_top_270.webp",
+     "rot": 270,
+     "px": [
+      872,
+      1025
+     ],
+     "anchor": [
+      0.4114,
+      0.4893
+     ]
+    }
+   ],
+   "oblique": [
+    {
+     "file": "play_oblique_0.webp",
+     "rot": 0,
+     "px": [
+      1025,
+      1070
+     ],
+     "anchor": [
+      0.5107,
+      0.6166
+     ]
+    },
+    {
+     "file": "play_oblique_90.webp",
+     "rot": 90,
+     "px": [
+      872,
+      1208
+     ],
+     "anchor": [
+      0.5886,
+      0.6578
+     ]
+    },
+    {
+     "file": "play_oblique_180.webp",
+     "rot": 180,
+     "px": [
+      1025,
+      709
+     ],
+     "anchor": [
+      0.4893,
+      0.6201
+     ]
+    },
+    {
+     "file": "play_oblique_270.webp",
+     "rot": 270,
+     "px": [
+      872,
+      1131
+     ],
+     "anchor": [
+      0.4114,
+      0.6247
+     ]
+    }
+   ]
+  },
+  "fence": {
+   "w": 1.0,
+   "d": 0.05,
+   "h": 1.2,
+   "ppm": 220.0,
+   "top": [
+    {
+     "file": "fence_top_0.webp",
+     "rot": 0,
+     "px": [
+      255,
+      53
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "fence_top_90.webp",
+     "rot": 90,
+     "px": [
+      53,
+      255
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "fence_top_180.webp",
+     "rot": 180,
+     "px": [
+      255,
+      53
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "fence_top_270.webp",
+     "rot": 270,
+     "px": [
+      53,
+      255
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    }
+   ],
+   "oblique": [
+    {
+     "file": "fence_oblique_0.webp",
+     "rot": 0,
+     "px": [
+      255,
+      204
+     ],
+     "anchor": [
+      0.5,
+      0.8805
+     ]
+    },
+    {
+     "file": "fence_oblique_90.webp",
+     "rot": 90,
+     "px": [
+      53,
+      370
+     ],
+     "anchor": [
+      0.5,
+      0.7099
+     ]
+    },
+    {
+     "file": "fence_oblique_180.webp",
+     "rot": 180,
+     "px": [
+      255,
+      204
+     ],
+     "anchor": [
+      0.5,
+      0.8805
+     ]
+    },
+    {
+     "file": "fence_oblique_270.webp",
+     "rot": 270,
+     "px": [
+      53,
+      370
+     ],
+     "anchor": [
+      0.5,
+      0.7099
+     ]
+    }
+   ]
+  }
+ }
+}

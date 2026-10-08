@@ -265,6 +265,10 @@ await p.click('[data-testid=tool-rect]');
 assert.equal(await p.evaluate(() => window.__gw.editor.getState().session.viewport.tiltDeg), 0);
 await p.click('[data-testid=view-oblique]');
 await p.keyboard.press('Escape');
+// Objekte aus Blender: Manifest erreichbar, alle Bilder vorhanden
+const man = await p.evaluate(async () => (await fetch('assets/items/manifest.json')).json());
+assert.ok(Object.keys(man.items).length >= 12);
+for (const e of Object.values(man.items)) assert.equal(e.top.length + e.oblique.length, 8);
 step('Schrägansicht');
 
 await p.click('[data-testid=export-btn]');

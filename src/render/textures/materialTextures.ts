@@ -4,6 +4,7 @@
  */
 import { FillPattern, Matrix, Texture } from 'pixi.js';
 import type { Material } from '../../core/model/types';
+import { groundTile } from '../assets/groundAssets';
 import { rng } from '../util/rng';
 
 type Painter = (ctx: CanvasRenderingContext2D, w: number, h: number, pxPerM: number) => void;
@@ -134,6 +135,7 @@ function pebbles(ctx: CanvasRenderingContext2D, r: () => number, n: number, w: n
 }
 
 const SPECS: Record<Material['texture'], TileSpec> = {
+  slabs: null as unknown as TileSpec,
   lawn: {
     // Nur Feinstruktur (Halme, Körnung, 1-m-Flecken); große Wolken liefert lawnMacroPattern
     w: 4,
@@ -288,6 +290,54 @@ const SPECS: Record<Material['texture'], TileSpec> = {
       });
     },
   },
+  meadow: {
+    // Ersatz bis das Blender-Bild geladen ist: dunkleres, struppiges Grün mit Blütentupfen
+    w: 2,
+    h: 2,
+    pxPerM: 120,
+    paint(ctx, w, h) {
+      const A = C('#6f7a36');
+      const B = C('#a4ac5c');
+      pixels(ctx, w, h, (u, v) => {
+        const c = mixc(A, B, tfbm(u, v, 4, 61, 3));
+        const f = 0.8 + pnoise(u * 220, v * 220, 220, 62) * 0.35;
+        return [c[0] * f, c[1] * f, c[2] * f];
+      });
+      const r = rng(63);
+      for (const col of ['#f2efe4', '#c4342a', '#4f6fc4', '#e3bf3e', '#9c6aae']) {
+        ctx.fillStyle = col;
+        for (let i = 0; i < 40; i++) {
+          ctx.beginPath();
+          ctx.arc(r() * w, r() * h, 1 + r() * 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    },
+  },
+  sand: {
+    w: 1,
+    h: 1,
+    pxPerM: 200,
+    paint(ctx, w, h) {
+      const A = C('#c2ab80');
+      const B = C('#e2d2ad');
+      pixels(ctx, w, h, (u, v) => {
+        const c = mixc(A, B, tfbm(u, v, 3, 71, 3));
+        const f = 0.9 + pnoise(u * 180, v * 180, 180, 72) * 0.16;
+        return [c[0] * f, c[1] * f, c[2] * f];
+      });
+    },
+  },
+  stepping: {
+    // Trittplattenweg: Fläche bleibt Rasen; die Platten zeichnet objectView einzeln
+    w: 1,
+    h: 1,
+    pxPerM: 60,
+    paint(ctx, w, h) {
+      ctx.fillStyle = '#b1aca2';
+      ctx.fillRect(0, 0, w, h);
+    },
+  },
   water: {
     w: 3,
     h: 3,
@@ -319,9 +369,15 @@ const SPECS: Record<Material['texture'], TileSpec> = {
   },
 };
 
+// Großformat: gleiche Malweise wie Terrassenplatten, bis die Blender-Kachel da ist
+SPECS.slabs = { ...SPECS.paving, w: 2.4, h: 1.2 };
+
 const cache = new Map<string, { texture: Texture; spec: TileSpec }>();
 
 function tile(key: Material['texture']) {
+  // Blender-Kachel, sobald geladen; sonst die gemalte
+  const g = groundTile(key);
+  if (g) return { texture: g.texture, spec: { w: g.w, h: g.h, pxPerM: g.ppm, paint: () => undefined } as TileSpec };
   let hit = cache.get(key);
   if (hit) return hit;
   const spec = SPECS[key];
@@ -399,6 +455,8 @@ const swatchCache = new Map<string, string>();
  * dargestellt mit `pxPerM` Bildschirmpixeln pro Meter.
  */
 export function materialSwatchStyle(m: Material, pxPerM = 70): { backgroundImage: string; backgroundSize: string } {
+  const g = groundTile(m.texture);
+  if (g) return { backgroundImage: `url(${g.url})`, backgroundSize: `${g.w * pxPerM}px ${g.h * pxPerM}px` };
   let url = swatchCache.get(m.texture);
   if (!url) {
     url = (tile(m.texture).texture.source.resource as HTMLCanvasElement).toDataURL();

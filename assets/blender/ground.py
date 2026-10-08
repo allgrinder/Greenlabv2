@@ -175,6 +175,25 @@ def paving(T, rnd):
             tiled(ob, T, 0.5)
 
 
+@ground("slabs", (2.4, 1.2), 260)
+def slabs(T, rnd):
+    """Großformatplatten 120 × 60 Beton hellgrau, enge Fuge, Halbverband"""
+    base_plane(T, pmat("joint2", lin("#55524c"), 1.0, 0.2, 0.8, 120), -0.01)
+    mats = [pmat(f"lslab{i}", lin(h), 0.75, 0.06, 0.12, 3, 0.35) for i, h in enumerate(["#c6c2ba", "#bfbbb3", "#cbc7c0", "#b9b5ad"])]
+    for row in range(2):
+        off = (row % 2) * 0.6
+        for col in range(2):
+            ob = link(bpy.data.objects.new("lslab", slab_mesh("lslab", 1.195, 0.595, 0.04)), outline=False)
+            ob.location = P(col * 1.2 + off + 0.6, row * 0.6 + 0.3, -0.02 + rnd.uniform(-0.001, 0.001))
+            ob.rotation_euler = Euler((rnd.uniform(-0.003, 0.003), rnd.uniform(-0.003, 0.003), rnd.uniform(-0.002, 0.002)))
+            bev = ob.modifiers.new("b", "BEVEL")
+            bev.width = 0.003
+            bev.segments = 2
+            bev.limit_method = "ANGLE"
+            ob.data.materials.append(mats[rnd.randrange(len(mats))])
+            tiled(ob, T, 0.7)
+
+
 @ground("wood", (2.4, 1.12), 300)
 def wood(T, rnd):
     """Holzdeck Lärche: 14-cm-Dielen mit 6 mm Fugen, versetzte Stöße, Maserung, Schraubenpaare"""

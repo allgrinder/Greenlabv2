@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { bbox } from '../core/geometry/polygon';
 import type { Project } from '../core/model/types';
 import { createBenchmark } from '../core/sample/benchmark';
-import { createLindenweg12 } from '../core/sample/lindenweg12';
+import { createMustergarten } from '../core/sample/mustergarten';
 import { startAutosave, type SaveState } from '../persistence/autosave';
 import { getBlob, lastProjectId, listProjects, loadProject, putBlob, rememberLast, saveProject } from '../persistence/db';
 import { exportProject, importProject } from '../persistence/jsonIO';
@@ -200,7 +200,7 @@ export function App() {
                 setMenu(false);
                 setScreen('wizard');
               }}
-              onSample={() => createAndOpen(createLindenweg12())}
+              onSample={() => createAndOpen(createMustergarten())}
               onImport={importFile}
               onExportJson={exportJson}
             />
@@ -212,7 +212,7 @@ export function App() {
         <NewProjectWizard
           canCancel={!!docId}
           onCancel={() => setScreen('editor')}
-          onSample={() => createAndOpen(createLindenweg12())}
+          onSample={() => createAndOpen(createMustergarten())}
           onCreate={({ project, backgroundBlob }) => createAndOpen(project, backgroundBlob && project.background ? { [project.background.blobId]: backgroundBlob } : {})}
         />
       )}

@@ -450,6 +450,10 @@ export type MaterialId =
   | 'barkMulch'
   | 'soil'
   | 'water'
+  | 'meadow'
+  | 'sand'
+  | 'stepping'
+  | 'slabs'
   | (string & {});
 
 export type QuantityUnit = 'm2' | 'm3' | 'm' | 'pcs';
@@ -458,7 +462,7 @@ export interface Material {
   id: MaterialId;
   name: string; // „Kies 8/16, Jurakalk“
   /** Schlüssel des prozeduralen Texturgenerators in render/textures */
-  texture: 'lawn' | 'gravel' | 'paving' | 'wood' | 'mulch' | 'barkMulch' | 'soil' | 'water';
+  texture: 'lawn' | 'gravel' | 'paving' | 'wood' | 'mulch' | 'barkMulch' | 'soil' | 'water' | 'meadow' | 'sand' | 'stepping' | 'slabs';
   baseColor: string;
   /** Kachelgröße der Textur in Weltmetern */
   tileSizeM: number;

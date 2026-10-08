@@ -4,6 +4,7 @@
  */
 import { FillPattern, Matrix, Texture } from 'pixi.js';
 import type { Material } from '../../core/model/types';
+import { groundTile } from '../assets/groundAssets';
 import { rng } from '../util/rng';
 
 type Painter = (ctx: CanvasRenderingContext2D, w: number, h: number, pxPerM: number) => void;
@@ -134,6 +135,7 @@ function pebbles(ctx: CanvasRenderingContext2D, r: () => number, n: number, w: n
 }
 
 const SPECS: Record<Material['texture'], TileSpec> = {
+  slabs: null as unknown as TileSpec,
   lawn: {
     // Nur Feinstruktur (Halme, Körnung, 1-m-Flecken); große Wolken liefert lawnMacroPattern
     w: 4,
@@ -288,6 +290,54 @@ const SPECS: Record<Material['texture'], TileSpec> = {
       });
     },
   },
+  meadow: {
+    // Ersatz bis das Blender-Bild geladen ist: dunkleres, struppiges Grün mit Blütentupfen
+    w: 2,
+    h: 2,
+    pxPerM: 120,
+    paint(ctx, w, h) {
+      const A = C('#6f7a36');
+      const B = C('#a4ac5c');
+      pixels(ctx, w, h, (u, v) => {
+        const c = mixc(A, B, tfbm(u, v, 4, 61, 3));
+        const f = 0.8 + pnoise(u * 220, v * 220, 220, 62) * 0.35;
+        return [c[0] * f, c[1] * f, c[2] * f];
+      });
+      const r = rng(63);
+      for (const col of ['#f2efe4', '#c4342a', '#4f6fc4', '#e3bf3e', '#9c6aae']) {
+        ctx.fillStyle = col;
+        for (let i = 0; i < 40; i++) {
+          ctx.beginPath();
+          ctx.arc(r() * w, r() * h, 1 + r() * 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    },
+  },
+  sand: {
+    w: 1,
+    h: 1,
+    pxPerM: 200,
+    paint(ctx, w, h) {
+      const A = C('#c2ab80');
+      const B = C('#e2d2ad');
+      pixels(ctx, w, h, (u, v) => {
+        const c = mixc(A, B, tfbm(u, v, 3, 71, 3));
+        const f = 0.9 + pnoise(u * 180, v * 180, 180, 72) * 0.16;
+        return [c[0] * f, c[1] * f, c[2] * f];
+      });
+    },
+  },
+  stepping: {
+    // Trittplattenweg: Fläche bleibt Rasen; die Platten zeichnet objectView einzeln
+    w: 1,
+    h: 1,
+    pxPerM: 60,
+    paint(ctx, w, h) {
+      ctx.fillStyle = '#b1aca2';
+      ctx.fillRect(0, 0, w, h);
+    },
+  },
   water: {
     w: 3,
     h: 3,
@@ -319,9 +369,15 @@ const SPECS: Record<Material['texture'], TileSpec> = {
   },
 };
 
+// Großformat: gleiche Malweise wie Terrassenplatten, bis die Blender-Kachel da ist
+SPECS.slabs = { ...SPECS.paving, w: 2.4, h: 1.2 };
+
 const cache = new Map<string, { texture: Texture; spec: TileSpec }>();
 
 function tile(key: Material['texture']) {
+  // Blender-Kachel, sobald geladen; sonst die gemalte
+  const g = groundTile(key);
+  if (g) return { texture: g.texture, spec: { w: g.w, h: g.h, pxPerM: g.ppm, paint: () => undefined } as TileSpec };
   let hit = cache.get(key);
   if (hit) return hit;
   const spec = SPECS[key];
@@ -392,6 +448,65 @@ export function lawnMacroPattern(): FillPattern {
   return pattern;
 }
 
+/* ---------- Wildwiese: hohe/niedrige Partien und Blütennester über viele Meter ---------- */
+
+const MEADOW_MACRO = { size: 36, pxPerM: 10 };
+let meadowTex: Texture | null = null;
+
+/** Halbtransparente Überlagerung der Wiesenkachel: helle Grasbüschel, dunkle Senken, Blütennester */
+export function meadowMacroPattern(): FillPattern {
+  if (!meadowTex) {
+    const n = MEADOW_MACRO.size * MEADOW_MACRO.pxPerM;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = n;
+    const ctx = canvas.getContext('2d')!;
+    const img = ctx.createImageData(n, n);
+    const dark: RGB = [52, 62, 22];
+    const light: RGB = [214, 206, 126];
+    for (let j = 0; j < n; j++)
+      for (let i = 0; i < n; i++) {
+        const t = tfbm(i / n, j / n, 9, 77, 4);
+        const k = (j * n + i) * 4;
+        const c = t < 0.5 ? dark : light;
+        const a = Math.min(1, Math.abs(t - 0.5) * 2.6);
+        img.data[k] = c[0];
+        img.data[k + 1] = c[1];
+        img.data[k + 2] = c[2];
+        img.data[k + 3] = Math.round(a * a * (t < 0.5 ? 110 : 120));
+      }
+    ctx.putImageData(img, 0, 0);
+    // Blütennester: Margerite, Mohn, Kornblume, Wiesensalbei, Hahnenfuß – je Nest eine Farbe dominiert
+    const r = rng(78);
+    const colors = ['#f4f1e6', '#f4f1e6', '#c4342a', '#5a78cc', '#9c6aae', '#e3bf3e', '#efe7c8'];
+    for (let c = 0; c < 260; c++) {
+      const cx = r() * n;
+      const cy = r() * n;
+      const col = colors[Math.floor(r() * colors.length)];
+      const rad = 4 + r() * 10;
+      const dots = 5 + Math.floor(r() * 12);
+      for (let d = 0; d < dots; d++) {
+        const a = r() * Math.PI * 2;
+        const q = Math.sqrt(r()) * rad;
+        for (const ox of [0, -n, n])
+          for (const oy of [0, -n, n]) {
+            ctx.globalAlpha = 0.3 + r() * 0.35;
+            ctx.fillStyle = col;
+            ctx.beginPath();
+            ctx.arc(cx + Math.cos(a) * q + ox, cy + Math.sin(a) * q + oy, 0.5 + r() * 0.6, 0, Math.PI * 2);
+            ctx.fill();
+          }
+      }
+    }
+    ctx.globalAlpha = 1;
+    meadowTex = Texture.from(canvas);
+    meadowTex.source.style.addressMode = 'repeat';
+    meadowTex.source.scaleMode = 'linear';
+  }
+  const pattern = new FillPattern({ texture: meadowTex, repetition: 'repeat', textureSpace: 'global' });
+  pattern.setTransform(new Matrix().scale(1 / MEADOW_MACRO.pxPerM, 1 / MEADOW_MACRO.pxPerM).translate(2.3, 5.1));
+  return pattern;
+}
+
 const swatchCache = new Map<string, string>();
 
 /**
@@ -399,6 +514,8 @@ const swatchCache = new Map<string, string>();
  * dargestellt mit `pxPerM` Bildschirmpixeln pro Meter.
  */
 export function materialSwatchStyle(m: Material, pxPerM = 70): { backgroundImage: string; backgroundSize: string } {
+  const g = groundTile(m.texture);
+  if (g) return { backgroundImage: `url(${g.url})`, backgroundSize: `${g.w * pxPerM}px ${g.h * pxPerM}px` };
   let url = swatchCache.get(m.texture);
   if (!url) {
     url = (tile(m.texture).texture.source.resource as HTMLCanvasElement).toDataURL();

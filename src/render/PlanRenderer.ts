@@ -29,6 +29,7 @@ import { SpatialIndex } from './SpatialIndex';
 import { buildObjectView, viewKey, type ObjectView, type ViewContext } from './views/objectView';
 import { screenToWorld, tiltCos, tiltTan, visibleWorldBBox, worldToScreen, type ScreenSize } from './Viewport';
 import { materialPattern } from './textures/materialTextures';
+import { loadGroundAssets } from './assets/groundAssets';
 import { loadItemAssets } from './assets/itemAssets';
 import { loadPlantAssets, preloadPlants } from './assets/plantAssets';
 import { getMaterial } from '../core/catalog/materials';
@@ -161,6 +162,7 @@ export class PlanRenderer {
     // Blender-Bilder der Objekte im Hintergrund laden, danach neu aufbauen
     void loadItemAssets(() => this.rebuildAll());
     void loadPlantAssets(() => this.rebuildAll());
+    void loadGroundAssets(() => this.rebuildAll());
     // Schriften können nach dem ersten Frame nachladen
     document.fonts?.ready.then(() => this.rebuildAll());
     this.invalidate();

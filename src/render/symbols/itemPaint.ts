@@ -702,7 +702,11 @@ const edge: Painter = (g, W, D, ppm, rnd) => {
   for (let x = ppm; x < W; x += ppm) g.fillRect(x - 0.5, 0, 1, D);
 };
 
-const PAINTERS: Record<string, Painter> = { house, shed, greenhouse, compost, barrel, raisedBed, table, lounger, planter, pool, play, fence, edge };
+const PAINTERS: Record<string, Painter> = {
+  house, shed, greenhouse, compost, barrel, raisedBed, table, lounger, planter, pool, play, fence, edge,
+  // Mustergarten-Objekte: gemalt nur als Platzhalter, bis die Blender-Bilder geladen sind
+  cortenBed: raisedBed, container: shed, pergola: shed, lounge: lounger, firepit: table, trampoline: pool, gate: fence, stoneWall: fence,
+};
 
 /** Auflösung je Objektgröße: kleine Möbel fein, Häuser gröber (Textur ≤ 1024 px) */
 export function itemPpm(w: number, d: number): number {
@@ -752,6 +756,17 @@ export function itemSolid(symbol: string, h: number): ItemSolid {
       return { kind: 'box', eave: h, roof: 'flat', wall: symbol === 'compost' ? '#7d5f40' : '#a27c56', wood: true };
     case 'fence':
       return { kind: 'box', eave: h, roof: 'flat', wall: '#9a7a5a', wood: true };
+    case 'cortenBed':
+      return { kind: 'box', eave: h, roof: 'flat', wall: '#7a3e22' };
+    case 'container':
+    case 'pergola':
+      return { kind: 'box', eave: h, roof: 'flat', wall: '#26272a' };
+    case 'gate':
+      return { kind: 'box', eave: h, roof: 'flat', wall: '#2e2f31' };
+    case 'stoneWall':
+      return { kind: 'box', eave: h, roof: 'flat', wall: '#8d877c' };
+    case 'lounge':
+      return { kind: 'slab', eave: h, roof: 'flat', wall: '#6b6660' };
     case 'barrel':
       return { kind: 'cylinder', eave: h, roof: 'flat', wall: '#45524a' };
     case 'planter':

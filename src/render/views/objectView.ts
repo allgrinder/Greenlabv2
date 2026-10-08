@@ -3,7 +3,7 @@
  * (Zoomstufe, Jahre ab heute, Jahreszeit, Linse, Tag/Nacht).
  * Schatten entstehen zentral im ShadowLayer aus dem Sonnenstand.
  */
-import { Container, Graphics, Text, type FillInput, type StrokeInput } from 'pixi.js';
+import { Container, Graphics, Sprite, Text, type FillInput, type StrokeInput } from 'pixi.js';
 import { getItem } from '../../core/catalog/items';
 import { getMaterial } from '../../core/catalog/materials';
 import { getSpecies } from '../../core/catalog/plants';
@@ -12,17 +12,19 @@ import { footprint, itemSize } from '../../core/geometry/objects';
 import { offsetPolyline } from '../../core/geometry/clip';
 import type { Polygon } from '../../core/geometry/polygon';
 import { type FlatRegion, flattenPath } from '../../core/geometry/shape';
-import type { PlanObject } from '../../core/model/types';
+import type { PlanObject, Vec2 } from '../../core/model/types';
 import type { LensTab } from '../../state/types';
 import { DARK_SYMBOLS, itemSprite } from '../symbols/items';
 import { waterGradient } from '../symbols/gradients';
 import { drawPlanting } from '../symbols/plants';
 import { crownSprite, espalierNode, hedgeNode, perennialSprite, plantingNode, scatterNode } from '../symbols/plantSprites';
 import { drawDrip, drawFixture, drawLampDay, drawPipe, drawSprinkler } from '../symbols/tech';
-import { lawnMacroPattern, materialPattern } from '../textures/materialTextures';
+import { lawnMacroPattern, materialPattern, meadowMacroPattern } from '../textures/materialTextures';
 import { plantAssetSprite } from '../assets/plantAssets';
 import { buildSolid, type Tilt } from './obliqueView';
-import { hex, seedFrom } from '../util/rng';
+import { hex, rng, seedFrom } from '../util/rng';
+import { steppingStones } from '../assets/groundAssets';
+
 
 export interface ObjectView {
   node: Container;
@@ -124,6 +126,55 @@ function growthRings(g: Graphics, c: { x: number; y: number }, today: number, ma
   ring(today / 2, 0.075, 0.15, 0x1e2224, 0.04);
 }
 
+/** Trittplatten im Schrittmaß entlang der Mittellinie, quer zur Laufrichtung, leicht versetzt und verdreht */
+function steppingNode(line: Vec2[], width: number, seed: number): Container {
+  const c = new Container();
+  const r = rng(seed);
+  const stones = steppingStones();
+  const g = new Graphics();
+  c.addChild(g);
+  const STEP = 0.72;
+  const across = Math.max(0.55, width);
+  const along = 0.42;
+  let carry = STEP / 2;
+  let n = 0;
+  for (let i = 1; i < line.length; i++) {
+    const a = line[i - 1];
+    const b = line[i];
+    const len = Math.hypot(b.x - a.x, b.y - a.y);
+    if (len < 1e-6) continue;
+    const dir = { x: (b.x - a.x) / len, y: (b.y - a.y) / len };
+    let t = carry;
+    for (; t <= len; t += STEP, n++) {
+      const side = (n % 2 ? 1 : -1) * Math.max(0, width - 0.6) * 0.25 + (r() - 0.5) * 0.04;
+      const x = a.x + dir.x * t - dir.y * side;
+      const y = a.y + dir.y * t + dir.x * side;
+      // Längsseite der Platte quer zum Weg
+      const rot = Math.atan2(dir.y, dir.x) + Math.PI / 2 + (r() - 0.5) * 0.25;
+      const st = stones.length ? stones[Math.floor(r() * stones.length)] : null;
+      if (st) {
+        const s = new Sprite(st.texture);
+        s.anchor.set(0.5);
+        s.position.set(x, y);
+        s.rotation = rot;
+        // Bild ist 60 × 40 cm (Längsseite = x): auf Wegbreite × 42 cm strecken
+        s.scale.set((st.w * (across / 0.6)) / st.texture.width, (st.h * (along / 0.4)) / st.texture.height);
+        c.addChild(s);
+      } else {
+        // gemalter Ersatz: Kontaktschatten und gerundete Platte
+        const cos = Math.cos(rot);
+        const sin = Math.sin(rot);
+        const pts = (ox: number, oy: number) =>
+          [[-across / 2, -along / 2], [across / 2, -along / 2], [across / 2, along / 2], [-across / 2, along / 2]].flatMap(([u, v]) => [x + ox + u * cos - v * sin, y + oy + u * sin + v * cos]);
+        g.poly(pts(0.02, 0.025), true).fill({ color: 0x2c3318, alpha: 0.25 });
+        g.poly(pts(0, 0), true).fill(0xaba59b).stroke({ color: 0x8a847a, width: 0.015 });
+      }
+    }
+    carry = t - len;
+  }
+  return c;
+}
+
 export function buildObjectView(o: PlanObject, ctx: ViewContext): ObjectView {
   if (ctx.tilt) {
     const solid = buildSolid(o, ctx, ctx.tilt);
@@ -161,6 +212,10 @@ export function buildObjectView(o: PlanObject, ctx: ViewContext): ObjectView {
           edge.mask = mask;
           node.addChild(mask, edge);
         }
+        if (m.texture === 'meadow') {
+          fillRegions(g, fp, meadowMacroPattern());
+          if (ctx.season !== 'summer') fillRegions(g, fp, { color: hex(LAWN_COLOR[ctx.season]), alpha: 0.45 });
+        }
         const edge = { gravel: 0xa69c8c, paving: 0x9b8f7d, wood: 0x7e5c3d } as Record<string, number>;
         if (edge[m.texture]) strokeRegions(g, fp, { color: edge[m.texture], width: m.texture === 'wood' ? 0.045 : 0.08 });
       }
@@ -169,6 +224,10 @@ export function buildObjectView(o: PlanObject, ctx: ViewContext): ObjectView {
     }
     case 'path': {
       const fp = footprint(o);
+      if (getMaterial(o.materialId).texture === 'stepping') {
+        node.addChild(steppingNode(flattenPath(o.centerline, 0.02), o.width, seed));
+        break;
+      }
       fillRegions(g, fp, materialPattern(getMaterial(o.materialId)));
       if (o.edging) strokeRegions(g, fp, { color: 0xa3998a, width: 0.09 });
       break;

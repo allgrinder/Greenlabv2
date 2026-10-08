@@ -1,0 +1,93 @@
+{
+ "version": 1,
+ "tiles": {
+  "gravel": {
+   "file": "gravel.webp",
+   "w": 1.0,
+   "h": 1.0,
+   "ppm": 640
+  },
+  "paving": {
+   "file": "paving.webp",
+   "w": 1.6,
+   "h": 0.8,
+   "ppm": 360
+  },
+  "wood": {
+   "file": "wood.webp",
+   "w": 2.4,
+   "h": 1.12,
+   "ppm": 300
+  },
+  "mulch": {
+   "file": "mulch.webp",
+   "w": 0.8,
+   "h": 0.8,
+   "ppm": 420
+  },
+  "barkMulch": {
+   "file": "barkMulch.webp",
+   "w": 0.8,
+   "h": 0.8,
+   "ppm": 420
+  },
+  "soil": {
+   "file": "soil.webp",
+   "w": 0.8,
+   "h": 0.8,
+   "ppm": 420
+  },
+  "sand": {
+   "file": "sand.webp",
+   "w": 1.0,
+   "h": 1.0,
+   "ppm": 420
+  },
+  "meadow": {
+   "file": "meadow.webp",
+   "w": 2.0,
+   "h": 2.0,
+   "ppm": 300
+  },
+  "slabs": {
+   "file": "slabs.webp",
+   "w": 2.4,
+   "h": 1.2,
+   "ppm": 260
+  }
+ },
+ "stepping": [
+  {
+   "file": "stepping_0.webp",
+   "px": [
+    198,
+    138
+   ],
+   "ppm": 300
+  },
+  {
+   "file": "stepping_1.webp",
+   "px": [
+    198,
+    139
+   ],
+   "ppm": 300
+  },
+  {
+   "file": "stepping_2.webp",
+   "px": [
+    193,
+    141
+   ],
+   "ppm": 300
+  },
+  {
+   "file": "stepping_3.webp",
+   "px": [
+    193,
+    139
+   ],
+   "ppm": 300
+  }
+ ]
+}

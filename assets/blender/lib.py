@@ -400,6 +400,69 @@ def mat(kind: str) -> bpy.types.Material:
         m, b = _principled(kind)
         b.inputs["Base Color"].default_value = (0.35, 0.05, 0.03, 1)
         b.inputs["Roughness"].default_value = 0.6
+    elif kind == "corten":  # wetterfester Stahl: rostbraun, fleckig
+        m, b = _principled(kind)
+        _color_noise(m, b, (0.13, 0.04, 0.012), (0.3, 0.1, 0.03), 7)
+        b.inputs["Roughness"].default_value = 0.88
+        b.inputs["Metallic"].default_value = 0.15
+        _bump(m, b, 160, 0.12)
+    elif kind == "larch":  # Lärche, frisch geölt
+        m, b = _principled(kind)
+        _planks(m, b, (0.2, 0.1, 0.045), (0.36, 0.2, 0.1), 0.14, (0.03, 0.02, 0.012), ("X",))
+        b.inputs["Roughness"].default_value = 0.62
+    elif kind == "container":  # schwarz lackiertes Trapezblech
+        m, b = _principled(kind)
+        nt = m.node_tree
+        b.inputs["Base Color"].default_value = (0.018, 0.018, 0.018, 1)
+        b.inputs["Roughness"].default_value = 0.42
+        b.inputs["Metallic"].default_value = 0.4
+        tc = nt.nodes.new("ShaderNodeTexCoord")
+        wave = nt.nodes.new("ShaderNodeTexWave")
+        wave.wave_profile = "TRI"
+        wave.bands_direction = "X"
+        wave.inputs["Scale"].default_value = 2.2
+        nt.links.new(tc.outputs["Object"], wave.inputs["Vector"])
+        bump = nt.nodes.new("ShaderNodeBump")
+        bump.inputs["Strength"].default_value = 0.6
+        nt.links.new(wave.outputs["Fac"], bump.inputs["Height"])
+        nt.links.new(bump.outputs["Normal"], b.inputs["Normal"])
+    elif kind == "stone":  # Naturstein (Muschelkalk/Granit grau) – Farbe je Stein über Objekt-Zufall
+        m, b = _principled(kind)
+        nt = m.node_tree
+        info = nt.nodes.new("ShaderNodeObjectInfo")
+        tex = nt.nodes.new("ShaderNodeTexNoise")
+        tex.inputs["Scale"].default_value = 14
+        add = nt.nodes.new("ShaderNodeMath")
+        add.operation = "MULTIPLY_ADD"
+        nt.links.new(info.outputs["Random"], add.inputs[0])
+        add.inputs[1].default_value = 0.7
+        nt.links.new(tex.outputs["Fac"], add.inputs[2])
+        sc = nt.nodes.new("ShaderNodeMath")
+        sc.operation = "MULTIPLY"
+        sc.inputs[1].default_value = 0.8
+        nt.links.new(add.outputs[0], sc.inputs[0])
+        ramp = nt.nodes.new("ShaderNodeValToRGB")
+        ramp.color_ramp.elements[0].color = (0.07, 0.066, 0.06, 1)
+        ramp.color_ramp.elements[1].color = (0.25, 0.235, 0.21, 1)
+        nt.links.new(sc.outputs[0], ramp.inputs["Fac"])
+        nt.links.new(ramp.outputs["Color"], b.inputs["Base Color"])
+        b.inputs["Roughness"].default_value = 0.9
+        _bump(m, b, 25, 0.5)
+    elif kind == "ember":  # Glut / Flammen
+        m, b = _principled(kind)
+        b.inputs["Base Color"].default_value = (0.8, 0.25, 0.04, 1)
+        b.inputs["Emission Color"].default_value = (1.0, 0.35, 0.06, 1)
+        b.inputs["Emission Strength"].default_value = 6.0
+    elif kind == "log":
+        m, b = _principled(kind)
+        _color_noise(m, b, (0.05, 0.03, 0.02), (0.12, 0.08, 0.05), 20)
+        b.inputs["Roughness"].default_value = 0.9
+    elif kind == "mat_black":  # Sprungtuch
+        m, b = _principled(kind)
+        b.inputs["Base Color"].default_value = (0.008, 0.008, 0.009, 1)
+        b.inputs["Roughness"].default_value = 0.95
+        b.inputs["Specular IOR Level"].default_value = 0.15
+        _bump(m, b, 600, 0.1)
     elif kind == "sand":
         m, b = _principled(kind)
         _color_noise(m, b, (0.42, 0.34, 0.22), (0.52, 0.43, 0.29), 60)
@@ -407,7 +470,7 @@ def mat(kind: str) -> bpy.types.Material:
         _bump(m, b, 120, 0.3)
     else:
         raise KeyError(kind)
-    if kind not in {"glass", "water", "window", "solar"}:
+    if kind not in {"glass", "water", "window", "solar", "ember"}:
         _ao(m, 0.85 if kind in LEAF_COLORS else 0.7)
     _mats[kind] = m
     return m

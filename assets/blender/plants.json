@@ -369,6 +369,232 @@
   ]
  },
  {
+  "id": "liquidambar",
+  "name": "Amberbaum",
+  "kind": "tree",
+  "deciduous": true,
+  "marcescent": false,
+  "diameterMature": 7,
+  "heightMature": 14,
+  "colors": {
+   "summer": "#5F7E4A",
+   "autumn": "#B2402E",
+   "winter": "#7A6E5E"
+  },
+  "looks": [
+   {
+    "key": "#5F7E4A|0||",
+    "look": {
+     "color": "#5F7E4A",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring",
+     "summer"
+    ]
+   },
+   {
+    "key": "#B2402E|0||",
+    "look": {
+     "color": "#B2402E",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7A6E5E|1||",
+    "look": {
+     "color": "#7A6E5E",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "carpinus-betulus",
+  "name": "Hainbuche",
+  "kind": "tree",
+  "deciduous": true,
+  "marcescent": false,
+  "diameterMature": 8,
+  "heightMature": 12,
+  "colors": {
+   "summer": "#6B8A4A",
+   "spring": "#8DAA62",
+   "autumn": "#C49A45",
+   "winter": "#7A6E5E"
+  },
+  "looks": [
+   {
+    "key": "#8DAA62|0||",
+    "look": {
+     "color": "#8DAA62",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6B8A4A|0||",
+    "look": {
+     "color": "#6B8A4A",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#C49A45|0||",
+    "look": {
+     "color": "#C49A45",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7A6E5E|1||",
+    "look": {
+     "color": "#7A6E5E",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "spiraea",
+  "name": "Prachtspiere",
+  "kind": "shrub",
+  "deciduous": true,
+  "marcescent": false,
+  "diameterMature": 2,
+  "heightMature": 2,
+  "colors": {
+   "summer": "#7A9467",
+   "autumn": "#B68A4A",
+   "winter": "#7E7466",
+   "bloom": "#F6F3EA"
+  },
+  "looks": [
+   {
+    "key": "#7A9467|0||",
+    "look": {
+     "color": "#7A9467",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring",
+     "summer"
+    ]
+   },
+   {
+    "key": "#B68A4A|0||",
+    "look": {
+     "color": "#B68A4A",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7E7466|1||",
+    "look": {
+     "color": "#7E7466",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "cornus",
+  "name": "Hartriegel",
+  "kind": "shrub",
+  "deciduous": true,
+  "marcescent": false,
+  "diameterMature": 2,
+  "heightMature": 2.5,
+  "colors": {
+   "summer": "#6E8A58",
+   "autumn": "#A2443A",
+   "winter": "#A8402E",
+   "bloom": "#EFEADB"
+  },
+  "looks": [
+   {
+    "key": "#6E8A58|0||",
+    "look": {
+     "color": "#6E8A58",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring",
+     "summer"
+    ]
+   },
+   {
+    "key": "#A2443A|0||",
+    "look": {
+     "color": "#A2443A",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#A8402E|1||",
+    "look": {
+     "color": "#A8402E",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
   "id": "hydrangea",
   "name": "Hortensie",
   "kind": "shrub",

@@ -54,7 +54,8 @@ src/
     calibration.ts  2-Punkt-Kalibrierung → metersPerPixel
     quantities/   quantities.ts (pro Objekt), summary.ts (Projekt)
     catalog/      materials.ts, plants.ts, items.ts
-    sample/       lindenweg12.ts (Beispielgarten 30 × 50 m aus dem Design)
+    sample/       mustergarten.ts (Beispielgarten „Modern & Naturnah“, 30 × 50 m, sieben Zonen);
+                  lindenweg12.ts (früherer Beispielgarten, nur noch für Tests)
     format.ts     de-DE-Zahlen: „41,5 m²“, „1.246 €“, „±0,00 m“
   state/          store.ts, history.ts, commands/*.ts, selectors.ts, types.ts
   persistence/    db.ts, autosave.ts, jsonIO.ts
@@ -291,5 +292,6 @@ In Phase 1 waren die Linsen-Tabs sichtbar, aber deaktiviert. Seit Phase 2 sind s
 
 - **Look:** warme Sonne, Himmel als Aufhellung, unsichtbarer Licht-Boden (Rückstrahlung, dunkle Fußpunkte), Umgebungsverdeckung in allen Materialien, warmes Anthrazit, Holz mit Brettfugen, Freestyle-Konturen nur an harten Objekten (Sammlung `outline`).
 - **Pflanzen:** `assets/blender/plants.py` + `render_plants.py`; Looks je Jahreszeit aus `render/assets/plantLooks.ts` (Export `npm run assets:looks`). Manifest `public/assets/plants/manifest.json` mit Bezugsmaß (Durchmesser bzw. Spalierschirm), Höhe, ppm, Ankern.
+- **Böden:** `assets/blender/ground.py` + `render_ground.py` → nahtlose Kacheln je `Material.texture` und freigestellte Trittplatten in `public/assets/ground/`. `render/assets/groundAssets.ts` lädt sie beim Start; `materialTextures.tile()` nimmt das Bild, sonst die prozedurale Kachel. Wildwiese bekommt wie Rasen eine großflächige Überlagerung (`meadowMacroPattern`), Wege aus Material `stepping` zeichnen einzelne Platten im Schrittmaß entlang der Mittellinie statt einer Füllung.
 - **App:** `render/assets/plantAssets.ts` lädt Bilder bei Bedarf (gebündelter Neuaufbau nach dem Laden), `exportPng` lädt vorher alle Bilder der Export-Jahreszeit. Genutzt in Einzelpflanzen, Pflanzungen, Pflanzgruppen, Hecken, Spalieren und in der Schrägansicht (Stamm + Krone als ein Bild); ohne Bild bleibt `foliage.ts`.
 

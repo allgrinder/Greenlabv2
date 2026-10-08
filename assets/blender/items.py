@@ -237,16 +237,16 @@ def barrel(w: float, d: float, h: float):
     box("tap", -0.03, r * 0.9, 0.15, 0.03, r * 1.05, 0.2, "graphite", 0.005)
 
 
-def raised_bed(w: float, d: float, h: float):
-    """Hochbeet aus anthrazit Stahl mit Gemüsereihen"""
+def raised_bed(w: float, d: float, h: float, steel: str = "anthracite"):
+    """Hochbeet aus Stahl (anthrazit oder Corten) mit Gemüsereihen"""
     t = 0.03
-    box("wall_n", -w / 2, -d / 2, 0, w / 2, -d / 2 + t, h, "anthracite", 0.005)
-    box("wall_s", -w / 2, d / 2 - t, 0, w / 2, d / 2, h, "anthracite", 0.005)
-    box("wall_w", -w / 2, -d / 2, 0, -w / 2 + t, d / 2, h, "anthracite", 0.005)
-    box("wall_e", w / 2 - t, -d / 2, 0, w / 2, d / 2, h, "anthracite", 0.005)
+    box("wall_n", -w / 2, -d / 2, 0, w / 2, -d / 2 + t, h, steel, 0.005)
+    box("wall_s", -w / 2, d / 2 - t, 0, w / 2, d / 2, h, steel, 0.005)
+    box("wall_w", -w / 2, -d / 2, 0, -w / 2 + t, d / 2, h, steel, 0.005)
+    box("wall_e", w / 2 - t, -d / 2, 0, w / 2, d / 2, h, steel, 0.005)
     # umlaufende Abkantung oben
     for (a, b_, c, d_) in ((-w / 2 - 0.02, -d / 2 - 0.02, w / 2 + 0.02, -d / 2 + 0.05), (-w / 2 - 0.02, d / 2 - 0.05, w / 2 + 0.02, d / 2 + 0.02), (-w / 2 - 0.02, -d / 2, -w / 2 + 0.05, d / 2), (w / 2 - 0.05, -d / 2, w / 2 + 0.02, d / 2)):
-        box("rim", a, b_, h - 0.01, c, d_, h + 0.01, "anthracite", 0.004)
+        box("rim", a, b_, h - 0.01, c, d_, h + 0.01, steel, 0.004)
     box("soil", -w / 2 + t, -d / 2 + t, 0, w / 2 - t, d / 2 - t, h - 0.06, "soil")
     # üppige Mischkultur: Reihen aus Mangold, Grünkohl, Salaten und Kräutern, dicht und leicht über den Rand
     r = rng(int(w * 100 + d * 10))
@@ -428,6 +428,203 @@ def fence(w: float, d: float, h: float):
         z += 0.11
 
 
+def corten_bed(w: float, d: float, h: float):
+    raised_bed(w, d, h, "corten")
+
+
+# ------------------------------------------------------------------ Mustergarten: Pod, Pavillon, Feuerstelle, Spiel
+
+
+def container(w: float, d: float, h: float):
+    """Homeoffice-Pod: schwarzer 20-Fuß-Container, Glasfront zum Garten (Plan-Süden), PV auf dem Dach"""
+    box("body", -w / 2, -d / 2, 0.12, w / 2, d / 2, h - 0.1, "container", 0.01)
+    # Eckpfosten und umlaufender Rahmen wie beim Seecontainer
+    for x in (-w / 2, w / 2 - 0.16):
+        for y in (-d / 2, d / 2 - 0.16):
+            box("corner", x - 0.01, y - 0.01, 0.1, x + 0.17, y + 0.17, h, "anthracite", 0.006)
+    for y0, y1 in ((-d / 2 - 0.01, -d / 2 + 0.15), (d / 2 - 0.15, d / 2 + 0.01)):
+        box("rail_b", -w / 2, y0, 0.1, w / 2, y1, 0.26, "anthracite", 0.004)
+        box("rail_t", -w / 2, y0, h - 0.18, w / 2, y1, h, "anthracite", 0.004)
+    box("roof", -w / 2 + 0.05, -d / 2 + 0.05, h - 0.1, w / 2 - 0.05, d / 2 - 0.05, h - 0.03, "container")
+    # Glasfront: drei große Felder mit schmalen Profilen, Schiebetür in der Mitte
+    gx0, gx1 = -w / 2 + 0.6, w / 2 - 0.35
+    box("glass", gx0, d / 2 - 0.02, 0.28, gx1, d / 2 + 0.005, h - 0.2, "window")
+    for i in range(4):
+        x = gx0 + (gx1 - gx0) * i / 3
+        box("mullion", x - 0.03, d / 2 - 0.01, 0.26, x + 0.03, d / 2 + 0.03, h - 0.18, "anthracite")
+    # Innenleben durch das Glas angedeutet: Schreibtisch, Licht
+    box("desk", gx0 + 0.3, -0.2, 0.72, gx0 + 2.0, 0.5, 0.76, "wood_light")
+    # Stufe aus Beton vor der Tür
+    box("step", -0.6, d / 2, 0, 0.6, d / 2 + 0.4, 0.12, "concrete", 0.006)
+    # PV-Module flach aufgeständert
+    e, s_ = Vector((1, 0, 0)), Vector((0, math.cos(math.radians(8)), math.sin(math.radians(8))))
+    nrm = e.cross(s_)
+    # zwei Module am Ostende, der Rest bleibt schwarzes Trapezblech
+    n = 2
+    pw = 1.1
+    for i in range(n):
+        org = P(w / 2 - 0.3 - (n - i) * (pw + 0.04), d / 2 - 0.35, h + 0.02)
+        plate("pv", org, e, s_, nrm, pw, d - 0.7, 0.035, "solar")
+        plate("pvframe", org - e * 0.015 - s_ * 0.015 - nrm * 0.004, e, s_, nrm, pw + 0.03, d - 0.67, 0.03, "graphite")
+
+
+def pergola(w: float, d: float, h: float):
+    """Pavillon: anthrazit Aluminium-Lamellendach auf vier Pfosten, darunter Loungesofa auf Betonplatten"""
+    box("floor", -w / 2 + 0.05, -d / 2 + 0.05, 0, w / 2 - 0.05, d / 2 - 0.05, 0.04, "concrete", 0.004)
+    t = 0.14
+    for x in (-w / 2, w / 2 - t):
+        for y in (-d / 2, d / 2 - t):
+            box("post", x, y, 0, x + t, y + t, h, "anthracite", 0.006)
+    # Rahmen
+    for y0, y1 in ((-d / 2, -d / 2 + t), (d / 2 - t, d / 2)):
+        box("beam", -w / 2, y0, h - 0.24, w / 2, y1, h, "anthracite", 0.006)
+    for x0, x1 in ((-w / 2, -w / 2 + t), (w / 2 - t, w / 2)):
+        box("beam", x0, -d / 2, h - 0.24, x1, d / 2, h, "anthracite", 0.006)
+    # Lamellen quer, leicht schräg gestellt (dunkles Dach, feine Linien von oben)
+    y = -d / 2 + t + 0.02
+    while y < d / 2 - t - 0.1:
+        box("louvre", -w / 2 + t, y, h - 0.13, w / 2 - t, y + 0.16, h - 0.1, "mat_black", 0.004)
+        y += 0.17
+    sofa(w - 0.8, d - 0.9, 0.75, ox=0.0, oy=0.1)
+    # Teppich
+    box("rug", -w / 4, -d / 6, 0.04, w / 4, d / 4, 0.05, "fabric_light")
+
+
+def sofa(w: float, d: float, h: float, ox: float = 0.0, oy: float = 0.0):
+    """Loungesofa in L-Form: anthrazit Gestell, hellgraue Polster, Couchtisch Beton"""
+    seat = 0.85
+    x0, y0, x1, y1 = ox - w / 2, oy - d / 2, ox + w / 2, oy + d / 2
+
+    def module(a, b_, c, d_, back):
+        box("base", a, b_, 0.05, c, d_, 0.3, "anthracite", 0.01)
+        box("seat", a + 0.03, b_ + 0.03, 0.3, c - 0.03, d_ - 0.03, 0.44, "fabric_light", 0.04)
+        if back == "n":
+            box("back", a, b_, 0.3, c, b_ + 0.2, h, "fabric_light", 0.05)
+        elif back == "w":
+            box("back", a, b_, 0.3, a + 0.2, d_, h, "fabric_light", 0.05)
+
+    # langer Schenkel an der Rückseite (Plan-Norden), kurzer Schenkel links
+    module(x0, y0, x1, y0 + seat, "n")
+    module(x0, y0 + seat, x0 + seat, y1, "w")
+    # Kissen
+    r = rng(int(w * 10))
+    for i in range(3):
+        x = x0 + 0.5 + i * (w - 1.0) / 2
+        box("pillow", x - 0.22, y0 + 0.18, 0.44, x + 0.22, y0 + 0.32, 0.8, "fabric_dark" if i == 1 else "fabric_light", 0.05)
+    _ = r
+    # Couchtisch
+    tx = (x0 + seat + x1) / 2
+    ty = (y0 + seat + y1) / 2
+    box("ctable", tx - 0.45, ty - 0.35, 0, tx + 0.45, ty + 0.35, 0.36, "concrete_dark", 0.01)
+
+
+def lounge(w: float, d: float, h: float):
+    sofa(w, d, h)
+
+
+def lounge_chair(cx: float, cy: float, ang: float):
+    """Lounge-Sessel (Seil/Alu anthrazit, helles Polster), Rückenlehne von der Mitte weg"""
+    from mathutils import Matrix
+
+    parts = []
+    parts.append(box("frame", -0.36, -0.34, 0.0, 0.36, 0.38, 0.32, "anthracite", 0.02))
+    parts.append(box("cushion", -0.32, -0.3, 0.32, 0.32, 0.34, 0.42, "fabric_light", 0.04))
+    parts.append(box("back", -0.36, 0.26, 0.3, 0.36, 0.4, 0.72, "anthracite", 0.03))
+    parts.append(box("backcushion", -0.3, 0.16, 0.42, 0.3, 0.27, 0.68, "fabric_light", 0.04))
+    rot = Matrix.Rotation(ang, 4, "Z")
+    for ob in parts:
+        ob.data.transform(rot)
+        ob.location = P(cx, cy, 0)
+
+
+def firepit(w: float, d: float, h: float):
+    """Runde Feuerstelle: Natursteinpflaster im Kreis, Feuerschale aus Corten mit Glut, Sessel ringsum"""
+    R = w / 2
+    # Pflasterring aus Segmenten (Radialfugen), Fuge darunter
+    cylinder("joint", 0, 0, -0.02, 0.0, R, "concrete_dark", 96)
+    rings = [(0.75, 1.3, 10), (1.3, 1.85, 16), (1.85, R - 0.02, 22)]
+    r = rng(17)
+    for r0, r1, n in rings:
+        for i in range(n):
+            a0 = i / n * math.tau + 0.012
+            a1 = (i + 1) / n * math.tau - 0.012
+            k = 6
+            pts = [P((r0 + 0.012) * math.cos(a0 + (a1 - a0) * j / k), (r0 + 0.012) * math.sin(a0 + (a1 - a0) * j / k), 0.0) for j in range(k + 1)]
+            pts += [P((r1 - 0.012) * math.cos(a1 - (a1 - a0) * j / k), (r1 - 0.012) * math.sin(a1 - (a1 - a0) * j / k), 0.0) for j in range(k + 1)]
+            top = [Vector((p.x, p.y, 0.025 + r.uniform(-0.002, 0.002))) for p in pts]
+            ob = poly_mesh("paver", top, [list(range(len(top)))], "stone")
+            sol = ob.modifiers.new("t", "SOLIDIFY")
+            sol.thickness = 0.04
+            bev = ob.modifiers.new("b", "BEVEL")
+            bev.width = 0.006
+            bev.limit_method = "ANGLE"
+    cylinder("inner", 0, 0, 0, 0.02, 0.74, "gravel_dark", 64)
+    # Feuerschale
+    cylinder("bowl", 0, 0, 0, 0.36, 0.48, "corten", 64, 0.01)
+    cylinder("bowl_in", 0, 0, 0.3, 0.361, 0.42, "graphite", 64)
+    cylinder("embers", 0, 0, 0.30, 0.33, 0.36, "ember", 48)
+    for i in range(4):
+        a = i / 4 * math.pi + 0.3
+        L = 0.55
+        ob = cylinder("log", 0, 0, -L / 2, L / 2, 0.045, "log", 16)
+        ob.rotation_euler = (math.pi / 2, 0, a)
+        ob.location = P(0, 0, 0.36 + (i % 2) * 0.07)
+    # Sessel im Kreis (Öffnung zum Rasen nach Plan-Norden)
+    n = 5
+    for i in range(n):
+        a = math.pi / 2 + (i - (n - 1) / 2) * (math.tau / (n + 1))
+        cx, cy = math.cos(a) * (R - 0.65), math.sin(a) * (R - 0.65)
+        # Rückenlehne nach außen: lokale +y zeigt von der Mitte weg
+        lounge_chair(cx, cy, -(a - math.pi / 2))
+
+
+def trampoline(w: float, d: float, h: float):
+    """Bodentrampolin: ebenerdig, schwarzes Sprungtuch, grauer Randschutz"""
+    R = w / 2
+    cylinder("pad", 0, 0, 0, 0.05, R, "fabric_dark", 96, 0.02)
+    cylinder("ring", 0, 0, 0.05, 0.055, R - 0.18, "graphite", 96)
+    cylinder("mat", 0, 0, 0.03, 0.058, R - 0.22, "mat_black", 96)
+
+
+def gate(w: float, d: float, h: float):
+    """Gartentor zweiflüglig, anthrazit Flachstahl senkrecht, Pfosten 12 × 12"""
+    for x in (-w / 2, w / 2 - 0.12):
+        box("post", x, -0.06, 0, x + 0.12, 0.06, h + 0.1, "anthracite", 0.006)
+        box("cap", x - 0.01, -0.07, h + 0.1, x + 0.13, 0.07, h + 0.13, "graphite")
+    inner = w - 0.24
+    for leaf in (0, 1):
+        lx0 = -w / 2 + 0.13 + leaf * inner / 2
+        lx1 = lx0 + inner / 2 - 0.02
+        box("frame_b", lx0, -0.025, 0.08, lx1, 0.025, 0.14, "anthracite")
+        box("frame_t", lx0, -0.025, h - 0.06, lx1, 0.025, h, "anthracite")
+        x = lx0
+        while x < lx1 - 0.02:
+            box("bar", x, -0.02, 0.08, x + 0.02, 0.02, h, "anthracite")
+            x += 0.07
+    box("handle", -0.08, 0.02, 1.0, 0.08, 0.05, 1.03, "graphite")
+
+
+def stone_wall(w: float, d: float, h: float):
+    """Trockenmauer 1 m: Schichten aus unregelmäßigen Bruchsteinen, Deckplatten"""
+    r = rng(23)
+    z = 0.0
+    while z < h - 0.08:
+        lh = r.uniform(0.09, 0.15)
+        x = -w / 2 - r.uniform(0, 0.15)
+        while x < w / 2:
+            L = r.uniform(0.18, 0.38)
+            a, c = max(-w / 2, x + 0.008), min(w / 2, x + L - 0.008)
+            if c - a > 0.04:
+                box("stone", a, -d / 2 + r.uniform(0, 0.02), z + 0.005, c, d / 2 - r.uniform(0, 0.02), z + lh - r.uniform(0.004, 0.012), "stone", 0.018)
+            x += L
+        z += lh
+    x = -w / 2
+    while x < w / 2:
+        L = r.uniform(0.3, 0.5)
+        box("cap", x + 0.006, -d / 2 - 0.02, z, min(w / 2, x + L) - 0.006, d / 2 + 0.02, z + 0.06, "stone", 0.012)
+        x += L
+
+
 GENERATORS = {
     "house": house,
     "shed": shed,
@@ -441,4 +638,12 @@ GENERATORS = {
     "pool": pool,
     "play": play,
     "fence": fence,
+    "cortenBed": corten_bed,
+    "container": container,
+    "pergola": pergola,
+    "lounge": lounge,
+    "firepit": firepit,
+    "trampoline": trampoline,
+    "gate": gate,
+    "stoneWall": stone_wall,
 }

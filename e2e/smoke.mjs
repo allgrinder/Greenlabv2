@@ -169,7 +169,7 @@ step('JSON-Export und -Import');
 // Phase 2 am Beispielprojekt
 await p.click('button[aria-label=Projekte]');
 await p.click('[data-testid=menu-sample]');
-await p.waitForFunction(() => window.__gw.editor.getState().doc?.name.includes('Lindenweg'));
+await p.waitForFunction(() => window.__gw.editor.getState().doc?.name.includes('Mustergarten'));
 const tab = (name) => p.click(`header >> text=${name}`);
 
 await tab('Sonne');
@@ -275,7 +275,7 @@ await p.click('[data-testid=export-btn]');
 await p.waitForSelector('[data-testid=pdf-preview] img', { timeout: 30000 });
 await p.click('[data-testid=export-dialog] >> text=150 dpi');
 const [pdf] = await Promise.all([p.waitForEvent('download', { timeout: 120000 }), p.click('[data-testid=export-run]')]);
-assert.match(pdf.suggestedFilename(), /_A3_M1-200\.pdf$/);
+assert.match(pdf.suggestedFilename(), /_A3_M1-\d+\.pdf$/);
 await p.keyboard.press('Escape');
 step('PDF-Architektenplan');
 

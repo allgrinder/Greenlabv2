@@ -1378,6 +1378,112 @@
      ]
     }
    ]
+  },
+  "container": {
+   "w": 6.06,
+   "d": 2.44,
+   "h": 2.6,
+   "ppm": 220.0,
+   "top": [
+    {
+     "file": "container_top_0.webp",
+     "rot": 0,
+     "px": [
+      1373,
+      662
+     ],
+     "anchor": [
+      0.5,
+      0.4352
+     ]
+    },
+    {
+     "file": "container_top_90.webp",
+     "rot": 90,
+     "px": [
+      662,
+      1373
+     ],
+     "anchor": [
+      0.5648,
+      0.5
+     ]
+    },
+    {
+     "file": "container_top_180.webp",
+     "rot": 180,
+     "px": [
+      1373,
+      662
+     ],
+     "anchor": [
+      0.5,
+      0.5648
+     ]
+    },
+    {
+     "file": "container_top_270.webp",
+     "rot": 270,
+     "px": [
+      662,
+      1373
+     ],
+     "anchor": [
+      0.4352,
+      0.5
+     ]
+    }
+   ],
+   "oblique": [
+    {
+     "file": "container_oblique_0.webp",
+     "rot": 0,
+     "px": [
+      1373,
+      876
+     ],
+     "anchor": [
+      0.5,
+      0.6472
+     ]
+    },
+    {
+     "file": "container_oblique_90.webp",
+     "rot": 90,
+     "px": [
+      662,
+      1445
+     ],
+     "anchor": [
+      0.5648,
+      0.6179
+     ]
+    },
+    {
+     "file": "container_oblique_180.webp",
+     "rot": 180,
+     "px": [
+      1373,
+      793
+     ],
+     "anchor": [
+      0.5,
+      0.7147
+     ]
+    },
+    {
+     "file": "container_oblique_270.webp",
+     "rot": 270,
+     "px": [
+      662,
+      1445
+     ],
+     "anchor": [
+      0.4352,
+      0.6179
+     ]
+    }
+   ]
   }
  }
 }

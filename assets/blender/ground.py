@@ -405,7 +405,7 @@ def stepping_stone(rnd: random.Random, i: int):
     bev.width = 0.006
     bev.segments = 2
     bev.limit_method = "ANGLE"
-    tone = ["#a9a69f", "#a19e96", "#aeaba4", "#9c9991"][i % 4]
+    tone = ["#8e8b84", "#87847d", "#94918a", "#827f78"][i % 4]
     m = pmat(f"stone{i}", lin(tone), 0.82, 0.12, 0.35, 14, 0.3)
     ob.data.materials.append(m)
     return ob

@@ -154,6 +154,11 @@ function steppingNode(line: Vec2[], width: number, seed: number): Container {
       const rot = Math.atan2(dir.y, dir.x) + Math.PI / 2 + (r() - 0.5) * 0.05;
       const st = stones.length ? stones[Math.floor(r() * stones.length)] : null;
       if (st) {
+        // Kontaktschatten: Platte liegt leicht vertieft im Rasen
+        const cs = Math.cos(rot);
+        const sn = Math.sin(rot);
+        const corner = (u: number, v: number, ox: number, oy: number) => [x + ox + u * cs - v * sn, y + oy + u * sn + v * cs];
+        g.poly([[-1, -1], [1, -1], [1, 1], [-1, 1]].flatMap(([u, v]) => corner((u * across) / 2, (v * along) / 2, 0.03, 0.04)), true).fill({ color: 0x1d2610, alpha: 0.35 });
         const s = new Sprite(st.texture);
         s.anchor.set(0.5);
         s.position.set(x, y);

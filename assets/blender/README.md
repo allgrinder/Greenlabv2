@@ -1,7 +1,7 @@
 # Blender-Assets
 
-Die Objekte der Bibliothek (Gebäude, Möbel, Ausstattung) werden mit Blender gerendert, nicht gezeichnet.
-Stil: modern, grau und anthrazit.
+Objekte (Gebäude, Möbel, Ausstattung) und alle Pflanzen werden mit Blender gerendert.
+Stil: modern, grau und anthrazit; warmes Sonnenlicht, Umgebungsverdeckung, feine Konturen an harten Objekten.
 
 ## Rendern
 
@@ -15,6 +15,23 @@ python3.13 -m venv .venv-blender
 
 Ergebnis: `public/assets/items/<symbol>_<top|oblique>_<0|90|180|270>.webp` und `manifest.json`.
 Die App lädt das Manifest beim Start; fehlt es, bleibt die gemalte Darstellung.
+
+## Pflanzen
+
+```bash
+npm run assets:looks                                              # Katalog + Looks je Jahreszeit → assets/blender/plants.json
+.venv-blender/bin/python assets/blender/render_plants.py          # alle Arten (mehrere Stunden, setzt bei Abbruch fort)
+.venv-blender/bin/python assets/blender/render_plants.py --only tilia-cordata,buxus --force
+.venv-blender/bin/python assets/blender/render_plants.py --quick --out /tmp/probe  # Vorschau aller Arten in Minuten
+```
+
+- `plants.py`: Bäume (Stamm → Gerüstäste → Seitenäste → Zweige, Laub in fransigen Wolken aus Teilwolken),
+  Sträucher/Hecke, Spalierschirme, Stauden (Polster + Ähren, Margeriten, Schalen, Dolden, Kugeln),
+  Gräser (Halmbögen + Blütenstände), Gemüse. Parameter je Art in `TREES`, `SHRUBS`, `PERENNIALS`, `GRASSES`.
+- Looks (Laubfarbe, kahl, Blüte, Frucht) kommen aus `src/render/assets/plantLooks.ts` – dieselbe Funktion nutzt die App,
+  um das passende Bild zu finden. Gleiche Looks mehrerer Jahreszeiten werden nur einmal gerendert.
+- Ergebnis: `public/assets/plants/<art>_<look>_<variante>_<top|oblique>.webp` + `manifest.json`.
+  Die App lädt das Manifest beim Start und die Bilder erst, wenn eine Art in einer Jahreszeit sichtbar wird.
 
 ## Aufbau
 

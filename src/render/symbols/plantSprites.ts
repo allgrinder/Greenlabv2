@@ -10,6 +10,7 @@ import { pointInRegion, bbox } from '../../core/geometry/polygon';
 import type { FlatRegion } from '../../core/geometry/shape';
 import type { EspalierObject, PlantSpecies, ScatterPlant, Vec2 } from '../../core/model/types';
 import { rng } from '../util/rng';
+import { plantAssetSprite } from '../assets/plantAssets';
 import { foliageTexture, paintBareTree, paintCrown, paintEspalier, paintPerennial, sizeBucket, textureSize } from './foliage';
 
 const VARIANTS = 4;
@@ -50,6 +51,8 @@ export function crownSprite(sp: PlantSpecies, at: Vec2, d: number, seed: number,
 
 /** Staude/Gras/Gemüse als Polster */
 export function perennialSprite(sp: PlantSpecies, at: Vec2, d: number, seed: number, season: Season): Sprite {
+  const rendered = plantAssetSprite(sp, season, seed, at, { view: 'top', width: d, rotation: ((seed % 360) * Math.PI) / 180 });
+  if (rendered) return rendered;
   const grass = sp.kind === 'grass';
   const bloom = inBloom(sp, season) ? (sp.colors.bloom ?? sp.colors.summer) : grass && (season === 'summer' || season === 'autumn') ? '#E8DDB8' : null;
   const leaf = grass ? seasonColor(sp, season) : season === 'winter' ? '#7d7464' : season === 'autumn' ? (sp.colors.autumn ?? '#7d8a55') : '#6d8a4b';
@@ -74,7 +77,8 @@ export function hedgeNode(line: Vec2[], width: number, sp: PlantSpecies, season:
     for (let t = 0; t < L; t += step) {
       const p = { x: a.x + ((b.x - a.x) * t) / L + (rnd() - 0.5) * width * 0.1, y: a.y + ((b.y - a.y) * t) / L + (rnd() - 0.5) * width * 0.1 };
       const d = width * (0.92 + rnd() * 0.22);
-      node.addChild(crownSprite(sp, p, d, Math.floor(rnd() * 1e6), { color, bare: false, bloom: null, fruit: null }, true));
+      const sd = Math.floor(rnd() * 1e6);
+      node.addChild(plantAssetSprite(sp, season, sd, p, { view: 'top', width: d, rotation: (sd % 360) * (Math.PI / 180) }) ?? crownSprite(sp, p, d, sd, { color, bare: false, bloom: null, fruit: null }, true));
     }
   }
   return node;
@@ -92,6 +96,11 @@ export function espalierNode(o: EspalierObject, season: Season): Container {
   const d = Math.round(o.depth * 20) / 20;
   const ppm = Math.min(160, 1100 / Math.max(w, d));
   for (const [i, t] of espalierTrees(o).entries()) {
+    const rendered = plantAssetSprite(sp, season, i, t.p, { view: 'top', width: o.spacing, depth: o.depth, rotation: Math.atan2(t.dir.y, t.dir.x) });
+    if (rendered) {
+      node.addChild(rendered);
+      continue;
+    }
     const v = i % VARIANTS;
     const tex = foliageTexture(`esp|${o.speciesId}|${season}|${w}|${d}|${v}|${bare}`, () => paintEspalier(w * 0.98, d, ppm, color, accent, bare, 7000 + v * 31337));
     const s = new Sprite(tex);

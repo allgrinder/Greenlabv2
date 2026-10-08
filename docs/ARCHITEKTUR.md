@@ -287,3 +287,9 @@ In Phase 1 waren die Linsen-Tabs sichtbar, aber deaktiviert. Seit Phase 2 sind s
 - **Pipeline:** `assets/blender/` (bpy 5.2 ohne Oberfläche): Generatoren je Katalogsymbol, Cycles, orthografische Kamera für Draufsicht und 35°-Schrägansicht, vier Drehungen; WebP + `manifest.json` nach `public/assets/items/`. Licht aus derselben Richtung wie die App-Schatten, kein Boden.
 - **App:** `render/assets/itemAssets.ts` lädt Manifest und Bilder im Hintergrund und baut danach neu auf. `itemSprite` (Draufsicht) und die Schrägansicht (`obliqueView`) bevorzugen die Bilder; der Ankerpunkt im Manifest ist der Bodenursprung, in der Schrägansicht wird y durch cos(Kippwinkel) geteilt, weil die Welt gestaucht ist. Ohne Manifest bleibt die gemalte Darstellung aus `itemPaint.ts`.
 
+## 17. Pflanzen aus Blender, natürlicherer Look
+
+- **Look:** warme Sonne, Himmel als Aufhellung, unsichtbarer Licht-Boden (Rückstrahlung, dunkle Fußpunkte), Umgebungsverdeckung in allen Materialien, warmes Anthrazit, Holz mit Brettfugen, Freestyle-Konturen nur an harten Objekten (Sammlung `outline`).
+- **Pflanzen:** `assets/blender/plants.py` + `render_plants.py`; Looks je Jahreszeit aus `render/assets/plantLooks.ts` (Export `npm run assets:looks`). Manifest `public/assets/plants/manifest.json` mit Bezugsmaß (Durchmesser bzw. Spalierschirm), Höhe, ppm, Ankern.
+- **App:** `render/assets/plantAssets.ts` lädt Bilder bei Bedarf (gebündelter Neuaufbau nach dem Laden), `exportPng` lädt vorher alle Bilder der Export-Jahreszeit. Genutzt in Einzelpflanzen, Pflanzungen, Pflanzgruppen, Hecken, Spalieren und in der Schrägansicht (Stamm + Krone als ein Bild); ohne Bild bleibt `foliage.ts`.
+

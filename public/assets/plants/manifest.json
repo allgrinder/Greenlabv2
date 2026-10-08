@@ -4598,6 +4598,235 @@
      ]
     }
    }
+  },
+  "perovskia": {
+   "kind": "perennial",
+   "w": 0.8,
+   "d": 0.8,
+   "h": 1,
+   "ppm": 170.0,
+   "looks": {
+    "#6d8a4b|0||": {
+     "seasons": [
+      "spring",
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "perovskia_0_0_top.webp",
+       "px": [
+        111,
+        113
+       ],
+       "anchor": [
+        0.5266,
+        0.4538
+       ]
+      },
+      {
+       "file": "perovskia_0_1_top.webp",
+       "px": [
+        128,
+        125
+       ],
+       "anchor": [
+        0.5051,
+        0.5251
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#80855a|0|#8E9AC8|": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "perovskia_1_0_top.webp",
+       "px": [
+        107,
+        125
+       ],
+       "anchor": [
+        0.5644,
+        0.5098
+       ]
+      },
+      {
+       "file": "perovskia_1_1_top.webp",
+       "px": [
+        121,
+        123
+       ],
+       "anchor": [
+        0.5104,
+        0.5327
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#7d7464|0||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "perovskia_2_0_top.webp",
+       "px": [
+        115,
+        119
+       ],
+       "anchor": [
+        0.4368,
+        0.5527
+       ]
+      },
+      {
+       "file": "perovskia_2_1_top.webp",
+       "px": [
+        119,
+        121
+       ],
+       "anchor": [
+        0.4973,
+        0.482
+       ]
+      }
+     ],
+     "oblique": []
+    }
+   }
+  },
+  "hakonechloa": {
+   "kind": "grass",
+   "w": 0.6,
+   "d": 0.6,
+   "h": 0.4,
+   "ppm": 170.0,
+   "looks": {
+    "#93B356|0||": {
+     "seasons": [
+      "spring"
+     ],
+     "top": [
+      {
+       "file": "hakonechloa_0_0_top.webp",
+       "px": [
+        128,
+        125
+       ],
+       "anchor": [
+        0.5113,
+        0.4937
+       ]
+      },
+      {
+       "file": "hakonechloa_0_1_top.webp",
+       "px": [
+        126,
+        127
+       ],
+       "anchor": [
+        0.5049,
+        0.5077
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#7FA046|0|#E8DDB8|": {
+     "seasons": [
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "hakonechloa_1_0_top.webp",
+       "px": [
+        130,
+        141
+       ],
+       "anchor": [
+        0.5064,
+        0.4885
+       ]
+      },
+      {
+       "file": "hakonechloa_1_1_top.webp",
+       "px": [
+        134,
+        131
+       ],
+       "anchor": [
+        0.4941,
+        0.5136
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#C08A3E|0|#E8DDB8|": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "hakonechloa_2_0_top.webp",
+       "px": [
+        135,
+        135
+       ],
+       "anchor": [
+        0.5089,
+        0.5249
+       ]
+      },
+      {
+       "file": "hakonechloa_2_1_top.webp",
+       "px": [
+        130,
+        128
+       ],
+       "anchor": [
+        0.5118,
+        0.4932
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#B9A27A|0||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "hakonechloa_3_0_top.webp",
+       "px": [
+        130,
+        126
+       ],
+       "anchor": [
+        0.498,
+        0.5121
+       ]
+      },
+      {
+       "file": "hakonechloa_3_1_top.webp",
+       "px": [
+        130,
+        127
+       ],
+       "anchor": [
+        0.4954,
+        0.4952
+       ]
+      }
+     ],
+     "oblique": []
+    }
+   }
   }
  },
  "graded": true

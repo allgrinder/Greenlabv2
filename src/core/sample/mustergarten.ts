@@ -119,14 +119,15 @@ export function createMustergarten(): Project {
   // ---------- Flächen, Wege, Beete (zuerst bauen: der Rasen wird darum herum ausgeschnitten)
   // grün dominiert, Gräser als helle Akzente (wie im Konzept)
   const BORDER: [string, number][] = [
-    ['salvia', 0.2],
-    ['nepeta', 0.18],
-    ['geranium', 0.16],
-    ['echinacea', 0.12],
-    ['pennisetum', 0.12],
-    ['sedum', 0.1],
-    ['lavandula', 0.07],
-    ['stipa', 0.05],
+    ['salvia', 0.17],
+    ['nepeta', 0.14],
+    ['geranium', 0.14],
+    ['perovskia', 0.12],
+    ['hakonechloa', 0.12],
+    ['echinacea', 0.1],
+    ['pennisetum', 0.08],
+    ['sedum', 0.08],
+    ['lavandula', 0.05],
   ];
   // breite, mehrschichtige Rabatten wie im Konzept: Sträucher hinten an der Hecke, Stauden und Gräser davor
   const borders = [

@@ -133,9 +133,10 @@ function steppingNode(line: Vec2[], width: number, seed: number): Container {
   const stones = steppingStones();
   const g = new Graphics();
   c.addChild(g);
-  const STEP = 0.72;
-  const across = Math.max(0.55, width);
-  const along = 0.42;
+  // Betonplatten 85 × 40 cm, Fuge im Rasen ca. 18 cm
+  const STEP = 0.58;
+  const across = Math.max(0.55, width * 0.95);
+  const along = 0.4;
   let carry = STEP / 2;
   let n = 0;
   for (let i = 1; i < line.length; i++) {
@@ -146,19 +147,19 @@ function steppingNode(line: Vec2[], width: number, seed: number): Container {
     const dir = { x: (b.x - a.x) / len, y: (b.y - a.y) / len };
     let t = carry;
     for (; t <= len; t += STEP, n++) {
-      const side = (n % 2 ? 1 : -1) * Math.max(0, width - 0.6) * 0.25 + (r() - 0.5) * 0.04;
+      const side = (r() - 0.5) * 0.02;
       const x = a.x + dir.x * t - dir.y * side;
       const y = a.y + dir.y * t + dir.x * side;
       // Längsseite der Platte quer zum Weg
-      const rot = Math.atan2(dir.y, dir.x) + Math.PI / 2 + (r() - 0.5) * 0.25;
+      const rot = Math.atan2(dir.y, dir.x) + Math.PI / 2 + (r() - 0.5) * 0.05;
       const st = stones.length ? stones[Math.floor(r() * stones.length)] : null;
       if (st) {
         const s = new Sprite(st.texture);
         s.anchor.set(0.5);
         s.position.set(x, y);
         s.rotation = rot;
-        // Bild ist 60 × 40 cm (Längsseite = x): auf Wegbreite × 42 cm strecken
-        s.scale.set((st.w * (across / 0.6)) / st.texture.width, (st.h * (along / 0.4)) / st.texture.height);
+        // Bild ist 85 × 40 cm (Längsseite = x, mit schmalem Rand): auf Wegbreite × 40 cm strecken
+        s.scale.set((st.w * (across / 0.85)) / st.texture.width, (st.h * (along / 0.4)) / st.texture.height);
         c.addChild(s);
       } else {
         // gemalter Ersatz: Kontaktschatten und gerundete Platte
@@ -235,7 +236,9 @@ export function buildObjectView(o: PlanObject, ctx: ViewContext): ObjectView {
     case 'planting': {
       const fp = footprint(o);
       if (o.mulchMaterialId) fillRegions(g, fp, materialPattern(getMaterial(o.mulchMaterialId)));
-      strokeRegions(g, fp, { color: 0xa39886, width: 0.1 });
+      // Unterwuchs: Lücken zwischen den Stauden lesen sich als beschattetes Laub, nicht als nackter Mulch
+      // (Basalt bleibt als gestalterische Abdeckung sichtbar)
+      fillRegions(g, fp, { color: 0x27331a, alpha: o.mulchMaterialId === 'basalt' ? 0.15 : 0.62 });
       const mix = o.mix.map((x) => {
         const sp = getSpecies(x.speciesId);
         return { sp, share: x.share, color: inBloom(sp, ctx.season) && sp.colors.bloom ? sp.colors.bloom : seasonColor(sp, ctx.season) };

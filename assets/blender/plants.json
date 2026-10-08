@@ -1471,6 +1471,126 @@
   ]
  },
  {
+  "id": "perovskia",
+  "name": "Blauraute",
+  "kind": "perennial",
+  "deciduous": true,
+  "marcescent": false,
+  "diameterMature": 0.8,
+  "heightMature": 1,
+  "colors": {
+   "summer": "#8E9AB8",
+   "spring": "#98A592",
+   "autumn": "#A4A6A0",
+   "winter": "#B4AFA2",
+   "bloom": "#8E9AC8"
+  },
+  "looks": [
+   {
+    "key": "#6d8a4b|0||",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring",
+     "summer"
+    ]
+   },
+   {
+    "key": "#80855a|0|#8E9AC8|",
+    "look": {
+     "color": "#80855a",
+     "bare": false,
+     "bloom": "#8E9AC8",
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7d7464|0||",
+    "look": {
+     "color": "#7d7464",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "hakonechloa",
+  "name": "Japanisches Berggras",
+  "kind": "grass",
+  "deciduous": true,
+  "marcescent": false,
+  "diameterMature": 0.6,
+  "heightMature": 0.4,
+  "colors": {
+   "summer": "#7FA046",
+   "spring": "#93B356",
+   "autumn": "#C08A3E",
+   "winter": "#B9A27A"
+  },
+  "looks": [
+   {
+    "key": "#93B356|0||",
+    "look": {
+     "color": "#93B356",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#7FA046|0|#E8DDB8|",
+    "look": {
+     "color": "#7FA046",
+     "bare": false,
+     "bloom": "#E8DDB8",
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#C08A3E|0|#E8DDB8|",
+    "look": {
+     "color": "#C08A3E",
+     "bare": false,
+     "bloom": "#E8DDB8",
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#B9A27A|0||",
+    "look": {
+     "color": "#B9A27A",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
   "id": "pennisetum",
   "name": "Lampenputzergras",
   "kind": "grass",

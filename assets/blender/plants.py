@@ -368,11 +368,13 @@ PERENNIALS = {
     "nepeta": dict(leaf=0.025, form="oval", flower="spike", fsize=0.009, n=60, tint=1.2, leaf_hex="#8c9a82"),
     "achillea": dict(leaf=0.04, form="needle", flower="umbel", fsize=0.05, n=10, tint=1.05),
     "anemone": dict(leaf=0.07, form="big", flower="saucer", fsize=0.035, n=16, tint=1.0),
+    "perovskia": dict(leaf=0.03, form="needle", flower="spike", fsize=0.01, n=55, tint=1.25, leaf_hex="#9aa69a"),
 }
 GRASSES = {
     "stipa": dict(blades=700, width=0.006, arch=0.55, plume="feather"),
     "pennisetum": dict(blades=600, width=0.009, arch=0.75, plume="brush"),
     "calamagrostis": dict(blades=420, width=0.01, arch=0.15, plume="upright"),
+    "hakonechloa": dict(blades=520, width=0.012, arch=0.95, plume="none"),
 }
 
 

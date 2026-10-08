@@ -21,6 +21,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from PIL import Image  # noqa: E402
 
 import lib  # noqa: E402
+from grade import grade  # noqa: E402
 import plants  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -43,7 +44,7 @@ def main():
     os.makedirs(args.out, exist_ok=True)
     species = json.load(open(os.path.join(os.path.dirname(__file__), "plants.json")))
     man_path = os.path.join(args.out, "manifest.json")
-    manifest = json.load(open(man_path)) if os.path.exists(man_path) else {"version": 1, "plants": {}}
+    manifest = json.load(open(man_path)) if os.path.exists(man_path) else {"version": 1, "plants": {}, "graded": True}
     only = [s for s in args.only.split(",") if s]
     base_variants = 1 if args.quick or args.preview else VARIANTS
     samples = 12 if args.quick else 32 if args.preview else 40
@@ -74,7 +75,7 @@ def main():
                 for view, tilt in views:
                     png = os.path.join(args.out, names[view][:-5] + ".png")
                     r = lib.render_view(png, ppm, tilt, margin=0.03)
-                    Image.open(png).save(os.path.join(args.out, names[view]), "WEBP", quality=86, method=6)
+                    grade(Image.open(png)).save(os.path.join(args.out, names[view]), "WEBP", quality=86, method=6)
                     os.remove(png)
                     look_entry[view].append({"file": names[view], "px": [r.width, r.height], "anchor": [round(r.anchor[0], 4), round(r.anchor[1], 4)]})
             entry["looks"][lk["key"]] = look_entry

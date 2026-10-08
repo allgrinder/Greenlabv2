@@ -19,7 +19,7 @@ import { waterGradient } from '../symbols/gradients';
 import { drawPlanting } from '../symbols/plants';
 import { crownSprite, espalierNode, hedgeNode, perennialSprite, plantingNode, scatterNode } from '../symbols/plantSprites';
 import { drawDrip, drawFixture, drawLampDay, drawPipe, drawSprinkler } from '../symbols/tech';
-import { lawnMacroPattern, materialPattern } from '../textures/materialTextures';
+import { lawnMacroPattern, materialPattern, meadowMacroPattern } from '../textures/materialTextures';
 import { plantAssetSprite } from '../assets/plantAssets';
 import { buildSolid, type Tilt } from './obliqueView';
 import { hex, rng, seedFrom } from '../util/rng';
@@ -133,7 +133,9 @@ function steppingNode(line: Vec2[], width: number, seed: number): Container {
   const stones = steppingStones();
   const g = new Graphics();
   c.addChild(g);
-  const STEP = 0.65;
+  const STEP = 0.72;
+  const across = Math.max(0.55, width);
+  const along = 0.42;
   let carry = STEP / 2;
   let n = 0;
   for (let i = 1; i < line.length; i++) {
@@ -155,14 +157,15 @@ function steppingNode(line: Vec2[], width: number, seed: number): Container {
         s.anchor.set(0.5);
         s.position.set(x, y);
         s.rotation = rot;
-        s.scale.set(st.w / st.texture.width, st.h / st.texture.height);
+        // Bild ist 60 × 40 cm (Längsseite = x): auf Wegbreite × 42 cm strecken
+        s.scale.set((st.w * (across / 0.6)) / st.texture.width, (st.h * (along / 0.4)) / st.texture.height);
         c.addChild(s);
       } else {
         // gemalter Ersatz: Kontaktschatten und gerundete Platte
         const cos = Math.cos(rot);
         const sin = Math.sin(rot);
         const pts = (ox: number, oy: number) =>
-          [[-0.3, -0.2], [0.3, -0.2], [0.3, 0.2], [-0.3, 0.2]].flatMap(([u, v]) => [x + ox + u * cos - v * sin, y + oy + u * sin + v * cos]);
+          [[-across / 2, -along / 2], [across / 2, -along / 2], [across / 2, along / 2], [-across / 2, along / 2]].flatMap(([u, v]) => [x + ox + u * cos - v * sin, y + oy + u * sin + v * cos]);
         g.poly(pts(0.02, 0.025), true).fill({ color: 0x2c3318, alpha: 0.25 });
         g.poly(pts(0, 0), true).fill(0xaba59b).stroke({ color: 0x8a847a, width: 0.015 });
       }
@@ -208,6 +211,10 @@ export function buildObjectView(o: PlanObject, ctx: ViewContext): ObjectView {
           for (const wdt of [1.6, 0.9, 0.45]) strokeRegions(edge, fp, { color: 0x3a4418, alpha: 0.07, width: wdt });
           edge.mask = mask;
           node.addChild(mask, edge);
+        }
+        if (m.texture === 'meadow') {
+          fillRegions(g, fp, meadowMacroPattern());
+          if (ctx.season !== 'summer') fillRegions(g, fp, { color: hex(LAWN_COLOR[ctx.season]), alpha: 0.45 });
         }
         const edge = { gravel: 0xa69c8c, paving: 0x9b8f7d, wood: 0x7e5c3d } as Record<string, number>;
         if (edge[m.texture]) strokeRegions(g, fp, { color: edge[m.texture], width: m.texture === 'wood' ? 0.045 : 0.08 });

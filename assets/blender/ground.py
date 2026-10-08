@@ -322,18 +322,22 @@ def sand(T, rnd):
 
 @ground("meadow", (2.0, 2.0), 300)
 def meadow(T, rnd):
-    """Wildblumenwiese: hohe, lockere Gräser, dazwischen Margeriten, Mohn, Kornblumen, Schafgarbe"""
-    base_plane(T, pmat("md_base", lin("#6a7434"), 1.0, 0.3, 0.6, 20))
-    gm = [pmat(f"gr{i}", lin(h), 0.6, 0.1, 0.0, 10, 0.3, 0.8) for i, h in enumerate(["#93a248", "#aab455", "#7f8f3d", "#c2bd6c", "#9cad4e", "#b9b07a"])]
+    """Wildblumenwiese: lockere, hohe Grasbüschel (hell, gelbgrün), dazwischen Margeriten, Mohn, Kornblumen, Schafgarbe"""
+    base_plane(T, pmat("md_base", lin("#5f6a2e"), 1.0, 0.3, 0.6, 20))
+    gm = [pmat(f"gr{i}", lin(h), 0.6, 0.1, 0.0, 10, 0.3, 0.6) for i, h in enumerate(["#a9b552", "#c3c768", "#94a548", "#d6cc7f", "#b6bf5c", "#cdc58e", "#8f9d45"])]
     me = bpy.data.meshes.new("blades")
     bm = bmesh.new()
-    blades_by_mat: list[list] = [[] for _ in gm]
-    for i in range(16000):
-        x, y = rnd.uniform(0, T[0]), rnd.uniform(0, T[1])
-        a = rnd.uniform(0, 6.28)
-        L = rnd.uniform(0.08, 0.22)
-        lean = rnd.uniform(0.2, 0.7)
-        w = 0.0035
+    # Büschel: Halme stehen gruppiert, dazwischen tiefere Lücken -> Struktur auch aus der Ferne
+    tufts = [(rnd.uniform(0, T[0]), rnd.uniform(0, T[1]), rnd.uniform(0.06, 0.16), rnd.uniform(0.7, 1.3)) for _ in range(260)]
+    for i in range(24000):
+        tx, ty, tr, th = tufts[i % len(tufts)] if rnd.random() < 0.8 else (rnd.uniform(0, T[0]), rnd.uniform(0, T[1]), 0.0, 0.7)
+        rr = abs(rnd.gauss(0, tr))
+        aa = rnd.uniform(0, 6.28)
+        x, y = (tx + math.cos(aa) * rr) % T[0], (ty + math.sin(aa) * rr) % T[1]
+        a = aa + rnd.uniform(-0.6, 0.6)
+        L = rnd.uniform(0.1, 0.3) * th
+        lean = rnd.uniform(0.25, 0.75)
+        w = 0.004
         d = Vector((math.cos(a), math.sin(a), 0))
         s = Vector((-math.sin(a), math.cos(a), 0)) * w
         prev = None
@@ -360,16 +364,16 @@ def meadow(T, rnd):
     from plants import flower_obj
 
     # Blüten in lockeren Gruppen (wie ausgesät), nicht gleichmäßig verteilt
-    flowers = [("#f2efe4", 0.017, "daisy", 50), ("#c4342a", 0.02, "saucer", 34), ("#4f6fc4", 0.013, "saucer", 46), ("#e9e2c6", 0.012, "ball", 30), ("#e3bf3e", 0.012, "saucer", 40), ("#9c6aae", 0.009, "ball", 44), ("#c9b98e", 0.008, "ball", 70), ("#7e6a4c", 0.007, "ball", 60)]
+    flowers = [("#f2efe4", 0.02, "daisy", 120), ("#c4342a", 0.022, "saucer", 60), ("#4f6fc4", 0.016, "saucer", 80), ("#ece6cc", 0.014, "ball", 90), ("#e3bf3e", 0.015, "saucer", 70), ("#9c6aae", 0.011, "ball", 80), ("#d8cfa8", 0.01, "ball", 110), ("#7e6a4c", 0.008, "ball", 70)]
     for hex_, size, kind, n in flowers:
         proto = flower_obj(hex_, size, kind)
-        centers = [(rnd.uniform(0, T[0]), rnd.uniform(0, T[1])) for _ in range(max(2, n // 9))]
+        centers = [(rnd.uniform(0, T[0]), rnd.uniform(0, T[1])) for _ in range(max(2, n // 10))]
         for _ in range(n):
             cx, cy = rnd.choice(centers)
-            px, py = (cx + rnd.gauss(0, 0.22)) % T[0], (cy + rnd.gauss(0, 0.22)) % T[1]
+            px, py = (cx + rnd.gauss(0, 0.2)) % T[0], (cy + rnd.gauss(0, 0.2)) % T[1]
             o = bpy.data.objects.new("fl", proto.data)
             o.scale = (rnd.uniform(1.0, 1.5),) * 3
-            o.location = P(px, py, rnd.uniform(0.1, 0.26))
+            o.location = P(px, py, rnd.uniform(0.12, 0.32))
             o.rotation_euler = Euler((rnd.uniform(-0.3, 0.3), rnd.uniform(-0.3, 0.3), rnd.uniform(0, 6)))
             link(o, outline=False)
             tiled(o, T, size)

@@ -71,21 +71,27 @@ def leaves_for(area: float, size: float, coverage: float = 2.2) -> int:
     return int(area * coverage / (0.7 * size * size))
 
 
-def bark_material() -> bpy.types.Material:
-    if "bark" not in _cache:
-        m, b = _principled("bark")
+#: Rindenfarbe (dunkel, hell) je Art, wenn sie auffällt – Hartriegel mit roten Ruten
+BARK = {"cornus": ((0.22, 0.03, 0.02), (0.45, 0.07, 0.04))}
+
+
+def bark_material(kind: str = "") -> bpy.types.Material:
+    key = "bark" + kind
+    if key not in _cache:
+        dark, light = BARK.get(kind, ((0.055, 0.045, 0.035), (0.14, 0.12, 0.1)))
+        m, b = _principled(key)
         nt = m.node_tree
         tex = nt.nodes.new("ShaderNodeTexNoise")
         tex.inputs["Scale"].default_value = 18
         ramp = nt.nodes.new("ShaderNodeValToRGB")
-        ramp.color_ramp.elements[0].color = (0.055, 0.045, 0.035, 1)
-        ramp.color_ramp.elements[1].color = (0.14, 0.12, 0.1, 1)
+        ramp.color_ramp.elements[0].color = (*dark, 1)
+        ramp.color_ramp.elements[1].color = (*light, 1)
         nt.links.new(tex.outputs["Fac"], ramp.inputs["Fac"])
         nt.links.new(ramp.outputs["Color"], b.inputs["Base Color"])
         b.inputs["Roughness"].default_value = 0.9
         _ao(m, 0.7)
-        _cache["bark"] = m
-    return _cache["bark"]
+        _cache[key] = m
+    return _cache[key]
 
 
 def reset_cache():
@@ -232,7 +238,7 @@ def foliage_cluster(name: str, c: Vector, r: float, rnd: random.Random, leaf: bp
 class Branches:
     """Alle Äste einer Pflanze in einem Kurvenobjekt (Poly-Splines mit Radius je Punkt)"""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, bark: str = ""):
         cu = bpy.data.curves.new(name, "CURVE")
         cu.dimensions = "3D"
         cu.bevel_depth = 1.0
@@ -240,7 +246,7 @@ class Branches:
         cu.use_fill_caps = True
         self.cu = cu
         self.ob = link(bpy.data.objects.new(name, cu), outline=False)
-        self.ob.data.materials.append(bark_material())
+        self.ob.data.materials.append(bark_material(bark))
 
     def add(self, pts: list[Vector], radii: list[float]):
         sp = self.cu.splines.new("POLY")
@@ -278,12 +284,16 @@ TREES = {
     "prunus-serrulata": dict(shape="vase", stem=0.28, leaf=0.065, form="oval", dens=160, multi=1),
     "acer-campestre": dict(shape="round", stem=0.25, leaf=0.05, form="round", dens=200, multi=1),
     "acer-globosum": dict(shape="globe", stem=0.45, leaf=0.075, form="round", dens=230, multi=1),
+    "liquidambar": dict(shape="oval", stem=0.3, leaf=0.08, form="round", dens=170, multi=1),
+    "carpinus-betulus": dict(shape="oval", stem=0.22, leaf=0.05, form="oval", dens=220, multi=1),
 }
 SHRUBS = {
     "hydrangea": dict(shape="mound", leaf=0.09, form="big", dens=130, heads=("ball", 0.2, 30)),
     "viburnum": dict(shape="round", leaf=0.07, form="oval", dens=150, heads=None),
     "buxus": dict(shape="globe", leaf=0.022, form="oval", dens=2600, heads=None),
     "syringa": dict(shape="vase", leaf=0.075, form="oval", dens=140, heads=("panicle", 0.16, 40)),
+    "spiraea": dict(shape="mound", leaf=0.035, form="oval", dens=260, heads=("ball", 0.035, 220)),
+    "cornus": dict(shape="vase", leaf=0.07, form="oval", dens=150, heads=None),
     "carpinus-hedge": dict(shape="hedge", leaf=0.045, form="oval", dens=420, heads=None),
 }
 #: Stauden: Blattgröße/-form, Blütenform, Blütengröße, Anzahl, Blattton
@@ -395,7 +405,7 @@ def shrub(sp: dict, look: dict, seed: int):
     shape = p["shape"]
     if shape == "hedge":  # Heckenabschnitt: gerade so hoch wie breit, dicht
         H = min(H, R * 2.2)
-    br = Branches("stems")
+    br = Branches("stems", sp["id"])
     stems = 1 if shape == "globe" else 7
     cr = R * (0.45 if shape in ("globe", "hedge") else 0.38)
     centers: list[Vector] = []

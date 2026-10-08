@@ -2078,6 +2078,851 @@
      "oblique": []
     }
    }
+  },
+  "echinacea": {
+   "kind": "perennial",
+   "w": 0.5,
+   "d": 0.5,
+   "h": 0.9,
+   "ppm": 170.0,
+   "looks": {
+    "#6d8a4b|0||": {
+     "seasons": [
+      "spring"
+     ],
+     "top": [
+      {
+       "file": "echinacea_0_0_top.webp",
+       "px": [
+        73,
+        74
+       ],
+       "anchor": [
+        0.5252,
+        0.4561
+       ]
+      },
+      {
+       "file": "echinacea_0_1_top.webp",
+       "px": [
+        84,
+        82
+       ],
+       "anchor": [
+        0.5048,
+        0.5239
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#6d8a4b|0|#C8678F|": {
+     "seasons": [
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "echinacea_1_0_top.webp",
+       "px": [
+        77,
+        82
+       ],
+       "anchor": [
+        0.5953,
+        0.5307
+       ]
+      },
+      {
+       "file": "echinacea_1_1_top.webp",
+       "px": [
+        88,
+        83
+       ],
+       "anchor": [
+        0.5276,
+        0.5729
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#80855a|0||": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "echinacea_2_0_top.webp",
+       "px": [
+        76,
+        78
+       ],
+       "anchor": [
+        0.44,
+        0.5501
+       ]
+      },
+      {
+       "file": "echinacea_2_1_top.webp",
+       "px": [
+        78,
+        79
+       ],
+       "anchor": [
+        0.4975,
+        0.4829
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#7d7464|0||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "echinacea_3_0_top.webp",
+       "px": [
+        74,
+        80
+       ],
+       "anchor": [
+        0.4686,
+        0.5863
+       ]
+      },
+      {
+       "file": "echinacea_3_1_top.webp",
+       "px": [
+        70,
+        70
+       ],
+       "anchor": [
+        0.5076,
+        0.4507
+       ]
+      }
+     ],
+     "oblique": []
+    }
+   }
+  },
+  "rudbeckia": {
+   "kind": "perennial",
+   "w": 0.5,
+   "d": 0.5,
+   "h": 0.7,
+   "ppm": 170.0,
+   "looks": {
+    "#6d8a4b|0||": {
+     "seasons": [
+      "spring",
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "rudbeckia_0_0_top.webp",
+       "px": [
+        73,
+        74
+       ],
+       "anchor": [
+        0.5252,
+        0.4561
+       ]
+      },
+      {
+       "file": "rudbeckia_0_1_top.webp",
+       "px": [
+        84,
+        82
+       ],
+       "anchor": [
+        0.5048,
+        0.5239
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#80855a|0|#E2B23A|": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "rudbeckia_1_0_top.webp",
+       "px": [
+        82,
+        87
+       ],
+       "anchor": [
+        0.5345,
+        0.4847
+       ]
+      },
+      {
+       "file": "rudbeckia_1_1_top.webp",
+       "px": [
+        87,
+        82
+       ],
+       "anchor": [
+        0.5118,
+        0.559
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#7d7464|0||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "rudbeckia_2_0_top.webp",
+       "px": [
+        76,
+        78
+       ],
+       "anchor": [
+        0.44,
+        0.5501
+       ]
+      },
+      {
+       "file": "rudbeckia_2_1_top.webp",
+       "px": [
+        78,
+        79
+       ],
+       "anchor": [
+        0.4975,
+        0.4829
+       ]
+      }
+     ],
+     "oblique": []
+    }
+   }
+  },
+  "nepeta": {
+   "kind": "perennial",
+   "w": 0.6,
+   "d": 0.6,
+   "h": 0.4,
+   "ppm": 170.0,
+   "looks": {
+    "#6d8a4b|0||": {
+     "seasons": [
+      "spring"
+     ],
+     "top": [
+      {
+       "file": "nepeta_0_0_top.webp",
+       "px": [
+        97,
+        97
+       ],
+       "anchor": [
+        0.4524,
+        0.4931
+       ]
+      },
+      {
+       "file": "nepeta_0_1_top.webp",
+       "px": [
+        93,
+        98
+       ],
+       "anchor": [
+        0.4586,
+        0.5038
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#6d8a4b|0|#8E8CC4|": {
+     "seasons": [
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "nepeta_1_0_top.webp",
+       "px": [
+        99,
+        109
+       ],
+       "anchor": [
+        0.5058,
+        0.5211
+       ]
+      },
+      {
+       "file": "nepeta_1_1_top.webp",
+       "px": [
+        100,
+        91
+       ],
+       "anchor": [
+        0.4881,
+        0.506
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#80855a|0||": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "nepeta_2_0_top.webp",
+       "px": [
+        102,
+        100
+       ],
+       "anchor": [
+        0.4963,
+        0.5624
+       ]
+      },
+      {
+       "file": "nepeta_2_1_top.webp",
+       "px": [
+        102,
+        107
+       ],
+       "anchor": [
+        0.52,
+        0.4705
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#7d7464|0||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "nepeta_3_0_top.webp",
+       "px": [
+        92,
+        106
+       ],
+       "anchor": [
+        0.5211,
+        0.5004
+       ]
+      },
+      {
+       "file": "nepeta_3_1_top.webp",
+       "px": [
+        93,
+        84
+       ],
+       "anchor": [
+        0.5246,
+        0.4956
+       ]
+      }
+     ],
+     "oblique": []
+    }
+   }
+  },
+  "achillea": {
+   "kind": "perennial",
+   "w": 0.5,
+   "d": 0.5,
+   "h": 0.7,
+   "ppm": 170.0,
+   "looks": {
+    "#6d8a4b|0||": {
+     "seasons": [
+      "spring"
+     ],
+     "top": [
+      {
+       "file": "achillea_0_0_top.webp",
+       "px": [
+        83,
+        75
+       ],
+       "anchor": [
+        0.5281,
+        0.4906
+       ]
+      },
+      {
+       "file": "achillea_0_1_top.webp",
+       "px": [
+        70,
+        70
+       ],
+       "anchor": [
+        0.5016,
+        0.4883
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#6d8a4b|0|#F1E3B8|": {
+     "seasons": [
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "achillea_1_0_top.webp",
+       "px": [
+        94,
+        85
+       ],
+       "anchor": [
+        0.518,
+        0.5239
+       ]
+      },
+      {
+       "file": "achillea_1_1_top.webp",
+       "px": [
+        89,
+        85
+       ],
+       "anchor": [
+        0.5354,
+        0.4443
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#80855a|0||": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "achillea_2_0_top.webp",
+       "px": [
+        76,
+        75
+       ],
+       "anchor": [
+        0.4944,
+        0.4777
+       ]
+      },
+      {
+       "file": "achillea_2_1_top.webp",
+       "px": [
+        75,
+        90
+       ],
+       "anchor": [
+        0.4759,
+        0.5045
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#7d7464|0||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "achillea_3_0_top.webp",
+       "px": [
+        80,
+        84
+       ],
+       "anchor": [
+        0.5145,
+        0.5408
+       ]
+      },
+      {
+       "file": "achillea_3_1_top.webp",
+       "px": [
+        81,
+        74
+       ],
+       "anchor": [
+        0.5239,
+        0.4581
+       ]
+      }
+     ],
+     "oblique": []
+    }
+   }
+  },
+  "anemone": {
+   "kind": "perennial",
+   "w": 0.6,
+   "d": 0.6,
+   "h": 0.9,
+   "ppm": 170.0,
+   "looks": {
+    "#6d8a4b|0||": {
+     "seasons": [
+      "spring",
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "anemone_0_0_top.webp",
+       "px": [
+        85,
+        88
+       ],
+       "anchor": [
+        0.5236,
+        0.4943
+       ]
+      },
+      {
+       "file": "anemone_0_1_top.webp",
+       "px": [
+        88,
+        86
+       ],
+       "anchor": [
+        0.4265,
+        0.4707
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#80855a|0|#E6B7CB|": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "anemone_1_0_top.webp",
+       "px": [
+        100,
+        99
+       ],
+       "anchor": [
+        0.4798,
+        0.5144
+       ]
+      },
+      {
+       "file": "anemone_1_1_top.webp",
+       "px": [
+        97,
+        100
+       ],
+       "anchor": [
+        0.4935,
+        0.4578
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#7d7464|0||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "anemone_2_0_top.webp",
+       "px": [
+        92,
+        104
+       ],
+       "anchor": [
+        0.4341,
+        0.4795
+       ]
+      },
+      {
+       "file": "anemone_2_1_top.webp",
+       "px": [
+        84,
+        78
+       ],
+       "anchor": [
+        0.4811,
+        0.5251
+       ]
+      }
+     ],
+     "oblique": []
+    }
+   }
+  },
+  "pennisetum": {
+   "kind": "grass",
+   "w": 0.8,
+   "d": 0.8,
+   "h": 0.8,
+   "ppm": 170.0,
+   "looks": {
+    "#9CAE78|0||": {
+     "seasons": [
+      "spring"
+     ],
+     "top": [
+      {
+       "file": "pennisetum_0_0_top.webp",
+       "px": [
+        134,
+        138
+       ],
+       "anchor": [
+        0.5058,
+        0.4913
+       ]
+      },
+      {
+       "file": "pennisetum_0_1_top.webp",
+       "px": [
+        136,
+        137
+       ],
+       "anchor": [
+        0.501,
+        0.4978
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#8EA066|0|#E8DDB8|": {
+     "seasons": [
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "pennisetum_1_0_top.webp",
+       "px": [
+        172,
+        167
+       ],
+       "anchor": [
+        0.4838,
+        0.4752
+       ]
+      },
+      {
+       "file": "pennisetum_1_1_top.webp",
+       "px": [
+        153,
+        165
+       ],
+       "anchor": [
+        0.5337,
+        0.4708
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#C9A86A|0|#E8DDB8|": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "pennisetum_2_0_top.webp",
+       "px": [
+        174,
+        172
+       ],
+       "anchor": [
+        0.4936,
+        0.5128
+       ]
+      },
+      {
+       "file": "pennisetum_2_1_top.webp",
+       "px": [
+        174,
+        163
+       ],
+       "anchor": [
+        0.4963,
+        0.515
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#CDB98E|0||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "pennisetum_3_0_top.webp",
+       "px": [
+        137,
+        138
+       ],
+       "anchor": [
+        0.5113,
+        0.4962
+       ]
+      },
+      {
+       "file": "pennisetum_3_1_top.webp",
+       "px": [
+        136,
+        139
+       ],
+       "anchor": [
+        0.5001,
+        0.5081
+       ]
+      }
+     ],
+     "oblique": []
+    }
+   }
+  },
+  "calamagrostis": {
+   "kind": "grass",
+   "w": 0.6,
+   "d": 0.6,
+   "h": 1.5,
+   "ppm": 170.0,
+   "looks": {
+    "#8FA56C|0||": {
+     "seasons": [
+      "spring"
+     ],
+     "top": [
+      {
+       "file": "calamagrostis_0_0_top.webp",
+       "px": [
+        38,
+        37
+       ],
+       "anchor": [
+        0.499,
+        0.5033
+       ]
+      },
+      {
+       "file": "calamagrostis_0_1_top.webp",
+       "px": [
+        37,
+        38
+       ],
+       "anchor": [
+        0.4834,
+        0.5065
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#A3A46A|0|#A3A46A|": {
+     "seasons": [
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "calamagrostis_1_0_top.webp",
+       "px": [
+        77,
+        78
+       ],
+       "anchor": [
+        0.5153,
+        0.5242
+       ]
+      },
+      {
+       "file": "calamagrostis_1_1_top.webp",
+       "px": [
+        82,
+        84
+       ],
+       "anchor": [
+        0.4947,
+        0.507
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#CDB27A|0|#E8DDB8|": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "calamagrostis_2_0_top.webp",
+       "px": [
+        78,
+        81
+       ],
+       "anchor": [
+        0.5102,
+        0.4975
+       ]
+      },
+      {
+       "file": "calamagrostis_2_1_top.webp",
+       "px": [
+        83,
+        83
+       ],
+       "anchor": [
+        0.4932,
+        0.5091
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#D2C095|0||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "calamagrostis_3_0_top.webp",
+       "px": [
+        38,
+        39
+       ],
+       "anchor": [
+        0.504,
+        0.4977
+       ]
+      },
+      {
+       "file": "calamagrostis_3_1_top.webp",
+       "px": [
+        37,
+        37
+       ],
+       "anchor": [
+        0.4944,
+        0.4997
+       ]
+      }
+     ],
+     "oblique": []
+    }
+   }
   }
  }
 }

@@ -2923,6 +2923,408 @@
      "oblique": []
     }
    }
+  },
+  "photinia-espalier": {
+   "kind": "espalier",
+   "w": 1.5,
+   "d": 0.45,
+   "h": 3.8,
+   "ppm": 170.0,
+   "looks": {
+    "#B4553A|0||": {
+     "seasons": [
+      "spring"
+     ],
+     "top": [
+      {
+       "file": "photinia-espalier_0_0_top.webp",
+       "px": [
+        331,
+        109
+       ],
+       "anchor": [
+        0.4974,
+        0.5047
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#5E7438|0||": {
+     "seasons": [
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "photinia-espalier_1_0_top.webp",
+       "px": [
+        337,
+        112
+       ],
+       "anchor": [
+        0.5065,
+        0.506
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#5A6E36|0||": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "photinia-espalier_2_0_top.webp",
+       "px": [
+        340,
+        113
+       ],
+       "anchor": [
+        0.4984,
+        0.5047
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#566A36|0||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "photinia-espalier_3_0_top.webp",
+       "px": [
+        339,
+        112
+       ],
+       "anchor": [
+        0.5018,
+        0.4942
+       ]
+      }
+     ],
+     "oblique": []
+    }
+   }
+  },
+  "laurocerasus-espalier": {
+   "kind": "espalier",
+   "w": 1.5,
+   "d": 0.45,
+   "h": 3.6,
+   "ppm": 170.0,
+   "looks": {
+    "#5B7A3A|0||": {
+     "seasons": [
+      "spring"
+     ],
+     "top": [
+      {
+       "file": "laurocerasus-espalier_0_0_top.webp",
+       "px": [
+        332,
+        115
+       ],
+       "anchor": [
+        0.4994,
+        0.4998
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#3F5F2E|0||": {
+     "seasons": [
+      "summer",
+      "autumn",
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "laurocerasus-espalier_1_0_top.webp",
+       "px": [
+        317,
+        116
+       ],
+       "anchor": [
+        0.5033,
+        0.4962
+       ]
+      }
+     ],
+     "oblique": []
+    }
+   }
+  },
+  "quercus-ilex-espalier": {
+   "kind": "espalier",
+   "w": 1.5,
+   "d": 0.45,
+   "h": 4,
+   "ppm": 170.0,
+   "looks": {
+    "#7A8A55|0||": {
+     "seasons": [
+      "spring"
+     ],
+     "top": [
+      {
+       "file": "quercus-ilex-espalier_0_0_top.webp",
+       "px": [
+        358,
+        115
+       ],
+       "anchor": [
+        0.4994,
+        0.4998
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#4D5D3E|0||": {
+     "seasons": [
+      "summer",
+      "autumn",
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "quercus-ilex-espalier_1_0_top.webp",
+       "px": [
+        340,
+        116
+       ],
+       "anchor": [
+        0.5037,
+        0.4962
+       ]
+      }
+     ],
+     "oblique": []
+    }
+   }
+  },
+  "ligustrum-espalier": {
+   "kind": "espalier",
+   "w": 1.5,
+   "d": 0.45,
+   "h": 3.5,
+   "ppm": 170.0,
+   "looks": {
+    "#5C7A3C|0||": {
+     "seasons": [
+      "spring",
+      "summer",
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "ligustrum-espalier_0_0_top.webp",
+       "px": [
+        347,
+        115
+       ],
+       "anchor": [
+        0.4959,
+        0.4957
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#5E7240|0||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "ligustrum-espalier_1_0_top.webp",
+       "px": [
+        353,
+        110
+       ],
+       "anchor": [
+        0.5044,
+        0.4998
+       ]
+      }
+     ],
+     "oblique": []
+    }
+   }
+  },
+  "carpinus-espalier": {
+   "kind": "espalier",
+   "w": 1.5,
+   "d": 0.45,
+   "h": 4,
+   "ppm": 170.0,
+   "looks": {
+    "#8DAA62|0||": {
+     "seasons": [
+      "spring"
+     ],
+     "top": [
+      {
+       "file": "carpinus-espalier_0_0_top.webp",
+       "px": [
+        343,
+        109
+       ],
+       "anchor": [
+        0.4972,
+        0.5047
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#6B8A4A|0||": {
+     "seasons": [
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "carpinus-espalier_1_0_top.webp",
+       "px": [
+        349,
+        112
+       ],
+       "anchor": [
+        0.5069,
+        0.506
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#B88D45|0||": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "carpinus-espalier_2_0_top.webp",
+       "px": [
+        352,
+        113
+       ],
+       "anchor": [
+        0.4983,
+        0.5047
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#A8835A|0||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "carpinus-espalier_3_0_top.webp",
+       "px": [
+        351,
+        112
+       ],
+       "anchor": [
+        0.5019,
+        0.4942
+       ]
+      }
+     ],
+     "oblique": []
+    }
+   }
+  },
+  "tilia-espalier": {
+   "kind": "espalier",
+   "w": 1.5,
+   "d": 0.45,
+   "h": 4.2,
+   "ppm": 170.0,
+   "looks": {
+    "#97AE68|0||": {
+     "seasons": [
+      "spring"
+     ],
+     "top": [
+      {
+       "file": "tilia-espalier_0_0_top.webp",
+       "px": [
+        331,
+        115
+       ],
+       "anchor": [
+        0.5141,
+        0.5053
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#6D8A4A|0||": {
+     "seasons": [
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "tilia-espalier_1_0_top.webp",
+       "px": [
+        337,
+        113
+       ],
+       "anchor": [
+        0.5013,
+        0.4985
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#C99A3E|0||": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "tilia-espalier_2_0_top.webp",
+       "px": [
+        331,
+        114
+       ],
+       "anchor": [
+        0.4991,
+        0.4998
+       ]
+      }
+     ],
+     "oblique": []
+    },
+    "#7A6E5E|1||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "tilia-espalier_3_0_top.webp",
+       "px": [
+        255,
+        37
+       ],
+       "anchor": [
+        0.5,
+        0.5
+       ]
+      }
+     ],
+     "oblique": []
+    }
+   }
   }
  }
 }

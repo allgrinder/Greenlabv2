@@ -5,7 +5,7 @@ import type { Material, MaterialId } from '../model/types';
  * Preise sind plausible Beispielwerte (netto), keine Marktpreise.
  */
 export const MATERIALS: Material[] = [
-  { id: 'lawn', name: 'Rollrasen', texture: 'lawn', baseColor: '#9BAE74', tileSizeM: 1, anchor: 'world', unit: 'm2', depthM: null, unitSizeM: null, price: 7.9 },
+  { id: 'lawn', name: 'Rollrasen', texture: 'lawn', baseColor: '#76863A', tileSizeM: 1, anchor: 'world', unit: 'm2', depthM: null, unitSizeM: null, price: 7.9 },
   { id: 'gravel', name: 'Kies 8/16, Jurakalk', texture: 'gravel', baseColor: '#D6CDBB', tileSizeM: 0.5, anchor: 'world', unit: 'm3', depthM: 0.08, unitSizeM: null, price: 68 },
   { id: 'paving', name: 'Terrassenplatten 80 × 40', texture: 'paving', baseColor: '#CFC3AE', tileSizeM: 1.6, anchor: 'object', unit: 'pcs', depthM: null, unitSizeM: { w: 0.8, d: 0.4 }, price: 20.48 },
   { id: 'wood', name: 'Holzdeck Lärche', texture: 'wood', baseColor: '#B78C61', tileSizeM: 1.2, anchor: 'object', unit: 'm2', depthM: null, unitSizeM: null, price: 119 },

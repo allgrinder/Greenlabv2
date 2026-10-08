@@ -53,7 +53,8 @@ export interface ViewParams {
 }
 
 /** Schatten der Planansicht ohne Sonnenlinse: Sonne aus Südost, wie im Design */
-const DESIGN_SHADOW: Vec2 = { x: 0.12, y: 0.15 };
+// Abendsonne von links oben wie im Gartenkonzept: lange, weiche Schatten nach rechts unten
+const DESIGN_SHADOW: Vec2 = { x: 0.34, y: 0.44 };
 
 export const seasonOfDoy = (doy: number): Season => (doy < 80 || doy >= 355 ? 'winter' : doy < 172 ? 'spring' : doy < 266 ? 'summer' : 'autumn');
 
@@ -489,7 +490,7 @@ export class PlanRenderer {
     let sv: Vec2 | null = DESIGN_SHADOW;
     if (p.night) sv = null;
     else if (p.lens === 'sun') sv = shadowVector(sunAt(loc, year, p.sun.doy, p.sun.hour), doc.site.northDeg);
-    this.shadowLayer.update(doc, sv, p.years, p.season, p.lens === 'sun' ? 0.34 : 0.3);
+    this.shadowLayer.update(doc, sv, p.years, p.season, p.lens === 'sun' ? 0.34 : 0.36);
     // Heatmap (Sonnenstunden hängen nur vom Tag ab, nicht von der Uhrzeit)
     const heatOn = p.lens === 'sun' && p.sun.heat && !p.night;
     if (!heatOn) {

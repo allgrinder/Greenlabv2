@@ -143,9 +143,10 @@ const SPECS: Record<Material['texture'], TileSpec> = {
     h: 4,
     pxPerM: 100,
     paint(ctx, w, h) {
-      const A = C('#939e4f');
-      const B = C('#afb868');
-      const D = C('#c0c67c');
+      // satt und olivgrün wie im Gartenkonzept (Mittel etwa #75843a)
+      const A = C('#66752c');
+      const B = C('#7f8e3c');
+      const D = C('#99a552');
       pixels(ctx, w, h, (u, v) => {
         const mid = tfbm(u, v, 4, 5, 3);
         const fine = tfbm(u, v, 24, 7, 2);
@@ -158,8 +159,8 @@ const SPECS: Record<Material['texture'], TileSpec> = {
       // kurze Halme: dunkle Schattenseite, helle Spitzen
       const r = rng(11);
       const any = () => r() * Math.PI * 2;
-      strokes(ctx, r, 5200, w, h, 4, 'rgba(78,90,36,.16)', 1.1, any);
-      strokes(ctx, r, 3600, w, h, 3.5, 'rgba(214,220,150,.13)', 1, any);
+      strokes(ctx, r, 6400, w, h, 4, 'rgba(40,50,16,.2)', 1.1, any);
+      strokes(ctx, r, 4200, w, h, 3.5, 'rgba(178,188,100,.13)', 1, any);
     },
   },
   gravel: {

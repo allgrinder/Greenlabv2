@@ -2120,6 +2120,112 @@
      ]
     }
    ]
+  },
+  "basaltBoulders": {
+   "w": 1.6,
+   "d": 1.2,
+   "h": 0.7,
+   "ppm": 220.0,
+   "top": [
+    {
+     "file": "basaltBoulders_top_0.webp",
+     "rot": 0,
+     "px": [
+      365,
+      278
+     ],
+     "anchor": [
+      0.5098,
+      0.4775
+     ]
+    },
+    {
+     "file": "basaltBoulders_top_90.webp",
+     "rot": 90,
+     "px": [
+      278,
+      365
+     ],
+     "anchor": [
+      0.5225,
+      0.5098
+     ]
+    },
+    {
+     "file": "basaltBoulders_top_180.webp",
+     "rot": 180,
+     "px": [
+      365,
+      278
+     ],
+     "anchor": [
+      0.4902,
+      0.5225
+     ]
+    },
+    {
+     "file": "basaltBoulders_top_270.webp",
+     "rot": 270,
+     "px": [
+      278,
+      365
+     ],
+     "anchor": [
+      0.4775,
+      0.4902
+     ]
+    }
+   ],
+   "oblique": [
+    {
+     "file": "basaltBoulders_oblique_0.webp",
+     "rot": 0,
+     "px": [
+      365,
+      271
+     ],
+     "anchor": [
+      0.5098,
+      0.5286
+     ]
+    },
+    {
+     "file": "basaltBoulders_oblique_90.webp",
+     "rot": 90,
+     "px": [
+      278,
+      342
+     ],
+     "anchor": [
+      0.5225,
+      0.5468
+     ]
+    },
+    {
+     "file": "basaltBoulders_oblique_180.webp",
+     "rot": 180,
+     "px": [
+      365,
+      250
+     ],
+     "anchor": [
+      0.4902,
+      0.5818
+     ]
+    },
+    {
+     "file": "basaltBoulders_oblique_270.webp",
+     "rot": 270,
+     "px": [
+      278,
+      332
+     ],
+     "anchor": [
+      0.4775,
+      0.5479
+     ]
+    }
+   ]
   }
  }
 }

@@ -24,6 +24,8 @@ export const ITEMS: CatalogItem[] = [
   { id: 'trampoline-ground', name: 'Bodentrampolin Ø 3 m', category: 'play', defaultLayer: 'build', width: 3, depth: 3, height: 0.06, symbol: 'trampoline', creates: 'item', unit: 'pcs', price: 990 },
   { id: 'gate-double', name: 'Gartentor zweiflüglig 2,2 m', category: 'fence', defaultLayer: 'build', width: 2.2, depth: 0.12, height: 1.4, symbol: 'gate', creates: 'item', unit: 'pcs', price: 1450 },
   { id: 'stone-wall-1m', name: 'Natursteinmauer, trocken', category: 'fence', defaultLayer: 'build', width: 1, depth: 0.45, height: 0.8, symbol: 'stoneWall', creates: 'item', unit: 'm', price: 260 },
+  { id: 'basalt-boulders', name: 'Basalt-Findlinge, 3er-Gruppe', category: 'furniture', defaultLayer: 'build', width: 1.6, depth: 1.2, height: 0.7, symbol: 'basaltBoulders', creates: 'item', unit: 'pcs', price: 680 },
+  { id: 'basalt-columns', name: 'Basaltstelen, 5er-Gruppe', category: 'furniture', defaultLayer: 'build', width: 1.0, depth: 0.8, height: 1.4, symbol: 'basaltColumns', creates: 'item', unit: 'pcs', price: 890 },
   { id: 'edge.kantenstein-8x20', name: 'Kantenstein 8 × 20 × 100', category: 'edging', defaultLayer: 'paths', width: 1, depth: 0.08, height: 0.2, symbol: 'edge', creates: 'item', unit: 'm', price: 6.4 },
 ];
 

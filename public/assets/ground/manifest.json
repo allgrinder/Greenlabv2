@@ -54,6 +54,12 @@
    "w": 2.4,
    "h": 1.2,
    "ppm": 260
+  },
+  "basalt": {
+   "file": "basalt.webp",
+   "w": 0.8,
+   "h": 0.8,
+   "ppm": 520
   }
  },
  "stepping": [

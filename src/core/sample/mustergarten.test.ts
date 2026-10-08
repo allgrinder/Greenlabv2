@@ -41,6 +41,14 @@ describe('Mustergarten Modern & Naturnah', () => {
     for (const i of ['office-pod', 'pavilion-4x4', 'firepit-round', 'trampoline-ground', 'gate-double', 'raised-bed-corten-300x100', 'stone-wall-1m']) expect(items.has(i)).toBe(true);
   });
 
+  it('Basalt: Beete am Pavillon mit Basaltsplitt abgedeckt, Findlinge und Stelen gesetzt', () => {
+    expect(objs.filter((o) => o.type === 'planting' && o.mulchMaterialId === 'basalt').length).toBeGreaterThanOrEqual(4);
+    const ids = objs.flatMap((o) => (o.type === 'item' ? [o.catalogId] : []));
+    expect(ids).toContain('basalt-boulders');
+    expect(ids).toContain('basalt-columns');
+    expect(getMaterial('basalt').unit).toBe('m3');
+  });
+
   it('Kosten: Trittplatten werden als Stückzahl gerechnet', () => {
     const rep = projectSummary(doc);
     const st = rep.lines.find((l) => l.key === 'mat:stepping');

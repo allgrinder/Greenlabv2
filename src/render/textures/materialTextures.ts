@@ -136,6 +136,7 @@ function pebbles(ctx: CanvasRenderingContext2D, r: () => number, n: number, w: n
 
 const SPECS: Record<Material['texture'], TileSpec> = {
   slabs: null as unknown as TileSpec,
+  basalt: null as unknown as TileSpec,
   lawn: {
     // Nur Feinstruktur (Halme, Körnung, 1-m-Flecken); große Wolken liefert lawnMacroPattern
     w: 4,
@@ -371,6 +372,17 @@ const SPECS: Record<Material['texture'], TileSpec> = {
 
 // Großformat: gleiche Malweise wie Terrassenplatten, bis die Blender-Kachel da ist
 SPECS.slabs = { ...SPECS.paving, w: 2.4, h: 1.2 };
+// Basalt: gemalt wie Kies, nur dunkel – bis die Blender-Kachel geladen ist
+SPECS.basalt = {
+  w: 0.8,
+  h: 0.8,
+  pxPerM: 256,
+  paint(ctx, w, h) {
+    ctx.fillStyle = '#26282a';
+    ctx.fillRect(0, 0, w, h);
+    pebbles(ctx, rng(91), 900, w, h, 3, 7, [C('#3c3f42'), C('#4a4d50'), C('#2f3234'), C('#55585b')], 0.6);
+  },
+};
 
 const cache = new Map<string, { texture: Texture; spec: TileSpec }>();
 

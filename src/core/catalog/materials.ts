@@ -15,8 +15,8 @@ export const MATERIALS: Material[] = [
   { id: 'slabs', name: 'Betonplatten 120 × 60, hellgrau', texture: 'slabs', baseColor: '#C6C2BA', tileSizeM: 2.4, anchor: 'object', unit: 'pcs', depthM: null, unitSizeM: { w: 1.2, d: 0.6 }, price: 46 },
   { id: 'meadow', name: 'Blumenwiese, heimische Wildblumen', texture: 'meadow', baseColor: '#8E9A4E', tileSizeM: 2, anchor: 'world', unit: 'm2', depthM: null, unitSizeM: null, price: 4.6 },
   { id: 'sand', name: 'Spielsand 0/2', texture: 'sand', baseColor: '#D8C7A0', tileSizeM: 1, anchor: 'world', unit: 'm3', depthM: 0.3, unitSizeM: null, price: 52 },
-  // Trittplatten im Abstand von 65 cm auf einem 60 cm breiten Weg: eine Platte je 0,39 m² Wegfläche
-  { id: 'stepping', name: 'Trittplatten Naturstein', texture: 'stepping', baseColor: '#ABA59B', tileSizeM: 0.6, anchor: 'world', unit: 'pcs', depthM: null, unitSizeM: { w: 0.65, d: 0.6 }, price: 34 },
+  // Trittplatten im Schrittmaß 72 cm auf einem 90 cm breiten Weg: eine Platte je 0,65 m² Wegfläche
+  { id: 'stepping', name: 'Trittplatten Naturstein', texture: 'stepping', baseColor: '#ABA59B', tileSizeM: 0.6, anchor: 'world', unit: 'pcs', depthM: null, unitSizeM: { w: 0.72, d: 0.9 }, price: 34 },
   { id: 'water', name: 'Wasserfläche', texture: 'water', baseColor: '#6E9AA0', tileSizeM: 2, anchor: 'world', unit: 'm2', depthM: null, unitSizeM: null, price: 196.8 },
 ];
 

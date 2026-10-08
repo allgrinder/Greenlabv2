@@ -478,21 +478,21 @@ export function meadowMacroPattern(): FillPattern {
     // Blütennester: Margerite, Mohn, Kornblume, Wiesensalbei, Hahnenfuß – je Nest eine Farbe dominiert
     const r = rng(78);
     const colors = ['#f4f1e6', '#f4f1e6', '#c4342a', '#5a78cc', '#9c6aae', '#e3bf3e', '#efe7c8'];
-    for (let c = 0; c < 70; c++) {
+    for (let c = 0; c < 260; c++) {
       const cx = r() * n;
       const cy = r() * n;
       const col = colors[Math.floor(r() * colors.length)];
-      const rad = 6 + r() * 16;
-      const dots = 12 + Math.floor(r() * 30);
+      const rad = 4 + r() * 10;
+      const dots = 5 + Math.floor(r() * 12);
       for (let d = 0; d < dots; d++) {
         const a = r() * Math.PI * 2;
         const q = Math.sqrt(r()) * rad;
         for (const ox of [0, -n, n])
           for (const oy of [0, -n, n]) {
-            ctx.globalAlpha = 0.45 + r() * 0.4;
+            ctx.globalAlpha = 0.3 + r() * 0.35;
             ctx.fillStyle = col;
             ctx.beginPath();
-            ctx.arc(cx + Math.cos(a) * q + ox, cy + Math.sin(a) * q + oy, 0.6 + r() * 0.9, 0, Math.PI * 2);
+            ctx.arc(cx + Math.cos(a) * q + ox, cy + Math.sin(a) * q + oy, 0.5 + r() * 0.6, 0, Math.PI * 2);
             ctx.fill();
           }
       }

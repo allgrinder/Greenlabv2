@@ -106,7 +106,7 @@ export function createMustergarten(): Project {
     materialId,
     edging,
   });
-  const planting = (name: string, region: PlantingObject['region'], mix: [string, number][], perSquareMeter = 6): PlantingObject => ({
+  const planting = (name: string, region: PlantingObject['region'], mix: [string, number][], perSquareMeter = 8): PlantingObject => ({
     ...objectBase(L('plants')),
     type: 'planting',
     name,
@@ -148,7 +148,7 @@ export function createMustergarten(): Project {
   add(sand);
   add(kiesBeete);
   add(entry);
-  add(path('Trittplatten', STEPPING_CENTERLINE, 0.7, 'stepping'));
+  add(path('Trittplatten', STEPPING_CENTERLINE, 0.9, 'stepping'));
   borders.forEach((b) => add(b));
 
   // ---------- Hecke ringsum (Lücke für das Tor unten links)

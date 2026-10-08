@@ -8,7 +8,7 @@ export const ITEMS: CatalogItem[] = [
   { id: 'terrace-wood', name: 'Terrasse, Holz', category: 'terrace', defaultLayer: 'areas', width: 4, depth: 3, height: 0, symbol: 'deck', creates: { area: 'wood' }, unit: 'm2', price: 0 },
   { id: 'pond', name: 'Teich', category: 'pond', defaultLayer: 'areas', width: 4, depth: 3, height: 0, symbol: 'pond', creates: { area: 'water' }, unit: 'm2', price: 0 },
   { id: 'pool-8x4', name: 'Pool 8 × 4 m', category: 'pool', defaultLayer: 'build', width: 8, depth: 4, height: 0, symbol: 'pool', creates: 'item', unit: 'pcs', price: 18500 },
-  { id: 'play-swing', name: 'Spielturm mit Schaukel', category: 'play', defaultLayer: 'build', width: 4.5, depth: 3, height: 3, symbol: 'play', creates: 'item', unit: 'pcs', price: 1290 },
+  { id: 'play-swing', name: 'Spielturm Lärche mit Schaukel', category: 'play', defaultLayer: 'build', width: 4.5, depth: 3, height: 3, symbol: 'play', creates: 'item', unit: 'pcs', price: 1290 },
   { id: 'table-6', name: 'Tisch mit 6 Stühlen', category: 'furniture', defaultLayer: 'build', width: 2.6, depth: 3.6, height: 0.75, symbol: 'table', creates: 'item', unit: 'pcs', price: 1450 },
   { id: 'lounger', name: 'Liege', category: 'furniture', defaultLayer: 'build', width: 2.3, depth: 0.75, height: 0.4, symbol: 'lounger', creates: 'item', unit: 'pcs', price: 390 },
   { id: 'planter', name: 'Pflanzkübel Terrakotta', category: 'furniture', defaultLayer: 'build', width: 0.7, depth: 0.7, height: 0.6, symbol: 'planter', creates: 'item', unit: 'pcs', price: 120 },
@@ -26,6 +26,7 @@ export const ITEMS: CatalogItem[] = [
   { id: 'stone-wall-1m', name: 'Natursteinmauer, trocken', category: 'fence', defaultLayer: 'build', width: 1, depth: 0.45, height: 0.8, symbol: 'stoneWall', creates: 'item', unit: 'm', price: 260 },
   { id: 'basalt-boulders', name: 'Basalt-Findlinge, 3er-Gruppe', category: 'furniture', defaultLayer: 'build', width: 1.6, depth: 1.2, height: 0.7, symbol: 'basaltBoulders', creates: 'item', unit: 'pcs', price: 680 },
   { id: 'basalt-columns', name: 'Basaltstelen, 5er-Gruppe', category: 'furniture', defaultLayer: 'build', width: 1.0, depth: 0.8, height: 1.4, symbol: 'basaltColumns', creates: 'item', unit: 'pcs', price: 890 },
+  { id: 'deck-bench', name: 'Einbaubank Lärche mit Pflanzkasten', category: 'furniture', defaultLayer: 'build', width: 3.2, depth: 0.55, height: 0.45, symbol: 'deckBench', creates: 'item', unit: 'pcs', price: 1680 },
   { id: 'edge.kantenstein-8x20', name: 'Kantenstein 8 × 20 × 100', category: 'edging', defaultLayer: 'paths', width: 1, depth: 0.08, height: 0.2, symbol: 'edge', creates: 'item', unit: 'm', price: 6.4 },
 ];
 

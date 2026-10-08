@@ -209,7 +209,8 @@ def slabs(T, rnd):
 def wood(T, rnd):
     """Holzdeck Lärche: 14-cm-Dielen mit 6 mm Fugen, versetzte Stöße, Maserung, Schraubenpaare"""
     base_plane(T, pmat("gap", lin("#2a221b"), 1.0), -0.03)
-    tones = ["#a07a55", "#94704d", "#ab855e", "#8c6a49", "#b08b63"]
+    # Lärche, leicht vergraut (wie im Konzept): warmes Graubraun statt Orange
+    tones = ["#9a8166", "#8e765d", "#a48b70", "#85705a", "#ab937a"]
     gm = []
     for i, h in enumerate(tones):
         m, b = _principled(f"plank{i}")

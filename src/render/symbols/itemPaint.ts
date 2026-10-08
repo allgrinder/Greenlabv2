@@ -705,7 +705,7 @@ const edge: Painter = (g, W, D, ppm, rnd) => {
 const PAINTERS: Record<string, Painter> = {
   house, shed, greenhouse, compost, barrel, raisedBed, table, lounger, planter, pool, play, fence, edge,
   // Mustergarten-Objekte: gemalt nur als Platzhalter, bis die Blender-Bilder geladen sind
-  cortenBed: raisedBed, container: shed, pergola: shed, lounge: lounger, firepit: table, trampoline: pool, gate: fence, stoneWall: fence, basaltBoulders: barrel, basaltColumns: barrel,
+  cortenBed: raisedBed, container: shed, pergola: shed, lounge: lounger, firepit: table, trampoline: pool, gate: fence, stoneWall: fence, basaltBoulders: barrel, basaltColumns: barrel, deckBench: lounger,
 };
 
 /** Auflösung je Objektgröße: kleine Möbel fein, Häuser gröber (Textur ≤ 1024 px) */

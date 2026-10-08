@@ -144,7 +144,7 @@ def shed(w: float, d: float, h: float):
 
 
 def greenhouse(w: float, d: float, h: float):
-    """Gewächshaus: anthrazit Aluminium, Glas, Satteldach; Beete mit Pflanzen darin"""
+    """Gewächshaus: helles Aluminium, leicht mattes Glas, Satteldach; Beete mit Pflanzen darin"""
     eave = h * 0.68
     along_y = d >= w
     # Beete und Weg
@@ -164,18 +164,18 @@ def greenhouse(w: float, d: float, h: float):
         n = max(2, round(d / 0.7))
         for i in range(n + 1):
             y = -d / 2 + (d - t) * i / n
-            box("post", x, y, 0, x + t, y + t, eave, "anthracite")
+            box("post", x, y, 0, x + t, y + t, eave, "alu_light")
     for y in (-d / 2, d / 2 - t):
         n = max(2, round(w / 0.7))
         for i in range(n + 1):
             x = -w / 2 + (w - t) * i / n
             zt = eave + (h - eave) * (1 - abs(x + t / 2) / (w / 2)) if along_y else eave
-            box("post", x, y, 0, x + t, y + t, zt, "anthracite")
-    box("sill_n", -w / 2, -d / 2, eave - t, w / 2, -d / 2 + t, eave, "anthracite")
-    box("sill_s", -w / 2, d / 2 - t, eave - t, w / 2, d / 2, eave, "anthracite")
-    box("eave_w", -w / 2, -d / 2, eave - t, -w / 2 + t, d / 2, eave, "anthracite")
-    box("eave_e", w / 2 - t, -d / 2, eave - t, w / 2, d / 2, eave, "anthracite")
-    box("ridge", -t / 2, -d / 2, h - t, t / 2, d / 2, h, "anthracite")
+            box("post", x, y, 0, x + t, y + t, zt, "alu_light")
+    box("sill_n", -w / 2, -d / 2, eave - t, w / 2, -d / 2 + t, eave, "alu_light")
+    box("sill_s", -w / 2, d / 2 - t, eave - t, w / 2, d / 2, eave, "alu_light")
+    box("eave_w", -w / 2, -d / 2, eave - t, -w / 2 + t, d / 2, eave, "alu_light")
+    box("eave_e", w / 2 - t, -d / 2, eave - t, w / 2, d / 2, eave, "alu_light")
+    box("ridge", -t / 2, -d / 2, h - t, t / 2, d / 2, h, "alu_light")
     # Dachsparren und Glas
     n = max(2, round(d / 0.7))
     for side in (-1, 1):
@@ -190,16 +190,16 @@ def greenhouse(w: float, d: float, h: float):
         # Sparren als schmale Platten entlang der Dachneigung, dazwischen Glas
         for i in range(n + 1):
             y = -d / 2 + (d - t) * i / n
-            plate("rafter", P(side * w / 2, y, eave), e, s, nrm, t, L, t, "anthracite")
-        plate("roofglass", P(side * w / 2, -d / 2, eave) + nrm * 0.01, e, s, nrm, d, L, 0.01, "glass")
+            plate("rafter", P(side * w / 2, y, eave), e, s, nrm, t, L, t, "alu_light")
+        plate("roofglass", P(side * w / 2, -d / 2, eave) + nrm * 0.01, e, s, nrm, d, L, 0.01, "glass_greenhouse")
     # Wände Glas
-    box("glass_n", -w / 2, -d / 2, 0.02, w / 2, -d / 2 + 0.01, eave, "glass")
-    box("glass_s", -w / 2, d / 2 - 0.01, 0.02, w / 2, d / 2, eave, "glass")
-    box("glass_w", -w / 2, -d / 2, 0.02, -w / 2 + 0.01, d / 2, eave, "glass")
-    box("glass_e", w / 2 - 0.01, -d / 2, 0.02, w / 2, d / 2, eave, "glass")
+    box("glass_n", -w / 2, -d / 2, 0.02, w / 2, -d / 2 + 0.01, eave, "glass_greenhouse")
+    box("glass_s", -w / 2, d / 2 - 0.01, 0.02, w / 2, d / 2, eave, "glass_greenhouse")
+    box("glass_w", -w / 2, -d / 2, 0.02, -w / 2 + 0.01, d / 2, eave, "glass_greenhouse")
+    box("glass_e", w / 2 - 0.01, -d / 2, 0.02, w / 2, d / 2, eave, "glass_greenhouse")
     # Giebeldreiecke
     for y in (-d / 2, d / 2):
-        poly_mesh("gable", [P(-w / 2, y, eave), P(w / 2, y, eave), P(0, y, h)], [[0, 1, 2]], "glass")
+        poly_mesh("gable", [P(-w / 2, y, eave), P(w / 2, y, eave), P(0, y, h)], [[0, 1, 2]], "glass_greenhouse")
     _ = along_y
 
 
@@ -380,19 +380,26 @@ def pool(w: float, d: float, h: float):
 
 
 def play(w: float, d: float, h: float):
-    """Spielturm modern: graue Holzpfosten, anthrazit Pultdach, Rutsche hellgrau, Schaukel"""
+    """Spielturm aus naturbelassener Lärche: Satteldach aus Holz, Leiter, Rutsche, Schaukel"""
     t = 1.4
     tx0, ty0 = -w / 2 + 0.1, -d / 2 + 0.1
-    # Sandfläche
-    box("sand", -w / 2, -d / 2 + 0.6, -0.01, -w / 2 + 2.0, d / 2, 0.02, "sand")
     for dx in (0, t - 0.09):
         for dy in (0, t - 0.09):
-            box("post", tx0 + dx, ty0 + dy, 0, tx0 + dx + 0.09, ty0 + dy + 0.09, h - 0.2, "wood_grey", 0.006)
-    box("deck", tx0, ty0, 1.2, tx0 + t, ty0 + t, 1.25, "wood_grey", 0.004)
+            box("post", tx0 + dx, ty0 + dy, 0, tx0 + dx + 0.09, ty0 + dy + 0.09, h - 0.2, "wood_natural", 0.006)
+    box("deck", tx0, ty0, 1.2, tx0 + t, ty0 + t, 1.25, "wood_natural", 0.004)
     for z in (1.5, 1.75):
-        box("rail_n", tx0, ty0, z, tx0 + t, ty0 + 0.04, z + 0.06, "wood_grey")
-        box("rail_w", tx0, ty0, z, tx0 + 0.04, ty0 + t, z + 0.06, "wood_grey")
-    box("roof", tx0 - 0.15, ty0 - 0.15, h - 0.2, tx0 + t + 0.15, ty0 + t + 0.15, h - 0.12, "anthracite", 0.008)
+        box("rail_n", tx0, ty0, z, tx0 + t, ty0 + 0.04, z + 0.06, "wood_natural")
+        box("rail_w", tx0, ty0, z, tx0 + 0.04, ty0 + t, z + 0.06, "wood_natural")
+    # Satteldach aus Holz
+    for side in (-1, 1):
+        a_ = math.radians(28)
+        o_ = P(tx0 + t / 2, ty0 - 0.15, h - 0.05)
+        e_ = Vector((0, -1, 0))
+        s_ = Vector((side * math.cos(a_), 0, -math.sin(a_)))
+        n_ = e_.cross(s_)
+        if n_.z < 0:
+            n_ = -n_
+        plate("roof", o_, e_, s_, n_, t + 0.3, t / 2 / math.cos(a_) + 0.15, 0.03, "wood_natural")
     # Rutsche nach Süden
     a = math.atan2(1.2, 2.2)
     o = P(tx0 + 0.45, ty0 + t, 1.22)
@@ -401,15 +408,21 @@ def play(w: float, d: float, h: float):
     nrm = e.cross(s)
     if nrm.z < 0:
         nrm = -nrm
-    plate("slide", o, e, s, nrm, 0.5, 2.5, 0.04, "concrete")
+    plate("slide", o, e, s, nrm, 0.5, 2.5, 0.04, "wood_natural")
     plate("slide_l", o, s, nrm, -e, 2.5, 0.12, 0.03, "graphite")
     plate("slide_r", o + e * 0.5, s, nrm, -e, 2.5, 0.12, 0.03, "graphite")
+    # Leiter nach Westen
+    for dy in (0.35, 0.85):
+        a_ = math.radians(20)
+        box("ladder_rail", tx0 - 0.5, ty0 + dy, 0, tx0 - 0.44, ty0 + dy + 0.05, 1.25, "wood_natural")
+    for zz in (0.25, 0.5, 0.75, 1.0):
+        box("rung", tx0 - 0.5 + zz * 0.0, ty0 + 0.35, zz, tx0 - 0.44, ty0 + 0.9, zz + 0.04, "wood_natural")
     # Schaukelbalken
     bx0 = tx0 + t
-    box("beam", bx0, ty0 + 0.3, 2.2, w / 2 - 0.05, ty0 + 0.42, 2.32, "wood_grey", 0.006)
+    box("beam", bx0, ty0 + 0.3, 2.2, w / 2 - 0.05, ty0 + 0.42, 2.32, "wood_natural", 0.006)
     for x in (w / 2 - 0.15,):
         for dy in (-0.4, 0.9):
-            box("aframe", x, ty0 + 0.36 + dy * 0.5 - 0.05, 0, x + 0.1, ty0 + 0.36 + dy * 0.5 + 0.05, 2.32, "wood_grey", 0.006)
+            box("aframe", x, ty0 + 0.36 + dy * 0.5 - 0.05, 0, x + 0.1, ty0 + 0.36 + dy * 0.5 + 0.05, 2.32, "wood_natural", 0.006)
     for x in (bx0 + 0.6, bx0 + 1.6):
         if x > w / 2 - 0.4:
             continue
@@ -456,16 +469,7 @@ def container(w: float, d: float, h: float):
     box("desk", gx0 + 0.3, -0.2, 0.72, gx0 + 2.0, 0.5, 0.76, "wood_light")
     # Stufe aus Beton vor der Tür
     box("step", -0.6, d / 2, 0, 0.6, d / 2 + 0.4, 0.12, "concrete", 0.006)
-    # PV-Module flach aufgeständert
-    e, s_ = Vector((1, 0, 0)), Vector((0, math.cos(math.radians(8)), math.sin(math.radians(8))))
-    nrm = e.cross(s_)
-    # zwei Module am Ostende, der Rest bleibt schwarzes Trapezblech
-    n = 2
-    pw = 1.1
-    for i in range(n):
-        org = P(w / 2 - 0.3 - (n - i) * (pw + 0.04), d / 2 - 0.35, h + 0.02)
-        plate("pv", org, e, s_, nrm, pw, d - 0.7, 0.035, "solar")
-        plate("pvframe", org - e * 0.015 - s_ * 0.015 - nrm * 0.004, e, s_, nrm, pw + 0.03, d - 0.67, 0.03, "graphite")
+    # Dach bleibt schwarzes Trapezblech (wie im Konzept), Dachrand leicht abgesetzt
 
 
 def pergola(w: float, d: float, h: float):
@@ -538,37 +542,67 @@ def lounge_chair(cx: float, cy: float, ang: float):
 
 
 def firepit(w: float, d: float, h: float):
-    """Runde Feuerstelle: Natursteinpflaster im Kreis, Feuerschale aus Corten mit Glut, Sessel ringsum"""
+    """Runde Feuerstelle: Kiesrund mit Stahlkante, gemauerter Feuerring aus Betonsteinen, Flammen, Sessel ringsum"""
     R = w / 2
-    # Pflasterring aus Segmenten (Radialfugen), Fuge darunter
-    cylinder("joint", 0, 0, -0.02, 0.0, R, "concrete_dark", 96)
-    rings = [(0.75, 1.3, 10), (1.3, 1.85, 16), (1.85, R - 0.02, 22)]
+    cylinder("gravel", 0, 0, -0.02, 0.02, R - 0.03, "gravel_light", 128)
+    # Rasenkante aus Stahl (anthrazit), schmal
+    ring = cylinder("edge", 0, 0, -0.02, 0.035, R, "anthracite", 128)
+    hole = cylinder("edge_cut", 0, 0, -0.05, 0.06, R - 0.03, "anthracite", 128)
+    mod = ring.modifiers.new("cut", "BOOLEAN")
+    mod.object = hole
+    mod.operation = "DIFFERENCE"
+    hole.hide_render = True
+    # Feuerring: 14 gebogene Betonsteine, Fugen dazwischen
     r = rng(17)
-    for r0, r1, n in rings:
-        for i in range(n):
-            a0 = i / n * math.tau + 0.012
-            a1 = (i + 1) / n * math.tau - 0.012
-            k = 6
-            pts = [P((r0 + 0.012) * math.cos(a0 + (a1 - a0) * j / k), (r0 + 0.012) * math.sin(a0 + (a1 - a0) * j / k), 0.0) for j in range(k + 1)]
-            pts += [P((r1 - 0.012) * math.cos(a1 - (a1 - a0) * j / k), (r1 - 0.012) * math.sin(a1 - (a1 - a0) * j / k), 0.0) for j in range(k + 1)]
-            top = [Vector((p.x, p.y, 0.025 + r.uniform(-0.002, 0.002))) for p in pts]
-            ob = poly_mesh("paver", top, [list(range(len(top)))], "stone")
-            sol = ob.modifiers.new("t", "SOLIDIFY")
-            sol.thickness = 0.04
-            bev = ob.modifiers.new("b", "BEVEL")
-            bev.width = 0.006
-            bev.limit_method = "ANGLE"
-    cylinder("inner", 0, 0, 0, 0.02, 0.74, "gravel_dark", 64)
-    # Feuerschale
-    cylinder("bowl", 0, 0, 0, 0.36, 0.48, "corten", 64, 0.01)
-    cylinder("bowl_in", 0, 0, 0.3, 0.361, 0.42, "graphite", 64)
-    cylinder("embers", 0, 0, 0.30, 0.33, 0.36, "ember", 48)
-    for i in range(4):
-        a = i / 4 * math.pi + 0.3
-        L = 0.55
+    n = 14
+    for i in range(n):
+        a0 = i / n * math.tau + 0.02
+        a1 = (i + 1) / n * math.tau - 0.02
+        k = 5
+        inner, outer = 0.44, 0.62
+        pts = [P(inner * math.cos(a0 + (a1 - a0) * j / k), inner * math.sin(a0 + (a1 - a0) * j / k), 0.0) for j in range(k + 1)]
+        pts += [P(outer * math.cos(a1 - (a1 - a0) * j / k), outer * math.sin(a1 - (a1 - a0) * j / k), 0.0) for j in range(k + 1)]
+        top = [Vector((p.x, p.y, 0.32 + r.uniform(-0.004, 0.004))) for p in pts]
+        ob = poly_mesh("ringstone", top, [list(range(len(top)))], "concrete")
+        sol = ob.modifiers.new("t", "SOLIDIFY")
+        sol.thickness = 0.32
+        bev = ob.modifiers.new("b", "BEVEL")
+        bev.width = 0.008
+        bev.limit_method = "ANGLE"
+    cylinder("pit", 0, 0, 0.0, 0.2, 0.45, "graphite", 64)
+    cylinder("embers", 0, 0, 0.2, 0.23, 0.4, "ember", 48)
+    for i in range(5):
+        a = i / 5 * math.pi + 0.3
+        L = 0.5
         ob = cylinder("log", 0, 0, -L / 2, L / 2, 0.045, "log", 16)
         ob.rotation_euler = (math.pi / 2, 0, a)
-        ob.location = P(0, 0, 0.36 + (i % 2) * 0.07)
+        ob.location = P(0, 0, 0.26 + (i % 2) * 0.07)
+    # Flammen: schmale, gedrehte Zungen mit Leuchtmaterial
+    import bmesh
+    import bpy
+
+    from lib import link, mat
+
+    for i in range(9):
+        me = bpy.data.meshes.new("flame")
+        bm = bmesh.new()
+        hgt = r.uniform(0.25, 0.5)
+        wd = r.uniform(0.05, 0.09)
+        prof = [(0, 0), (wd, hgt * 0.25), (wd * 0.7, hgt * 0.6), (0.004, hgt)]
+        ring_v = []
+        for k_, (rad, z) in enumerate(prof):
+            ring_v.append([bm.verts.new((math.cos(t / 6 * math.tau) * rad, math.sin(t / 6 * math.tau) * rad * 0.6, z)) for t in range(6)])
+        for k_ in range(len(ring_v) - 1):
+            for t in range(6):
+                bm.faces.new((ring_v[k_][t], ring_v[k_][(t + 1) % 6], ring_v[k_ + 1][(t + 1) % 6], ring_v[k_ + 1][t]))
+        bm.to_mesh(me)
+        bm.free()
+        ob = link(bpy.data.objects.new("flame", me))
+        ob.data.materials.append(mat("flame"))
+        a = r.uniform(0, math.tau)
+        rr_ = r.uniform(0, 0.16)
+        ob.location = P(math.cos(a) * rr_, math.sin(a) * rr_, 0.3)
+        ob.rotation_euler = (r.uniform(-0.25, 0.25), r.uniform(-0.25, 0.25), r.uniform(0, 6.28))
     # Sessel im Kreis (Öffnung zum Rasen nach Plan-Norden)
     n = 5
     for i in range(n):
@@ -696,6 +730,19 @@ def basalt_columns(w: float, d: float, h: float):
         bev.limit_method = "ANGLE"
 
 
+def deck_bench(w: float, d: float, h: float):
+    """Einbaubank aus Lärche auf dem Deck: Sitzkasten mit Lattung, Rückenkissen, Pflanzkasten am Ende"""
+    box("body", -w / 2, -d / 2, 0, w / 2 - 0.6, d / 2, h - 0.04, "wood_natural", 0.004)
+    box("seat", -w / 2 - 0.02, -d / 2 - 0.02, h - 0.04, w / 2 - 0.6, d / 2 + 0.02, h, "wood_natural", 0.004)
+    box("cushion", -w / 2 + 0.05, -d / 2 + 0.06, h, w / 2 - 0.65, d / 2 - 0.04, h + 0.08, "fabric_light", 0.03)
+    box("back", -w / 2 + 0.05, -d / 2 + 0.02, h + 0.08, w / 2 - 0.65, -d / 2 + 0.14, h + 0.42, "fabric_dark", 0.04)
+    box("planterbox", w / 2 - 0.58, -d / 2, 0, w / 2, d / 2, h + 0.1, "corten", 0.004)
+    box("planter_soil", w / 2 - 0.55, -d / 2 + 0.03, 0, w / 2 - 0.03, d / 2 - 0.03, h + 0.06, "soil")
+    r = rng(5)
+    for i in range(3):
+        veg_clump("herb", P(w / 2 - 0.29 + (r.random() - 0.5) * 0.25, (r.random() - 0.5) * d * 0.6, h + 0.06), r, 1.4)
+
+
 GENERATORS = {
     "house": house,
     "shed": shed,
@@ -719,4 +766,5 @@ GENERATORS = {
     "stoneWall": stone_wall,
     "basaltBoulders": basalt_boulders,
     "basaltColumns": basalt_columns,
+    "deckBench": deck_bench,
 }

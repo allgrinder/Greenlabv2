@@ -214,6 +214,8 @@ export function buildObjectView(o: PlanObject, ctx: ViewContext): ObjectView {
           node.addChild(mask, edge);
         }
         if (m.texture === 'meadow') {
+          // weicher Übergang: Wiesenhalme greifen über den Rand in den Rasen
+          for (const [wdt, al] of [[0.9, 0.25], [0.45, 0.5]] as const) strokeRegions(g, fp, { width: wdt, alpha: al, fill: materialPattern(m) } as StrokeInput);
           fillRegions(g, fp, meadowMacroPattern());
           if (ctx.season !== 'summer') fillRegions(g, fp, { color: hex(LAWN_COLOR[ctx.season]), alpha: 0.45 });
         }

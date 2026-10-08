@@ -1,0 +1,138 @@
+{
+ "version": 1,
+ "plants": {
+  "tilia-cordata": {
+   "kind": "tree",
+   "w": 15,
+   "d": 15,
+   "h": 20,
+   "ppm": 48.0,
+   "looks": {
+    "#97AE68|0||": {
+     "seasons": [
+      "spring"
+     ],
+     "top": [
+      {
+       "file": "tilia-cordata_0_0_top.webp",
+       "px": [
+        716,
+        779
+       ],
+       "anchor": [
+        0.4561,
+        0.5259
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "tilia-cordata_0_0_oblique.webp",
+       "px": [
+        716,
+        727
+       ],
+       "anchor": [
+        0.4561,
+        0.9751
+       ]
+      }
+     ]
+    },
+    "#6D8656|0||": {
+     "seasons": [
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "tilia-cordata_1_0_top.webp",
+       "px": [
+        732,
+        708
+       ],
+       "anchor": [
+        0.4859,
+        0.5462
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "tilia-cordata_1_0_oblique.webp",
+       "px": [
+        732,
+        739
+       ],
+       "anchor": [
+        0.4859,
+        0.9755
+       ]
+      }
+     ]
+    },
+    "#C69442|0||": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "tilia-cordata_2_0_top.webp",
+       "px": [
+        750,
+        722
+       ],
+       "anchor": [
+        0.492,
+        0.4825
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "tilia-cordata_2_0_oblique.webp",
+       "px": [
+        750,
+        729
+       ],
+       "anchor": [
+        0.492,
+        0.9752
+       ]
+      }
+     ]
+    },
+    "#7A6E5E|1||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "tilia-cordata_3_0_top.webp",
+       "px": [
+        758,
+        745
+       ],
+       "anchor": [
+        0.5096,
+        0.522
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "tilia-cordata_3_0_oblique.webp",
+       "px": [
+        758,
+        719
+       ],
+       "anchor": [
+        0.5096,
+        0.9749
+       ]
+      }
+     ]
+    }
+   }
+  }
+ }
+}

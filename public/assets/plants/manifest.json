@@ -399,6 +399,139 @@
      ]
     }
    }
+  },
+  "prunus-serrulata": {
+   "kind": "tree",
+   "w": 8,
+   "d": 8,
+   "h": 7,
+   "ppm": 90.0,
+   "looks": {
+    "#E6C3CB|0|#FBF1F3|": {
+     "seasons": [
+      "spring"
+     ],
+     "top": [
+      {
+       "file": "prunus-serrulata_0_0_top.webp",
+       "px": [
+        615,
+        607
+       ],
+       "anchor": [
+        0.4949,
+        0.4906
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "prunus-serrulata_0_0_oblique.webp",
+       "px": [
+        615,
+        591
+       ],
+       "anchor": [
+        0.4949,
+        0.902
+       ]
+      }
+     ]
+    },
+    "#738B58|0||": {
+     "seasons": [
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "prunus-serrulata_1_0_top.webp",
+       "px": [
+        666,
+        619
+       ],
+       "anchor": [
+        0.5019,
+        0.471
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "prunus-serrulata_1_0_oblique.webp",
+       "px": [
+        666,
+        601
+       ],
+       "anchor": [
+        0.5019,
+        0.9013
+       ]
+      }
+     ]
+    },
+    "#B5553A|0||": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "prunus-serrulata_2_0_top.webp",
+       "px": [
+        621,
+        613
+       ],
+       "anchor": [
+        0.5037,
+        0.489
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "prunus-serrulata_2_0_oblique.webp",
+       "px": [
+        621,
+        605
+       ],
+       "anchor": [
+        0.5037,
+        0.9028
+       ]
+      }
+     ]
+    },
+    "#7A6E5E|1||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "prunus-serrulata_3_0_top.webp",
+       "px": [
+        609,
+        630
+       ],
+       "anchor": [
+        0.503,
+        0.5207
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "prunus-serrulata_3_0_oblique.webp",
+       "px": [
+        609,
+        596
+       ],
+       "anchor": [
+        0.503,
+        0.9588
+       ]
+      }
+     ]
+    }
+   }
   }
  }
 }

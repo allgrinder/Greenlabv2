@@ -483,7 +483,7 @@ def pergola(w: float, d: float, h: float):
     # Lamellen quer, leicht schräg gestellt (dunkles Dach, feine Linien von oben)
     y = -d / 2 + t + 0.02
     while y < d / 2 - t - 0.1:
-        box("louvre", -w / 2 + t, y, h - 0.13, w / 2 - t, y + 0.16, h - 0.1, "anthracite", 0.004)
+        box("louvre", -w / 2 + t, y, h - 0.13, w / 2 - t, y + 0.16, h - 0.1, "mat_black", 0.004)
         y += 0.17
     sofa(w - 0.8, d - 0.9, 0.75, ox=0.0, oy=0.1)
     # Teppich

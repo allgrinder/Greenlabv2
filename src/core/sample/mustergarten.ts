@@ -117,20 +117,26 @@ export function createMustergarten(): Project {
   });
 
   // ---------- Flächen, Wege, Beete (zuerst bauen: der Rasen wird darum herum ausgeschnitten)
+  // grün dominiert, Gräser als helle Akzente (wie im Konzept)
   const BORDER: [string, number][] = [
-    ['pennisetum', 0.2],
-    ['salvia', 0.18],
-    ['nepeta', 0.16],
-    ['echinacea', 0.14],
-    ['stipa', 0.14],
+    ['salvia', 0.2],
+    ['nepeta', 0.18],
+    ['geranium', 0.16],
+    ['echinacea', 0.12],
+    ['pennisetum', 0.12],
     ['sedum', 0.1],
-    ['lavandula', 0.08],
+    ['lavandula', 0.07],
+    ['stipa', 0.05],
   ];
   const borders = [
-    planting('Rabatte Nord', simpleRegion(rect(15, 1.75, 28.2, 1.7)), [['stipa', 0.25], ['nepeta', 0.2], ['pennisetum', 0.2], ['salvia', 0.2], ['echinacea', 0.15]]),
+    planting('Rabatte Nord', simpleRegion(rect(15, 1.75, 28.2, 1.7)), [['geranium', 0.25], ['nepeta', 0.2], ['salvia', 0.2], ['pennisetum', 0.15], ['echinacea', 0.1], ['stipa', 0.1]]),
     planting('Rabatte West', simpleRegion(rect(1.95, 25.6, 2.1, 45.8)), BORDER),
     planting('Rabatte Ost', simpleRegion(rect(28.15, 25.6, 1.9, 45.8)), BORDER),
-    planting('Rabatte Süd', simpleRegion(rect(16.35, 48.05, 21.7, 2.1)), [['lavandula', 0.25], ['sedum', 0.2], ['stipa', 0.2], ['pennisetum', 0.2], ['salvia', 0.15]]),
+    // Pflanzband westlich der Trittplatten: der Weg läuft im unteren Teil zwischen Stauden
+    planting('Beet am Trittweg', simpleRegion(rect(23.55, 41.5, 1.5, 9.4, 0.6)), BORDER),
+    planting('Beet Pavillon Ost', simpleRegion(rect(23.3, 34.4, 1, 5.6)), BORDER, 7),
+    planting('Beet Pavillon Süd', simpleRegion(rect(20.5, 37.5, 6.6, 1.1)), BORDER, 7),
+    planting('Rabatte Süd', simpleRegion(rect(16.35, 48.05, 21.7, 2.1)), [['lavandula', 0.2], ['geranium', 0.2], ['sedum', 0.2], ['salvia', 0.2], ['pennisetum', 0.1], ['stipa', 0.1]]),
     planting('Beet Pavillon Nord', simpleRegion(rect(20.5, 31.3, 6.6, 1.1)), [['salvia', 0.35], ['nepeta', 0.35], ['stipa', 0.3]], 5),
     planting('Beet Pavillon West', simpleRegion(rect(17.7, 34.4, 1, 5.6)), [['pennisetum', 0.4], ['echinacea', 0.3], ['sedum', 0.3]], 5),
   ];
@@ -194,6 +200,8 @@ export function createMustergarten(): Project {
     [28.2, 15.5, 1.8], [28.1, 21, 1.6], [28.2, 27, 1.8], [28.1, 32.5, 1.6], [28.2, 38.5, 1.8], [28.1, 44.5, 1.6],
     [9.5, 1.8, 1.6], [16, 1.8, 1.7], [21, 1.8, 1.6],
     [10, 48, 1.6], [19.5, 48, 1.8], [24.5, 48, 1.6],
+    [2, 8.5, 1.6], [1.9, 33, 1.6], [2, 37, 1.8], [2, 45.5, 1.6], [28.2, 4.5, 1.6], [28.1, 9.5, 1.8],
+    [5.5, 1.8, 1.6], [13, 1.8, 1.4], [14.5, 48, 1.6], [7.5, 48.1, 1.4], [23.5, 39.5, 1.3], [23.5, 43.6, 1.4],
   ];
   const kinds = ['hydrangea', 'spiraea', 'cornus'];
   SHRUBS.forEach(([x, y, d], i) => add(plant(kinds[i % 3], x, y, d)));
@@ -237,7 +245,7 @@ export function createMustergarten(): Project {
   add(text('② Spiel & Bewegung', 7, 27.2));
   add(text('③ Rasen', 15, 30, 0.8));
   add(text('④ Hochbeete', 8.2, 39.4));
-  add(text('⑤ Pavillon', 20.5, 38.5));
+  add(text('⑤ Pavillon', 20.5, 39.2));
   add(text('⑥ Naturwiese & Pod', 10.5, 15.2));
   add(text('⑦ Feuerstelle', 15, 40.9));
 

@@ -343,7 +343,7 @@ def tree(sp: dict, look: dict, seed: int):
             if u.length > 1:
                 continue
             ln = u.length
-            u = u.normalized() * (0.55 + 0.45 * ln ** 0.5)
+            u = u.normalized() * (0.2 + 0.8 * ln ** 0.6)  # auch innen und oben in der Mitte (sonst Loch)
             rr = R
             if shape == "vase":
                 rr = R * (0.55 + 0.45 * (u.z + 1) / 2)
@@ -384,7 +384,7 @@ def tree(sp: dict, look: dict, seed: int):
     extra = ([(bloom, 0.35)] if bloom else []) + ([(fruit, 0.006)] if fruit else [])
     for i, c in enumerate(centers):
         r = cr * rnd.uniform(0.75, 1.3)
-        foliage_cluster(f"clump{i}", c, r, rnd, leaf, ls, look["color"], rnd.uniform(0.7, 0.95), 2.2, 5, extra)
+        foliage_cluster(f"clump{i}", c, r, rnd, leaf, ls, look["color"], rnd.uniform(0.7, 0.95), 2.9, 5, extra)
 
 
 def shrub(sp: dict, look: dict, seed: int):

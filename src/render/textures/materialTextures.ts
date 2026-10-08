@@ -135,29 +135,28 @@ function pebbles(ctx: CanvasRenderingContext2D, r: () => number, n: number, w: n
 
 const SPECS: Record<Material['texture'], TileSpec> = {
   lawn: {
-    w: 6,
-    h: 6,
+    // Nur Feinstruktur (Halme, Körnung, 1-m-Flecken); große Wolken liefert lawnMacroPattern
+    w: 4,
+    h: 4,
     pxPerM: 100,
     paint(ctx, w, h) {
-      const A = C('#6b8443');
-      const B = C('#90a660');
-      const D = C('#aaa96a');
+      const A = C('#939e4f');
+      const B = C('#afb868');
+      const D = C('#c0c67c');
       pixels(ctx, w, h, (u, v) => {
-        const big = tfbm(u, v, 2, 3, 3);
-        const mid = tfbm(u, v, 9, 5, 3);
-        const blade = pnoise(u * 360, v * 360, 360, 9) * 0.6 + pnoise(u * 600, v * 120, 600, 4) * 0.4;
-        // Mähstreifen 1 m (6 je Kachel)
-        const stripe = 1 + 0.022 * Math.sign(Math.sin(u * Math.PI * 6));
-        let c = mixc(A, B, Math.min(1, Math.max(0, big * 1.3 - 0.15)));
-        c = mixc(c, D, Math.max(0, mid - 0.62) * 1.5);
-        const f = (0.8 + blade * 0.36) * stripe;
+        const mid = tfbm(u, v, 4, 5, 3);
+        const fine = tfbm(u, v, 24, 7, 2);
+        const grain = pnoise(u * 400, v * 400, 400, 9) * 0.55 + pnoise(u * 160, v * 160, 160, 4) * 0.45;
+        let c = mixc(A, B, Math.min(1, Math.max(0, mid * 1.5 - 0.25)));
+        c = mixc(c, D, Math.max(0, fine - 0.6) * 1.6);
+        const f = 0.87 + grain * 0.22;
         return [c[0] * f, c[1] * f, c[2] * f];
       });
-      // einzelne Halme mit Lichtkante
+      // kurze Halme: dunkle Schattenseite, helle Spitzen
       const r = rng(11);
-      const up = () => -Math.PI / 2 + (r() - 0.5) * 0.9;
-      strokes(ctx, r, 2200, w, h, 9, 'rgba(36,52,20,.22)', 1.4, up);
-      strokes(ctx, r, 1400, w, h, 8, 'rgba(232,240,190,.16)', 1.2, up);
+      const any = () => r() * Math.PI * 2;
+      strokes(ctx, r, 5200, w, h, 4, 'rgba(78,90,36,.16)', 1.1, any);
+      strokes(ctx, r, 3600, w, h, 3.5, 'rgba(214,220,150,.13)', 1, any);
     },
   },
   gravel: {
@@ -354,6 +353,42 @@ export function materialPattern(m: Material, origin?: { x: number; y: number }, 
     mtx.translate(origin.x, origin.y);
   }
   pattern.setTransform(mtx);
+  return pattern;
+}
+
+/* ---------- große Helligkeitswolken für Rasen (nicht kachelnd wahrnehmbar) ---------- */
+
+const MACRO = { size: 44, pxPerM: 6 };
+let macroTex: Texture | null = null;
+
+/** Weiche helle/dunkle Wolken über 44 × 44 m (Halbtransparenz), über den Rasen gelegt */
+export function lawnMacroPattern(): FillPattern {
+  if (!macroTex) {
+    const n = MACRO.size * MACRO.pxPerM;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = n;
+    const ctx = canvas.getContext('2d')!;
+    const img = ctx.createImageData(n, n);
+    const dark: RGB = [64, 76, 26];
+    const light: RGB = [206, 210, 140];
+    for (let j = 0; j < n; j++)
+      for (let i = 0; i < n; i++) {
+        const t = tfbm(i / n, j / n, 5, 31, 4);
+        const k = (j * n + i) * 4;
+        const c = t < 0.5 ? dark : light;
+        const a = Math.min(1, Math.abs(t - 0.5) * 2.4);
+        img.data[k] = c[0];
+        img.data[k + 1] = c[1];
+        img.data[k + 2] = c[2];
+        img.data[k + 3] = Math.round(a * a * (t < 0.5 ? 120 : 90));
+      }
+    ctx.putImageData(img, 0, 0);
+    macroTex = Texture.from(canvas);
+    macroTex.source.style.addressMode = 'repeat';
+    macroTex.source.scaleMode = 'linear';
+  }
+  const pattern = new FillPattern({ texture: macroTex, repetition: 'repeat', textureSpace: 'global' });
+  pattern.setTransform(new Matrix().scale(1 / MACRO.pxPerM, 1 / MACRO.pxPerM).translate(7.3, 3.1));
   return pattern;
 }
 

@@ -19,7 +19,7 @@ import { waterGradient } from '../symbols/gradients';
 import { drawPlanting } from '../symbols/plants';
 import { crownSprite, espalierNode, hedgeNode, perennialSprite, plantingNode, scatterNode } from '../symbols/plantSprites';
 import { drawDrip, drawFixture, drawLampDay, drawPipe, drawSprinkler } from '../symbols/tech';
-import { materialPattern } from '../textures/materialTextures';
+import { lawnMacroPattern, materialPattern } from '../textures/materialTextures';
 import { buildSolid, type Tilt } from './obliqueView';
 import { hex, seedFrom } from '../util/rng';
 
@@ -149,8 +149,17 @@ export function buildObjectView(o: PlanObject, ctx: ViewContext): ObjectView {
         strokeRegions(g, fp, { color: 0xc3baaa, width: 0.12 });
       } else {
         fillRegions(g, fp, materialPattern(m, origin, rot));
-        // Rasen färbt sich mit der Jahreszeit
-        if (m.texture === 'lawn' && ctx.season !== 'summer') fillRegions(g, fp, { color: hex(LAWN_COLOR[ctx.season]), alpha: 0.55 });
+        if (m.texture === 'lawn') {
+          // große weiche Wolken, Jahreszeitenfarbe, dunklere Ränder zu Beeten und Wegen
+          fillRegions(g, fp, lawnMacroPattern());
+          if (ctx.season !== 'summer') fillRegions(g, fp, { color: hex(LAWN_COLOR[ctx.season]), alpha: 0.55 });
+          const mask = new Graphics();
+          fillRegions(mask, fp, 0xffffff);
+          const edge = new Graphics();
+          for (const wdt of [1.6, 0.9, 0.45]) strokeRegions(edge, fp, { color: 0x3a4418, alpha: 0.07, width: wdt });
+          edge.mask = mask;
+          node.addChild(mask, edge);
+        }
         const edge = { gravel: 0xa69c8c, paving: 0x9b8f7d, wood: 0x7e5c3d } as Record<string, number>;
         if (edge[m.texture]) strokeRegions(g, fp, { color: edge[m.texture], width: m.texture === 'wood' ? 0.045 : 0.08 });
       }

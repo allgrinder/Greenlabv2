@@ -2226,6 +2226,112 @@
      ]
     }
    ]
+  },
+  "basaltColumns": {
+   "w": 1.0,
+   "d": 0.8,
+   "h": 1.4,
+   "ppm": 220.0,
+   "top": [
+    {
+     "file": "basaltColumns_top_0.webp",
+     "rot": 0,
+     "px": [
+      266,
+      177
+     ],
+     "anchor": [
+      0.5236,
+      0.5033
+     ]
+    },
+    {
+     "file": "basaltColumns_top_90.webp",
+     "rot": 90,
+     "px": [
+      177,
+      266
+     ],
+     "anchor": [
+      0.4967,
+      0.5236
+     ]
+    },
+    {
+     "file": "basaltColumns_top_180.webp",
+     "rot": 180,
+     "px": [
+      266,
+      177
+     ],
+     "anchor": [
+      0.4764,
+      0.4967
+     ]
+    },
+    {
+     "file": "basaltColumns_top_270.webp",
+     "rot": 270,
+     "px": [
+      177,
+      266
+     ],
+     "anchor": [
+      0.5033,
+      0.4764
+     ]
+    }
+   ],
+   "oblique": [
+    {
+     "file": "basaltColumns_oblique_0.webp",
+     "rot": 0,
+     "px": [
+      266,
+      312
+     ],
+     "anchor": [
+      0.5236,
+      0.7625
+     ]
+    },
+    {
+     "file": "basaltColumns_oblique_90.webp",
+     "rot": 90,
+     "px": [
+      177,
+      387
+     ],
+     "anchor": [
+      0.4967,
+      0.7259
+     ]
+    },
+    {
+     "file": "basaltColumns_oblique_180.webp",
+     "rot": 180,
+     "px": [
+      266,
+      300
+     ],
+     "anchor": [
+      0.4764,
+      0.7495
+     ]
+    },
+    {
+     "file": "basaltColumns_oblique_270.webp",
+     "rot": 270,
+     "px": [
+      177,
+      328
+     ],
+     "anchor": [
+      0.5033,
+      0.6455
+     ]
+    }
+   ]
   }
  }
 }

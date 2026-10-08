@@ -133,6 +133,139 @@
      ]
     }
    }
+  },
+  "amelanchier-lamarckii": {
+   "kind": "tree",
+   "w": 5,
+   "d": 5,
+   "h": 6,
+   "ppm": 144.0,
+   "looks": {
+    "#B5C78A|0|#F3E9EC|": {
+     "seasons": [
+      "spring"
+     ],
+     "top": [
+      {
+       "file": "amelanchier-lamarckii_0_0_top.webp",
+       "px": [
+        760,
+        735
+       ],
+       "anchor": [
+        0.5099,
+        0.4792
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "amelanchier-lamarckii_0_0_oblique.webp",
+       "px": [
+        760,
+        685
+       ],
+       "anchor": [
+        0.5099,
+        0.8377
+       ]
+      }
+     ]
+    },
+    "#86A062|0||#B9472F": {
+     "seasons": [
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "amelanchier-lamarckii_1_0_top.webp",
+       "px": [
+        703,
+        781
+       ],
+       "anchor": [
+        0.4781,
+        0.489
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "amelanchier-lamarckii_1_0_oblique.webp",
+       "px": [
+        703,
+        679
+       ],
+       "anchor": [
+        0.4781,
+        0.8304
+       ]
+      }
+     ]
+    },
+    "#C4553A|0||": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "amelanchier-lamarckii_2_0_top.webp",
+       "px": [
+        739,
+        701
+       ],
+       "anchor": [
+        0.4793,
+        0.4854
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "amelanchier-lamarckii_2_0_oblique.webp",
+       "px": [
+        739,
+        691
+       ],
+       "anchor": [
+        0.4793,
+        0.8816
+       ]
+      }
+     ]
+    },
+    "#7A6E5E|1||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "amelanchier-lamarckii_3_0_top.webp",
+       "px": [
+        721,
+        745
+       ],
+       "anchor": [
+        0.5291,
+        0.4969
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "amelanchier-lamarckii_3_0_oblique.webp",
+       "px": [
+        721,
+        700
+       ],
+       "anchor": [
+        0.5291,
+        0.8669
+       ]
+      }
+     ]
+    }
+   }
   }
  }
 }

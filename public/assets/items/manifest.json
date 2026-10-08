@@ -1272,6 +1272,112 @@
      ]
     }
    ]
+  },
+  "cortenBed": {
+   "w": 3.0,
+   "d": 1.0,
+   "h": 0.7,
+   "ppm": 220.0,
+   "top": [
+    {
+     "file": "cortenBed_top_0.webp",
+     "rot": 0,
+     "px": [
+      706,
+      264
+     ],
+     "anchor": [
+      0.4986,
+      0.5
+     ]
+    },
+    {
+     "file": "cortenBed_top_90.webp",
+     "rot": 90,
+     "px": [
+      264,
+      706
+     ],
+     "anchor": [
+      0.5,
+      0.4986
+     ]
+    },
+    {
+     "file": "cortenBed_top_180.webp",
+     "rot": 180,
+     "px": [
+      706,
+      264
+     ],
+     "anchor": [
+      0.5014,
+      0.5
+     ]
+    },
+    {
+     "file": "cortenBed_top_270.webp",
+     "rot": 270,
+     "px": [
+      264,
+      706
+     ],
+     "anchor": [
+      0.5,
+      0.5014
+     ]
+    }
+   ],
+   "oblique": [
+    {
+     "file": "cortenBed_oblique_0.webp",
+     "rot": 0,
+     "px": [
+      706,
+      316
+     ],
+     "anchor": [
+      0.4986,
+      0.6601
+     ]
+    },
+    {
+     "file": "cortenBed_oblique_90.webp",
+     "rot": 90,
+     "px": [
+      264,
+      674
+     ],
+     "anchor": [
+      0.5,
+      0.5735
+     ]
+    },
+    {
+     "file": "cortenBed_oblique_180.webp",
+     "rot": 180,
+     "px": [
+      706,
+      312
+     ],
+     "anchor": [
+      0.5014,
+      0.6559
+     ]
+    },
+    {
+     "file": "cortenBed_oblique_270.webp",
+     "rot": 270,
+     "px": [
+      264,
+      679
+     ],
+     "anchor": [
+      0.5,
+      0.5769
+     ]
+    }
+   ]
   }
  }
 }

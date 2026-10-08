@@ -33,6 +33,21 @@ npm run assets:looks                                              # Katalog + Lo
 - Ergebnis: `public/assets/plants/<art>_<look>_<variante>_<top|oblique>.webp` + `manifest.json`.
   Die App lädt das Manifest beim Start und die Bilder erst, wenn eine Art in einer Jahreszeit sichtbar wird.
 
+## Bodenbeläge
+
+```bash
+.venv-blender/bin/python assets/blender/render_ground.py                 # alle Kacheln + Trittplatten (~5 min)
+.venv-blender/bin/python assets/blender/render_ground.py --only meadow
+.venv-blender/bin/python assets/blender/render_ground.py --quick --out /tmp/probe
+```
+
+- `ground.py`: jeder Belag ist echt modelliert – Kiesel, Platten mit Fugen und Fase, Dielen mit versetzten Stößen
+  und Schrauben, Häcksel, Rinde, Erde, Sand, Wildwiese (Grasbüschel + Blütennester), Großformatplatten.
+- Nahtlos: Ein Muster deckt genau eine Kachel ab; Elemente am Rand werden um ± Kachelgröße dupliziert (`tiled()`).
+  Nichts darf doppelt übereinander liegen – sonst flackern Flächen schwarz oder bekommen schräge Schattenstreifen.
+- Ergebnis: `public/assets/ground/<schlüssel>.webp` (Schlüssel = `Material.texture`), `stepping_<n>.webp`
+  (freigestellte Trittplatten) und `manifest.json`. Fehlt ein Bild, malt die App die prozedurale Kachel.
+
 ## Aufbau
 
 - `lib.py` – Szene (Cycles, Sonne von oben links wie in der App, kein Boden, kein Schlagschatten),

@@ -72,7 +72,9 @@ Umgesetzt sind alle acht Kernfunktionen der Phase 1 sowie PNG-Export (siehe `ARC
 ## Objekte aus Blender
 
 - Gebäude, Möbel und Ausstattung sind in Blender modelliert und gerendert (modern, grau/anthrazit): Draufsicht und Schrägansicht in vier Drehungen, ohne Schlagschatten (den wirft die App). Skripte und Anleitung: `assets/blender/README.md`.
-- Auch alle Pflanzen kommen aus Blender: 36 Arten in ihren Jahreszeiten (Blüte, Frucht, Herbstfarbe, kahler Winter), Bäume und Sträucher zusätzlich schräg. Die Bilder laden erst, wenn sie gebraucht werden; bis dahin steht die gemalte Version da.
+- Bodenbeläge (Kies, Platten, Holzdeck, Häcksel, Rinde, Erde, Sand, Wildwiese, Großformatplatten, Trittplatten) sind in Blender Stück für Stück modelliert und als nahtlose Kacheln gerendert.
+- Beispielgarten ist der „Mustergarten Modern & Naturnah“ (30 × 50 m, sieben Zonen: Eingang, Spiel, Rasen, Hochbeete, Pavillon, Naturwiese mit Homeoffice-Pod, Feuerstelle).
+- Auch alle Pflanzen kommen aus Blender: 40 Arten in ihren Jahreszeiten (Blüte, Frucht, Herbstfarbe, kahler Winter), Bäume und Sträucher zusätzlich schräg. Die Bilder laden erst, wenn sie gebraucht werden; bis dahin steht die gemalte Version da.
 - Gedrehte Objekte nutzen die nächste vorgerenderte Drehung; der Rest wird in der Draufsicht gedreht, in der Schrägansicht nicht. Abweichende Maße strecken das Bild.
 
 ## Bekannte Grenzen

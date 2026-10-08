@@ -635,6 +635,109 @@
      ]
     }
    }
+  },
+  "acer-globosum": {
+   "kind": "tree",
+   "w": 5,
+   "d": 5,
+   "h": 5,
+   "ppm": 144.0,
+   "looks": {
+    "#7E9A5C|0||": {
+     "seasons": [
+      "spring",
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "acer-globosum_0_0_top.webp",
+       "px": [
+        804,
+        855
+       ],
+       "anchor": [
+        0.4963,
+        0.5081
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "acer-globosum_0_0_oblique.webp",
+       "px": [
+        804,
+        745
+       ],
+       "anchor": [
+        0.4963,
+        0.8804
+       ]
+      }
+     ]
+    },
+    "#D6A83E|0||": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "acer-globosum_1_0_top.webp",
+       "px": [
+        800,
+        781
+       ],
+       "anchor": [
+        0.498,
+        0.4965
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "acer-globosum_1_0_oblique.webp",
+       "px": [
+        800,
+        710
+       ],
+       "anchor": [
+        0.498,
+        0.9275
+       ]
+      }
+     ]
+    },
+    "#7A6E5E|1||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "acer-globosum_2_0_top.webp",
+       "px": [
+        836,
+        811
+       ],
+       "anchor": [
+        0.4874,
+        0.4849
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "acer-globosum_2_0_oblique.webp",
+       "px": [
+        836,
+        746
+       ],
+       "anchor": [
+        0.4874,
+        0.9144
+       ]
+      }
+     ]
+    }
+   }
   }
  }
 }

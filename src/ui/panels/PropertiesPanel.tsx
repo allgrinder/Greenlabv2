@@ -46,8 +46,10 @@ const TYPE_LABEL: Record<PlanObject['type'], string> = {
 
 const SOURCE_LABEL: Record<string, string> = { rect: 'Rechteck', polygon: 'Polygon', bezier: 'Bézier', freehand: 'Freihand', boolean: 'Polygon' };
 
-const PATH_MATERIALS = ['gravel', 'paving', 'wood', 'mulch', 'barkMulch', 'soil'];
-const AREA_MATERIALS = ['lawn', 'gravel', 'paving', 'wood', 'mulch', 'barkMulch', 'soil', 'water'];
+const PATH_MATERIALS = ['gravel', 'basalt', 'paving', 'slabs', 'stepping', 'wood', 'mulch', 'barkMulch', 'soil'];
+const AREA_MATERIALS = ['lawn', 'meadow', 'gravel', 'basalt', 'paving', 'slabs', 'wood', 'sand', 'mulch', 'barkMulch', 'soil', 'water'];
+/** Abdeckung zwischen den Pflanzen eines Beets */
+const MULCH_MATERIALS = ['barkMulch', 'mulch', 'basalt', 'gravel', 'soil'];
 
 function update<T extends PlanObject>(o: T, label: string, fn: (d: Draft<T>) => unknown) {
   cmd.updateObject<T>(o.id, label, fn);
@@ -388,6 +390,25 @@ function PlantingProps({ o, q, doc }: { o: Extract<PlanObject, { type: 'planting
         <Field label="Pflanzen" value={`${num(count, 0)} Stk`} />
         <ElevationField o={o} />
         <LayerSelect o={o} doc={doc} />
+      </div>
+      <div className={u.eyebrow}>Abdeckung</div>
+      <div className={s.swatches}>
+        {MULCH_MATERIALS.map((id) => {
+          const mm = getMaterial(id);
+          return (
+            <button
+              key={id}
+              type="button"
+              title={mm.name}
+              aria-label={mm.name}
+              aria-pressed={id === o.mulchMaterialId}
+              className={id === o.mulchMaterialId ? s.swatchOn : s.swatch}
+              style={materialSwatchStyle(mm, 60)}
+              onClick={() => update(o, 'Abdeckung ändern', (d) => void (d.mulchMaterialId = id))}
+              data-testid={`mulch-${id}`}
+            />
+          );
+        })}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {o.mix.map((m) => {

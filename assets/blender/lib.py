@@ -448,6 +448,15 @@ def mat(kind: str) -> bpy.types.Material:
         nt.links.new(ramp.outputs["Color"], b.inputs["Base Color"])
         b.inputs["Roughness"].default_value = 0.9
         _bump(m, b, 25, 0.5)
+    elif kind == "basalt":  # Basalt: anthrazit, leicht bläulich, matte raue Oberfläche
+        m, b = _principled(kind)
+        _color_noise(m, b, (0.022, 0.024, 0.027), (0.06, 0.062, 0.066), 6)
+        b.inputs["Roughness"].default_value = 0.78
+        _bump(m, b, 40, 0.45)
+    elif kind == "basalt_cut":  # gesägte/geschliffene Kopffläche der Stelen: etwas heller
+        m, b = _principled(kind)
+        _color_noise(m, b, (0.05, 0.052, 0.056), (0.085, 0.088, 0.092), 20)
+        b.inputs["Roughness"].default_value = 0.55
     elif kind == "ember":  # Glut / Flammen
         m, b = _principled(kind)
         b.inputs["Base Color"].default_value = (0.8, 0.25, 0.04, 1)

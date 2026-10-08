@@ -625,6 +625,77 @@ def stone_wall(w: float, d: float, h: float):
         x += L
 
 
+def _boulder(name: str, cx: float, cy: float, sx: float, sy: float, sz: float, seed: int, material: str = "basalt"):
+    """Findling: verformte, leicht facettierte Kugel, zur Hälfte eingegraben"""
+    import bmesh
+    import bpy
+
+    from lib import link, mat
+
+    r = rng(seed)
+    me = bpy.data.meshes.new(name)
+    bm = bmesh.new()
+    bmesh.ops.create_icosphere(bm, subdivisions=3, radius=1)
+    ph = [r.random() * 6 for _ in range(4)]
+    for v in bm.verts:
+        d = v.co.normalized()
+        k = 1 + 0.14 * math.sin(d.x * 2.6 + ph[0]) * math.cos(d.y * 2.2 + ph[1]) + 0.07 * math.sin(d.z * 5 + ph[2]) + 0.05 * math.sin((d.x + d.y) * 7 + ph[3])
+        # oben abgeflacht, Kanten gebrochen
+        z = d.z * (0.85 if d.z > 0 else 1.0)
+        v.co = Vector((d.x * sx * k, -d.y * sy * k, z * sz * k))
+    bmesh.ops.translate(bm, vec=P(cx, cy, sz * 0.35), verts=bm.verts)
+    bm.to_mesh(me)
+    bm.free()
+    ob = link(bpy.data.objects.new(name, me))
+    ob.data.materials.append(mat(material))
+    for p in ob.data.polygons:
+        p.use_smooth = True
+    return ob
+
+
+def basalt_boulders(w: float, d: float, h: float):
+    """Gruppe aus drei Basalt-Findlingen (groß, mittel, klein) für Beete und Kiesflächen"""
+    _boulder("b1", -w * 0.12, -d * 0.05, w * 0.3, d * 0.34, h * 0.78, 3)
+    _boulder("b2", w * 0.26, d * 0.12, w * 0.2, d * 0.24, h * 0.55, 7)
+    _boulder("b3", -w * 0.02, d * 0.33, w * 0.13, d * 0.14, h * 0.38, 11)
+
+
+def basalt_columns(w: float, d: float, h: float):
+    """Basaltstelen: fünf- bis sechseckige Säulen in gestaffelten Höhen, Kopf gesägt"""
+    import bmesh
+    import bpy
+
+    from lib import link, mat
+
+    r = rng(19)
+    cols = [(-0.22, -0.08, 1.0, 0.13), (0.05, -0.16, 0.78, 0.12), (0.25, 0.04, 0.6, 0.11), (-0.04, 0.14, 0.9, 0.12), (-0.28, 0.18, 0.45, 0.1)]
+    for i, (fx, fy, fh, rad) in enumerate(cols):
+        n = r.choice([5, 6, 6])
+        top = h * fh
+        me = bpy.data.meshes.new(f"col{i}")
+        bm = bmesh.new()
+        a0 = r.random() * math.tau
+        ring = [(math.cos(a0 + k / n * math.tau) * rad * r.uniform(0.85, 1.12), math.sin(a0 + k / n * math.tau) * rad * r.uniform(0.85, 1.12)) for k in range(n)]
+        cx, cy = fx * w * 1.6, fy * d * 1.6
+        bot = [bm.verts.new(P(cx + x, cy + y, 0)) for x, y in ring]
+        tp = [bm.verts.new(P(cx + x, cy + y, top + r.uniform(-0.02, 0.02))) for x, y in ring]
+        f_top = bm.faces.new(tp)
+        bm.faces.new(list(reversed(bot)))
+        for k in range(n):
+            bm.faces.new((bot[k], bot[(k + 1) % n], tp[(k + 1) % n], tp[k]))
+        f_top.material_index = 1
+        bm.normal_update()
+        bm.to_mesh(me)
+        bm.free()
+        ob = link(bpy.data.objects.new(f"col{i}", me))
+        ob.data.materials.append(mat("basalt"))
+        ob.data.materials.append(mat("basalt_cut"))
+        bev = ob.modifiers.new("b", "BEVEL")
+        bev.width = 0.012
+        bev.segments = 2
+        bev.limit_method = "ANGLE"
+
+
 GENERATORS = {
     "house": house,
     "shed": shed,
@@ -646,4 +717,6 @@ GENERATORS = {
     "trampoline": trampoline,
     "gate": gate,
     "stoneWall": stone_wall,
+    "basaltBoulders": basalt_boulders,
+    "basaltColumns": basalt_columns,
 }

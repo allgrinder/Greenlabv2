@@ -80,7 +80,7 @@ def base_plane(T, material, z=0.0):
     return ob
 
 
-def pebble_mesh(name: str, r: float, rnd: random.Random, flat: float = 0.55, sub: int = 2):
+def pebble_mesh(name: str, r: float, rnd: random.Random, flat: float = 0.55, sub: int = 2, smooth: bool = True, rough: float = 0.0):
     me = bpy.data.meshes.new(name)
     bm = bmesh.new()
     bmesh.ops.create_icosphere(bm, subdivisions=sub, radius=1)
@@ -88,17 +88,18 @@ def pebble_mesh(name: str, r: float, rnd: random.Random, flat: float = 0.55, sub
     sx, sy = rnd.uniform(0.75, 1.25), rnd.uniform(0.6, 1.0)
     for v in bm.verts:
         d = v.co.normalized()
-        k = 1 + 0.12 * math.sin(d.x * 3 + ph[0]) * math.sin(d.y * 2 + ph[1]) + 0.08 * math.sin(d.z * 4 + ph[2])
+        k = 1 + 0.12 * math.sin(d.x * 3 + ph[0]) * math.sin(d.y * 2 + ph[1]) + 0.08 * math.sin(d.z * 4 + ph[2]) + rnd.uniform(-rough, rough)
         v.co = Vector((d.x * r * sx * k, d.y * r * sy * k, d.z * r * flat * k))
     bm.to_mesh(me)
     bm.free()
     for p in me.polygons:
-        p.use_smooth = True
+        p.use_smooth = smooth
     return me
 
 
-def scatter_pebbles(T, n: int, rmin: float, rmax: float, mats: list, rnd: random.Random, flat: float = 0.55, z: float = 0.0, protos: int = 24):
-    meshes = [pebble_mesh(f"peb{i}", 1.0, rnd, flat) for i in range(protos)]
+def scatter_pebbles(T, n: int, rmin: float, rmax: float, mats: list, rnd: random.Random, flat: float = 0.55, z: float = 0.0, protos: int = 24, angular: bool = False):
+    # gebrochenes Gestein: grobe Facetten, scharfe Kanten
+    meshes = [pebble_mesh(f"peb{i}", 1.0, rnd, flat, 1 if angular else 2, not angular, 0.22 if angular else 0.0) for i in range(protos)]
     for i in range(n):
         r = rnd.uniform(rmin, rmax)
         me = meshes[i % protos]
@@ -149,6 +150,16 @@ def gravel(T, rnd):
     mats = [pmat(f"g{i}", lin(h), 0.55, 0.12, 0.25, 25, 0.45) for i, h in enumerate(tones)]
     scatter_pebbles(T, 2600, 0.006, 0.013, mats, rnd, 0.55)
     scatter_pebbles(T, 900, 0.004, 0.007, mats, rnd, 0.6, 0.005)
+
+
+@ground("basalt", (0.8, 0.8), 520)
+def basalt(T, rnd):
+    """Basaltsplitt 16/32: kantig gebrochen, anthrazit bis blauschwarz, matte Bruchflächen, wenige hellere Körner"""
+    base_plane(T, pmat("bs_base", lin("#1c1d1e"), 1.0, 0.2, 0.6, 80))
+    tones = ["#3a3d40", "#33363a", "#43464a", "#2c2f32", "#4d5053", "#383a3b", "#5a5c5e"]
+    mats = [pmat(f"bs{i}", lin(h), 0.72, 0.1, 0.35, 30, 0.4) for i, h in enumerate(tones)]
+    scatter_pebbles(T, 2100, 0.009, 0.017, mats, rnd, 0.6, protos=30, angular=True)
+    scatter_pebbles(T, 700, 0.006, 0.01, mats, rnd, 0.6, 0.006, protos=20, angular=True)
 
 
 @ground("paving", (1.6, 0.8), 360)

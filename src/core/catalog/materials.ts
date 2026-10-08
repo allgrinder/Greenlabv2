@@ -12,6 +12,7 @@ export const MATERIALS: Material[] = [
   { id: 'mulch', name: 'Mulch, Holzhäcksel', texture: 'mulch', baseColor: '#6E533F', tileSizeM: 0.6, anchor: 'world', unit: 'm3', depthM: 0.07, unitSizeM: null, price: 49 },
   { id: 'barkMulch', name: 'Rindenmulch', texture: 'barkMulch', baseColor: '#4E3A2C', tileSizeM: 0.6, anchor: 'world', unit: 'm3', depthM: 0.07, unitSizeM: null, price: 55 },
   { id: 'soil', name: 'Erde / Beet', texture: 'soil', baseColor: '#7A604A', tileSizeM: 0.8, anchor: 'world', unit: 'm3', depthM: 0.3, unitSizeM: null, price: 38 },
+  { id: 'basalt', name: 'Basaltsplitt 16/32, anthrazit', texture: 'basalt', baseColor: '#3A3C3E', tileSizeM: 0.8, anchor: 'world', unit: 'm3', depthM: 0.06, unitSizeM: null, price: 145 },
   { id: 'slabs', name: 'Betonplatten 120 × 60, hellgrau', texture: 'slabs', baseColor: '#C6C2BA', tileSizeM: 2.4, anchor: 'object', unit: 'pcs', depthM: null, unitSizeM: { w: 1.2, d: 0.6 }, price: 46 },
   { id: 'meadow', name: 'Blumenwiese, heimische Wildblumen', texture: 'meadow', baseColor: '#8E9A4E', tileSizeM: 2, anchor: 'world', unit: 'm2', depthM: null, unitSizeM: null, price: 4.6 },
   { id: 'sand', name: 'Spielsand 0/2', texture: 'sand', baseColor: '#D8C7A0', tileSizeM: 1, anchor: 'world', unit: 'm3', depthM: 0.3, unitSizeM: null, price: 52 },

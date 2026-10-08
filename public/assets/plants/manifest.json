@@ -738,6 +738,227 @@
      ]
     }
    }
+  },
+  "hydrangea": {
+   "kind": "shrub",
+   "w": 1.5,
+   "d": 1.5,
+   "h": 1.5,
+   "ppm": 170.0,
+   "looks": {
+    "#7E9A6A|0||": {
+     "seasons": [
+      "spring"
+     ],
+     "top": [
+      {
+       "file": "hydrangea_0_0_top.webp",
+       "px": [
+        208,
+        209
+       ],
+       "anchor": [
+        0.5563,
+        0.4442
+       ]
+      },
+      {
+       "file": "hydrangea_0_1_top.webp",
+       "px": [
+        220,
+        216
+       ],
+       "anchor": [
+        0.4923,
+        0.4804
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "hydrangea_0_0_oblique.webp",
+       "px": [
+        208,
+        236
+       ],
+       "anchor": [
+        0.5563,
+        0.7975
+       ]
+      },
+      {
+       "file": "hydrangea_0_1_oblique.webp",
+       "px": [
+        220,
+        211
+       ],
+       "anchor": [
+        0.4923,
+        0.8081
+       ]
+      }
+     ]
+    },
+    "#7E9A6A|0|#A9B7D8|": {
+     "seasons": [
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "hydrangea_1_0_top.webp",
+       "px": [
+        191,
+        214
+       ],
+       "anchor": [
+        0.5435,
+        0.5119
+       ]
+      },
+      {
+       "file": "hydrangea_1_1_top.webp",
+       "px": [
+        226,
+        205
+       ],
+       "anchor": [
+        0.5079,
+        0.524
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "hydrangea_1_0_oblique.webp",
+       "px": [
+        191,
+        232
+       ],
+       "anchor": [
+        0.5435,
+        0.8284
+       ]
+      },
+      {
+       "file": "hydrangea_1_1_oblique.webp",
+       "px": [
+        226,
+        233
+       ],
+       "anchor": [
+        0.5079,
+        0.8379
+       ]
+      }
+     ]
+    },
+    "#A3583A|0||": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "hydrangea_2_0_top.webp",
+       "px": [
+        228,
+        209
+       ],
+       "anchor": [
+        0.4749,
+        0.5018
+       ]
+      },
+      {
+       "file": "hydrangea_2_1_top.webp",
+       "px": [
+        194,
+        206
+       ],
+       "anchor": [
+        0.5227,
+        0.5023
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "hydrangea_2_0_oblique.webp",
+       "px": [
+        228,
+        252
+       ],
+       "anchor": [
+        0.4749,
+        0.8404
+       ]
+      },
+      {
+       "file": "hydrangea_2_1_oblique.webp",
+       "px": [
+        194,
+        243
+       ],
+       "anchor": [
+        0.5227,
+        0.8041
+       ]
+      }
+     ]
+    },
+    "#7E806C|1||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "hydrangea_3_0_top.webp",
+       "px": [
+        188,
+        211
+       ],
+       "anchor": [
+        0.5633,
+        0.5105
+       ]
+      },
+      {
+       "file": "hydrangea_3_1_top.webp",
+       "px": [
+        194,
+        212
+       ],
+       "anchor": [
+        0.5353,
+        0.4852
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "hydrangea_3_0_oblique.webp",
+       "px": [
+        188,
+        235
+       ],
+       "anchor": [
+        0.5633,
+        0.8278
+       ]
+      },
+      {
+       "file": "hydrangea_3_1_oblique.webp",
+       "px": [
+        194,
+        232
+       ],
+       "anchor": [
+        0.5353,
+        0.8476
+       ]
+      }
+     ]
+    }
+   }
   }
  }
 }

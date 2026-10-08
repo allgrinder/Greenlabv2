@@ -532,6 +532,109 @@
      ]
     }
    }
+  },
+  "acer-campestre": {
+   "kind": "tree",
+   "w": 10,
+   "d": 10,
+   "h": 12,
+   "ppm": 72.0,
+   "looks": {
+    "#6D8656|0||": {
+     "seasons": [
+      "spring",
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "acer-campestre_0_0_top.webp",
+       "px": [
+        746,
+        720
+       ],
+       "anchor": [
+        0.5083,
+        0.5002
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "acer-campestre_0_0_oblique.webp",
+       "px": [
+        746,
+        681
+       ],
+       "anchor": [
+        0.5083,
+        0.9662
+       ]
+      }
+     ]
+    },
+    "#D0A23E|0||": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "acer-campestre_1_0_top.webp",
+       "px": [
+        740,
+        766
+       ],
+       "anchor": [
+        0.4839,
+        0.4911
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "acer-campestre_1_0_oblique.webp",
+       "px": [
+        740,
+        702
+       ],
+       "anchor": [
+        0.4839,
+        0.943
+       ]
+      }
+     ]
+    },
+    "#7A6E5E|1||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "acer-campestre_2_0_top.webp",
+       "px": [
+        741,
+        746
+       ],
+       "anchor": [
+        0.4882,
+        0.514
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "acer-campestre_2_0_oblique.webp",
+       "px": [
+        741,
+        691
+       ],
+       "anchor": [
+        0.4882,
+        0.9703
+       ]
+      }
+     ]
+    }
+   }
   }
  }
 }

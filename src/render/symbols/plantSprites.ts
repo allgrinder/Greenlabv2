@@ -166,7 +166,8 @@ export function plantingNode(region: FlatRegion, mix: { sp: PlantSpecies; share:
   const rnd = rng(seed);
   const b = bbox(region.outer);
   const inside = (p: Vec2) => pointInRegion(p, region.outer, region.holes);
-  const cell = 1.6;
+  // Pflanzgruppen im Raster; schmale Beete bekommen ein feineres Raster, sonst fallen sie leer aus
+  const cell = Math.min(1.6, Math.max(0.55, Math.min(b.maxX - b.minX, b.maxY - b.minY) * 0.75));
   const perDrift = Math.max(1, Math.round(perSquareMeter * cell * cell));
   // dicht und überlappend wie eine eingewachsene Pflanzung; hohe Arten zuletzt (liegen oben)
   const items: { h: number; s: Container }[] = [];

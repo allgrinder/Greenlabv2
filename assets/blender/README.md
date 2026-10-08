@@ -25,7 +25,8 @@ npm run assets:looks                                              # Katalog + Lo
 .venv-blender/bin/python assets/blender/render_plants.py --quick --out /tmp/probe  # Vorschau aller Arten in Minuten
 ```
 
-- `plants.py`: Bäume (Stamm → Gerüstäste → Seitenäste → Zweige, Laub in fransigen Wolken aus Teilwolken),
+- `plants.py`: Bäume (Stamm → Gerüstäste → Seitenäste → Zweigspitzen; Laub als Blattzweige in Laubmassen,
+  per Punktwolke verteilt: außen dichter, fransiger Rand, Lücken, Lichtdurchlass), freie Sträucher ebenso,
   Sträucher/Hecke, Spalierschirme, Stauden (Polster + Ähren, Margeriten, Schalen, Dolden, Kugeln),
   Gräser (Halmbögen + Blütenstände), Gemüse. Parameter je Art in `TREES`, `SHRUBS`, `PERENNIALS`, `GRASSES`.
 - Looks (Laubfarbe, kahl, Blüte, Frucht) kommen aus `src/render/assets/plantLooks.ts` – dieselbe Funktion nutzt die App,

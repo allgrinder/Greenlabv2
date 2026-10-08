@@ -1,6 +1,7 @@
 """
-Farbanpassung der Pflanzenbilder an das Referenzbild: hellere, wärmere Kronen.
-Hebt die Mitten (Gamma) und verschiebt Richtung Gelbgrün; Transparenz bleibt.
+Farbanpassung der Pflanzenbilder an das Gartenkonzept: satte, natürliche Grüntöne (nicht gelbstichig).
+Hebt die Mitten leicht (Gamma) und dämpft Blau nur wenig; Transparenz bleibt.
+`regrade()` rechnet Bilder mit der früheren, zu gelben Anpassung auf die neue um.
 
     python assets/blender/grade.py public/assets/plants   # einmalig auf vorhandene Bilder (Manifest merkt sich das)
 """

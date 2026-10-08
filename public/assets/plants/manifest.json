@@ -266,6 +266,139 @@
      ]
     }
    }
+  },
+  "malus-topaz": {
+   "kind": "tree",
+   "w": 7,
+   "d": 7,
+   "h": 5,
+   "ppm": 102.857,
+   "looks": {
+    "#AEBF8B|0|#F7EEF0|": {
+     "seasons": [
+      "spring"
+     ],
+     "top": [
+      {
+       "file": "malus-topaz_0_0_top.webp",
+       "px": [
+        744,
+        743
+       ],
+       "anchor": [
+        0.5099,
+        0.4772
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "malus-topaz_0_0_oblique.webp",
+       "px": [
+        744,
+        663
+       ],
+       "anchor": [
+        0.5099,
+        0.744
+       ]
+      }
+     ]
+    },
+    "#7C935F|0||": {
+     "seasons": [
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "malus-topaz_1_0_top.webp",
+       "px": [
+        748,
+        706
+       ],
+       "anchor": [
+        0.5068,
+        0.5013
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "malus-topaz_1_0_oblique.webp",
+       "px": [
+        748,
+        615
+       ],
+       "anchor": [
+        0.5068,
+        0.7725
+       ]
+      }
+     ]
+    },
+    "#B48743|0||": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "malus-topaz_2_0_top.webp",
+       "px": [
+        737,
+        750
+       ],
+       "anchor": [
+        0.4905,
+        0.4654
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "malus-topaz_2_0_oblique.webp",
+       "px": [
+        737,
+        620
+       ],
+       "anchor": [
+        0.4905,
+        0.7694
+       ]
+      }
+     ]
+    },
+    "#7A6E5E|1||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "malus-topaz_3_0_top.webp",
+       "px": [
+        693,
+        704
+       ],
+       "anchor": [
+        0.5299,
+        0.5015
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "malus-topaz_3_0_oblique.webp",
+       "px": [
+        693,
+        652
+       ],
+       "anchor": [
+        0.5299,
+        0.7576
+       ]
+      }
+     ]
+    }
+   }
   }
  }
 }

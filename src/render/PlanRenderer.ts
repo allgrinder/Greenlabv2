@@ -87,6 +87,9 @@ export function viewParamsFrom(s: SessionState): ViewParams {
 /** Vorschau eines Werkzeugs, im Bildschirmraum gezeichnet */
 export type PreviewDrawer = (g: Graphics, toScreen: ToScreen, labels: LabelPool) => void;
 
+/** Werkzeuge ohne Raster (Auswahl, Hintergrund ausrichten); alle Zeichenwerkzeuge zeigen es */
+const NO_GRID_TOOLS = new Set(['select', 'calibrate', 'bgmove', 'bgalign']);
+
 const PLANT_TYPES = new Set<PlanObject['type']>(['plant', 'hedge', 'planting', 'scatter', 'espalier']);
 
 /** alle Pflanzenarten eines Gartens */
@@ -147,6 +150,8 @@ export class PlanRenderer {
   onProgress: ((p: number) => void) | null = null;
   private frameWaiters: (() => void)[] = [];
   private uploaded = new WeakSet<object>();
+  /** Deckkraft des Zeichenrasters: nur beim Zeichnen und Verschieben sichtbar, weich ein- und ausgeblendet */
+  private gridA = 0;
 
   constructor(private store: EditorStoreApi) {}
 
@@ -704,7 +709,13 @@ export class PlanRenderer {
     const toScreen = this.toScreen;
     if (doc) {
       const plotLayer = doc.layerOrder.map((id) => doc.layers[id]).find((l) => l.kind === 'plot');
-      if (doc.settings.snapToGrid && !exporting) drawGrid(g, toScreen, vp.pxPerMeter, doc.site.boundary, doc.settings.gridStepM);
+      if (doc.settings.snapToGrid && !exporting) {
+        const want = !NO_GRID_TOOLS.has(s.session.tool) || s.mergeOpen ? 1 : 0;
+        this.gridA += (want - this.gridA) * 0.3;
+        if (Math.abs(want - this.gridA) < 0.02) this.gridA = want;
+        else this.invalidate();
+        drawGrid(g, toScreen, vp.pxPerMeter, doc.site.boundary, doc.settings.gridStepM, this.gridA);
+      }
       if (!plotLayer || plotLayer.visible) drawBoundary(g, toScreen, doc.site.boundary, vp.pxPerMeter, s.session.mode === 'night');
       // Bemaßungen
       for (const lid of doc.layerOrder) {

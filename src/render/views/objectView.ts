@@ -44,6 +44,8 @@ export interface ViewContext {
   northDeg: number;
   /** Schrägansicht (null = Draufsicht) */
   tilt: Tilt | null;
+  /** Grundstückskontur (Rabatten: Kanten daran sind die Rückseite) */
+  site?: Vec2[];
 }
 
 /**
@@ -260,13 +262,14 @@ export function buildObjectView(o: PlanObject, ctx: ViewContext): ObjectView {
       const fp = footprint(o);
       if (o.mulchMaterialId) fillRegions(g, fp, materialPattern(getMaterial(o.mulchMaterialId)));
       // Unterwuchs: Lücken zwischen den Stauden lesen sich als beschattetes Laub, nicht als nackter Mulch
-      // (Basalt bleibt als gestalterische Abdeckung sichtbar)
-      fillRegions(g, fp, { color: 0x27331a, alpha: o.mulchMaterialId === 'basalt' ? 0.15 : 0.62 });
+      // (Basalt und Kies bleiben als gestalterische Abdeckung sichtbar)
+      fillRegions(g, fp, { color: 0x27331a, alpha: o.mulchMaterialId === 'basalt' ? 0.15 : o.mulchMaterialId === 'gravel' ? 0.32 : 0.62 });
       const mix = o.mix.map((x) => {
         const sp = getSpecies(x.speciesId);
         return { sp, share: x.share, color: inBloom(sp, ctx.season) && sp.colors.bloom ? sp.colors.bloom : seasonColor(sp, ctx.season) };
       });
-      if (ctx.lod >= 1) for (const r of fp) node.addChild(plantingNode(r, mix, o.perSquareMeter, seed, ctx.season));
+      if (o.edging && !edgeStrip(EDGING_STRIP[o.edging.catalogId] ?? '')) strokeRegions(g, fp, { color: 0x8c857a, alpha: 0.75, width: 0.08 });
+      if (ctx.lod >= 1) for (const r of fp) node.addChild(plantingNode(r, mix, o.perSquareMeter, seed, ctx.season, o.tiers ? (ctx.site ?? null) : undefined));
       else for (const r of fp) drawPlanting(g, r, mix, o.perSquareMeter, seed, 1);
       break;
     }

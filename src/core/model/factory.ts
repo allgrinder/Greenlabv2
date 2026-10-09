@@ -5,6 +5,7 @@
 import { getItem } from '../catalog/items';
 import { getSpecies } from '../catalog/plants';
 import { getLamp } from '../catalog/lamps';
+import { getBedMix } from '../catalog/bedMixes';
 import { defaultLayerKind, layerOfKind, objectBase } from './defaults';
 import type {
   AreaObject,
@@ -25,6 +26,7 @@ import type {
   PathObject,
   PlanObject,
   PlantObject,
+  PlantingObject,
   Project,
   Region,
   TextObject,
@@ -56,6 +58,23 @@ export function newEspalier(doc: Project, centerline: PathGeometry, speciesId = 
     height: roof ? 2.6 : sp.heightMature,
     depth: roof ? 2.2 : 0.45,
     form: roof ? 'roof' : 'flat',
+  };
+}
+
+/** Rabatte aus einer Mischungsvorlage: gestaffelt, gemulcht, ohne Einfassung */
+export function newPlanting(doc: Project, region: Region, mixId: string): PlantingObject {
+  const v = getBedMix(mixId);
+  return {
+    ...objectBase(layerFor(doc, 'plants')),
+    type: 'planting',
+    name: v.name,
+    region,
+    mix: v.mix.map((x) => ({ ...x })),
+    perSquareMeter: v.perSquareMeter,
+    mulchMaterialId: v.mulchMaterialId,
+    tiers: true,
+    edging: null,
+    mixId: v.id,
   };
 }
 

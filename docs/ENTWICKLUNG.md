@@ -20,6 +20,10 @@
 
 Die App öffnet mit der Startseite: zuletzt bearbeiteter Garten, alle gespeicherten Gärten mit Vorschaubild, Neuer Garten, Mustergarten, JSON-Import. Grafik und Bilder laden währenddessen im Hintergrund (Fortschritt oben rechts); ein Garten öffnet erst, wenn er vollständig gezeichnet ist. `?bench=N` öffnet weiterhin direkt einen Benchmark-Garten.
 
+## Rabatten
+
+Werkzeug „Rabatte“ (K): Form wählen (Rechteck, Polygon, Kurve, Freihand) und Mischung (oder „Passend zum Standort“), dann zeichnen. Die Rabatte ist sofort bepflanzt, gemulcht und nach Höhe gestaffelt. Rechts lassen sich Vorlage, Anteile, Arten, Dichte, Staffelung, Abdeckung und Einfassung ändern. Erd-, Mulch-, Kies- und Basaltflächen haben den Knopf „Bepflanzen – in Rabatte umwandeln“. Stauden aus der Bibliothek auf eine Rabatte ziehen fügt sie der Mischung hinzu.
+
 ## Stand Phase 1
 
 Umgesetzt sind alle acht Kernfunktionen der Phase 1 sowie PNG-Export (siehe `ARCHITEKTUR.md`):

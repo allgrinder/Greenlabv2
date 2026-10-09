@@ -1,6 +1,7 @@
 /**
  * Pflanzen als Sprites (Stil B). Jede Funktion liefert Knoten in Weltmetern.
  */
+import { assignSpecies, bedDepth } from '../../core/planting';
 import { Container, Graphics, Sprite } from 'pixi.js';
 import { getSpecies } from '../../core/catalog/plants';
 import { espalierTrees } from '../../core/espalier';
@@ -161,31 +162,55 @@ export function scatterNode(plants: ScatterPlant[], season: Season, seed: number
  * Staudenpflanzung (Fläche mit Mix): Drifts je Art, deterministisch verteilt – wie bisher,
  * nur mit Polstern statt Kreisen.
  */
-export function plantingNode(region: FlatRegion, mix: { sp: PlantSpecies; share: number }[], perSquareMeter: number, seed: number, season: Season): Container {
+/**
+ * Pflanzfläche: Arten in Gruppen („Drifts“) im Raster. `tiers` = Grundstückskontur bzw. null (Inselbeet):
+ * dann Höhenstaffelung (niedrig vorn, hoch hinten, s. core/planting); undefined = Zufall nach Anteil.
+ */
+export function plantingNode(region: FlatRegion, mix: { sp: PlantSpecies; share: number }[], perSquareMeter: number, seed: number, season: Season, tiers?: Vec2[] | null): Container {
   const node = new Container();
   const rnd = rng(seed);
   const b = bbox(region.outer);
   const inside = (p: Vec2) => pointInRegion(p, region.outer, region.holes);
   // Pflanzgruppen im Raster; schmale Beete bekommen ein feineres Raster, sonst fallen sie leer aus
-  const cell = Math.min(1.6, Math.max(0.55, Math.min(b.maxX - b.minX, b.maxY - b.minY) * 0.75));
+  // gestaffelte Rabatten: kleinere Gruppen, damit sich Höhenbänder auch in schmalen Beeten bilden
+  const cell = Math.min(tiers !== undefined ? 0.9 : 1.6, Math.max(0.55, Math.min(b.maxX - b.minX, b.maxY - b.minY) * 0.75));
   const perDrift = Math.max(1, Math.round(perSquareMeter * cell * cell));
-  // dicht und überlappend wie eine eingewachsene Pflanzung; hohe Arten zuletzt (liegen oben)
+  const staggered = tiers !== undefined;
   const items: { h: number; s: Container }[] = [];
+  // dicht und überlappend wie eine eingewachsene Pflanzung; hohe Arten zuletzt (liegen oben)
+  const drift = (c: Vec2, pick: { sp: PlantSpecies }) => {
+    for (let i = 0; i < perDrift; i++) {
+      const a = rnd() * Math.PI * 2;
+      const d = Math.sqrt(rnd()) * cell * 0.6;
+      const p = { x: c.x + Math.cos(a) * d, y: c.y + Math.sin(a) * d };
+      if (!inside(p)) continue;
+      const size = Math.min(0.95, pick.sp.diameterMature * 1.15) * (0.85 + rnd() * 0.35);
+      items.push({ h: pick.sp.heightMature + rnd() * 0.1, s: perennialSprite(pick.sp, p, size, Math.floor(rnd() * 1e6), season) });
+    }
+  };
+  const centers: Vec2[] = [];
   for (let y = b.minY + cell / 2; y < b.maxY; y += cell)
     for (let x = b.minX + cell / 2; x < b.maxX; x += cell) {
       const c = { x: x + (rnd() - 0.5) * cell * 0.8, y: y + (rnd() - 0.5) * cell * 0.8 };
       if (!inside(c)) continue;
-      let t = rnd();
-      const pick = mix.find((m) => (t -= m.share) <= 0) ?? mix[mix.length - 1];
-      for (let i = 0; i < perDrift; i++) {
-        const a = rnd() * Math.PI * 2;
-        const d = Math.sqrt(rnd()) * cell * 0.6;
-        const p = { x: c.x + Math.cos(a) * d, y: c.y + Math.sin(a) * d };
-        if (!inside(p)) continue;
-        const size = Math.min(0.95, pick.sp.diameterMature * 1.15) * (0.85 + rnd() * 0.35);
-        items.push({ h: pick.sp.heightMature + rnd() * 0.1, s: perennialSprite(pick.sp, p, size, Math.floor(rnd() * 1e6), season) });
+      if (staggered) {
+        centers.push(c);
+        continue;
       }
+      // ohne Staffelung: Art zufällig nach Anteil (Zufallsfolge wie bisher, bestehende Beete bleiben gleich)
+      let t = rnd();
+      drift(c, mix.find((m) => (t -= m.share) <= 0) ?? mix[mix.length - 1]);
     }
+  if (staggered) {
+    const depth = bedDepth(region.outer, tiers);
+    const picks = assignSpecies(
+      centers.map((c) => depth(c)),
+      mix.map((m) => ({ height: m.sp.heightMature, share: m.share })),
+      rnd,
+      true,
+    );
+    centers.forEach((c, k) => drift(c, mix[picks[k]]));
+  }
   items.sort((a, b2) => a.h - b2.h);
   for (const it of items) node.addChild(it.s);
   return node;

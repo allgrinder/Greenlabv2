@@ -91,7 +91,7 @@ export class EdgeLayer {
     // Beete, Kies- und Plattenflächen, die auf dem Rasen liegen: dort hängen Halme von außen hinein
     const onLawn: Ring[] = [];
     const surfaces: Surface[] = [];
-    const edged: { rings: Vec2[][]; strip: string }[] = [];
+    const edged: { rings: Vec2[][]; strip: string; planting: boolean }[] = [];
     const spill: { rings: Ring[]; parts: [string, number][]; seed: number }[] = [];
     for (const o of visible) {
       if (o.type !== 'area' && o.type !== 'path' && o.type !== 'planting') continue;
@@ -100,8 +100,8 @@ export class EdgeLayer {
       const tex = o.type === 'planting' ? (o.mulchMaterialId ? getMaterial(o.mulchMaterialId).texture : '') : getMaterial(o.materialId).texture;
       for (const r of fp) surfaces.push({ region: r, tex: o.type === 'area' ? tex : o.type, box: bbox(r.outer) });
       if (o.type === 'area' && tex === 'lawn') lawn.push(...rings);
-      const e = o.type !== 'planting' && o.edging ? EDGING_STRIP[o.edging.catalogId] : undefined;
-      if (e) edged.push({ rings: rings.map((r) => r.pts), strip: e });
+      const e = o.edging ? EDGING_STRIP[o.edging.catalogId] : undefined;
+      if (e) edged.push({ rings: rings.map((r) => r.pts), strip: e, planting: o.type === 'planting' });
       else if (o.type !== 'path' || tex !== 'stepping') {
         if (tex !== 'lawn') onLawn.push(...rings);
         const parts = spillOf(tex, season);
@@ -175,9 +175,11 @@ export class EdgeLayer {
         const shadow = new Graphics();
         shadow.poly(ring.flatMap((p) => [p.x, p.y]), true).stroke({ color: 0x1b1a14, alpha: 0.18, width: strip.h * 0.9, join: 'round' });
         shadow.position.set(0.012, 0.016);
-        this.container.addChild(shadow);
+        // Rabatten: Einfassung über dem Mulch der Pflanzfläche
+        const into = e.planting ? this.bedContainer : this.container;
+        into.addChild(shadow);
         const mesh = stripMesh(ring, true, strip.h, strip.w, strip.texture, 1);
-        if (mesh) this.container.addChild(mesh);
+        if (mesh) into.addChild(mesh);
       }
     }
   }

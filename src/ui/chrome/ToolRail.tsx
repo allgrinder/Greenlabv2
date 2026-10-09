@@ -9,6 +9,7 @@ export const TOOLS: { id: ToolId; label: string; key: string; icon: IconName }[]
   { id: 'poly', label: 'Polygon', key: 'P', icon: 'poly' },
   { id: 'bezier', label: 'Kurve / Bézier', key: 'B', icon: 'bezier' },
   { id: 'free', label: 'Freihand', key: 'F', icon: 'free' },
+  { id: 'bed', label: 'Rabatte', key: 'K', icon: 'bed' },
   { id: 'path', label: 'Weg-Werkzeug', key: 'W', icon: 'path' },
   { id: 'dim', label: 'Bemaßung', key: 'M', icon: 'dim' },
   { id: 'text', label: 'Text', key: 'T', icon: 'text' },

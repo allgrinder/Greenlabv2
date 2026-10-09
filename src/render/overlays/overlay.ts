@@ -42,8 +42,9 @@ export function dashed(g: Graphics, pts: Vec2[], closed: boolean, pattern: numbe
   }
 }
 
-export function drawGrid(g: Graphics, toScreen: ToScreen, ppm: number, boundary: Polygon, step: number) {
-  if (boundary.length < 3) return;
+/** Rasterpunkte und 5-m-Linien; `strength` 0…1 zum Ein- und Ausblenden */
+export function drawGrid(g: Graphics, toScreen: ToScreen, ppm: number, boundary: Polygon, step: number, strength = 1) {
+  if (boundary.length < 3 || strength <= 0.01) return;
   const xs = boundary.map((p) => p.x);
   const ys = boundary.map((p) => p.y);
   const minX = Math.floor(Math.min(...xs));
@@ -58,7 +59,7 @@ export function drawGrid(g: Graphics, toScreen: ToScreen, ppm: number, boundary:
       const p = toScreen({ x, y });
       g.rect(p.x - r / 2, p.y - r / 2, r, r);
     }
-  g.fill({ color: 0x1e2828, alpha: 0.28 });
+  g.fill({ color: 0x1e2828, alpha: 0.28 * strength });
   // 5-m-Linien
   for (let x = Math.ceil(minX / 5) * 5; x <= maxX; x += 5) {
     const a = toScreen({ x, y: minY });
@@ -70,7 +71,7 @@ export function drawGrid(g: Graphics, toScreen: ToScreen, ppm: number, boundary:
     const b = toScreen({ x: maxX, y });
     g.moveTo(a.x, a.y).lineTo(b.x, b.y);
   }
-  g.stroke({ color: 0x1e2828, alpha: 0.14, width: 1, pixelLine: true });
+  g.stroke({ color: 0x1e2828, alpha: 0.14 * strength, width: 1, pixelLine: true });
 }
 
 /** Grenzlinie strichpunktiert (Architektur-Konvention), Grenzsteine an den Ecken */

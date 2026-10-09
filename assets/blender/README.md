@@ -69,3 +69,11 @@ npm run assets:looks                                              # Katalog + Lo
 3. `render_items.py --only <symbol>` ausführen.
 
 Schatten wirft die App selbst (Sonnenstand); die Bilder haben deshalb keinen Schlagschatten.
+
+## Stauden: besondere Formen (`plants.py`)
+
+- `strap`: Schwertblätter aus der Mitte (Taglilie), `fern`: Farnwedel aus Fiederblättchen (Wurmfarn),
+  Blüten `plume` (Rispe, Astilbe) und `lily` (Trichter, Taglilie).
+- `spread` verkleinert das Blattpolster bei großen Blättern; `frame` fügt lose Eckpunkte hinzu, weil Blätter
+  als Partikel nicht zur Bildhülle zählen und sonst am Rand abgeschnitten würden.
+- Wintergrüne Stauden mit `leaf_hex` (Purpurglöckchen, Bergenie) behalten ihre Laubfarbe das ganze Jahr.

@@ -2,6 +2,7 @@
  * Prozedurale Kacheltexturen je Material. Muster und Farben folgen den SVG-Patterns
  * aus GardenPlan.dc.html, werden aber in Metern gedacht und zufällig (deterministisch) gestreut.
  */
+import { cachedCanvas } from './texCache';
 import { FillPattern, Matrix, Texture } from 'pixi.js';
 import type { Material } from '../../core/model/types';
 import { groundTile } from '../assets/groundAssets';
@@ -399,13 +400,23 @@ const MAX_PX = 2048;
  * das Licht in den Blender-Bildern kommt immer von links oben). Das Raster der Vorlage verschwindet,
  * die Wiederholung erst nach k Kachelbreiten (≥ 8 m) – mit Makro-Variation darüber praktisch unsichtbar.
  */
-function bomb(srcs: CanvasImageSource[], tileW: number, tileH: number, ppm: number, seed: number) {
+function bomb(cacheKey: string, srcs: CanvasImageSource[], tileW: number, tileH: number, ppm: number, seed: number) {
   const k = Math.min(8, Math.max(3, Math.ceil(8 / Math.max(tileW, tileH))));
   const ppmT = Math.min(ppm, MAX_PX / (k * Math.max(tileW, tileH)));
   const tw = Math.round(tileW * ppmT);
   const th = Math.round(tileH * ppmT);
-  const W = tw * k;
-  const H = th * k;
+  // gespeichertes Ergebnis (2. Start) oder neu malen
+  const img = cachedCanvas(`bomb|${cacheKey}|${seed}`, tw * k, th * k, (out) => paintBomb(out, srcs, tw, th, seed));
+  const texture = Texture.from(img);
+  texture.source.style.addressMode = 'repeat';
+  texture.source.style.scaleMode = 'linear';
+  texture.source.autoGenerateMipmaps = true;
+  return { texture, spec: { w: tileW * k, h: tileH * k, pxPerM: ppmT, paint: () => undefined } as TileSpec };
+}
+
+function paintBomb(out: HTMLCanvasElement, srcs: CanvasImageSource[], tw: number, th: number, seed: number) {
+  const W = out.width;
+  const H = out.height;
   // Vorlagen (Grundkachel + Varianten) auf Zielauflösung
   const bases = srcs.map((src) => {
     const c = document.createElement('canvas');
@@ -415,9 +426,6 @@ function bomb(srcs: CanvasImageSource[], tileW: number, tileH: number, ppm: numb
     return c;
   });
   const base = bases[0];
-  const out = document.createElement('canvas');
-  out.width = W;
-  out.height = H;
   const ctx = out.getContext('2d')!;
   const pat = ctx.createPattern(base, 'repeat')!;
   ctx.fillStyle = pat;
@@ -460,11 +468,6 @@ function bomb(srcs: CanvasImageSource[], tileW: number, tileH: number, ppm: numb
           ctx.drawImage(patch, px, py);
         }
     }
-  const texture = Texture.from(out);
-  texture.source.style.addressMode = 'repeat';
-  texture.source.style.scaleMode = 'linear';
-  texture.source.autoGenerateMipmaps = true;
-  return { texture, spec: { w: tileW * k, h: tileH * k, pxPerM: ppmT, paint: () => undefined } as TileSpec };
 }
 
 const bombed = new Map<string, { texture: Texture; spec: TileSpec }>();
@@ -478,7 +481,7 @@ function tile(key: Material['texture']) {
     let hit = bombed.get(k);
     if (!hit) {
       const srcs = [g.texture, ...(g.variants ?? [])].map((t) => t.source.resource as CanvasImageSource);
-      hit = bomb(srcs, g.w, g.h, g.ppm, key.length * 977 + 13);
+      hit = bomb(`img|${key}`, srcs, g.w, g.h, g.ppm, key.length * 977 + 13);
       bombed.set(k, hit);
     }
     return hit;
@@ -494,7 +497,7 @@ function tile(key: Material['texture']) {
   spec.paint(canvas.getContext('2d')!, cw, ch, spec.pxPerM);
   if (key === 'lawn') {
     // Rasen ist immer gemalt: ebenfalls aufbrechen
-    hit = bomb([canvas], spec.w, spec.h, spec.pxPerM, 4711);
+    hit = bomb('proc|lawn', [canvas], spec.w, spec.h, spec.pxPerM, 4711);
     cache.set(key, hit);
     return hit;
   }
@@ -532,24 +535,24 @@ let macroTex: Texture | null = null;
 export function lawnMacroPattern(): FillPattern {
   if (!macroTex) {
     const n = MACRO.size * MACRO.pxPerM;
-    const canvas = document.createElement('canvas');
-    canvas.width = canvas.height = n;
-    const ctx = canvas.getContext('2d')!;
-    const img = ctx.createImageData(n, n);
-    const dark: RGB = [64, 76, 26];
-    const light: RGB = [206, 210, 140];
-    for (let j = 0; j < n; j++)
-      for (let i = 0; i < n; i++) {
-        const t = tfbm(i / n, j / n, 5, 31, 4);
-        const k = (j * n + i) * 4;
-        const c = t < 0.5 ? dark : light;
-        const a = Math.min(1, Math.abs(t - 0.5) * 2.4);
-        img.data[k] = c[0];
-        img.data[k + 1] = c[1];
-        img.data[k + 2] = c[2];
-        img.data[k + 3] = Math.round(a * a * (t < 0.5 ? 120 : 90));
-      }
-    ctx.putImageData(img, 0, 0);
+    const canvas = cachedCanvas('macro|lawn', n, n, (canvas) => {
+      const ctx = canvas.getContext('2d')!;
+      const img = ctx.createImageData(n, n);
+      const dark: RGB = [64, 76, 26];
+      const light: RGB = [206, 210, 140];
+      for (let j = 0; j < n; j++)
+        for (let i = 0; i < n; i++) {
+          const t = tfbm(i / n, j / n, 5, 31, 4);
+          const k = (j * n + i) * 4;
+          const c = t < 0.5 ? dark : light;
+          const a = Math.min(1, Math.abs(t - 0.5) * 2.4);
+          img.data[k] = c[0];
+          img.data[k + 1] = c[1];
+          img.data[k + 2] = c[2];
+          img.data[k + 3] = Math.round(a * a * (t < 0.5 ? 120 : 90));
+        }
+      ctx.putImageData(img, 0, 0);
+    });
     macroTex = Texture.from(canvas);
     macroTex.source.style.addressMode = 'repeat';
     macroTex.source.scaleMode = 'linear';
@@ -568,47 +571,47 @@ let meadowTex: Texture | null = null;
 export function meadowMacroPattern(): FillPattern {
   if (!meadowTex) {
     const n = MEADOW_MACRO.size * MEADOW_MACRO.pxPerM;
-    const canvas = document.createElement('canvas');
-    canvas.width = canvas.height = n;
-    const ctx = canvas.getContext('2d')!;
-    const img = ctx.createImageData(n, n);
-    const dark: RGB = [52, 62, 22];
-    const light: RGB = [214, 206, 126];
-    for (let j = 0; j < n; j++)
-      for (let i = 0; i < n; i++) {
-        const t = tfbm(i / n, j / n, 9, 77, 4);
-        const k = (j * n + i) * 4;
-        const c = t < 0.5 ? dark : light;
-        const a = Math.min(1, Math.abs(t - 0.5) * 2.6);
-        img.data[k] = c[0];
-        img.data[k + 1] = c[1];
-        img.data[k + 2] = c[2];
-        img.data[k + 3] = Math.round(a * a * (t < 0.5 ? 110 : 120));
+    const canvas = cachedCanvas('macro|meadow', n, n, (canvas) => {
+      const ctx = canvas.getContext('2d')!;
+      const img = ctx.createImageData(n, n);
+      const dark: RGB = [52, 62, 22];
+      const light: RGB = [214, 206, 126];
+      for (let j = 0; j < n; j++)
+        for (let i = 0; i < n; i++) {
+          const t = tfbm(i / n, j / n, 9, 77, 4);
+          const k = (j * n + i) * 4;
+          const c = t < 0.5 ? dark : light;
+          const a = Math.min(1, Math.abs(t - 0.5) * 2.6);
+          img.data[k] = c[0];
+          img.data[k + 1] = c[1];
+          img.data[k + 2] = c[2];
+          img.data[k + 3] = Math.round(a * a * (t < 0.5 ? 110 : 120));
+        }
+      ctx.putImageData(img, 0, 0);
+      // Blütennester: Margerite, Mohn, Kornblume, Wiesensalbei, Hahnenfuß – je Nest eine Farbe dominiert
+      const r = rng(78);
+      const colors = ['#f4f1e6', '#f4f1e6', '#c4342a', '#5a78cc', '#9c6aae', '#e3bf3e', '#efe7c8'];
+      for (let c = 0; c < 260; c++) {
+        const cx = r() * n;
+        const cy = r() * n;
+        const col = colors[Math.floor(r() * colors.length)];
+        const rad = 4 + r() * 10;
+        const dots = 5 + Math.floor(r() * 12);
+        for (let d = 0; d < dots; d++) {
+          const a = r() * Math.PI * 2;
+          const q = Math.sqrt(r()) * rad;
+          for (const ox of [0, -n, n])
+            for (const oy of [0, -n, n]) {
+              ctx.globalAlpha = 0.3 + r() * 0.35;
+              ctx.fillStyle = col;
+              ctx.beginPath();
+              ctx.arc(cx + Math.cos(a) * q + ox, cy + Math.sin(a) * q + oy, 0.5 + r() * 0.6, 0, Math.PI * 2);
+              ctx.fill();
+            }
+        }
       }
-    ctx.putImageData(img, 0, 0);
-    // Blütennester: Margerite, Mohn, Kornblume, Wiesensalbei, Hahnenfuß – je Nest eine Farbe dominiert
-    const r = rng(78);
-    const colors = ['#f4f1e6', '#f4f1e6', '#c4342a', '#5a78cc', '#9c6aae', '#e3bf3e', '#efe7c8'];
-    for (let c = 0; c < 260; c++) {
-      const cx = r() * n;
-      const cy = r() * n;
-      const col = colors[Math.floor(r() * colors.length)];
-      const rad = 4 + r() * 10;
-      const dots = 5 + Math.floor(r() * 12);
-      for (let d = 0; d < dots; d++) {
-        const a = r() * Math.PI * 2;
-        const q = Math.sqrt(r()) * rad;
-        for (const ox of [0, -n, n])
-          for (const oy of [0, -n, n]) {
-            ctx.globalAlpha = 0.3 + r() * 0.35;
-            ctx.fillStyle = col;
-            ctx.beginPath();
-            ctx.arc(cx + Math.cos(a) * q + ox, cy + Math.sin(a) * q + oy, 0.5 + r() * 0.6, 0, Math.PI * 2);
-            ctx.fill();
-          }
-      }
-    }
-    ctx.globalAlpha = 1;
+      ctx.globalAlpha = 1;
+    });
     meadowTex = Texture.from(canvas);
     meadowTex.source.style.addressMode = 'repeat';
     meadowTex.source.scaleMode = 'linear';
@@ -653,31 +656,31 @@ export function macroPattern(texture: string): FillPattern | null {
   let tex = macroTexs.get(texture);
   if (!tex) {
     const n = MACRO2.size * MACRO2.pxPerM;
-    const canvas = document.createElement('canvas');
-    canvas.width = canvas.height = n;
-    const ctx = canvas.getContext('2d')!;
-    const img = ctx.createImageData(n, n);
-    const mossC: RGB = [74, 92, 40];
-    for (let j = 0; j < n; j++)
-      for (let i = 0; i < n; i++) {
-        const t = tfbm(i / n, j / n, ms.f, ms.seed, 4);
-        const k = (j * n + i) * 4;
-        let c = t < 0.5 ? ms.dark : ms.light;
-        let a = Math.min(1, Math.abs(t - 0.5) * 2.6);
-        a = a * a * (t < 0.5 ? ms.aDark : ms.aLight);
-        if (ms.moss) {
-          const m2 = tfbm(i / n, j / n, ms.f * 4, ms.seed + 7, 3);
-          if (m2 > 0.62) {
-            c = mossC;
-            a = Math.max(a, (m2 - 0.62) * 3 * ms.moss);
+    const canvas = cachedCanvas(`macro2|${texture}`, n, n, (canvas) => {
+      const ctx = canvas.getContext('2d')!;
+      const img = ctx.createImageData(n, n);
+      const mossC: RGB = [74, 92, 40];
+      for (let j = 0; j < n; j++)
+        for (let i = 0; i < n; i++) {
+          const t = tfbm(i / n, j / n, ms.f, ms.seed, 4);
+          const k = (j * n + i) * 4;
+          let c = t < 0.5 ? ms.dark : ms.light;
+          let a = Math.min(1, Math.abs(t - 0.5) * 2.6);
+          a = a * a * (t < 0.5 ? ms.aDark : ms.aLight);
+          if (ms.moss) {
+            const m2 = tfbm(i / n, j / n, ms.f * 4, ms.seed + 7, 3);
+            if (m2 > 0.62) {
+              c = mossC;
+              a = Math.max(a, (m2 - 0.62) * 3 * ms.moss);
+            }
           }
+          img.data[k] = c[0];
+          img.data[k + 1] = c[1];
+          img.data[k + 2] = c[2];
+          img.data[k + 3] = Math.round(a);
         }
-        img.data[k] = c[0];
-        img.data[k + 1] = c[1];
-        img.data[k + 2] = c[2];
-        img.data[k + 3] = Math.round(a);
-      }
-    ctx.putImageData(img, 0, 0);
+      ctx.putImageData(img, 0, 0);
+    });
     tex = Texture.from(canvas);
     tex.source.style.addressMode = 'repeat';
     tex.source.scaleMode = 'linear';

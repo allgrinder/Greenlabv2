@@ -57,10 +57,38 @@ function scatter(regions: FlatRegion[], perM2: number, seed: number, cb: (x: num
   }
 }
 
-/** unregelmäßiger Fleck aus überlappenden Kreisen */
-function blot(g: Graphics, x: number, y: number, size: number, r: () => number) {
-  const n = 4 + Math.floor(r() * 4);
-  for (let k = 0; k < n; k++) g.circle(x + (r() - 0.5) * size, y + (r() - 0.5) * size, size * (0.3 + r() * 0.35));
+/**
+ * Weicher, unregelmäßiger Fleck (Klee, trockene Stelle): Kontur mit mehreren Wellen und Streckung,
+ * in vier nach innen kleiner werdenden Schichten – der Rand läuft aus statt als Kreiskante zu enden.
+ * Dazu ein, zwei Ausläufer, damit keine Form rund wirkt.
+ */
+function softBlot(g: Graphics, x: number, y: number, size: number, r: () => number, color: number, alpha: number) {
+  const parts: [number, number, number][] = [[x, y, size]];
+  const extra = 1 + Math.floor(r() * 2);
+  for (let k = 0; k < extra; k++) {
+    const a = r() * Math.PI * 2;
+    const d = size * (0.35 + r() * 0.3);
+    parts.push([x + Math.cos(a) * d, y + Math.sin(a) * d, size * (0.35 + r() * 0.3)]);
+  }
+  for (const [cx, cy, sz] of parts) {
+    const harm = [2, 3, 4, 6].map((i) => ({ i, amp: (0.06 + r() * 0.16) / Math.sqrt(i / 2), ph: r() * Math.PI * 2 }));
+    const stretch = 0.6 + r() * 0.5;
+    const rot = r() * Math.PI;
+    const c = Math.cos(rot);
+    const sn = Math.sin(rot);
+    for (const k of [1, 0.8, 0.6, 0.4]) {
+      const pts: number[] = [];
+      for (let j = 0; j < 28; j++) {
+        const t = (j / 28) * Math.PI * 2;
+        let rad = (sz / 2) * k;
+        for (const h of harm) rad *= 1 + h.amp * Math.sin(h.i * t + h.ph);
+        const u = Math.cos(t) * rad;
+        const v = Math.sin(t) * rad * stretch;
+        pts.push(cx + u * c - v * sn, cy + u * sn + v * c);
+      }
+      g.poly(pts, true).fill({ color, alpha: alpha / 3 });
+    }
+  }
 }
 
 /** gedrehte Ellipse als Polygon (Laub, Steine) */
@@ -81,10 +109,9 @@ function ellipse(g: Graphics, x: number, y: number, rx: number, ry: number, rot:
 export function surfaceDetails(g: Graphics, regions: FlatRegion[], texture: string, seed: number, season: Season) {
   if (texture === 'lawn') {
     // Kleefelder und dichte Stellen (dunkler), trockene Stellen (heller, gelblich)
-    scatter(regions, 0.05, seed + 1, (x, y, r) => blot(g, x, y, 0.4 + r() * 0.9, r));
-    g.fill({ color: 0x334114, alpha: 0.1 });
-    scatter(regions, 0.018, seed + 2, (x, y, r) => blot(g, x, y, 0.3 + r() * 0.7, r));
-    g.fill({ color: season === 'summer' ? 0xb9ab62 : 0xa79f78, alpha: 0.11 });
+    scatter(regions, 0.05, seed + 1, (x, y, r) => softBlot(g, x, y, 0.5 + r() * 1.0, r, 0x334114, 0.11));
+    const dry = season === 'summer' ? 0xb9ab62 : 0xa79f78;
+    scatter(regions, 0.018, seed + 2, (x, y, r) => softBlot(g, x, y, 0.4 + r() * 0.8, r, dry, 0.12));
     if (season === 'spring' || season === 'summer') {
       // Gänseblümchen in kleinen Gruppen
       scatter(regions, 0.03, seed + 3, (x, y, r) => {

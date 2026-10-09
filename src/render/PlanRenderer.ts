@@ -30,7 +30,8 @@ import { SpatialIndex } from './SpatialIndex';
 import { buildObjectView, viewKey, type ObjectView, type ViewContext } from './views/objectView';
 import { screenToWorld, tiltCos, tiltTan, visibleWorldBBox, worldToScreen, type ScreenSize } from './Viewport';
 import { idle, materialPattern, warmMaterialTextures } from './textures/materialTextures';
-import { allGroundTextures, loadGroundAssets } from './assets/groundAssets';
+import { allGroundTextures, groundManifestVersion, loadGroundAssets } from './assets/groundAssets';
+import { persistTextureCache, restoreTextureCache } from './textures/texCache';
 import { allItemTextures, loadItemAssets } from './assets/itemAssets';
 import { loadPlantAssets, preloadPlants } from './assets/plantAssets';
 import { getMaterial, MATERIALS } from '../core/catalog/materials';
@@ -208,6 +209,8 @@ export class PlanRenderer {
       (document.fonts?.ready ?? Promise.resolve()).then(step),
     ]);
     try {
+      // ab dem 2. Start: fertig berechnete Bodentexturen aus dem Browser statt neu malen
+      await restoreTextureCache(groundManifestVersion());
       await this.upload(await warmMaterialTextures(MATERIALS.map((m) => m.texture)));
       step();
       await this.upload([...allGroundTextures(), ...allItemTextures()]);
@@ -218,6 +221,7 @@ export class PlanRenderer {
     this.booting = false;
     this.rebuildAll();
     this.readyResolve();
+    void persistTextureCache(idle);
   }
 
   /** Texturen in kleinen Paketen auf die Grafikkarte legen, damit das erste Bild nicht stockt */

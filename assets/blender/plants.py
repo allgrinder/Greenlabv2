@@ -196,14 +196,15 @@ def flower_obj(petal_hex: str, size: float, kind: str = "saucer") -> bpy.types.O
     if kind == "ball":
         bmesh.ops.create_icosphere(bm, subdivisions=2, radius=s)
     else:
-        n = 12 if kind == "daisy" else 5
+        n = 12 if kind == "daisy" else 6 if kind == "lily" else 5
         c = bm.verts.new((0, 0, s * 0.15))
         for i in range(n):
             a0 = (i - 0.35) / n * math.tau
             a1 = (i + 0.35) / n * math.tau
             am = i / n * math.tau
-            r1 = s * (1.0 if kind == "daisy" else 0.9)
-            droop = -s * 0.25 if kind == "daisy" else s * 0.12
+            r1 = s * (1.0 if kind in ("daisy", "lily") else 0.9)
+            # Lilie: Trichter, Blütenblätter steigen nach außen an
+            droop = -s * 0.25 if kind == "daisy" else s * 0.45 if kind == "lily" else s * 0.12
             v1 = bm.verts.new((math.cos(a0) * s * 0.3, math.sin(a0) * s * 0.3, s * 0.12))
             v2 = bm.verts.new((math.cos(am) * r1, math.sin(am) * r1, droop))
             v3 = bm.verts.new((math.cos(a1) * s * 0.3, math.sin(a1) * s * 0.3, s * 0.12))
@@ -358,6 +359,22 @@ SHRUBS = {
 }
 #: Stauden: Blattgröße/-form, Blütenform, Blütengröße, Anzahl, Blattton
 PERENNIALS = {
+    # breite, blaugrüne Blätter, lockere lila Blütentrauben darüber
+    "hosta": dict(leaf=0.13, form="big", flower="spike", fsize=0.016, n=7, tint=1.0, leaf_hex="#6e8b80", mound=0.7, spread=0.85, frame=True),
+    # überhängende Schwertblätter, orange Trichterblüten
+    "hemerocallis": dict(strap=dict(n=85, width=0.02, arch=0.8), flower="lily", fsize=0.065, n=12, tint=1.15, leaf=0.05, form="needle", leaf_hex="#6f8f4c"),
+    # gefiedertes Laub, fedrige Rispen
+    "astilbe": dict(leaf=0.03, form="needle", flower="plume", fsize=0.008, n=13, tint=1.05, leaf_hex="#5f7a48"),
+    # Farnwedel aus Fiederblättchen
+    "dryopteris": dict(fern=dict(n=16, width=0.13), leaf=0.05, form="oval", flower="none", fsize=0, n=0, tint=1.0),
+    # runde, weich behaarte Blätter, schäumende gelbgrüne Blütenwolken
+    "alchemilla": dict(leaf=0.06, form="round", flower="umbel", fsize=0.05, n=22, tint=1.15, leaf_hex="#89a06e"),
+    # dunkelrote Blattrosette, feine Blütenstiele
+    "heuchera": dict(leaf=0.065, form="round", flower="spike", fsize=0.005, n=12, tint=1.0, leaf_hex="#5a2c3b", mound=0.75),
+    # aufrecht, gewölbte Blütenkuppeln
+    "phlox": dict(leaf=0.05, form="oval", flower="umbel", fsize=0.075, n=12, tint=1.0),
+    # große ledrige Blätter, Blütendolden auf dicken Stielen
+    "bergenia": dict(leaf=0.13, form="big", flower="umbel", fsize=0.05, n=6, tint=1.1, leaf_hex="#4c6a38", mound=0.8, spread=0.85, frame=True),
     "geranium": dict(leaf=0.045, form="round", flower="saucer", fsize=0.022, n=70, tint=1.0),
     "salvia": dict(leaf=0.04, form="oval", flower="spike", fsize=0.012, n=28, tint=0.95),
     "lavandula": dict(leaf=0.035, form="needle", flower="spike", fsize=0.011, n=40, tint=1.25, leaf_hex="#8a9a7e"),
@@ -371,6 +388,8 @@ PERENNIALS = {
     "perovskia": dict(leaf=0.03, form="needle", flower="spike", fsize=0.01, n=55, tint=1.25, leaf_hex="#9aa69a"),
 }
 GRASSES = {
+    "miscanthus": dict(blades=620, width=0.008, arch=0.4, plume="feather"),
+    "carex": dict(blades=900, width=0.005, arch=1.0, plume="none"),
     "stipa": dict(blades=700, width=0.006, arch=0.55, plume="feather"),
     "pennisetum": dict(blades=600, width=0.009, arch=0.75, plume="brush"),
     "calamagrostis": dict(blades=420, width=0.01, arch=0.15, plume="upright"),
@@ -735,14 +754,32 @@ def perennial(sp: dict, look: dict, seed: int):
     H = sp["heightMature"]
     winter = look["color"] == "#7d7464"
     leaf_hex = look["color"] if winter or look["color"] == "#80855a" else p.get("leaf_hex", look["color"])
+    if not sp.get("deciduous", True) and p.get("leaf_hex"):
+        # wintergrün (Purpurglöckchen, Bergenie): eigene Laubfarbe das ganze Jahr, im Winter etwas dunkler
+        leaf_hex = p["leaf_hex"] if not winter else "#%02x%02x%02x" % tuple(int(int(p["leaf_hex"][i : i + 2], 16) * 0.82) for i in (1, 3, 5))
+        winter = False
     lm = leaf_material(leaf_hex, p["tint"])
     leaf = leaf_obj(lm, p["leaf"], p["form"])
-    mound_h = (H * 0.45 if p["flower"] not in ("globe",) else 0.18) * (0.6 if winter else 1)
-    for i in range(5):
+    mound_h = (H * p.get("mound", 0.45) if p["flower"] not in ("globe",) else 0.18) * (0.6 if winter else 1)
+    if p.get("frame"):
+        # Blätter (Partikel) zählen nicht zur Bildhülle: lose Eckpunkte vergrößern den Ausschnitt
+        e = R + p["leaf"] * 1.3
+        me = bpy.data.meshes.new("frame")
+        me.from_pydata([(-e, -e, 0), (e, -e, 0), (e, e, 0), (-e, e, 0)], [], [])
+        link(bpy.data.objects.new("frame", me), outline=False)
+    if p.get("fern"):
+        fronds(R, H * (0.55 if winter else 1), p["fern"], leaf_hex, rnd)
+        return
+    if p.get("strap"):
+        st = p["strap"]
+        strap_leaves(R, H * 0.7 * (0.6 if winter else 1), st["n"], st["width"], st["arch"], leaf_hex, rnd)
+        mound_h = H * 0.35
+    for i in range(0 if p.get("strap") else 5):
         a = rnd.random() * math.tau
-        d = rnd.random() * R * 0.35
+        d = rnd.random() * R * 0.35 * p.get("spread", 1.0)
         c = Vector((math.cos(a) * d, math.sin(a) * d, mound_h * 0.35))
-        r = R * rnd.uniform(0.5, 0.65)
+        # große Blätter ragen über das Polster hinaus: Polster kleiner, damit nichts am Bildrand abgeschnitten wird
+        r = R * rnd.uniform(0.5, 0.65) * p.get("spread", 1.0)
         b = blob(f"m{i}", c, r, rnd, mound_h / r * 0.9, leaf_hex)
         emit(b, leaf, leaves_for(4 * math.pi * r * r, p["leaf"], 1.6), rnd.randint(1, 99999))
     bloom = look.get("bloom")
@@ -757,7 +794,17 @@ def perennial(sp: dict, look: dict, seed: int):
         top = Vector((math.cos(a) * d, math.sin(a) * d, H * rnd.uniform(0.82, 1.0)))
         base = Vector((top.x * 0.4, top.y * 0.4, mound_h * 0.6))
         stems.add([base, (base + top) / 2, top], [0.004, 0.003, 0.0025])
-        if fk == "spike":
+        if fk == "plume":
+            # Rispe: kegelförmig, unten breit verzweigt, fedrig
+            for k in range(26):
+                t = 0.45 + 0.55 * k / 25
+                q = base.lerp(top, t)
+                spread = (1 - t) * 0.09 + 0.012
+                fl = flower_obj(bloom, p["fsize"] * (1.25 - 0.5 * t), "ball")
+                for _ in range(3):
+                    inst = link(bpy.data.objects.new("fl", fl.data), outline=False)
+                    inst.location = q + Vector((rnd.uniform(-1, 1), rnd.uniform(-1, 1), rnd.uniform(-0.3, 0.3))) * spread
+        elif fk == "spike":
             # Ähre: Blütchen entlang der oberen 40 %
             for k in range(14):
                 t = 0.6 + 0.4 * k / 13
@@ -766,7 +813,7 @@ def perennial(sp: dict, look: dict, seed: int):
                 inst = link(bpy.data.objects.new("fl", fl.data), outline=False)
                 inst.location = q + Vector((rnd.uniform(-1, 1), rnd.uniform(-1, 1), 0)) * p["fsize"] * 0.6
         else:
-            kind = {"daisy": "daisy", "saucer": "saucer", "umbel": "ball", "globe": "ball"}[fk]
+            kind = {"daisy": "daisy", "saucer": "saucer", "umbel": "ball", "globe": "ball", "lily": "lily"}[fk]
             fl = flower_obj(bloom, p["fsize"] * (0.5 if fk == "umbel" else 1), kind)
             if fk == "umbel":  # flache Dolde aus vielen Kügelchen
                 for k in range(16):
@@ -777,6 +824,69 @@ def perennial(sp: dict, look: dict, seed: int):
                 inst = link(bpy.data.objects.new("fl", fl.data), outline=False)
                 inst.location = top
                 inst.rotation_euler = (rnd.uniform(-0.3, 0.3), rnd.uniform(-0.3, 0.3), rnd.random() * 6)
+
+
+def strap_leaves(R: float, H: float, n: int, width: float, arch: float, hex_: str, rnd: random.Random):
+    """Schwertblätter aus der Mitte, überhängend (Taglilie): breite, gekielte Bänder"""
+    me = bpy.data.meshes.new("straps")
+    bm = bmesh.new()
+    seg = 7
+    for _ in range(n):
+        a = rnd.random() * math.tau
+        L = H * rnd.uniform(0.6, 1.05)
+        lean = arch * rnd.uniform(0.5, 1.2)
+        start = Vector((math.cos(a) * R * 0.1 * rnd.random(), math.sin(a) * R * 0.1 * rnd.random(), 0))
+        dirv = Vector((math.cos(a), math.sin(a), 0))
+        side = Vector((-math.sin(a), math.cos(a), 0)) * width
+        prev = None
+        for k in range(seg + 1):
+            t = k / seg
+            pos = start + dirv * (R * 1.0 * lean * t**1.3) + Vector((0, 0, L * (t - lean * 0.6 * t * t)))
+            w = side * (1 - t**2 * 0.85)
+            keel = Vector((0, 0, width * 0.35))
+            v1, v2, v3 = bm.verts.new(pos - w), bm.verts.new(pos + keel), bm.verts.new(pos + w)
+            if prev:
+                bm.faces.new((prev[0], prev[1], v2, v1))
+                bm.faces.new((prev[1], prev[2], v3, v2))
+            prev = (v1, v2, v3)
+    bm.to_mesh(me)
+    bm.free()
+    ob = link(bpy.data.objects.new("straps", me), outline=False)
+    ob.data.materials.append(leaf_material(hex_, 1.0))
+    return ob
+
+
+def fronds(R: float, H: float, f: dict, hex_: str, rnd: random.Random):
+    """Farn: trichterförmig aufsteigende Wedel, Fiederblättchen beidseitig, zur Spitze kleiner"""
+    me = bpy.data.meshes.new("fronds")
+    bm = bmesh.new()
+    for i in range(f["n"]):
+        a = i / f["n"] * math.tau + rnd.uniform(-0.2, 0.2)
+        L = math.hypot(R, H) * rnd.uniform(0.8, 1.05)
+        dirv = Vector((math.cos(a), math.sin(a), 0))
+        side = Vector((-math.sin(a), math.cos(a), 0))
+        rise = rnd.uniform(0.75, 1.0)
+        steps = 22
+        prev_c = None
+        for k in range(steps + 1):
+            t = k / steps
+            # Wedel steigt steil auf und neigt sich zur Spitze nach außen
+            c = dirv * (R * 0.95 * t**1.2) + Vector((0, 0, H * rise * (t * 1.25 - 0.32 * t * t)))
+            if prev_c is not None and 0.08 < t:
+                width = f["width"] * math.sin(math.pi * min(1, t * 1.1)) * (1.15 - t * 0.6)
+                tang = (c - prev_c).normalized()
+                for sgn in (-1, 1):
+                    # Fiederblättchen: schmales Dreieck schräg nach vorn
+                    tip = c + side * sgn * width + tang * width * 0.35 + Vector((0, 0, -width * 0.18))
+                    b1 = c - tang * width * 0.16
+                    b2 = c + tang * width * 0.16
+                    bm.faces.new((bm.verts.new(b1), bm.verts.new(tip), bm.verts.new(b2)))
+            prev_c = c
+    bm.to_mesh(me)
+    bm.free()
+    ob = link(bpy.data.objects.new("fronds", me), outline=False)
+    ob.data.materials.append(leaf_material(hex_, 1.0))
+    return ob
 
 
 def grass(sp: dict, look: dict, seed: int):
@@ -809,7 +919,7 @@ def grass(sp: dict, look: dict, seed: int):
     bm.free()
     ob = link(bpy.data.objects.new("grass", me), outline=False)
     ob.data.materials.append(leaf_material(look["color"], 1.0))
-    if look.get("bloom"):
+    if look.get("bloom") and (p["plume"] != "none" or sp["id"] == "hakonechloa"):
         fl = flower_obj(look["bloom"], 0.012 if p["plume"] != "brush" else 0.02, "ball")
         n = 90 if p["plume"] == "feather" else 40
         for _ in range(n):

@@ -16,6 +16,7 @@ export function ProjectMenu({
   onSample,
   onImport,
   onExportJson,
+  onBackup,
 }: {
   onClose: () => void;
   onOpen: (id: string) => void;
@@ -24,6 +25,7 @@ export function ProjectMenu({
   onSample: () => void;
   onImport: (f: File) => void;
   onExportJson: () => void;
+  onBackup: () => void;
 }) {
   const current = useEditor((st) => st.doc?.id);
   const [items, setItems] = useState<ProjectMeta[] | null>(null);
@@ -98,6 +100,9 @@ export function ProjectMenu({
         </button>
         <button type="button" className={s.action} onClick={onExportJson} data-testid="menu-export-json">
           <Icon name="download" size={14} /> JSON exportieren
+        </button>
+        <button type="button" className={s.action} onClick={onBackup} data-testid="menu-backup">
+          <Icon name="download" size={14} /> Alle Gärten sichern
         </button>
         <input
           ref={file}

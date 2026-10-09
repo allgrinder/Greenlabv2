@@ -6,6 +6,7 @@ import { createMustergarten } from '../core/sample/mustergarten';
 import { startAutosave, type SaveState } from '../persistence/autosave';
 import { getBlob, getThumbnail, lastProjectId, listProjects, loadProject, putBlob, putThumbnail, rememberLast, rememberSample, sampleProjectId, saveProject } from '../persistence/db';
 import { exportProject, importProject } from '../persistence/jsonIO';
+import { exportBackup, isBackup, lastBackupAt, rememberBackup, requestPersistence, restoreBackup, storageState, type StorageState } from '../persistence/backup';
 import type { PlanRenderer } from '../render/PlanRenderer';
 import { fitBBox } from '../render/Viewport';
 import { editor, useEditor } from '../state';
@@ -61,6 +62,10 @@ export function App() {
   const rendererReady = useRef(deferred<PlanRenderer>());
   const prefetched = useRef(new Set<string>());
   const prevScreen = useRef<Screen>('start');
+  const [backupAt, setBackupAt] = useState<string | null>(() => lastBackupAt());
+  const [storage, setStorage] = useState<StorageState>('unknown');
+  /** erhöht sich, wenn sich die Gartenliste außerhalb der Startseite geändert hat (Wiederherstellung) */
+  const [listVersion, setListVersion] = useState(0);
   const [saveState, setSaveState] = useState<SaveState>('saved');
   const [menu, setMenu] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -108,6 +113,8 @@ export function App() {
         if (!benchmark.current) await r.prepare(p);
         editor.getState().loadProject(p);
         rememberLast(p.id);
+        // beim ersten Öffnen: Browser bitten, die Gärten nicht bei Platzmangel zu löschen
+        void requestPersistence().then(setStorage);
         editor.getState().setSession({ viewport: fitBBox(bbox(p.site.boundary), r.size, PLAN_INSETS, 40, editor.getState().session.viewport.tiltDeg ?? 0) });
         await r.nextFrame();
         await r.nextFrame();
@@ -171,6 +178,10 @@ export function App() {
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    void storageState().then(setStorage);
   }, []);
 
   // Vorschaubild auch beim Verlassen der Seite (Tab schließen, App wechseln)
@@ -241,9 +252,46 @@ export function App() {
 
   const importFile = async (f: File) => {
     try {
-      const { project, blobs } = await importProject(await f.text());
+      const text = await f.text();
+      let json: unknown = null;
+      try {
+        json = JSON.parse(text);
+      } catch {
+        /* Meldung kommt aus importProject */
+      }
+      if (isBackup(json)) {
+        // Sicherung aller Gärten zurückholen
+        const { restored, skipped } = await restoreBackup(json, await listProjects());
+        for (const r of restored) {
+          for (const [id, b] of Object.entries(r.blobs)) await putBlob(id, b);
+          await saveProject(r.project);
+        }
+        setListVersion((v) => v + 1);
+        notify(`${restored.length} ${restored.length === 1 ? 'Garten' : 'Gärten'} wiederhergestellt${skipped ? `, ${skipped} schon vorhanden` : ''}`);
+        return;
+      }
+      const { project, blobs } = await importProject(text);
       await createAndOpen(project, blobs);
       notify(`„${project.name}“ importiert`);
+    } catch (e) {
+      notify((e as Error).message, true);
+    }
+  };
+
+  /** Alle Gärten in eine Datei sichern (offener Garten mit aktuellem Stand) */
+  const backupAll = async () => {
+    try {
+      const cur = editor.getState().doc;
+      if (cur && screen === 'editor') await saveProject(cur);
+      const metas = await listProjects();
+      const projects = (await Promise.all(metas.map((m) => loadProject(m.id)))).filter((p): p is Project => !!p);
+      const text = await exportBackup(projects, getBlob);
+      const day = new Date().toISOString().slice(0, 10);
+      downloadBlob(new Blob([text], { type: 'application/json' }), `Gartenwerk-Sicherung_${day}.json`);
+      rememberBackup();
+      setBackupAt(lastBackupAt());
+      setMenu(false);
+      notify(`${projects.length} ${projects.length === 1 ? 'Garten' : 'Gärten'} gesichert`);
     } catch (e) {
       notify((e as Error).message, true);
     }
@@ -316,6 +364,7 @@ export function App() {
                 onSample={openSample}
                 onImport={importFile}
                 onExportJson={exportJson}
+                onBackup={backupAll}
               />
             )}
             {exporting && <ExportDialog onClose={() => setExporting(false)} />}
@@ -332,6 +381,8 @@ export function App() {
           onNew={() => switchTo('wizard')}
           onSample={openSample}
           onImport={importFile}
+          backup={{ at: backupAt, storage, onBackup: backupAll }}
+          listVersion={listVersion}
         />
       )}
       {screen === 'wizard' && (

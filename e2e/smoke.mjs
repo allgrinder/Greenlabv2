@@ -2,6 +2,7 @@
  * Browser-Smoke-Test der Kernabläufe (Phase 1 und 2). Voraussetzung: `npm run dev` läuft.
  *   npm run e2e            (Chromium aus PLAYWRIGHT_CHROMIUM oder /opt/pw-browsers/chromium)
  */
+import fs from 'node:fs';
 import { chromium } from 'playwright-core';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
@@ -191,6 +192,21 @@ await p.waitForSelector('[data-testid=start-screen]', { state: 'detached' });
 const names = await p.evaluate(async () => (await new Promise((res) => { const r = indexedDB.open('gartenwerk'); r.onsuccess = () => { const q = r.result.transaction('meta').objectStore('meta').getAll(); q.onsuccess = () => res(q.result.map((m) => m.name)); }; })));
 assert.equal(names.filter((x) => x.includes('Mustergarten')).length, 1);
 step('Startseite mit Vorschaubild, Mustergarten ohne Duplikat');
+
+// Sicherung aller Gärten: Hinweis, Datei, Wiederherstellen (alles schon vorhanden)
+await p.click('[data-testid=home]');
+await p.waitForSelector('[data-testid=backup-bar]');
+const [bk] = await Promise.all([p.waitForEvent('download'), p.click('[data-testid=backup-all]')]);
+assert.match(bk.suggestedFilename(), /^Gartenwerk-Sicherung_\d{4}-\d{2}-\d{2}\.json$/);
+const bkJson = JSON.parse(fs.readFileSync(await bk.path(), 'utf8'));
+assert.equal(bkJson.format, 'gartenwerk-backup');
+assert.ok(bkJson.projects.length >= 3);
+await p.waitForSelector('[data-testid=backup-bar] >> text=Letzte Sicherung');
+await p.setInputFiles('[data-testid=start-import-file]', await bk.path());
+await p.waitForSelector('[data-testid=toast] >> text=schon vorhanden');
+await p.click('[data-testid=start-last]');
+await p.waitForSelector('[data-testid=start-screen]', { state: 'detached' });
+step('Alle Gärten sichern und wiederherstellen');
 const tab = (name) => p.click(`header >> text=${name}`);
 
 await tab('Sonne');

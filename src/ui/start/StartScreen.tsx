@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { num } from '../../core/format';
+import { backupDue, REMIND_DAYS, type StorageState } from '../../persistence/backup';
 import { deleteProject, getThumbnail, listProjects, type ProjectMeta } from '../../persistence/db';
 import { Icon, Logo } from '../icons';
 import s from './start.module.css';
@@ -28,6 +29,8 @@ export function StartScreen({
   onNew,
   onSample,
   onImport,
+  backup,
+  listVersion = 0,
 }: {
   /** Ladefortschritt der Grafik 0…1 */
   progress: number;
@@ -40,13 +43,17 @@ export function StartScreen({
   onNew: () => void;
   onSample: () => void;
   onImport: (f: File) => void;
+  /** letzte Sicherung, Speicherzustand und Aktion „Alle Gärten sichern“ */
+  backup?: { at: string | null; storage: StorageState; onBackup: () => void };
+  /** ändert sich nach einer Wiederherstellung: Liste neu laden */
+  listVersion?: number;
 }) {
   const [items, setItems] = useState<ProjectMeta[] | null>(null);
   const file = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     listProjects().then(setItems, () => setItems([]));
-  }, []);
+  }, [listVersion]);
 
   const busy = opening !== null;
   const [last, ...rest] = items ?? [];
@@ -70,7 +77,7 @@ export function StartScreen({
         <section className={s.hero}>
           <div>
             <h1 className={s.h1}>Deine Gärten</h1>
-            <p className={s.lead}>Alle Planungen liegen lokal in diesem Browser. Sichere sie ab und zu als JSON.</p>
+            <p className={s.lead}>Alle Planungen liegen lokal in diesem Browser. Eine Sicherung aller Gärten holst du über „JSON importieren“ zurück.</p>
           </div>
           <div className={s.actions}>
             <button type="button" className={s.primary} onClick={onNew} disabled={busy} data-testid="start-new">
@@ -96,6 +103,8 @@ export function StartScreen({
             />
           </div>
         </section>
+
+        {backup && !!items?.length && <BackupBar items={items} backup={backup} busy={busy} />}
 
         {items?.length === 0 && (
           <section className={s.empty}>
@@ -242,5 +251,31 @@ function Outline({ pts }: { pts?: { x: number; y: number }[] }) {
     <svg className={s.outline} viewBox={`${x0 - pad} ${y0 - pad} ${x1 - x0 + 2 * pad} ${y1 - y0 + 2 * pad}`} preserveAspectRatio="xMidYMid meet" aria-hidden>
       <polygon points={pts.map((p) => `${p.x},${p.y}`).join(' ')} vectorEffect="non-scaling-stroke" />
     </svg>
+  );
+}
+
+/** Hinweis zur Sicherung: dezent, solange alles gesichert ist; deutlicher, wenn die letzte Sicherung fehlt oder alt ist */
+function BackupBar({ items, backup, busy }: { items: ProjectMeta[]; backup: { at: string | null; storage: StorageState; onBackup: () => void }; busy: boolean }) {
+  const due = backupDue(items[0]?.updatedAt ?? null, backup.at);
+  const status = backup.at ? `Letzte Sicherung ${when(backup.at)}` : 'Noch keine Sicherung';
+  const store =
+    backup.storage === 'persistent' ? 'Speicher dauerhaft geschützt' : backup.storage === 'best-effort' ? 'Der Browser darf den Speicher bei Platzmangel leeren' : null;
+  return (
+    <section className={due ? s.backupDue : s.backup} data-testid="backup-bar">
+      <svg viewBox="0 0 24 24" className={s.backupIcon} aria-hidden>
+        <path d="M12 3l7 3v5c0 4.6-3 8.4-7 10-4-1.6-7-5.4-7-10V6Z" />
+        {due ? <path d="M12 8v5M12 16v.5" /> : <path d="M8.5 12l2.5 2.5 4.5-5" />}
+      </svg>
+      <div className={s.backupText}>
+        <span className={s.backupTitle}>{due ? `${status} – deine Gärten liegen nur in diesem Browser.` : status}</span>
+        <span className={s.backupSub}>
+          {due ? `Sichere alle Gärten in eine Datei; nach ${REMIND_DAYS} Tagen mit Änderungen erinnert Gartenwerk wieder.` : 'Alle Gärten in einer Datei, mit Hintergrundbildern.'}
+          {store && <> · {store}</>}
+        </span>
+      </div>
+      <button type="button" className={due ? s.primary : s.ghost} onClick={backup.onBackup} disabled={busy} data-testid="backup-all">
+        <Icon name="download" size={14} /> Alle Gärten sichern
+      </button>
+    </section>
   );
 }

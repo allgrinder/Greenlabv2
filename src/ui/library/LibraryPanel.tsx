@@ -19,6 +19,7 @@ const BRUSH_GLYPH =
 import { LAMPS, kelvinRgb } from '../../core/catalog/lamps';
 import { irrGlyph, lampGlyph } from './glyphs';
 import { glyphSrc, SYMBOL_GLYPH, type GlyphKind } from './glyphs';
+import { useThumbs } from './thumbs';
 import u from '../components/ui.module.css';
 import s from './library.module.css';
 
@@ -34,6 +35,8 @@ interface Entry {
   search: string;
   filter: Filter[];
   sub?: string;
+  /** Blender-Rendering (Draufsicht), ersetzt das Symbol, sobald geladen */
+  photo?: { kind: 'item' | 'plant'; id: string };
 }
 
 
@@ -58,6 +61,7 @@ function useSections() {
         search: `${p.name} ${p.latin}`.toLowerCase(),
         filter: ['all', 'plants'] as Filter[],
         sub: p.kind === 'espalier' ? `${p.deciduous ? (p.marcescent ? 'hält Laub im Winter' : 'laubabwerfend') : 'immergrün'} · ${p.price} € je Baum` : undefined,
+        photo: { kind: 'plant' as const, id: p.id },
       })),
     }));
     // Pinsel vorn in „Stauden & Gräser“
@@ -70,8 +74,9 @@ function useSections() {
       brush: { kind: 'item', catalogId: i.id } as Brush,
       search: i.name.toLowerCase(),
       filter: (i.category === 'pond' || i.category === 'pool' ? ['all', 'build', 'water'] : ['all', 'build']) as Filter[],
+      photo: { kind: 'item' as const, id: i.symbol },
     }));
-    build.splice(7, 0, { key: 'hedge', name: 'Hecke', src: glyphSrc('hedge'), brush: 'hedge', search: 'hecke hainbuche', filter: ['all', 'plants', 'build'] });
+    build.splice(7, 0, { key: 'hedge', name: 'Hecke', src: glyphSrc('hedge'), brush: 'hedge', search: 'hecke hainbuche', filter: ['all', 'plants', 'build'], photo: { kind: 'plant', id: 'carpinus-hedge' } });
     sections.push({ h: 'Bauten & Ausstattung', items: build });
     sections.push({
       h: 'Licht',
@@ -101,6 +106,8 @@ function useSections() {
 
 export function LibraryPanel() {
   const sections = useSections();
+  const thumbs = useThumbs();
+  const srcOf = (e: Entry) => (e.photo && thumbs ? (e.photo.kind === 'item' ? thumbs.items[e.photo.id] : thumbs.plants[e.photo.id]) : undefined) ?? e.src;
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const brush = useEditor((st) => st.session.brush);
@@ -182,14 +189,14 @@ export function LibraryPanel() {
                       ev.dataTransfer.setData(DND_MIME, JSON.stringify(e.brush));
                       ev.dataTransfer.effectAllowed = 'copy';
                       const img = new Image();
-                      img.src = e.src;
+                      img.src = srcOf(e);
                       ev.dataTransfer.setDragImage(img, 20, 20);
                     }}
                     onClick={() => pick(e)}
                     data-testid={`lib-${e.key}`}
                   >
                     <span className={isOn(e) ? s.thumbOn : s.thumb}>
-                      <img src={e.src} width={40} height={40} alt="" draggable={false} />
+                      <img src={srcOf(e)} width={40} height={40} alt="" draggable={false} loading="lazy" className={srcOf(e) !== e.src ? s.photo : undefined} />
                     </span>
                     <span className={s.name}>{e.name}</span>
                   </button>

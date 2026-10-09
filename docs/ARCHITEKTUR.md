@@ -199,7 +199,10 @@ interface Tool {
 
 ## 7. Persistenz
 
-- `idb` mit drei Stores: `projects` (vollständiges Projekt), `meta` (id, name, updatedAt, Vorschaubild, für die Projektliste) und `blobs` (Hintergrundbilder).
+- `idb` mit drei Stores: `projects` (vollständiges Projekt), `meta` (id, name, updatedAt, Fläche, Objektzahl, vereinfachte Kontur – für die Projektliste) und `blobs` (Hintergrundbilder und Vorschaubilder `thumb:<id>`).
+- **Startseite** (`ui/start/StartScreen.tsx`): erscheint sofort, ohne auf WebGL zu warten. Zeigt den zuletzt bearbeiteten Garten groß und alle weiteren als Karten mit Vorschaubild (ohne Bild: Grundstückskontur), dazu Neuer Garten, Mustergarten (gespeicherte Kopie, `gw:sampleProject`, keine Duplikate), JSON-Import und Löschen mit Rückfrage. Erreichbar über das Logo und „Alle Gärten“ im Projektmenü.
+- **Vorschaubild:** `PlanRenderer.thumbnail()` rendert den Garten von oben (Sommer, ohne Hilfslinien, Beschriftung und Maße, transparenter Hintergrund) beim Verlassen des Editors, beim Verbergen der Seite und nach dem ersten Öffnen, falls noch keines existiert.
+- **Laden im Hintergrund:** Während die Startseite offen ist, lädt `PlanRenderer.boot()` alle Objekt- und Bodenbilder und das Pflanzenmanifest, berechnet die Bodentexturen vor (`warmMaterialTextures`) und legt alles in kleinen Paketen auf die Grafikkarte (`upload`). Erst danach wird einmal aufgebaut (`ready`). Beim Überfahren einer Karte und für den zuletzt bearbeiteten Garten werden dessen Pflanzenbilder schon geholt (`prefetch`). `open()` wartet auf `prepare(doc)` und zwei gezeichnete Bilder und blendet die Startseite dann aus – der Garten erscheint vollständig. Neue Pflanzenbilder bauen danach nur Pflanzen neu auf (`rebuildPlants`).
 - **Autosave:** 800 ms nach der letzten Änderung sowie bei `visibilitychange`. Der Status erscheint in der Topbar („Gespeichert“).
 - **JSON-Export:** `{ format: 'gartenwerk', schemaVersion, project, blobs: { id: dataURL } }`. Beim Import wird mit zod validiert, dann migriert, dann bekommt das Projekt eine neue ID (Kopie statt Überschreiben).
 - `migrations.ts`: Eine Kette `v1 → v2 → …` läuft beim Laden aus der DB und beim Import.

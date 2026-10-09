@@ -70,14 +70,15 @@ function views(sp: PlantSpecies, season: Season, view: 'top' | 'oblique') {
   return e && list?.length ? { e, list } : null;
 }
 
-/** Alle Bilder für diese Arten und Jahreszeiten laden (vor Exporten) */
-export async function preloadPlants(species: PlantSpecies[], seasons: Season[]): Promise<void> {
-  if (!manifest) return;
+/** Alle Bilder für diese Arten und Jahreszeiten laden (vor Exporten, beim Öffnen eines Gartens); liefert die Texturen */
+export async function preloadPlants(species: PlantSpecies[], seasons: Season[], which: ('top' | 'oblique')[] = ['top', 'oblique']): Promise<Texture[]> {
+  if (!manifest) return [];
   const files = new Set<string>();
   for (const sp of species)
     for (const s of seasons)
-      for (const v of ['top', 'oblique'] as const) views(sp, s, v)?.list.forEach((x) => files.add(x.file));
+      for (const v of which) views(sp, s, v)?.list.forEach((x) => files.add(x.file));
   await Promise.all([...files].map(request));
+  return [...files].flatMap((f) => textures.get(f) ?? []);
 }
 
 export interface PlantSpriteOpts {

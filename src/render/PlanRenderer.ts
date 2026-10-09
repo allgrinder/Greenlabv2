@@ -29,11 +29,11 @@ import { LabelPool, drawBoundary, drawDimension, drawGrid, drawSelection, type T
 import { SpatialIndex } from './SpatialIndex';
 import { buildObjectView, viewKey, type ObjectView, type ViewContext } from './views/objectView';
 import { screenToWorld, tiltCos, tiltTan, visibleWorldBBox, worldToScreen, type ScreenSize } from './Viewport';
-import { materialPattern } from './textures/materialTextures';
-import { loadGroundAssets } from './assets/groundAssets';
-import { loadItemAssets } from './assets/itemAssets';
+import { idle, materialPattern, warmMaterialTextures } from './textures/materialTextures';
+import { allGroundTextures, loadGroundAssets } from './assets/groundAssets';
+import { allItemTextures, loadItemAssets } from './assets/itemAssets';
 import { loadPlantAssets, preloadPlants } from './assets/plantAssets';
-import { getMaterial } from '../core/catalog/materials';
+import { getMaterial, MATERIALS } from '../core/catalog/materials';
 
 interface Mounted {
   ref: PlanObject;
@@ -87,6 +87,14 @@ export function viewParamsFrom(s: SessionState): ViewParams {
 /** Vorschau eines Werkzeugs, im Bildschirmraum gezeichnet */
 export type PreviewDrawer = (g: Graphics, toScreen: ToScreen, labels: LabelPool) => void;
 
+const PLANT_TYPES = new Set<PlanObject['type']>(['plant', 'hedge', 'planting', 'scatter', 'espalier']);
+
+/** alle Pflanzenarten eines Gartens */
+function speciesOf(doc: Project) {
+  const ids = new Set(Object.values(doc.objects).flatMap((o) => ('speciesId' in o ? [o.speciesId] : o.type === 'planting' ? o.mix.map((m) => m.speciesId) : o.type === 'scatter' ? o.plants.map((p) => p.speciesId) : [])));
+  return [...ids].map((id) => getSpecies(id));
+}
+
 const lodFor = (ppm: number) => (ppm < 6 ? 0 : ppm < 14 ? 1 : 2);
 
 export class PlanRenderer {
@@ -129,6 +137,16 @@ export class PlanRenderer {
   private lastLod = -1;
   private bgUrl: string | null = null;
   size: ScreenSize = { width: 1, height: 1 };
+  /** Bis alle Bildsätze geladen und vorbereitet sind, wird nicht bei jedem Teil neu aufgebaut */
+  private booting = true;
+  private readyResolve!: () => void;
+  /** erfüllt, sobald Objekt-, Boden- und Pflanzenmanifest geladen, Texturen vorberechnet und hochgeladen sind */
+  readonly ready = new Promise<void>((res) => (this.readyResolve = res));
+  /** Ladefortschritt 0…1 für die Startseite */
+  progress = 0;
+  onProgress: ((p: number) => void) | null = null;
+  private frameWaiters: (() => void)[] = [];
+  private uploaded = new WeakSet<object>();
 
   constructor(private store: EditorStoreApi) {}
 
@@ -162,13 +180,83 @@ export class PlanRenderer {
     this.size = { width: host.clientWidth, height: host.clientHeight };
 
     this.unsub = this.store.subscribe(() => this.invalidate());
-    // Blender-Bilder der Objekte im Hintergrund laden, danach neu aufbauen
-    void loadItemAssets(() => this.rebuildAll());
-    void loadPlantAssets(() => this.rebuildAll());
-    void loadGroundAssets(() => this.rebuildAll());
-    // Schriften können nach dem ersten Frame nachladen
-    document.fonts?.ready.then(() => this.rebuildAll());
+    void this.boot();
     this.invalidate();
+  }
+
+  /**
+   * Alle Bildsätze im Hintergrund laden, Bodentexturen vorberechnen und auf die Grafikkarte legen –
+   * erst danach einmal aufbauen (statt nach jedem Teil). Läuft, während die Startseite offen ist.
+   */
+  private async boot() {
+    const steps = 6;
+    let done = 0;
+    const step = () => {
+      this.progress = Math.min(1, ++done / steps);
+      this.onProgress?.(this.progress);
+    };
+    const rebuild = () => !this.booting && this.rebuildAll();
+    await Promise.all([
+      loadItemAssets(rebuild).then(step),
+      loadGroundAssets(rebuild).then(step),
+      loadPlantAssets(() => (this.booting ? undefined : this.rebuildPlants())).then(step),
+      (document.fonts?.ready ?? Promise.resolve()).then(step),
+    ]);
+    try {
+      await this.upload(await warmMaterialTextures(MATERIALS.map((m) => m.texture)));
+      step();
+      await this.upload([...allGroundTextures(), ...allItemTextures()]);
+    } catch (e) {
+      console.warn('Vorbereitung der Texturen unvollständig', e);
+    }
+    step();
+    this.booting = false;
+    this.rebuildAll();
+    this.readyResolve();
+  }
+
+  /** Texturen in kleinen Paketen auf die Grafikkarte legen, damit das erste Bild nicht stockt */
+  private async upload(list: Texture[]) {
+    const sys = (this.app.renderer as unknown as { texture?: { initSource?: (s: unknown) => void } }).texture;
+    if (!sys?.initSource) return;
+    let n = 0;
+    for (const t of list) {
+      const src = t.source;
+      if (!src || this.uploaded.has(src)) continue;
+      this.uploaded.add(src);
+      sys.initSource(src);
+      if (++n % 6 === 0) await idle();
+    }
+  }
+
+  /** Pflanzenbilder eines Gartens schon laden (z. B. beim Überfahren seiner Karte) */
+  prefetch(doc: Project): Promise<Texture[]> {
+    const tilt = !!this.store.getState().session.viewport.tiltDeg;
+    return preloadPlants(speciesOf(doc), [this.store.getState().session.season], tilt ? ['top', 'oblique'] : ['top']);
+  }
+
+  /** Vor dem Öffnen: Grundbilder bereit, Pflanzenbilder des Gartens geladen und hochgeladen */
+  async prepare(doc: Project): Promise<void> {
+    await this.ready;
+    await this.upload(await this.prefetch(doc));
+  }
+
+  /** erfüllt nach dem nächsten gezeichneten Bild */
+  nextFrame(): Promise<void> {
+    return new Promise((res) => {
+      this.frameWaiters.push(res);
+      this.invalidate();
+    });
+  }
+
+  /** Vorschaubild für die Startseite: ganzer Garten von oben, Sommer, ohne Hilfslinien */
+  async thumbnail(maxPx = 1100): Promise<Blob | null> {
+    const doc = this.store.getState().doc;
+    if (!doc || this.booting) return null;
+    const b = bbox(doc.site.boundary);
+    const ext = Math.max(b.maxX - b.minX, b.maxY - b.minY) + 2;
+    const { blob } = await this.exportPng({ pxPerMeter: maxPx / ext, marginM: 1, background: null, overlays: false, quick: true, view: { lens: 'plan', season: 'summer', night: false } });
+    return blob;
   }
 
   destroy(): void {
@@ -227,14 +315,23 @@ export class PlanRenderer {
    * Plan als PNG: rendert offscreen in eine RenderTexture im gewünschten Maßstab
    * (ohne Auswahl, Hover, Raster und Werkzeugvorschau).
    */
-  async exportPng(opts: { pxPerMeter: number; marginM: number; background: string | null; uiScale?: number; view?: Partial<ViewParams>; overlays?: boolean }): Promise<{ blob: Blob; width: number; height: number }> {
+  async exportPng(opts: {
+    pxPerMeter: number;
+    marginM: number;
+    background: string | null;
+    uiScale?: number;
+    view?: Partial<ViewParams>;
+    overlays?: boolean;
+    /** Vorschaubild: vorhandene Bilder nehmen, nichts nachladen und nicht neu aufbauen */
+    quick?: boolean;
+  }): Promise<{ blob: Blob; width: number; height: number }> {
     const doc = this.store.getState().doc;
     if (!doc) throw new Error('Kein Projekt geladen');
-    // Pflanzenbilder der Export-Jahreszeit vorher laden (sonst gemalte Ersatzdarstellung)
-    const season = opts.view?.season ?? 'summer';
-    const ids = new Set(Object.values(doc.objects).flatMap((o) => ('speciesId' in o ? [o.speciesId] : o.type === 'planting' ? o.mix.map((m) => m.speciesId) : o.type === 'scatter' ? o.plants.map((p) => p.speciesId) : [])));
-    await preloadPlants([...ids].map((id) => getSpecies(id)), [season]);
-    this.rebuildAll();
+    if (!opts.quick) {
+      // Pflanzenbilder der Export-Jahreszeit vorher laden (sonst gemalte Ersatzdarstellung)
+      await preloadPlants(speciesOf(doc), [opts.view?.season ?? 'summer']);
+      this.rebuildAll();
+    }
     const b = expandBBox(bbox(doc.site.boundary), opts.marginM);
     const maxTex = 8192;
     const ppm = Math.min(opts.pxPerMeter, maxTex / (b.maxX - b.minX), maxTex / (b.maxY - b.minY));
@@ -248,9 +345,10 @@ export class PlanRenderer {
     const base = viewParamsFrom(this.store.getState().session);
     this.viewOverride = { ...base, lens: 'plan', years: 0, season: 'summer', ...opts.view };
     let canvas: HTMLCanvasElement;
+    const hidden: Container[] = [];
     try {
       const s = this.store.getState();
-      const lod = 2;
+      const lod = opts.quick ? lodFor(ppm) : 2;
       this.reconcile(doc, lod);
       this.lastLod = lod;
       this.lastDoc = doc;
@@ -258,6 +356,13 @@ export class PlanRenderer {
       this.applyViewport(vp);
       this.cull(doc, vp);
       this.applyEffects(doc, true);
+      // ohne Hilfslinien auch ohne Beschriftung und Maßketten (Vorschaubild)
+      if (opts.overlays === false)
+        for (const m of this.mounted.values())
+          if (m.ref.type === 'text' || m.ref.type === 'dimension') {
+            hidden.push(m.view.node);
+            m.view.node.visible = false;
+          }
       // Linien und Maßzahlen in Druckgröße: Overlay in reduzierter Auflösung zeichnen und hochskalieren
       const k = opts.uiScale ?? 1;
       this.exportView = { vp: { ...vp, pxPerMeter: ppm / k }, size: { width: size.width / k, height: size.height / k } };
@@ -272,6 +377,7 @@ export class PlanRenderer {
       this.app.renderer.render({ container: this.app.stage, target: rt, clear: true });
       canvas = this.app.renderer.extract.canvas(rt) as HTMLCanvasElement;
     } finally {
+      for (const n of hidden) n.visible = true;
       this.app.stage.removeChild(bg);
       bg.destroy();
       this.overlay.scale.set(1);
@@ -291,6 +397,17 @@ export class PlanRenderer {
   private rebuildAll() {
     for (const m of this.mounted.values()) this.unmount(m);
     this.mounted.clear();
+    this.lastDoc = null;
+    this.invalidate();
+  }
+
+  /** Nur Pflanzen neu aufbauen (neue Pflanzenbilder sind da) – Flächen, Wege und Objekte bleiben */
+  private rebuildPlants() {
+    for (const [id, m] of this.mounted)
+      if (PLANT_TYPES.has(m.ref.type)) {
+        this.unmount(m);
+        this.mounted.delete(id);
+      }
     this.lastDoc = null;
     this.invalidate();
   }
@@ -320,6 +437,8 @@ export class PlanRenderer {
     this.app.render();
     this.frameTimes.push(performance.now() - t0);
     if (this.frameTimes.length > 240) this.frameTimes.shift();
+    const w = this.frameWaiters.splice(0);
+    w.forEach((f) => f());
   }
 
   /** Szenengraph an das Dokument angleichen */

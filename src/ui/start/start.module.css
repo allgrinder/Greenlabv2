@@ -1,0 +1,498 @@
+/* Startseite: gespeicherte Gärten, warmes Grau mit Anthrazit wie Onboarding und Topbar */
+.screen,
+.screenOut {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  overflow-y: auto;
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--dot) 1px, transparent 1px);
+  background-size: 20px 20px;
+  transition: opacity 0.38s var(--ease), visibility 0s linear 0s;
+}
+
+.screenOut {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.38s var(--ease), visibility 0s linear 0.38s;
+}
+
+.inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 30px 48px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* ---------- Kopf ---------- */
+.head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brandName {
+  font-family: var(--font-serif);
+  font-size: 19px;
+}
+
+.load,
+.loadDone {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--ink3);
+  transition: opacity 0.6s var(--ease) 0.8s;
+}
+
+.loadDone {
+  opacity: 0;
+}
+
+.bar {
+  width: 96px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.bar > span {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+  transform-origin: left;
+  transition: transform 0.4s var(--ease);
+}
+
+/* ---------- Titel und Aktionen ---------- */
+.hero {
+  display: flex;
+  align-items: flex-end;
+  gap: 24px 40px;
+  flex-wrap: wrap;
+}
+
+.h1 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 44px;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+
+.lead {
+  margin: 10px 0 0;
+  max-width: 46ch;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink2);
+}
+
+.actions {
+  margin-left: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.primary,
+.ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: background 0.15s, transform 0.15s var(--ease), opacity 0.15s;
+}
+
+.primary {
+  background: var(--ink);
+  color: #fff;
+  padding-inline: 18px;
+}
+
+.primary:hover {
+  transform: translateY(-1px);
+}
+
+.ghost {
+  background: var(--gb);
+  box-shadow: 0 0 0 1px var(--line) inset;
+  color: var(--ink);
+}
+
+.ghost:hover {
+  background: #fff;
+}
+
+.primary:disabled,
+.ghost:disabled {
+  opacity: 0.45;
+  transform: none;
+  cursor: default;
+}
+
+/* ---------- Zuletzt bearbeitet ---------- */
+.featuredCard {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  text-align: left;
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--gl);
+  box-shadow: var(--sh);
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+
+.featuredCard:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset, 0 18px 48px rgba(44, 46, 34, 0.16), 0 1px 3px rgba(44, 46, 34, 0.08);
+}
+
+.featuredCard:disabled {
+  cursor: progress;
+}
+
+.featuredThumb,
+.cardThumb {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background-color: #e2ddd2;
+  background-image: radial-gradient(rgba(31, 34, 36, 0.09) 1px, transparent 1px);
+  background-size: 14px 14px;
+}
+
+.featuredThumb {
+  aspect-ratio: 16 / 10;
+}
+
+/* ganzer Garten als Plan auf Papier: nichts abschneiden, Schlagschatten wie ein aufgelegter Plan */
+.featuredThumb img,
+.cardThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  padding: 6%;
+  filter: drop-shadow(0 6px 14px rgba(44, 46, 34, 0.18));
+  transition: transform 0.6s var(--ease);
+}
+
+.featuredCard:hover .featuredThumb img,
+.cardMain:hover .cardThumb img {
+  transform: scale(1.025);
+}
+
+.featuredBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 32px 34px 30px;
+  min-width: 0;
+}
+
+.kicker {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+
+.featuredName {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.facts > span {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--fld);
+  color: var(--ink2);
+  font-variant-numeric: tabular-nums;
+}
+
+.date {
+  font-size: 12.5px;
+  color: var(--ink3);
+}
+
+.go {
+  margin-top: auto;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+/* ---------- Alle Gärten ---------- */
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.sectionTitle {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink3);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 18px;
+}
+
+.card {
+  position: relative;
+  border-radius: 14px;
+  background: var(--gl);
+  box-shadow: var(--sh);
+  overflow: hidden;
+  transition: transform 0.2s var(--ease);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.cardMain {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  padding-bottom: 14px;
+}
+
+.cardMain:disabled {
+  cursor: progress;
+}
+
+.cardThumb {
+  aspect-ratio: 4 / 3;
+  margin-bottom: 8px;
+}
+
+.cardName {
+  padding: 0 14px;
+  font-weight: 500;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardSub {
+  padding: 0 14px;
+  font-size: 12px;
+  color: var(--ink3);
+  font-variant-numeric: tabular-nums;
+}
+
+.del {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--gb);
+  backdrop-filter: var(--blur);
+  color: var(--ink2);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.card:hover .del,
+.del:focus-visible {
+  opacity: 1;
+}
+
+.del:hover {
+  color: var(--terracotta);
+}
+
+.confirm {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 4px 4px 10px;
+  border-radius: 9px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 12px;
+}
+
+.confirm button {
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: #fff;
+}
+
+.confirm button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.confirm .confirmYes {
+  background: var(--terracotta);
+}
+
+.confirm .confirmYes:hover {
+  background: #a5623f;
+}
+
+/* ---------- Vorschau ohne Bild, Ladezustand ---------- */
+.outline {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.outline polygon {
+  fill: rgba(155, 174, 116, 0.35);
+  stroke: var(--ink);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+
+.noThumb {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.opening {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(233, 229, 220, 0.55);
+  backdrop-filter: blur(2px);
+}
+
+.spinner {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid rgba(31, 34, 36, 0.15);
+  border-top-color: var(--ink);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 34px 36px;
+  border-radius: 18px;
+  background: var(--gl);
+  box-shadow: var(--sh);
+}
+
+.emptyArt {
+  width: 132px;
+  flex: none;
+  fill: rgba(155, 174, 116, 0.3);
+  stroke: var(--ink);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+
+.emptyArt circle,
+.emptyArt rect {
+  fill: rgba(31, 34, 36, 0.07);
+}
+
+.emptyTitle {
+  font-family: var(--font-serif);
+  font-size: 24px;
+}
+
+.emptyText {
+  margin-top: 6px;
+  font-size: 13.5px;
+  color: var(--ink2);
+  max-width: 52ch;
+}
+
+@media (max-width: 860px) {
+  .inner {
+    padding: 22px 20px 48px;
+    gap: 28px;
+  }
+
+  .h1 {
+    font-size: 34px;
+  }
+
+  .actions {
+    margin-left: 0;
+  }
+
+  .featuredCard {
+    grid-template-columns: 1fr;
+  }
+
+  .featuredBody {
+    padding: 22px 22px 24px;
+  }
+
+  .empty {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -5,7 +5,11 @@
    "file": "gravel.webp",
    "w": 1.0,
    "h": 1.0,
-   "ppm": 640
+   "ppm": 640,
+   "variants": [
+    "gravel_v1.webp",
+    "gravel_v2.webp"
+   ]
   },
   "paving": {
    "file": "paving.webp",
@@ -23,31 +27,51 @@
    "file": "mulch.webp",
    "w": 0.8,
    "h": 0.8,
-   "ppm": 420
+   "ppm": 420,
+   "variants": [
+    "mulch_v1.webp",
+    "mulch_v2.webp"
+   ]
   },
   "barkMulch": {
    "file": "barkMulch.webp",
    "w": 0.8,
    "h": 0.8,
-   "ppm": 420
+   "ppm": 420,
+   "variants": [
+    "barkMulch_v1.webp",
+    "barkMulch_v2.webp"
+   ]
   },
   "soil": {
    "file": "soil.webp",
    "w": 0.8,
    "h": 0.8,
-   "ppm": 420
+   "ppm": 420,
+   "variants": [
+    "soil_v1.webp",
+    "soil_v2.webp"
+   ]
   },
   "sand": {
    "file": "sand.webp",
    "w": 1.0,
    "h": 1.0,
-   "ppm": 420
+   "ppm": 420,
+   "variants": [
+    "sand_v1.webp",
+    "sand_v2.webp"
+   ]
   },
   "meadow": {
    "file": "meadow.webp",
    "w": 2.0,
    "h": 2.0,
-   "ppm": 300
+   "ppm": 300,
+   "variants": [
+    "meadow_v1.webp",
+    "meadow_v2.webp"
+   ]
   },
   "slabs": {
    "file": "slabs.webp",
@@ -59,7 +83,11 @@
    "file": "basalt.webp",
    "w": 0.8,
    "h": 0.8,
-   "ppm": 520
+   "ppm": 520,
+   "variants": [
+    "basalt_v1.webp",
+    "basalt_v2.webp"
+   ]
   }
  },
  "stepping": [
@@ -102,6 +130,184 @@
    "w": 2.0,
    "h": 0.4,
    "ppm": 420
+  },
+  "kantenstein": {
+   "file": "edge_kantenstein.webp",
+   "w": 2.0,
+   "h": 0.12,
+   "ppm": 420
+  },
+  "steel": {
+   "file": "edge_steel.webp",
+   "w": 2.0,
+   "h": 0.06,
+   "ppm": 700
+  },
+  "corten": {
+   "file": "edge_corten.webp",
+   "w": 2.0,
+   "h": 0.06,
+   "ppm": 700
   }
+ },
+ "scatter": {
+  "pebble": [
+   {
+    "file": "scatter_pebble_0.webp",
+    "w": 0.3189,
+    "h": 0.3178
+   },
+   {
+    "file": "scatter_pebble_1.webp",
+    "w": 0.3289,
+    "h": 0.3267
+   },
+   {
+    "file": "scatter_pebble_2.webp",
+    "w": 0.3144,
+    "h": 0.3167
+   },
+   {
+    "file": "scatter_pebble_3.webp",
+    "w": 0.3167,
+    "h": 0.3144
+   },
+   {
+    "file": "scatter_pebble_4.webp",
+    "w": 0.3222,
+    "h": 0.3222
+   },
+   {
+    "file": "scatter_pebble_5.webp",
+    "w": 0.3222,
+    "h": 0.3189
+   },
+   {
+    "file": "scatter_pebble_6.webp",
+    "w": 0.3311,
+    "h": 0.3244
+   },
+   {
+    "file": "scatter_pebble_7.webp",
+    "w": 0.3178,
+    "h": 0.3222
+   }
+  ],
+  "basalt": [
+   {
+    "file": "scatter_basalt_0.webp",
+    "w": 0.3178,
+    "h": 0.3233
+   },
+   {
+    "file": "scatter_basalt_1.webp",
+    "w": 0.3278,
+    "h": 0.3256
+   },
+   {
+    "file": "scatter_basalt_2.webp",
+    "w": 0.3189,
+    "h": 0.3178
+   },
+   {
+    "file": "scatter_basalt_3.webp",
+    "w": 0.3144,
+    "h": 0.3178
+   },
+   {
+    "file": "scatter_basalt_4.webp",
+    "w": 0.32,
+    "h": 0.3211
+   },
+   {
+    "file": "scatter_basalt_5.webp",
+    "w": 0.3233,
+    "h": 0.32
+   }
+  ],
+  "bark": [
+   {
+    "file": "scatter_bark_0.webp",
+    "w": 0.3611,
+    "h": 0.34
+   },
+   {
+    "file": "scatter_bark_1.webp",
+    "w": 0.3456,
+    "h": 0.3311
+   },
+   {
+    "file": "scatter_bark_2.webp",
+    "w": 0.3611,
+    "h": 0.3833
+   },
+   {
+    "file": "scatter_bark_3.webp",
+    "w": 0.3378,
+    "h": 0.3444
+   },
+   {
+    "file": "scatter_bark_4.webp",
+    "w": 0.3278,
+    "h": 0.3478
+   },
+   {
+    "file": "scatter_bark_5.webp",
+    "w": 0.3333,
+    "h": 0.3689
+   },
+   {
+    "file": "scatter_bark_6.webp",
+    "w": 0.3489,
+    "h": 0.3222
+   },
+   {
+    "file": "scatter_bark_7.webp",
+    "w": 0.3744,
+    "h": 0.3733
+   }
+  ],
+  "leaf": [
+   {
+    "file": "scatter_leaf_0.webp",
+    "w": 0.3667,
+    "h": 0.3344
+   },
+   {
+    "file": "scatter_leaf_1.webp",
+    "w": 0.3744,
+    "h": 0.3367
+   },
+   {
+    "file": "scatter_leaf_2.webp",
+    "w": 0.3489,
+    "h": 0.3478
+   },
+   {
+    "file": "scatter_leaf_3.webp",
+    "w": 0.3333,
+    "h": 0.3711
+   },
+   {
+    "file": "scatter_leaf_4.webp",
+    "w": 0.3656,
+    "h": 0.3344
+   },
+   {
+    "file": "scatter_leaf_5.webp",
+    "w": 0.3478,
+    "h": 0.3878
+   },
+   {
+    "file": "scatter_leaf_6.webp",
+    "w": 0.3556,
+    "h": 0.3578
+   },
+   {
+    "file": "scatter_leaf_7.webp",
+    "w": 0.3733,
+    "h": 0.3411
+   }
+  ]
  }
 }

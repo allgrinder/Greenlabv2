@@ -47,7 +47,11 @@ npm run assets:looks                                              # Katalog + Lo
 - Nahtlos: Ein Muster deckt genau eine Kachel ab; Elemente am Rand werden um ± Kachelgröße dupliziert (`tiled()`).
   Nichts darf doppelt übereinander liegen – sonst flackern Flächen schwarz oder bekommen schräge Schattenstreifen.
 - `EDGE`/`grass_edge`: nahtloser Halmstreifen (2 × 0,4 m, freigestellt) für Rasenkanten – Büschel mit Lücken, Halme überwiegend nach außen.
-- Ergebnis: `public/assets/ground/<schlüssel>.webp` (Schlüssel = `Material.texture`), `edge_grass.webp`, `stepping_<n>.webp`
+- Einfassungen als Kantenstreifen: `kantenstein` (8 cm Beton, Fugen alle 1 m), `steel` (anthrazit, 25 mm Abkantung mit Lichtkante) und `corten` – je `edge_<schlüssel>.webp`.
+- `SCATTER`: freigestellte Streuteile (`pebble`, `basalt`, `bark`, `leaf`), die die App über Beet- und Belagskanten verteilt (`scatter_<art>_<n>.webp`, Größe in m im Manifest).
+- `VARIANTS`: Für organische Beläge (Kies, Basalt, Häcksel, Rinde, Erde, Sand, Wiese) gibt es zusätzliche Kacheln mit anderem Zufallswert (`<schlüssel>_v<n>.webp`). Die App mischt sie beim Aufbrechen der Kachel.
+  `python assets/blender/render_ground.py --no-base --variants 2 --only gravel,basalt,…` rendert nur die Varianten; `--only edges` bzw. `--only scatter` nur Kanten bzw. Streuteile.
+- Ergebnis: `public/assets/ground/<schlüssel>.webp` (Schlüssel = `Material.texture`), `edge_<art>.webp`, `scatter_<art>_<n>.webp`, `stepping_<n>.webp`
   (freigestellte Trittplatten) und `manifest.json`. Fehlt ein Bild, malt die App die prozedurale Kachel.
 
 ## Aufbau

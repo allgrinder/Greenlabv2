@@ -75,7 +75,8 @@ Umgesetzt sind alle acht Kernfunktionen der Phase 1 sowie PNG-Export (siehe `ARC
 - Bodenbeläge (Kies, Platten, Holzdeck, Häcksel, Rinde, Erde, Sand, Wildwiese, Großformatplatten, Basaltsplitt, Trittplatten) sind in Blender Stück für Stück modelliert und als nahtlose Kacheln gerendert.
 - Basalt für Beete: Basaltsplitt als Abdeckung jeder Pflanzfläche wählbar (Eigenschaften → Abdeckung), dazu Basalt-Findlinge und Basaltstelen im Katalog.
 - Beispielgarten ist der „Mustergarten Modern & Naturnah“ (30 × 50 m, sieben Zonen: Eingang, Spiel, Rasen, Hochbeete, Pavillon, Naturwiese mit Homeoffice-Pod, Feuerstelle).
-- Beläge ohne sichtbare Kachelwiederholung und ohne harte Kanten: aufgebrochene Texturen, großflächige Variation, einmalige Details, ausgefranste Ränder und echte Grashalme, die über Rasenkanten hängen.
+- Beläge ohne sichtbare Kachelwiederholung und ohne harte Kanten: aufgebrochene Texturen, großflächige Variation, einmalige Details, ausgefranste Ränder und echte Grashalme, die über Rasen- und Beetkanten hängen. Mehrere Blender-Varianten je Belag (Kies, Wiese …) gegen Wiederholung.
+- Einfassung wählbar (Eigenschaften: Ohne / Stein / Stahl / Corten) und als echtes Material mit Licht und Schatten gezeichnet; ohne Einfassung keine Linie. Einzelne Kiesel, Rindenstücke und Laub liegen über den Kanten.
 - Bäume und freie Sträucher sind aus Blattzweigen in Laubmassen aufgebaut (Punktwolke mit Klumpen, fransiger Rand, Lichtdurchlass) – keine Laubkugeln mehr.
 - Darstellung wie im Gartenkonzept: satter Rasen, lange weiche Schatten nach rechts unten, dichte Beete mit Unterwuchs, formgeschnittene Hecke mit Lichtkante.
 - Auch alle Pflanzen kommen aus Blender: 42 Arten in ihren Jahreszeiten (Blüte, Frucht, Herbstfarbe, kahler Winter), Bäume und Sträucher zusätzlich schräg. Die Bilder laden erst, wenn sie gebraucht werden; bis dahin steht die gemalte Version da.

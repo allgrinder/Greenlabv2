@@ -362,6 +362,7 @@ export class PlanRenderer {
       this.mounted.set(o.id, { ref: o, view, key });
     }
     // Reihenfolge je Ebene herstellen
+    const bedLayer = doc.layerOrder.find((id) => doc.layers[id].kind === 'plants');
     for (const lid of doc.layerOrder) {
       const layer = doc.layers[lid];
       const c = this.layers.get(lid)!;
@@ -369,12 +370,19 @@ export class PlanRenderer {
       const sorted = layer.kind === 'plants' ? [...layer.objectOrder].sort((a, b) => heightRank(doc.objects[a]) - heightRank(doc.objects[b])) : layer.objectOrder;
       // Körper der Schrägansicht liegen im gemeinsamen Tiefen-Container
       const order = sorted.filter((id) => this.mounted.get(id)?.view.depth === undefined);
-      order.forEach((id, i) => {
-        const m = this.mounted.get(id);
-        if (!m) return;
+      // Rasenhalme über den Beeträndern: nach Pflanzflächen und Streupflanzungen, vor Sträuchern und Kronen
+      const bedAt = lid === bedLayer ? order.filter((id) => this.mounted.has(id) && heightRank(doc.objects[id]) === 0).length : -1;
+      order.filter((id) => this.mounted.has(id)).forEach((id, j) => {
+        const i = bedAt >= 0 && j >= bedAt ? j + 1 : j;
+        const m = this.mounted.get(id)!;
         if (m.view.node.parent !== c) c.addChild(m.view.node);
         if (c.getChildIndex(m.view.node) !== i) c.setChildIndex(m.view.node, Math.min(i, c.children.length - 1));
       });
+      if (bedAt >= 0) {
+        const bed = this.edgeLayer.bedContainer;
+        if (bed.parent !== c) c.addChild(bed);
+        if (c.getChildIndex(bed) !== bedAt) c.setChildIndex(bed, Math.min(bedAt, c.children.length - 1));
+      }
     }
     const solids = [...this.mounted.values()].filter((m) => m.view.depth !== undefined).sort((a, b) => a.view.depth! - b.view.depth!);
     solids.forEach((m, i) => {

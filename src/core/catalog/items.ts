@@ -28,6 +28,8 @@ export const ITEMS: CatalogItem[] = [
   { id: 'basalt-columns', name: 'Basaltstelen, 5er-Gruppe', category: 'furniture', defaultLayer: 'build', width: 1.0, depth: 0.8, height: 1.4, symbol: 'basaltColumns', creates: 'item', unit: 'pcs', price: 890 },
   { id: 'deck-bench', name: 'Einbaubank Lärche mit Pflanzkasten', category: 'furniture', defaultLayer: 'build', width: 3.2, depth: 0.55, height: 0.45, symbol: 'deckBench', creates: 'item', unit: 'pcs', price: 1680 },
   { id: 'edge.kantenstein-8x20', name: 'Kantenstein 8 × 20 × 100', category: 'edging', defaultLayer: 'paths', width: 1, depth: 0.08, height: 0.2, symbol: 'edge', creates: 'item', unit: 'm', price: 6.4 },
+  { id: 'edge.stahl-anthrazit', name: 'Rasenkante Stahl, anthrazit', category: 'edging', defaultLayer: 'paths', width: 1, depth: 0.004, height: 0.15, symbol: 'edgeSteel', creates: 'item', unit: 'm', price: 18.5 },
+  { id: 'edge.corten', name: 'Rasenkante Cortenstahl', category: 'edging', defaultLayer: 'paths', width: 1, depth: 0.004, height: 0.15, symbol: 'edgeCorten', creates: 'item', unit: 'm', price: 21 },
 ];
 
 const BY_ID = new Map(ITEMS.map((i) => [i.id, i]));

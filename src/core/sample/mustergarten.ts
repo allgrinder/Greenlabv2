@@ -148,9 +148,9 @@ export function createMustergarten(): Project {
   const deck = area('Holzdeck Lärche', simpleRegion(rect(22.9, 8, 6.6, 9)), 'wood');
   const sand = area('Spielsand', simpleRegion(rect(6.6, 24.6, 6.4, 3.2, 0.6)), 'sand');
   // Hochbeete auf schmalem Kiesbett, Gewächshaus auf Betonplatten – der Rest bleibt Rasen (wie im Konzept)
-  const kiesBeete = area('Kiesbett Hochbeete', simpleRegion(rect(7.7, 33.3, 4.6, 8.8, 0.2)), 'gravel', { catalogId: 'edge.kantenstein-8x20', sides: 'outline' });
+  const kiesBeete = area('Kiesbett Hochbeete', simpleRegion(rect(7.7, 33.3, 4.6, 8.8, 0.2)), 'gravel', { catalogId: 'edge.stahl-anthrazit', sides: 'outline' });
   const glasPlatten = area('Platten Gewächshaus', simpleRegion(rect(11.1, 33.3, 2.4, 3.6)), 'slabs');
-  const entry = path('Kiesweg Eingang', ENTRY_CENTERLINE, 1.4, 'gravel', { catalogId: 'edge.kantenstein-8x20', sides: 'both' });
+  const entry = path('Kiesweg Eingang', ENTRY_CENTERLINE, 1.4, 'gravel', { catalogId: 'edge.corten', sides: 'both' });
 
   const lawnCut = [...borders, meadow, deck, sand, kiesBeete, glasPlatten, entry].flatMap((o) => footprint(o));
   const lawn = difference([flattenRegion(simpleRegion(rect(15, 25, 28.2, 48.2)))], lawnCut);

@@ -101,10 +101,13 @@ export async function loadGroundAssets(onReady: () => void): Promise<void> {
   }
 }
 
-/** alle geladenen Bodenbilder (zum Vorab-Hochladen auf die Grafikkarte) */
-export function allGroundTextures(): Texture[] {
+/**
+ * Geladene Bodenbilder, die direkt gezeichnet werden (zum Vorab-Hochladen auf die Grafikkarte).
+ * `direct(key)`: Kachel wird so gezeichnet – aufgebrochene Beläge dienen nur als Vorlage und bleiben weg.
+ */
+export function allGroundTextures(direct: (key: string) => boolean = () => true): Texture[] {
   return [
-    ...[...tiles.values()].flatMap((t) => [t.texture, ...(t.variants ?? [])]),
+    ...[...tiles.entries()].filter(([k]) => direct(k)).flatMap(([, t]) => [t.texture, ...(t.variants ?? [])]),
     ...[...edges.values()].map((t) => t.texture),
     ...[...scatterParts.values()].flatMap((l) => l.map((x) => x.texture)),
     ...stones.map((x) => x.texture),

@@ -399,18 +399,22 @@ const MAX_PX = 2048;
  * das Licht in den Blender-Bildern kommt immer von links oben). Das Raster der Vorlage verschwindet,
  * die Wiederholung erst nach k Kachelbreiten (≥ 8 m) – mit Makro-Variation darüber praktisch unsichtbar.
  */
-function bomb(src: CanvasImageSource, tileW: number, tileH: number, ppm: number, seed: number) {
+function bomb(srcs: CanvasImageSource[], tileW: number, tileH: number, ppm: number, seed: number) {
   const k = Math.min(8, Math.max(3, Math.ceil(8 / Math.max(tileW, tileH))));
   const ppmT = Math.min(ppm, MAX_PX / (k * Math.max(tileW, tileH)));
   const tw = Math.round(tileW * ppmT);
   const th = Math.round(tileH * ppmT);
   const W = tw * k;
   const H = th * k;
-  // Vorlage auf Zielauflösung
-  const base = document.createElement('canvas');
-  base.width = tw;
-  base.height = th;
-  base.getContext('2d')!.drawImage(src, 0, 0, tw, th);
+  // Vorlagen (Grundkachel + Varianten) auf Zielauflösung
+  const bases = srcs.map((src) => {
+    const c = document.createElement('canvas');
+    c.width = tw;
+    c.height = th;
+    c.getContext('2d')!.drawImage(src, 0, 0, tw, th);
+    return c;
+  });
+  const base = bases[0];
   const out = document.createElement('canvas');
   out.width = W;
   out.height = H;
@@ -423,7 +427,7 @@ function bomb(src: CanvasImageSource, tileW: number, tileH: number, ppm: number,
   const patch = document.createElement('canvas');
   patch.width = patch.height = R * 2;
   const pc = patch.getContext('2d')!;
-  const ppat = pc.createPattern(base, 'repeat')!;
+  const ppats = bases.map((b) => pc.createPattern(b, 'repeat')!);
   const step = R * 1.05;
   for (let y = 0; y < H; y += step)
     for (let x = 0; x < W; x += step) {
@@ -432,6 +436,7 @@ function bomb(src: CanvasImageSource, tileW: number, tileH: number, ppm: number,
       const rr = R * (0.7 + r() * 0.3);
       pc.globalCompositeOperation = 'source-over';
       pc.clearRect(0, 0, R * 2, R * 2);
+      const ppat = ppats[Math.floor(r() * ppats.length)];
       ppat.setTransform(new DOMMatrix().translateSelf(r() * tw, r() * th));
       pc.fillStyle = ppat;
       pc.fillRect(0, 0, R * 2, R * 2);
@@ -472,7 +477,8 @@ function tile(key: Material['texture']) {
     const k = `img|${key}`;
     let hit = bombed.get(k);
     if (!hit) {
-      hit = bomb(g.texture.source.resource as CanvasImageSource, g.w, g.h, g.ppm, key.length * 977 + 13);
+      const srcs = [g.texture, ...(g.variants ?? [])].map((t) => t.source.resource as CanvasImageSource);
+      hit = bomb(srcs, g.w, g.h, g.ppm, key.length * 977 + 13);
       bombed.set(k, hit);
     }
     return hit;
@@ -488,7 +494,7 @@ function tile(key: Material['texture']) {
   spec.paint(canvas.getContext('2d')!, cw, ch, spec.pxPerM);
   if (key === 'lawn') {
     // Rasen ist immer gemalt: ebenfalls aufbrechen
-    hit = bomb(canvas, spec.w, spec.h, spec.pxPerM, 4711);
+    hit = bomb([canvas], spec.w, spec.h, spec.pxPerM, 4711);
     cache.set(key, hit);
     return hit;
   }

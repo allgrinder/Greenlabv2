@@ -49,6 +49,13 @@ describe('Mustergarten Modern & Naturnah', () => {
     expect(getMaterial('basalt').unit).toBe('m3');
   });
 
+  it('Einfassungen: Stahl an den Kiesbeeten, Corten am Eingangsweg, alle im Katalog', () => {
+    const edgings = objs.flatMap((o) => ((o.type === 'area' || o.type === 'path') && o.edging ? [o.edging.catalogId] : []));
+    expect(edgings).toContain('edge.stahl-anthrazit');
+    expect(edgings).toContain('edge.corten');
+    for (const e of edgings) expect(getItem(e).unit).toBe('m');
+  });
+
   it('Kosten: Trittplatten werden als Stückzahl gerechnet', () => {
     const rep = projectSummary(doc);
     const st = rep.lines.find((l) => l.key === 'mat:stepping');

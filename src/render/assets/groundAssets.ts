@@ -12,6 +12,8 @@ export interface GroundTile {
   h: number;
   ppm: number;
   url: string;
+  /** weitere Kacheln gleicher Maße mit anderer Zufallsverteilung (für die Anti-Kachel-Mischung) */
+  variants?: Texture[];
 }
 
 export interface SteppingStone {
@@ -22,7 +24,8 @@ export interface SteppingStone {
 }
 
 interface Manifest {
-  tiles: Record<string, { file: string; w: number; h: number; ppm: number }>;
+  tiles: Record<string, { file: string; w: number; h: number; ppm: number; variants?: string[] }>;
+  scatter?: Record<string, { file: string; w: number; h: number }[]>;
   stepping: { file: string; px: [number, number]; ppm: number }[];
   edges?: Record<string, { file: string; w: number; h: number; ppm: number }>;
 }
@@ -30,6 +33,7 @@ interface Manifest {
 const BASE = `${import.meta.env.BASE_URL}assets/ground/`;
 const tiles = new Map<string, GroundTile>();
 const edges = new Map<string, GroundTile>();
+const scatterParts = new Map<string, SteppingStone[]>();
 let stones: SteppingStone[] = [];
 
 export async function loadGroundAssets(onReady: () => void): Promise<void> {
@@ -44,7 +48,20 @@ export async function loadGroundAssets(onReady: () => void): Promise<void> {
         texture.source.scaleMode = 'linear';
         texture.source.autoGenerateMipmaps = true;
         texture.source.updateMipmaps?.();
-        tiles.set(key, { texture, w: t.w, h: t.h, ppm: t.ppm, url: BASE + t.file });
+        const variants = await Promise.all((t.variants ?? []).map((f) => Assets.load<Texture>(BASE + f)));
+        tiles.set(key, { texture, w: t.w, h: t.h, ppm: t.ppm, url: BASE + t.file, variants });
+      }),
+      ...Object.entries(m.scatter ?? {}).map(async ([kind, list]) => {
+        const items = await Promise.all(
+          list.map(async (x) => {
+            const texture = await Assets.load<Texture>(BASE + x.file);
+            texture.source.scaleMode = 'linear';
+            texture.source.autoGenerateMipmaps = true;
+            texture.source.updateMipmaps?.();
+            return { texture, w: x.w, h: x.h };
+          }),
+        );
+        scatterParts.set(kind, items);
       }),
       ...Object.entries(m.edges ?? {}).map(async ([key, t]) => {
         const texture = await Assets.load<Texture>(BASE + t.file);
@@ -74,5 +91,7 @@ export async function loadGroundAssets(onReady: () => void): Promise<void> {
 
 export const groundTile = (key: string): GroundTile | undefined => tiles.get(key);
 export const steppingStones = (): SteppingStone[] => stones;
+/** Streuteile einer Art (Kiesel, Basalt, Rinde, Laub): freigestellte Einzelbilder mit Größe in Metern */
+export const scatterSprites = (kind: string): SteppingStone[] => scatterParts.get(kind) ?? [];
 /** Kantenstreifen (z. B. Rasenkante): nahtlos entlang der Länge w, Tiefe h, Wurzellinie in der Mitte */
 export const edgeStrip = (key: string): GroundTile | undefined => edges.get(key);

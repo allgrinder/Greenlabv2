@@ -411,8 +411,6 @@ def stepping_stone(rnd: random.Random, i: int):
     return ob
 
 
-#: Rasenkante: Streifen mit Grashalmen, die über die Kante hängen (Länge × Tiefe in m, Pixel je m)
-EDGE = {"grass": ((2.0, 0.4), 420)}
 
 
 def grass_edge(T, rnd):
@@ -464,3 +462,111 @@ def grass_edge(T, rnd):
         c = ob.copy()
         c.location = (dx, 0, 0)
         bpy.context.scene.collection.objects.link(c)
+
+
+def _edge_blocks(T, rnd, width: float, top: float, tones: list[str], unit: float, bevel: float, rough: float = 0.8, metallic: float = 0.0,
+                 segments: int = 2, tilt: float = 0.0, noise: float = 0.08, scale: float = 20):
+    """Einfassungsband entlang x, mittig: einzelne Elemente der Länge `unit` mit Fuge, leicht unterschiedlich hoch"""
+    mats = []
+    for i, h in enumerate(tones):
+        m = pmat(f"edgem{i}_{width}", lin(h), rough, noise, 0.3, scale, 0.35)
+        if metallic:
+            m.node_tree.nodes["Principled BSDF"].inputs["Metallic"].default_value = metallic
+        mats.append(m)
+    x = 0.0
+    while x < T[0] - 1e-6:
+        L = min(unit, T[0] - x)
+        ob = link(bpy.data.objects.new("edgeblock", slab_mesh("edgeblock", L - (0.004 if unit < T[0] else 0.0), width, 0.06)), outline=False)
+        ob.location = P(x + L / 2, T[1] / 2, top - 0.03 + rnd.uniform(-0.002, 0.002))
+        if bevel:
+            bev = ob.modifiers.new("b", "BEVEL")
+            bev.width = bevel
+            bev.segments = segments
+            bev.limit_method = "ANGLE"
+        if tilt:
+            ob.rotation_euler = Euler((tilt, 0, 0))
+        ob.data.materials.append(mats[rnd.randrange(len(mats))])
+        x += L
+
+
+def kantenstein_edge(T, rnd):
+    """Kantenstein 8 × 20 × 100 aus Beton: 8 cm breite Oberkante, Fugen alle 1 m, Fase, leichte Verschmutzung"""
+    _edge_blocks(T, rnd, 0.08, 0.0, ["#9a968d", "#928e85", "#a19d95"], 1.0, 0.006, 0.85)
+
+
+def steel_edge(T, rnd):
+    """Rasenkante aus Stahl, anthrazit pulverbeschichtet, mit 25 mm Abkantung oben: rund gebogene Lichtkante
+    auf der einen, Schattenkante auf der anderen Seite"""
+    _edge_blocks(T, rnd, 0.025, 0.0, ["#303134", "#2a2b2e"], 1.0, 0.009, 0.4, 0.6, segments=6, tilt=0.12, noise=0.04)
+
+
+def corten_edge(T, rnd):
+    """Rasenkante aus Cortenstahl mit Abkantung: rostbraun, fleckig, Stöße alle 1 m"""
+    _edge_blocks(T, rnd, 0.025, 0.0, ["#6f3519", "#76391b", "#6a3318"], 1.0, 0.009, 0.9, 0.2, segments=6, tilt=0.12, noise=0.2, scale=140)
+
+
+#: Kantenstreifen: Schlüssel → (Länge × Tiefe in m, Pixel je m, Generator); nahtlos entlang der Länge, Wurzel/Mitte bei Tiefe/2
+EDGE = {
+    "grass": ((2.0, 0.4), 420, grass_edge),
+    "kantenstein": ((2.0, 0.12), 420, kantenstein_edge),
+    "steel": ((2.0, 0.06), 700, steel_edge),
+    "corten": ((2.0, 0.06), 700, corten_edge),
+}
+
+
+# ------------------------------------------------------------------ Streuteile (einzeln, freigestellt)
+
+
+def _pebble_obj(rnd, r: float, hex_: str, flat: float, angular: bool):
+    me = pebble_mesh("sp", 1.0, rnd, flat, 1 if angular else 2, not angular, 0.2 if angular else 0.0)
+    ob = link(bpy.data.objects.new("sp", me), outline=False)
+    ob.scale = (r, r, r)
+    ob.rotation_euler = Euler((0, 0, rnd.uniform(0, 6.28)))
+    ob.data.materials.append(pmat(f"sp{hex_}", lin(hex_), 0.55, 0.12, 0.25, 25, 0.45))
+    return ob
+
+
+def scatter_pebble(rnd, i):
+    tones = ["#d9cfbd", "#cfc3ab", "#e6ded0", "#b9ab92", "#a59a88", "#c9bea9"]
+    _pebble_obj(rnd, rnd.uniform(0.008, 0.016), tones[i % len(tones)], 0.55, False)
+
+
+def scatter_basalt(rnd, i):
+    tones = ["#3a3d40", "#43464a", "#2c2f32", "#4d5053"]
+    _pebble_obj(rnd, rnd.uniform(0.009, 0.017), tones[i % len(tones)], 0.6, True)
+
+
+def scatter_bark(rnd, i):
+    """Rindenstück: gewölbt, rissig, braun"""
+    me = pebble_mesh("bk", 1.0, rnd, 0.25, 1, True, 0.15)
+    ob = link(bpy.data.objects.new("bk", me), outline=False)
+    L = rnd.uniform(0.025, 0.05)
+    ob.scale = (L, L * rnd.uniform(0.45, 0.7), L)
+    ob.rotation_euler = Euler((0, 0, rnd.uniform(0, 6.28)))
+    tones = ["#5a4232", "#4a3628", "#6b4e3a", "#3d2d22"]
+    ob.data.materials.append(pmat(f"bk{i}", lin(tones[i % 4]), 0.95, 0.25, 0.8, 50))
+
+
+def scatter_leaf(rnd, i):
+    """Herabgefallenes Blatt: leicht gewölbt, mit Mittelrippe angedeutet über Farbverlauf"""
+    s_ = rnd.uniform(0.03, 0.05)
+    outline = [(0, -s_), (s_ * 0.45, -s_ * 0.4), (s_ * 0.5, s_ * 0.25), (s_ * 0.25, s_ * 0.8), (0, s_ * 1.15), (-s_ * 0.25, s_ * 0.8), (-s_ * 0.5, s_ * 0.25), (-s_ * 0.45, -s_ * 0.4)]
+    bm = bmesh.new()
+    vs = [bm.verts.new((x, y, abs(x) * 0.25 + rnd.uniform(0, 0.002))) for x, y in outline]
+    mid = bm.verts.new((0, 0, 0.0))
+    for k in range(len(vs)):
+        bm.faces.new((mid, vs[k], vs[(k + 1) % len(vs)]))
+    me = bpy.data.meshes.new("leaf")
+    bm.to_mesh(me)
+    bm.free()
+    ob = link(bpy.data.objects.new("leaf", me), outline=False)
+    ob.rotation_euler = Euler((rnd.uniform(-0.3, 0.3), rnd.uniform(-0.3, 0.3), rnd.uniform(0, 6.28)))
+    tones = ["#b98d45", "#a8823e", "#8a6a3a", "#c4553a", "#6e5a34", "#9a7b3c"]
+    ob.data.materials.append(pmat(f"lf{i}", lin(tones[i % len(tones)]), 0.7, 0.15, 0.2, 30, 0.3))
+
+
+#: Streuteile: Art → (Generator, Anzahl Varianten)
+SCATTER = {"pebble": (scatter_pebble, 8), "basalt": (scatter_basalt, 6), "bark": (scatter_bark, 8), "leaf": (scatter_leaf, 8)}
+
+#: Beläge mit zusätzlichen Kachelvarianten (andere Zufallsverteilung, gleiche Maße)
+VARIANTS = ["gravel", "basalt", "mulch", "barkMulch", "soil", "sand", "meadow"]

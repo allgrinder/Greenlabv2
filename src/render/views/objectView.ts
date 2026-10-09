@@ -24,7 +24,8 @@ import { fringe, surfaceDetails } from './surfaceDetail';
 import { plantAssetSprite } from '../assets/plantAssets';
 import { buildSolid, type Tilt } from './obliqueView';
 import { hex, rng, seedFrom } from '../util/rng';
-import { steppingStones } from '../assets/groundAssets';
+import { edgeStrip, steppingStones } from '../assets/groundAssets';
+import { EDGING_STRIP } from '../effects/EdgeLayer';
 
 
 export interface ObjectView {
@@ -212,7 +213,7 @@ export function buildObjectView(o: PlanObject, ctx: ViewContext): ObjectView {
         const pat = materialPattern(m, origin, rot);
         fillRegions(g, fp, pat);
         // ausgefranste Kante bei Belägen ohne Fugenraster (Kies, Häcksel, Erde, Sand, Wiese …)
-        if (isOrganic(m.texture) && m.texture !== 'lawn') fringe(g, fp, pat, seed, m.texture === 'meadow' ? 0.22 : 0.06);
+        if (isOrganic(m.texture) && m.texture !== 'lawn' && !o.edging) fringe(g, fp, pat, seed, m.texture === 'meadow' ? 0.22 : 0.06);
         const macro = macroPattern(m.texture);
         if (macro) fillRegions(g, fp, macro);
         surfaceDetails(g, fp, m.texture, seed, ctx.season);
@@ -234,7 +235,8 @@ export function buildObjectView(o: PlanObject, ctx: ViewContext): ObjectView {
         // nur das Holzdeck hat eine echte Stirnkante; Kies und Platten enden ohne gemalte Linie
         if (m.texture === 'wood') strokeRegions(g, fp, { color: 0x7e5c3d, width: 0.045 });
       }
-      if (o.edging) strokeRegions(g, fp, { color: 0x8c857a, alpha: 0.75, width: 0.08 });
+      // Einfassung als gerendertes Band liegt in der Kanten-Ebene; gemalte Linie nur, bis das Bild geladen ist
+      if (o.edging && !edgeStrip(EDGING_STRIP[o.edging.catalogId] ?? '')) strokeRegions(g, fp, { color: 0x8c857a, alpha: 0.75, width: 0.08 });
       break;
     }
     case 'path': {
@@ -250,7 +252,8 @@ export function buildObjectView(o: PlanObject, ctx: ViewContext): ObjectView {
       const macro = macroPattern(pm.texture);
       if (macro) fillRegions(g, fp, macro);
       surfaceDetails(g, fp, pm.texture, seed, ctx.season);
-      if (o.edging) strokeRegions(g, fp, { color: 0x8c857a, alpha: 0.75, width: 0.08 });
+      // Einfassung als gerendertes Band liegt in der Kanten-Ebene; gemalte Linie nur, bis das Bild geladen ist
+      if (o.edging && !edgeStrip(EDGING_STRIP[o.edging.catalogId] ?? '')) strokeRegions(g, fp, { color: 0x8c857a, alpha: 0.75, width: 0.08 });
       break;
     }
     case 'planting': {

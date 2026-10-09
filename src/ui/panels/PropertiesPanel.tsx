@@ -13,7 +13,7 @@ import type { AreaObject, PlanObject, Project } from '../../core/model/types';
 import { objectQuantities, projectSummary, type ObjectQuantities } from '../../core/quantities/quantities';
 import { materialSwatchStyle } from '../../render/textures/materialTextures';
 import { cmd, editor, useEditor } from '../../state';
-import { Field, NumberField, Toggle } from '../components/controls';
+import { Field, NumberField } from '../components/controls';
 import { Icon } from '../icons';
 import { glyphSrc, irrGlyph, SYMBOL_GLYPH } from '../library/glyphs';
 import type { Brush } from '../../state/types';
@@ -161,6 +161,39 @@ function MaterialPicker({ o, ids }: { o: Extract<PlanObject, { type: 'area' | 'p
       <div className={s.row}>
         <span>{m.name}</span>
         <span className={s.muted}>{m.depthM ? `Schicht ${num(m.depthM * 100, 0)} cm` : m.unitSizeM ? `${num(m.unitSizeM.w * 100, 0)} × ${num(m.unitSizeM.d * 100, 0)} cm` : ''}</span>
+      </div>
+    </div>
+  );
+}
+
+/** Einfassung: keine, Betonstein, Stahl anthrazit oder Cortenstahl */
+const EDGINGS: [string | null, string][] = [
+  [null, 'Ohne'],
+  ['edge.kantenstein-8x20', 'Stein'],
+  ['edge.stahl-anthrazit', 'Stahl'],
+  ['edge.corten', 'Corten'],
+];
+
+function EdgingPicker({ o, sides, length }: { o: Extract<PlanObject, { type: 'area' | 'path' }>; sides: 'outline' | 'both'; length: number | null }) {
+  const cur = o.edging?.catalogId ?? null;
+  return (
+    <div className={s.row} style={{ padding: '4px 2px' }}>
+      <span>
+        Einfassung {length !== null && <span className={`${u.mono} ${s.muted}`}>{meters(length, 1)}</span>}
+      </span>
+      <div className={u.segmented}>
+        {EDGINGS.map(([id, label]) => (
+          <button
+            key={label}
+            type="button"
+            className={cur === id ? u.segmentOn : u.segment}
+            style={{ padding: '4px 8px' }}
+            data-testid={`edging-${label}`}
+            onClick={() => update(o, 'Einfassung', (d) => void (d.edging = id ? { catalogId: id, sides } : null))}
+          >
+            {label}
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -330,13 +363,7 @@ function AreaProps({ o, q, doc }: { o: AreaObject; q: ObjectQuantities; doc: Pro
           <ElevationField o={o} />
           <LayerSelect o={o} doc={doc} />
         </div>
-        <div className={s.row} style={{ padding: '4px 2px' }}>
-          <span>Kantenstein umlaufend</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {q.edgingLength !== null && <span className={`${u.mono} ${s.muted}`}>{meters(q.edgingLength, 1)}</span>}
-            <Toggle label="Kantenstein" on={!!o.edging} onChange={(v) => update(o, 'Kantenstein', (d) => void (d.edging = v ? { catalogId: 'edge.kantenstein-8x20', sides: 'outline' } : null))} />
-          </div>
-        </div>
+        <EdgingPicker o={o} sides="outline" length={q.edgingLength} />
       </div>
     </>
   );
@@ -356,13 +383,7 @@ function PathProps({ o, q, doc }: { o: Extract<PlanObject, { type: 'path' }>; q:
           <ElevationField o={o} />
           <LayerSelect o={o} doc={doc} />
         </div>
-        <div className={s.row} style={{ padding: '4px 2px' }}>
-          <span>Kantenstein beidseitig</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {q.edgingLength !== null && <span className={`${u.mono} ${s.muted}`}>{meters(q.edgingLength, 1)}</span>}
-            <Toggle label="Kantenstein" on={!!o.edging} onChange={(v) => update(o, 'Kantenstein', (d) => void (d.edging = v ? { catalogId: 'edge.kantenstein-8x20', sides: 'both' } : null))} />
-          </div>
-        </div>
+        <EdgingPicker o={o} sides="both" length={q.edgingLength} />
         <div className={s.row} style={{ padding: '0 2px' }}>
           <span>Ecken</span>
           <div className={u.segmented}>

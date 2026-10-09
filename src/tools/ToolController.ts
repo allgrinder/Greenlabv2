@@ -2,6 +2,10 @@
  * Verbindet Eingaben mit Werkzeugen: Pointer → Weltkoordinaten mit Fang, Navigation
  * (Mausrad, Trackpad, Pinch, Leertaste/Mittelklick = Pan) und Tastaturkürzel.
  */
+import { BedTool } from './BedTool';
+import { getSpecies } from '../core/catalog/plants';
+import { normalizeMix } from '../core/planting';
+import type { PlantingObject } from '../core/model/types';
 import { snapPoint, constrainAngle, type SnapResult } from '../core/geometry/snap';
 import { dist } from '../core/geometry/vec';
 import { newArea, newDrip, newEspalier, newHedge, newLamp, newPath, newPipe } from '../core/model/factory';
@@ -22,7 +26,7 @@ import { BrushTool, ObserverTool } from './GardenTools';
 import type { Brush } from '../state/types';
 import type { Tool, ToolContext, WorldPointerEvent } from './Tool';
 
-const KEYS: Record<string, ToolId> = { v: 'select', r: 'rect', p: 'poly', b: 'bezier', f: 'free', w: 'path', m: 'dim', t: 'text', g: 'plant' };
+const KEYS: Record<string, ToolId> = { v: 'select', r: 'rect', p: 'poly', b: 'bezier', f: 'free', k: 'bed', w: 'path', m: 'dim', t: 'text', g: 'plant' };
 
 export class ToolController {
   private tools: Record<string, Tool>;
@@ -103,6 +107,7 @@ export class ToolController {
       dim: new DimensionTool(ctx),
       text: new TextTool(ctx),
       plant: new PlaceTool(ctx),
+      bed: new BedTool(ctx),
     };
     this.current = this.tools[store.getState().session.tool] ?? this.tools.select;
     this.activate(this.current);
@@ -143,6 +148,20 @@ export class ToolController {
       const brush = JSON.parse(data) as Brush;
       const raw = renderer.toWorld(this.screenOf(e));
       const p = this.snapAt(raw, {}, { shift: false, alt: e.altKey }).p;
+      // Staude oder Gras auf eine Rabatte gezogen: kommt in deren Mischung statt als Einzelpflanze
+      if (brush.kind === 'plant' && /perennial|grass/.test(getSpecies(brush.speciesId).kind)) {
+        const bedId = renderer.index.hit(ctx.doc(), raw, 0, (o) => o.type === 'planting' && this.selectable(o));
+        const bed = bedId ? (ctx.doc().objects[bedId] as PlantingObject) : null;
+        if (bed) {
+          if (!bed.mix.some((m) => m.speciesId === brush.speciesId))
+            cmd.updateObject<PlantingObject>(bed.id, 'Art hinzufügen', (d) => {
+              d.mix = normalizeMix([...d.mix.map((x) => ({ ...x, share: x.share * d.mix.length })), { speciesId: brush.speciesId, share: 1 }]);
+              d.mixId = null;
+            });
+          store.getState().setSession({ brush, selection: [bed.id] });
+          return;
+        }
+      }
       cmd.addObject(objectFromBrush(ctx.doc(), brush, p));
       store.getState().setSession(brush.kind === 'irr' ? { brush, lens: 'irrigation' } : { brush });
     });
@@ -175,10 +194,13 @@ export class ToolController {
 
   switchTo(id: ToolId) {
     const next = this.tools[id] ?? this.tools.select;
+    // Rabatten-Werkzeug: Auswahl aufheben, damit rechts Form und Mischung erscheinen (auch bei erneutem K)
+    if (id === 'bed' && this.store.getState().session.selection.length) this.store.getState().setSession({ selection: [] });
     if (next === this.current) return;
     this.current.cancel?.();
     this.current = next;
     if (this.store.getState().session.tool !== id) this.store.getState().setSession({ tool: id });
+
     this.activate(next);
     this.renderer.invalidate();
   }

@@ -258,6 +258,35 @@ assert.ok(groups[groups.length - 1].plants.length >= 8);
 assert.equal(await p.evaluate(() => window.__gw.editor.getState().history.past.slice(-1)[0].label), 'Pflanzgruppe hinzufügen');
 step('Pflanzpinsel: eine Gruppe je Strich');
 
+// Rabatten: zeichnen mit Vorlage, Mischung bearbeiten, Einfassung, Fläche umwandeln
+await p.keyboard.press('Escape');
+await p.keyboard.press('k');
+await p.click('[data-testid=bed-mix-mediterran]');
+const beds0 = Object.values((await doc()).objects).filter((o) => o.type === 'planting').length;
+qa = await w2s(12, 30); qb = await w2s(17, 32);
+await p.mouse.move(qa.x, qa.y); await p.mouse.down(); await p.mouse.move(qb.x, qb.y, { steps: 6 }); await p.mouse.up();
+d = await doc();
+let bed = Object.values(d.objects).filter((o) => o.type === 'planting').at(-1);
+assert.equal(Object.values(d.objects).filter((o) => o.type === 'planting').length, beds0 + 1);
+assert.equal(bed.mixId, 'mediterran');
+assert.equal(bed.tiers, true);
+await p.waitForSelector('[data-testid=bed-sun]');
+await p.selectOption('[data-testid=bed-add]', 'echinacea');
+await p.click('[data-testid=edging-Stahl]');
+bed = (await doc()).objects[bed.id];
+assert.ok(bed.mix.some((m) => m.speciesId === 'echinacea'));
+assert.ok(Math.abs(bed.mix.reduce((a, m) => a + m.share, 0) - 1) < 1e-9);
+assert.equal(bed.edging.catalogId, 'edge.stahl-anthrazit');
+await p.keyboard.press('r');
+qa = await w2s(12, 34); qb = await w2s(15, 36);
+await p.mouse.move(qa.x, qa.y); await p.mouse.down(); await p.mouse.move(qb.x, qb.y, { steps: 6 }); await p.mouse.up();
+await p.click('[data-testid=area-to-bed]');
+d = await doc();
+const sel = await p.evaluate(() => window.__gw.editor.getState().session.selection);
+assert.equal(d.objects[sel[0]].type, 'planting');
+assert.equal(d.objects[sel[0]].mulchMaterialId, 'soil');
+step('Rabatten: Vorlage, Mischung, Einfassung, Fläche bepflanzen');
+
 await p.keyboard.press('Escape');
 await p.evaluate(() => { const st = window.__gw.editor.getState(); st.setSession({ selection: [], tool: 'select', panels: { ...st.session.panels, library: false } }); });
 // eigener Reiter, auch bei Auswahl erreichbar; Knopf im Grundstück-Panel führt dorthin

@@ -8,12 +8,15 @@ import type { SnapResult } from '../core/geometry/snap';
 import { add, dist, normalize, perp, scale, sub, dot } from '../core/geometry/vec';
 import { newArea, newDimension, newEspalier, newFixture, newFromCatalog, newLamp, newPath, newPlant, newSprinkler, newText } from '../core/model/factory';
 import { getLamp } from '../core/catalog/lamps';
-import type { PlanObject, Project } from '../core/model/types';
+import type { PlanObject, Project, Region } from '../core/model/types';
 import type { Brush } from '../state/types';
 import type { Vec2 } from '../core/model/types';
 import { ACCENT, dashed, type LabelPool, type ToScreen } from '../render/overlays/overlay';
 import { drawSnap, edgeLabel } from './preview';
 import type { Tool, ToolContext, WorldPointerEvent } from './Tool';
+
+/** Erzeugt aus einer gezeichneten Kontur das Objekt (Standard: Fläche mit Vorgabematerial) */
+export type RegionMaker = (doc: Project, region: Region) => PlanObject;
 
 export class RectTool implements Tool {
   readonly id = 'rect';
@@ -22,7 +25,10 @@ export class RectTool implements Tool {
   private b: Vec2 | null = null;
   private snap: SnapResult | null = null;
 
-  constructor(private ctx: ToolContext) {}
+  constructor(
+    private ctx: ToolContext,
+    private make?: RegionMaker,
+  ) {}
 
   private corners(shift: boolean): [Vec2, Vec2] | null {
     if (!this.a || !this.b) return null;
@@ -57,9 +63,8 @@ export class RectTool implements Tool {
     if (w < 0.05 || d < 0.05) return this.ctx.redraw();
     const doc = this.ctx.doc();
     const def = this.ctx.store.getState().session.defaults;
-    this.ctx.cmd.addObject(
-      newArea(doc, { outer: { kind: 'rect', center: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, width: w, depth: d, rotationDeg: 0, cornerRadius: 0 }, holes: [] }, def.areaMaterial),
-    );
+    const region: Region = { outer: { kind: 'rect', center: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, width: w, depth: d, rotationDeg: 0, cornerRadius: 0 }, holes: [] };
+    this.ctx.cmd.addObject(this.make ? this.make(doc, region) : newArea(doc, region, def.areaMaterial));
     this.ctx.redraw();
   }
   cancel() {
@@ -86,7 +91,11 @@ export class FreehandTool implements Tool {
   readonly cursor = 'crosshair';
   private pts: Vec2[] = [];
 
-  constructor(private ctx: ToolContext) {}
+  /** `make`: nur geschlossene Konturen werden zum Objekt (Rabatte); offene Striche verfallen */
+  constructor(
+    private ctx: ToolContext,
+    private make?: RegionMaker,
+  ) {}
 
   down(e: WorldPointerEvent) {
     if (e.button !== 0) return;
@@ -102,13 +111,14 @@ export class FreehandTool implements Tool {
     const pts = this.pts;
     this.pts = [];
     if (pts.length < 3) return this.ctx.redraw();
-    const closed = dist(pts[0], pts[pts.length - 1]) < this.ctx.px(16) && pts.length > 8;
+    // Rabatte: immer schließen
+    const closed = (!!this.make && pts.length > 8) || (dist(pts[0], pts[pts.length - 1]) < this.ctx.px(16) && pts.length > 8);
     const nodes = smoothFreehand(pts, closed, this.ctx.px(3));
     const doc = this.ctx.doc();
     const def = this.ctx.store.getState().session.defaults;
     const geom = { kind: 'path' as const, nodes, closed, source: 'freehand' as const };
-    if (closed && nodes.length >= 3) this.ctx.cmd.addObject(newArea(doc, { outer: geom, holes: [] }, def.areaMaterial));
-    else if (nodes.length >= 2) this.ctx.cmd.addObject(newPath(doc, geom, def.pathWidth, def.pathMaterial));
+    if (closed && nodes.length >= 3) this.ctx.cmd.addObject(this.make ? this.make(doc, { outer: geom, holes: [] }) : newArea(doc, { outer: geom, holes: [] }, def.areaMaterial));
+    else if (nodes.length >= 2 && !this.make) this.ctx.cmd.addObject(newPath(doc, geom, def.pathWidth, def.pathMaterial));
     this.ctx.redraw();
   }
   cancel() {

@@ -455,7 +455,7 @@ export class PlanRenderer {
     const p = this.params;
     const vp = this.vp;
     const tilt = vp.tiltDeg ? { tan: tiltTan(vp), cos: tiltCos(vp) } : null;
-    return { lod, years: p.years, season: p.season, lens: p.lens, night: p.night, northDeg: doc.site.northDeg, tilt };
+    return { lod, years: p.years, season: p.season, lens: p.lens, night: p.night, northDeg: doc.site.northDeg, tilt, site: doc.site.boundary };
   }
 
   private ctxKey(doc: Project): string {

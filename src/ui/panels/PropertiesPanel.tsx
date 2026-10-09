@@ -18,6 +18,8 @@ import { Icon } from '../icons';
 import { glyphSrc, irrGlyph, SYMBOL_GLYPH } from '../library/glyphs';
 import type { Brush } from '../../state/types';
 import { BackgroundSection } from './BackgroundSection';
+import { BedEditor, BedToolPanel, MULCH_MATERIALS } from './BedProps';
+import { makeBed } from '../../tools/BedTool';
 import { BrushPaintPanel, EspalierProps, EspalierToolPanel, ScatterProps } from './GardenProps';
 import { LocationFields } from '../components/LocationFields';
 import { DEFAULT_LOCATION } from '../../core/sun/sun';
@@ -36,7 +38,7 @@ const TYPE_LABEL: Record<PlanObject['type'], string> = {
   area: 'Fläche',
   path: 'Weg',
   plant: 'Pflanze',
-  planting: 'Pflanzung',
+  planting: 'Rabatte',
   hedge: 'Hecke',
   item: 'Objekt',
   dimension: 'Bemaßung',
@@ -48,8 +50,6 @@ const SOURCE_LABEL: Record<string, string> = { rect: 'Rechteck', polygon: 'Polyg
 
 const PATH_MATERIALS = ['gravel', 'basalt', 'paving', 'slabs', 'stepping', 'wood', 'mulch', 'barkMulch', 'soil'];
 const AREA_MATERIALS = ['lawn', 'meadow', 'gravel', 'basalt', 'paving', 'slabs', 'wood', 'sand', 'mulch', 'barkMulch', 'soil', 'water'];
-/** Abdeckung zwischen den Pflanzen eines Beets */
-const MULCH_MATERIALS = ['barkMulch', 'mulch', 'basalt', 'gravel', 'soil'];
 
 function update<T extends PlanObject>(o: T, label: string, fn: (d: Draft<T>) => unknown) {
   cmd.updateObject<T>(o.id, label, fn);
@@ -64,12 +64,13 @@ export function PropertiesPanel() {
   if (!doc) return null;
   const objs = selection.map((id) => doc.objects[id]).filter(Boolean);
   const showBrush = objs.length === 0 && tool === 'plant';
-  const toolPanel = objs.length === 0 && (tool === 'brush' || tool === 'espalier');
+  const toolPanel = objs.length === 0 && (tool === 'brush' || tool === 'espalier' || tool === 'bed');
   return (
     <aside className={s.panel} aria-label="Eigenschaften" data-testid="properties">
       {showBrush && <BrushDetail brush={brush} />}
       {objs.length === 0 && tool === 'brush' && <BrushPaintPanel />}
       {objs.length === 0 && tool === 'espalier' && <EspalierToolPanel />}
+      {objs.length === 0 && tool === 'bed' && <BedToolPanel />}
       {objs.length === 0 && !showBrush && !toolPanel && <ProjectInfo doc={doc} />}
       {objs.length === 1 && <ObjectProps key={objs[0].id} o={objs[0]} doc={doc} />}
       {objs.length > 1 && <MultiProps objs={objs} />}
@@ -174,7 +175,7 @@ const EDGINGS: [string | null, string][] = [
   ['edge.corten', 'Corten'],
 ];
 
-function EdgingPicker({ o, sides, length }: { o: Extract<PlanObject, { type: 'area' | 'path' }>; sides: 'outline' | 'both'; length: number | null }) {
+function EdgingPicker({ o, sides, length }: { o: Extract<PlanObject, { type: 'area' | 'path' | 'planting' }>; sides: 'outline' | 'both'; length: number | null }) {
   const cur = o.edging?.catalogId ?? null;
   return (
     <div className={s.row} style={{ padding: '4px 2px' }}>
@@ -364,6 +365,22 @@ function AreaProps({ o, q, doc }: { o: AreaObject; q: ObjectQuantities; doc: Pro
           <LayerSelect o={o} doc={doc} />
         </div>
         <EdgingPicker o={o} sides="outline" length={q.edgingLength} />
+        {MULCH_MATERIALS.includes(o.materialId) && (
+          <button
+            type="button"
+            className={s.convert}
+            onClick={() => {
+              // Beetfläche → Rabatte: Kontur, Abdeckung und Einfassung bleiben, Bepflanzung passend zum Standort
+              const made = makeBed(doc, o.region, 'auto');
+              const bed = { ...made, mulchMaterialId: o.materialId, edging: o.edging, name: o.name ?? made.name };
+              cmd.replaceObjects('In Rabatte umwandeln', [o.id], [bed]);
+              editor.getState().setSession({ selection: [bed.id] });
+            }}
+            data-testid="area-to-bed"
+          >
+            <Icon name="bed" size={15} /> Bepflanzen – in Rabatte umwandeln
+          </button>
+        )}
       </div>
     </>
   );
@@ -402,48 +419,18 @@ function PathProps({ o, q, doc }: { o: Extract<PlanObject, { type: 'path' }>; q:
 function PlantingProps({ o, q, doc }: { o: Extract<PlanObject, { type: 'planting' }>; q: ObjectQuantities; doc: Project }) {
   const count = q.lines.filter((l) => l.key.startsWith('plant:')).reduce((a, l) => a + l.quantity, 0);
   return (
-    <div className={s.section}>
-      <div className={u.eyebrow}>Pflanzung</div>
-      <div className={s.grid2}>
-        <Field label="Fläche" value={squareMeters(q.area ?? 0)} />
-        <Field label="Umfang" value={meters(q.perimeter ?? 0, 1)} />
-        <NumberField label="Stück / m²" value={o.perSquareMeter} format={(v) => num(v, 1)} min={0.1} max={50} onCommit={(v) => update(o, 'Pflanzdichte', (d) => void (d.perSquareMeter = v))} />
-        <Field label="Pflanzen" value={`${num(count, 0)} Stk`} />
-        <ElevationField o={o} />
-        <LayerSelect o={o} doc={doc} />
+    <>
+      <BedEditor o={o} doc={doc} count={count} edging={<EdgingPicker o={o} sides="outline" length={q.edgingLength} />} />
+      <div className={s.section}>
+        <div className={u.eyebrow}>Geometrie</div>
+        <div className={s.grid2}>
+          <Field label="Fläche" value={squareMeters(q.area ?? 0)} />
+          <Field label="Umfang" value={meters(q.perimeter ?? 0, 1)} />
+          <ElevationField o={o} />
+          <LayerSelect o={o} doc={doc} />
+        </div>
       </div>
-      <div className={u.eyebrow}>Abdeckung</div>
-      <div className={s.swatches}>
-        {MULCH_MATERIALS.map((id) => {
-          const mm = getMaterial(id);
-          return (
-            <button
-              key={id}
-              type="button"
-              title={mm.name}
-              aria-label={mm.name}
-              aria-pressed={id === o.mulchMaterialId}
-              className={id === o.mulchMaterialId ? s.swatchOn : s.swatch}
-              style={materialSwatchStyle(mm, 60)}
-              onClick={() => update(o, 'Abdeckung ändern', (d) => void (d.mulchMaterialId = id))}
-              data-testid={`mulch-${id}`}
-            />
-          );
-        })}
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {o.mix.map((m) => {
-          const sp = getSpecies(m.speciesId);
-          return (
-            <div key={m.speciesId} className={s.mixRow}>
-              <span className={s.dot} style={{ background: sp.colors.summer }} />
-              <span style={{ flex: 1 }}>{sp.name}</span>
-              <span className={`${u.mono} ${s.muted}`}>{num(m.share * 100, 0)} %</span>
-            </div>
-          );
-        })}
-      </div>
-    </div>
+    </>
   );
 }
 

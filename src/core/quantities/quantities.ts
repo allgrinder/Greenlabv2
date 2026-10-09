@@ -119,6 +119,10 @@ export function objectQuantities(o: PlanObject, prices: Prices = {}): ObjectQuan
         lines.push(line(prices, `plant:${sp.id}`, sp.name, n, 'pcs', sp.price));
       });
       if (o.mulchMaterialId) lines.push(materialLine(prices, o.mulchMaterialId, A));
+      if (o.edging) {
+        edgingLength = P;
+        lines.push(edgingLine(prices, o.edging, P));
+      }
       break;
     }
     case 'hedge': {

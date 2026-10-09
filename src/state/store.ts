@@ -42,7 +42,7 @@ export const initialSession = (): SessionState => ({
   night: { hour: 21.67, scene: null },
   paint: { radius: 0.8, density: 0.8, mix: ['salvia', 'geranium', 'stipa'], bedsOnly: false },
   privacy: { on: false, pose: 'sitting', season: 'summer' },
-  defaults: { areaMaterial: 'soil', pathMaterial: 'gravel', pathWidth: 1.2 },
+  defaults: { areaMaterial: 'soil', pathMaterial: 'gravel', pathWidth: 1.2, bedShape: 'rect', bedMix: 'auto' },
 });
 
 const HISTORY_LIMIT = 200;

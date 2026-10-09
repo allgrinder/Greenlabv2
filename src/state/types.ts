@@ -30,6 +30,7 @@ export type ToolId =
   | 'plotedit'
   | 'bgalign'
   | 'espalier'
+  | 'bed'
   | 'brush'
   | 'observer';
 
@@ -65,7 +66,14 @@ export interface SessionState {
   /** Einsehbarkeits-Prüfung (Linse „Sichtschutz“): beobachtete Person, Jahreszeit; `on` ist veraltet */
   privacy: { on: boolean; pose: 'sitting' | 'standing' | 'lying'; season: 'summer' | 'winter' };
   /** Vorgaben für neu gezeichnete Objekte */
-  defaults: { areaMaterial: string; pathMaterial: string; pathWidth: number };
+  defaults: {
+    areaMaterial: string;
+    pathMaterial: string;
+    pathWidth: number;
+    /** Rabatten-Werkzeug: Form und Mischung ('auto' = passend zum Standort) */
+    bedShape: 'rect' | 'poly' | 'bezier' | 'free';
+    bedMix: string;
+  };
 }
 
 export type Brush =

@@ -278,6 +278,12 @@ export interface PlantingObject extends ObjectBase {
   mix: { speciesId: string; share: number }[]; // share summiert sich zu 1
   perSquareMeter: number;
   mulchMaterialId: MaterialId | null;
+  /** Höhenstaffelung: niedrige Arten vorn, hohe hinten (fehlt bei älteren Projekten = aus) */
+  tiers?: boolean;
+  /** Einfassung der Rabatte (Stein, Stahl, Corten) */
+  edging?: Edging | null;
+  /** Vorlage, aus der die Mischung stammt (nur zur Anzeige) */
+  mixId?: string | null;
 }
 
 /** Hecke entlang einer Linie */

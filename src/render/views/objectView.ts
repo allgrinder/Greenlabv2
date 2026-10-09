@@ -19,7 +19,8 @@ import { waterGradient } from '../symbols/gradients';
 import { drawPlanting } from '../symbols/plants';
 import { crownSprite, espalierNode, hedgeNode, perennialSprite, plantingNode, scatterNode } from '../symbols/plantSprites';
 import { drawDrip, drawFixture, drawLampDay, drawPipe, drawSprinkler } from '../symbols/tech';
-import { lawnMacroPattern, materialPattern, meadowMacroPattern } from '../textures/materialTextures';
+import { isOrganic, lawnMacroPattern, macroPattern, materialPattern, meadowMacroPattern } from '../textures/materialTextures';
+import { fringe, surfaceDetails } from './surfaceDetail';
 import { plantAssetSprite } from '../assets/plantAssets';
 import { buildSolid, type Tilt } from './obliqueView';
 import { hex, rng, seedFrom } from '../util/rng';
@@ -63,7 +64,9 @@ function baseKey(o: PlanObject, c: ViewContext): string {
     case 'scatter':
       return `${c.season}|${c.lod}`;
     case 'area':
-      return o.materialId === 'lawn' ? c.season : '';
+    case 'path':
+      // Details (Gänseblümchen, Herbstlaub) hängen von der Jahreszeit ab
+      return c.season;
     case 'sprinkler':
       return c.lens === 'irrigation' ? 'irr' : '';
     case 'lamp':
@@ -206,7 +209,13 @@ export function buildObjectView(o: PlanObject, ctx: ViewContext): ObjectView {
         fillRegions(g, fp, { color: 0x47767f, alpha: 0.35 });
         strokeRegions(g, fp, { color: 0xc3baaa, width: 0.12 });
       } else {
-        fillRegions(g, fp, materialPattern(m, origin, rot));
+        const pat = materialPattern(m, origin, rot);
+        fillRegions(g, fp, pat);
+        // ausgefranste Kante bei Belägen ohne Fugenraster (Kies, Häcksel, Erde, Sand, Wiese …)
+        if (isOrganic(m.texture) && m.texture !== 'lawn') fringe(g, fp, pat, seed, m.texture === 'meadow' ? 0.22 : 0.06);
+        const macro = macroPattern(m.texture);
+        if (macro) fillRegions(g, fp, macro);
+        surfaceDetails(g, fp, m.texture, seed, ctx.season);
         if (m.texture === 'lawn') {
           // große weiche Wolken, Jahreszeitenfarbe, dunklere Ränder zu Beeten und Wegen
           fillRegions(g, fp, lawnMacroPattern());
@@ -219,15 +228,13 @@ export function buildObjectView(o: PlanObject, ctx: ViewContext): ObjectView {
           node.addChild(mask, edge);
         }
         if (m.texture === 'meadow') {
-          // weicher Übergang: Wiesenhalme greifen über den Rand in den Rasen
-          for (const [wdt, al] of [[0.9, 0.25], [0.45, 0.5]] as const) strokeRegions(g, fp, { width: wdt, alpha: al, fill: materialPattern(m) } as StrokeInput);
           fillRegions(g, fp, meadowMacroPattern());
           if (ctx.season !== 'summer') fillRegions(g, fp, { color: hex(LAWN_COLOR[ctx.season]), alpha: 0.45 });
         }
-        const edge = { gravel: 0xa69c8c, paving: 0x9b8f7d, wood: 0x7e5c3d } as Record<string, number>;
-        if (edge[m.texture]) strokeRegions(g, fp, { color: edge[m.texture], width: m.texture === 'wood' ? 0.045 : 0.08 });
+        // nur das Holzdeck hat eine echte Stirnkante; Kies und Platten enden ohne gemalte Linie
+        if (m.texture === 'wood') strokeRegions(g, fp, { color: 0x7e5c3d, width: 0.045 });
       }
-      if (o.edging) strokeRegions(g, fp, { color: 0xa3998a, width: 0.09 });
+      if (o.edging) strokeRegions(g, fp, { color: 0x8c857a, alpha: 0.75, width: 0.08 });
       break;
     }
     case 'path': {
@@ -236,8 +243,14 @@ export function buildObjectView(o: PlanObject, ctx: ViewContext): ObjectView {
         node.addChild(steppingNode(flattenPath(o.centerline, 0.02), o.width, seed));
         break;
       }
-      fillRegions(g, fp, materialPattern(getMaterial(o.materialId)));
-      if (o.edging) strokeRegions(g, fp, { color: 0xa3998a, width: 0.09 });
+      const pm = getMaterial(o.materialId);
+      const pat = materialPattern(pm);
+      fillRegions(g, fp, pat);
+      if (isOrganic(pm.texture) && !o.edging) fringe(g, fp, pat, seed, 0.05);
+      const macro = macroPattern(pm.texture);
+      if (macro) fillRegions(g, fp, macro);
+      surfaceDetails(g, fp, pm.texture, seed, ctx.season);
+      if (o.edging) strokeRegions(g, fp, { color: 0x8c857a, alpha: 0.75, width: 0.08 });
       break;
     }
     case 'planting': {

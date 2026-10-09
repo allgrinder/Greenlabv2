@@ -24,6 +24,7 @@ import { GapLayer } from './effects/GapLayer';
 import { HeatLayer } from './effects/HeatLayer';
 import { NightLayer } from './effects/NightLayer';
 import { ShadowLayer } from './effects/ShadowLayer';
+import { EdgeLayer } from './effects/EdgeLayer';
 import { LabelPool, drawBoundary, drawDimension, drawGrid, drawSelection, type ToScreen } from './overlays/overlay';
 import { SpatialIndex } from './SpatialIndex';
 import { buildObjectView, viewKey, type ObjectView, type ViewContext } from './views/objectView';
@@ -99,6 +100,7 @@ export class PlanRenderer {
   /** Schrägansicht: Körper aller Ebenen, nach Tiefe sortiert */
   private solids = new Container();
   private shadowLayer = new ShadowLayer();
+  private edgeLayer = new EdgeLayer();
   private heatLayer = new HeatLayer();
   private gapLayer = new GapLayer();
   private privacyLayer = new PrivacyLayer();
@@ -399,7 +401,8 @@ export class PlanRenderer {
         this.layers.set(id, c);
       }
       // Heatmap und Schatten liegen direkt unter den Pflanzen (über Flächen und Wegen)
-      if (doc.layers[id].kind === 'plants') order.push(this.heatLayer.container, this.shadowLayer.container);
+      // Rasenkanten über Flächen und Wegen; Heatmap und Schatten direkt unter den Pflanzen
+      if (doc.layers[id].kind === 'plants') order.push(this.edgeLayer.container, this.heatLayer.container, this.shadowLayer.container);
       order.push(c);
       // Bewässerungslücken über der Bewässerungsebene
       if (doc.layers[id].kind === 'water') order.push(this.gapLayer.container);
@@ -491,6 +494,7 @@ export class PlanRenderer {
     if (p.night) sv = null;
     else if (p.lens === 'sun') sv = shadowVector(sunAt(loc, year, p.sun.doy, p.sun.hour), doc.site.northDeg);
     this.shadowLayer.update(doc, sv, p.years, p.season, p.lens === 'sun' ? 0.34 : 0.36);
+    this.edgeLayer.update(doc, p.season);
     // Heatmap (Sonnenstunden hängen nur vom Tag ab, nicht von der Uhrzeit)
     const heatOn = p.lens === 'sun' && p.sun.heat && !p.night;
     if (!heatOn) {

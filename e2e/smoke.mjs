@@ -35,6 +35,9 @@ await p.click('[data-testid=contour-edges]');
 await p.fill('[data-testid=edge-0-len]', '40');
 await p.fill('[data-testid=north]', '-12');
 await p.setInputFiles('[data-testid=bg-file]', path.join(here, 'fixtures-lageplan.png'));
+// erst klicken, wenn das Bild geladen ist und sein Platz feststeht
+await p.waitForFunction(() => { const i = document.querySelector('[data-testid=calib-stage] img'); return i && i.complete && i.naturalWidth > 0 && i.getBoundingClientRect().width > 100; });
+await p.waitForTimeout(400);
 const img = await p.locator('[data-testid=calib-stage] img').boundingBox();
 const k = img.width / 1200;
 await p.mouse.click(img.x + 100 * k, img.y + 700 * k);

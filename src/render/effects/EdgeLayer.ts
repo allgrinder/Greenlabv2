@@ -57,133 +57,233 @@ interface Ring {
 interface Surface {
   region: FlatRegion;
   tex: string;
-  box: [number, number, number, number];
+  box: Box;
 }
+
+type Box = [number, number, number, number];
+
+/** Kantenlauf, an dem Halme wachsen können: Punkte, Außenseite, je Punkt „frei“ (Rasen daneben, keine Einfassung) */
+interface Edge {
+  pts: Vec2[];
+  sign: number;
+  free: boolean[];
+  /** Halme hängen in die Fläche hinein (Beet/Kies auf dem Rasen) statt aus dem Rasen heraus */
+  inward: boolean;
+  planting: boolean;
+}
+
+/** Je Objekt: Geometrie und eigene Darstellungsteile (bleiben stehen, solange sich Objekt und Nachbarn nicht ändern) */
+interface Entry {
+  ref: PlanObject;
+  rings: Ring[];
+  tex: string;
+  box: Box;
+  surfaces: Surface[];
+  strip?: string;
+  planting: boolean;
+  /** Streuung und Einfassung hängen nur vom Objekt ab */
+  own: Container[];
+  /** Kontaktschatten und Halme hängen auch von den Nachbarn ab */
+  edges: Edge[];
+  grass: Container[];
+}
+
+const EMPTY_BOX: Box = [Infinity, Infinity, -Infinity, -Infinity];
+const grow = (b: Box, m: number): Box => [b[0] - m, b[1] - m, b[2] + m, b[3] + m];
+const hits = (a: Box, b: Box) => a[0] <= b[2] && b[0] <= a[2] && a[1] <= b[3] && b[1] <= a[3];
+const inBox = (p: Vec2, b: Box) => p.x >= b[0] && p.x <= b[2] && p.y >= b[1] && p.y <= b[3];
 
 export class EdgeLayer {
   readonly container = new Container();
   /** Halme über Beetkanten: liegt in der Pflanzenebene über dem Mulch der Pflanzflächen, unter Sträuchern und Kronen */
   readonly bedContainer = new Container();
+  // Zeichenreihenfolge: Schatten → Streuung → Halme → Einfassung; in Beeten: Halme → Einfassung
+  private shadeC = new Container();
+  private scatterC = new Container();
+  private grassC = new Container();
+  private edgingC = new Container();
+  private bedGrassC = new Container();
+  private bedEdgingC = new Container();
+  private entries = new Map<string, Entry>();
   private doc: Project | null = null;
   private key = '';
+  private order = '';
 
   constructor() {
     this.container.label = 'edges';
     this.bedContainer.label = 'bed-edges';
+    this.container.addChild(this.shadeC, this.scatterC, this.grassC, this.edgingC);
+    this.bedContainer.addChild(this.bedGrassC, this.bedEdgingC);
   }
 
+  /**
+   * Abgleich mit dem Dokument. Nur geänderte Objekte bauen ihre Streuung und Einfassung neu;
+   * Halme und Schatten werden nur in der Umgebung der Änderung neu bewertet.
+   */
   update(doc: Project, season: Season) {
     const grass = edgeStrip('grass');
     const key = `${season}|${grass ? 1 : 0}|${scatterSprites('pebble').length}`;
     if (doc === this.doc && key === this.key) return;
     this.doc = doc;
-    this.key = key;
-    for (const c of this.container.removeChildren()) c.destroy();
-    for (const c of this.bedContainer.removeChildren()) c.destroy();
 
     const visible: PlanObject[] = [];
     for (const id of doc.layerOrder) {
       const layer = doc.layers[id];
       if (!layer.visible) continue;
-      for (const oid of layer.objectOrder) if (doc.objects[oid]) visible.push(doc.objects[oid]);
-    }
-    const lawn: Ring[] = [];
-    // Beete, Kies- und Plattenflächen, die auf dem Rasen liegen: dort hängen Halme von außen hinein
-    const onLawn: Ring[] = [];
-    const surfaces: Surface[] = [];
-    const edged: { rings: Vec2[][]; strip: string; planting: boolean }[] = [];
-    const spill: { rings: Ring[]; parts: [string, number][]; seed: number }[] = [];
-    for (const o of visible) {
-      if (o.type !== 'area' && o.type !== 'path' && o.type !== 'planting') continue;
-      const fp = footprint(o);
-      const rings = fp.flatMap((r) => [r.outer, ...r.holes].map((pts) => ({ pts, region: r, planting: o.type === 'planting' })));
-      const tex = o.type === 'planting' ? (o.mulchMaterialId ? getMaterial(o.mulchMaterialId).texture : '') : getMaterial(o.materialId).texture;
-      for (const r of fp) surfaces.push({ region: r, tex: o.type === 'area' ? tex : o.type, box: bbox(r.outer) });
-      if (o.type === 'area' && tex === 'lawn') lawn.push(...rings);
-      const e = o.edging ? EDGING_STRIP[o.edging.catalogId] : undefined;
-      if (e) edged.push({ rings: rings.map((r) => r.pts), strip: e, planting: o.type === 'planting' });
-      else if (o.type !== 'path' || tex !== 'stepping') {
-        if (tex !== 'lawn') onLawn.push(...rings);
-        const parts = spillOf(tex, season);
-        if (parts.length) spill.push({ rings, parts, seed: seedFrom(o.id) });
+      for (const oid of layer.objectOrder) {
+        const o = doc.objects[oid];
+        if (o && (o.type === 'area' || o.type === 'path' || o.type === 'planting')) visible.push(o);
       }
     }
-    const edgedSegs = edged.flatMap((e) => e.rings.flatMap((ring) => ring.map((a, i) => [a, ring[(i + 1) % ring.length]] as const)));
-    // oberster Belag an einem Punkt (Zeichenreihenfolge): nur echter Rasen, kein Weg/Beet darüber
+    // Jahreszeit, Bilder oder Reihenfolge geändert: alles neu (die Reihenfolge entscheidet, welcher Belag oben liegt)
+    const order = visible.map((o) => o.id).join(',');
+    const full = key !== this.key || order !== this.order;
+    this.key = key;
+    this.order = order;
+
+    // geänderte Bereiche sammeln (alte und neue Lage)
+    const changed: Box[] = [];
+    const seen = new Set<string>();
+    for (const o of visible) {
+      seen.add(o.id);
+      const e = this.entries.get(o.id);
+      if (e && e.ref === o && !full) continue;
+      if (e) {
+        changed.push(e.box);
+        this.drop(e);
+      }
+      const n = this.makeEntry(o, season);
+      this.entries.set(o.id, n);
+      changed.push(n.box);
+    }
+    for (const [id, e] of this.entries)
+      if (!seen.has(id)) {
+        changed.push(e.box);
+        this.drop(e);
+        this.entries.delete(id);
+      }
+    if (!changed.length) return;
+
+    // Umgebung der Änderung: Kanten, deren Nachbarschaft sich geändert haben kann
+    const zones = changed.filter((b) => b[0] <= b[2]).map((b) => grow(b, 0.5));
+    const list = visible.map((o) => this.entries.get(o.id)!);
+    const surfaces = list.flatMap((e) => e.surfaces);
+    const edgedSegs = list.filter((e) => e.strip).flatMap((e) => e.rings.flatMap((r) => r.pts.map((a, i) => [a, r.pts[(i + 1) % r.pts.length]] as const)));
     const topAt = (p: Vec2): string | null => {
       for (let i = surfaces.length - 1; i >= 0; i--) {
-        const s = surfaces[i];
-        if (p.x < s.box[0] || p.x > s.box[2] || p.y < s.box[1] || p.y > s.box[3]) continue;
-        if (pointInRegion(p, s.region.outer, s.region.holes)) return s.tex;
+        const sf = surfaces[i];
+        if (!inBox(p, sf.box)) continue;
+        if (pointInRegion(p, sf.region.outer, sf.region.holes)) return sf.tex;
       }
       return null;
     };
-    const probeOut = (pts: Vec2[], i: number, sign: number) => {
-      const p = pts[i];
-      const q = pts[(i + 1) % pts.length];
-      const n = norm(-(q.y - p.y), q.x - p.x);
-      return { x: (p.x + q.x) / 2 + n.x * 0.1 * sign, y: (p.y + q.y) / 2 + n.y * 0.1 * sign };
-    };
     const nearEdging = (p: Vec2) => edgedSegs.some(([a, b]) => distToSeg(p, a, b) < 0.12);
-    const bedRuns: { pts: Vec2[]; closed: boolean; sign: number; planting: boolean }[] = [];
-    for (const r of onLawn) {
-      const pts = densify(r.pts, 0.25);
-      const sign = outwardSign(pts, r.region);
-      const free = pts.map((p, i) => topAt(probeOut(pts, i, sign)) === 'lawn' && !nearEdging(p));
-      for (const run of runsOf(pts, free)) bedRuns.push({ ...run, sign: -sign, planting: !!r.planting });
+
+    for (const e of list) {
+      if (!e.edges.length) continue;
+      const fresh = full || e.grass.length === 0 && e.edges.some((x) => x.free.length === 0);
+      if (!fresh && !zones.some((z) => hits(z, e.box))) continue;
+      // nur Punkte in der Nähe der Änderung neu bewerten
+      for (const ed of e.edges) {
+        const all = fresh || ed.free.length !== ed.pts.length;
+        if (all) ed.free = new Array(ed.pts.length).fill(false);
+        ed.pts.forEach((p, i) => {
+          if (!all && !zones.some((z) => inBox(p, z))) return;
+          const t = topAt(probeOut(ed.pts, i, ed.sign));
+          ed.free[i] = !nearEdging(p) && (ed.inward ? t === 'lawn' : t === null);
+        });
+      }
+      for (const c of e.grass) c.destroy({ children: true });
+      e.grass = this.buildGrass(e, season, grass);
     }
+  }
 
-    // Kontaktschatten an Rasenkanten
-    const shade = new Graphics();
-    for (const r of [...lawn, ...bedRuns])
-      for (const [w, a] of [[0.32, 0.05], [0.18, 0.06], [0.08, 0.08]] as const)
-        shade.poly(r.pts.flatMap((p) => [p.x, p.y]), 'closed' in r ? r.closed : true).stroke({ color: 0x1b240c, alpha: a, width: w, join: 'round', cap: 'round' });
-    this.container.addChild(shade);
+  private makeEntry(o: PlanObject, season: Season): Entry {
+    const fp = footprint(o);
+    const planting = o.type === 'planting';
+    const rings = fp.flatMap((r) => [r.outer, ...r.holes].map((pts) => ({ pts, region: r, planting })));
+    const tex = o.type === 'planting' ? (o.mulchMaterialId ? getMaterial(o.mulchMaterialId).texture : '') : o.type === 'area' || o.type === 'path' ? getMaterial(o.materialId).texture : '';
+    const surfaces = fp.map((r) => ({ region: r, tex: o.type === 'area' ? tex : o.type, box: bbox(r.outer) }));
+    const box = surfaces.reduce<Box>((b, sf) => [Math.min(b[0], sf.box[0]), Math.min(b[1], sf.box[1]), Math.max(b[2], sf.box[2]), Math.max(b[3], sf.box[3])], EMPTY_BOX);
+    const edging = 'edging' in o && o.edging ? EDGING_STRIP[o.edging.catalogId] : undefined;
+    const e: Entry = { ref: o, rings, tex, box, surfaces, strip: edging, planting, own: [], edges: [], grass: [] };
 
-    // Streuung über die Kanten (unter dem Gras, damit Halme darüber liegen)
-    const sc = new Container();
-    for (const s of spill) for (const [kind, perM] of s.parts) scatterAlong(sc, s.rings, kind, perM, s.seed + kind.length);
-    this.container.addChild(sc);
-
-    // Halme: nur dort, wo keine Einfassung liegt
-    if (grass) {
-      const runs: { pts: Vec2[]; closed: boolean; sign: number; planting?: boolean }[] = [...bedRuns];
-      for (const r of lawn) {
+    const lawn = o.type === 'area' && tex === 'lawn';
+    const stepping = o.type === 'path' && tex === 'stepping';
+    if (lawn || (!edging && !stepping && tex !== 'lawn'))
+      e.edges = rings.map((r) => {
         const pts = densify(r.pts, 0.25);
         const sign = outwardSign(pts, r.region);
-        // grenzt der Rasen an ein Beet oder eine Fläche, hängen die Halme von deren Kontur aus hinein (bedRuns)
-        const free = pts.map((p, i) => {
-          const t = topAt(probeOut(pts, i, sign));
-          return !nearEdging(p) && t === null;
-        });
-        for (const run of runsOf(pts, free)) runs.push({ ...run, sign });
+        return { pts, sign, free: [], inward: !lawn, planting };
+      });
+
+    // Streuung über die Kanten (unter den Halmen)
+    if (!edging && !stepping) {
+      const parts = spillOf(tex, season);
+      if (parts.length) {
+        const sc = new Container();
+        for (const [kind, perM] of parts) scatterAlong(sc, rings, kind, perM, seedFrom(o.id) + kind.length);
+        this.scatterC.addChild(sc);
+        e.own.push(sc);
       }
+    }
+    // Einfassung obenauf: klare Kante, Gras endet daran
+    const strip = edging ? edgeStrip(edging) : undefined;
+    if (strip) {
+      const c = new Container();
+      for (const r of rings) {
+        const shadow = new Graphics();
+        shadow.poly(r.pts.flatMap((p) => [p.x, p.y]), true).stroke({ color: 0x1b1a14, alpha: 0.18, width: strip.h * 0.9, join: 'round' });
+        shadow.position.set(0.012, 0.016);
+        c.addChild(shadow);
+        const mesh = stripMesh(r.pts, true, strip.h, strip.w, strip.texture, 1);
+        if (mesh) c.addChild(mesh);
+      }
+      // Rabatten: Einfassung über dem Mulch der Pflanzfläche
+      (planting ? this.bedEdgingC : this.edgingC).addChild(c);
+      e.own.push(c);
+    }
+    return e;
+  }
+
+  /** Kontaktschatten und Halme entlang der freien Läufe eines Objekts */
+  private buildGrass(e: Entry, season: Season, grass: ReturnType<typeof edgeStrip>): Container[] {
+    const shade = new Graphics();
+    const blades = new Container();
+    for (const ed of e.edges) {
+      const runs = runsOf(ed.pts, ed.free);
+      // Rasenflächen: Schatten entlang der ganzen Kontur; Beete auf dem Rasen nur, wo Rasen angrenzt
+      const shaded = ed.inward ? runs : [{ pts: ed.pts, closed: true }];
+      for (const r of shaded)
+        for (const [w, a] of [[0.32, 0.05], [0.18, 0.06], [0.08, 0.08]] as const)
+          shade.poly(r.pts.flatMap((p) => [p.x, p.y]), r.closed).stroke({ color: 0x1b240c, alpha: a, width: w, join: 'round', cap: 'round' });
+      if (!grass) continue;
       for (const run of runs) {
-        const mesh = stripMesh(run.pts, run.closed, grass.h, grass.w, grass.texture, run.sign);
+        const mesh = stripMesh(run.pts, run.closed, grass.h, grass.w, grass.texture, ed.inward ? -ed.sign : ed.sign);
         if (mesh) {
           mesh.tint = TINT[season];
-          (run.planting ? this.bedContainer : this.container).addChild(mesh);
+          blades.addChild(mesh);
         }
       }
     }
+    this.shadeC.addChild(shade);
+    (e.planting ? this.bedGrassC : this.grassC).addChild(blades);
+    return [shade, blades];
+  }
 
-    // Einfassungen obenauf: klare Kante, Gras endet daran
-    for (const e of edged) {
-      const strip = edgeStrip(e.strip);
-      if (!strip) continue;
-      for (const ring of e.rings) {
-        const shadow = new Graphics();
-        shadow.poly(ring.flatMap((p) => [p.x, p.y]), true).stroke({ color: 0x1b1a14, alpha: 0.18, width: strip.h * 0.9, join: 'round' });
-        shadow.position.set(0.012, 0.016);
-        // Rabatten: Einfassung über dem Mulch der Pflanzfläche
-        const into = e.planting ? this.bedContainer : this.container;
-        into.addChild(shadow);
-        const mesh = stripMesh(ring, true, strip.h, strip.w, strip.texture, 1);
-        if (mesh) into.addChild(mesh);
-      }
-    }
+  private drop(e: Entry) {
+    for (const c of [...e.own, ...e.grass]) c.destroy({ children: true });
+    e.own = [];
+    e.grass = [];
   }
 }
+
+const probeOut = (pts: Vec2[], i: number, sign: number) => {
+  const p = pts[i];
+  const q = pts[(i + 1) % pts.length];
+  const n = norm(-(q.y - p.y), q.x - p.x);
+  return { x: (p.x + q.x) / 2 + n.x * 0.1 * sign, y: (p.y + q.y) / 2 + n.y * 0.1 * sign };
+};
 
 /** Ring in gleichmäßige Abstände unterteilen (damit Läufe genau an Einfassungen enden) */
 function densify(ring: Vec2[], step: number): Vec2[] {
@@ -206,7 +306,7 @@ function distToSeg(p: Vec2, a: Vec2, b: Vec2) {
   return Math.hypot(p.x - a.x - t * dx, p.y - a.y - t * dy);
 }
 
-function bbox(pts: Vec2[]): [number, number, number, number] {
+function bbox(pts: Vec2[]): Box {
   let [x0, y0, x1, y1] = [Infinity, Infinity, -Infinity, -Infinity];
   for (const p of pts) {
     x0 = Math.min(x0, p.x);

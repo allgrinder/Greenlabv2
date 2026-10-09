@@ -1721,6 +1721,653 @@
   ]
  },
  {
+  "id": "hosta",
+  "name": "Funkie",
+  "kind": "perennial",
+  "deciduous": true,
+  "marcescent": false,
+  "diameterMature": 0.8,
+  "heightMature": 0.6,
+  "colors": {
+   "summer": "#7F9A8C",
+   "spring": "#8FA88A",
+   "autumn": "#C2A45A",
+   "winter": "#7A6A58",
+   "bloom": "#D4CCE6"
+  },
+  "looks": [
+   {
+    "key": "#6d8a4b|0||",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6d8a4b|0|#D4CCE6|",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": "#D4CCE6",
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#80855a|0||",
+    "look": {
+     "color": "#80855a",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7d7464|0||",
+    "look": {
+     "color": "#7d7464",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "hemerocallis",
+  "name": "Taglilie",
+  "kind": "perennial",
+  "deciduous": true,
+  "marcescent": false,
+  "diameterMature": 0.7,
+  "heightMature": 0.8,
+  "colors": {
+   "summer": "#E08A2E",
+   "spring": "#8FA56C",
+   "autumn": "#B49A5A",
+   "winter": "#7A6A58",
+   "bloom": "#E3892C"
+  },
+  "looks": [
+   {
+    "key": "#6d8a4b|0||",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6d8a4b|0|#E3892C|",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": "#E3892C",
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#80855a|0||",
+    "look": {
+     "color": "#80855a",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7d7464|0||",
+    "look": {
+     "color": "#7d7464",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "astilbe",
+  "name": "Astilbe",
+  "kind": "perennial",
+  "deciduous": true,
+  "marcescent": false,
+  "diameterMature": 0.5,
+  "heightMature": 0.7,
+  "colors": {
+   "summer": "#E3A2B8",
+   "spring": "#7E9466",
+   "autumn": "#8A5A3E",
+   "winter": "#6E5A48",
+   "bloom": "#E59DB6"
+  },
+  "looks": [
+   {
+    "key": "#6d8a4b|0||",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6d8a4b|0|#E59DB6|",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": "#E59DB6",
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#80855a|0||",
+    "look": {
+     "color": "#80855a",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7d7464|0||",
+    "look": {
+     "color": "#7d7464",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "dryopteris",
+  "name": "Wurmfarn",
+  "kind": "perennial",
+  "deciduous": true,
+  "marcescent": false,
+  "diameterMature": 0.9,
+  "heightMature": 0.8,
+  "colors": {
+   "summer": "#5E7F44",
+   "spring": "#86A55A",
+   "autumn": "#B08A4A",
+   "winter": "#7A6A58"
+  },
+  "looks": [
+   {
+    "key": "#6d8a4b|0||",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring",
+     "summer"
+    ]
+   },
+   {
+    "key": "#80855a|0||",
+    "look": {
+     "color": "#80855a",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7d7464|0||",
+    "look": {
+     "color": "#7d7464",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "alchemilla",
+  "name": "Frauenmantel",
+  "kind": "perennial",
+  "deciduous": true,
+  "marcescent": false,
+  "diameterMature": 0.5,
+  "heightMature": 0.4,
+  "colors": {
+   "summer": "#D2D46A",
+   "spring": "#9CB27A",
+   "autumn": "#A89A5A",
+   "winter": "#7A6A58",
+   "bloom": "#D9DA6E"
+  },
+  "looks": [
+   {
+    "key": "#6d8a4b|0||",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6d8a4b|0|#D9DA6E|",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": "#D9DA6E",
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#80855a|0||",
+    "look": {
+     "color": "#80855a",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7d7464|0||",
+    "look": {
+     "color": "#7d7464",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "heuchera",
+  "name": "Purpurglöckchen",
+  "kind": "perennial",
+  "deciduous": false,
+  "marcescent": false,
+  "diameterMature": 0.45,
+  "heightMature": 0.35,
+  "colors": {
+   "summer": "#6B3446",
+   "spring": "#6B3446",
+   "autumn": "#6B3446",
+   "winter": "#5E3240",
+   "bloom": "#EFE2DA"
+  },
+  "looks": [
+   {
+    "key": "#6d8a4b|0||",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6d8a4b|0|#EFE2DA|",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": "#EFE2DA",
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#80855a|0||",
+    "look": {
+     "color": "#80855a",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7d7464|0||",
+    "look": {
+     "color": "#7d7464",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "phlox",
+  "name": "Hohe Flammenblume",
+  "kind": "perennial",
+  "deciduous": true,
+  "marcescent": false,
+  "diameterMature": 0.6,
+  "heightMature": 1,
+  "colors": {
+   "summer": "#D98DB9",
+   "spring": "#7E9466",
+   "autumn": "#8E7D62",
+   "winter": "#6E5A48",
+   "bloom": "#DA8CBA"
+  },
+  "looks": [
+   {
+    "key": "#6d8a4b|0||",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6d8a4b|0|#DA8CBA|",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": "#DA8CBA",
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#80855a|0||",
+    "look": {
+     "color": "#80855a",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7d7464|0||",
+    "look": {
+     "color": "#7d7464",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "bergenia",
+  "name": "Bergenie",
+  "kind": "perennial",
+  "deciduous": false,
+  "marcescent": false,
+  "diameterMature": 0.5,
+  "heightMature": 0.35,
+  "colors": {
+   "summer": "#4F6E3A",
+   "spring": "#D56A92",
+   "autumn": "#8E3E36",
+   "winter": "#7A3A34",
+   "bloom": "#D66A93"
+  },
+  "looks": [
+   {
+    "key": "#6d8a4b|0|#D66A93|",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": "#D66A93",
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6d8a4b|0||",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#80855a|0||",
+    "look": {
+     "color": "#80855a",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7d7464|0||",
+    "look": {
+     "color": "#7d7464",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "miscanthus",
+  "name": "Chinaschilf",
+  "kind": "grass",
+  "deciduous": true,
+  "marcescent": false,
+  "diameterMature": 1,
+  "heightMature": 1.6,
+  "colors": {
+   "summer": "#7E9A5E",
+   "spring": "#8FAA62",
+   "autumn": "#C9A86A",
+   "winter": "#CDBB92",
+   "bloom": "#E6DCC6"
+  },
+  "looks": [
+   {
+    "key": "#8FAA62|0||",
+    "look": {
+     "color": "#8FAA62",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#7E9A5E|0|#E8DDB8|",
+    "look": {
+     "color": "#7E9A5E",
+     "bare": false,
+     "bloom": "#E8DDB8",
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#C9A86A|0|#E8DDB8|",
+    "look": {
+     "color": "#C9A86A",
+     "bare": false,
+     "bloom": "#E8DDB8",
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#CDBB92|0||",
+    "look": {
+     "color": "#CDBB92",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "carex",
+  "name": "Segge",
+  "kind": "grass",
+  "deciduous": false,
+  "marcescent": false,
+  "diameterMature": 0.5,
+  "heightMature": 0.35,
+  "colors": {
+   "summer": "#7F9868",
+   "spring": "#88A06C",
+   "autumn": "#7C9262",
+   "winter": "#788A5E"
+  },
+  "looks": [
+   {
+    "key": "#88A06C|0||",
+    "look": {
+     "color": "#88A06C",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#7F9868|0|#E8DDB8|",
+    "look": {
+     "color": "#7F9868",
+     "bare": false,
+     "bloom": "#E8DDB8",
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#7C9262|0|#E8DDB8|",
+    "look": {
+     "color": "#7C9262",
+     "bare": false,
+     "bloom": "#E8DDB8",
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#788A5E|0||",
+    "look": {
+     "color": "#788A5E",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
   "id": "photinia-espalier",
   "name": "Glanzmispel-Spalier ›Red Robin‹",
   "kind": "espalier",

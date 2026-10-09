@@ -35,12 +35,24 @@ const tiles = new Map<string, GroundTile>();
 const edges = new Map<string, GroundTile>();
 const scatterParts = new Map<string, SteppingStone[]>();
 let stones: SteppingStone[] = [];
+let manifestVersion = 'none';
+
+/** Fingerabdruck des Manifests: ändert sich, sobald neue Bodenbilder gerendert wurden */
+export const groundManifestVersion = () => manifestVersion;
+
+function hash(s: string): string {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+  return (h >>> 0).toString(36);
+}
 
 export async function loadGroundAssets(onReady: () => void): Promise<void> {
   try {
     const res = await fetch(`${BASE}manifest.json`);
     if (!res.ok) return;
-    const m = (await res.json()) as Manifest;
+    const text = await res.text();
+    manifestVersion = hash(text);
+    const m = JSON.parse(text) as Manifest;
     await Promise.all([
       ...Object.entries(m.tiles).map(async ([key, t]) => {
         const texture = await Assets.load<Texture>(BASE + t.file);

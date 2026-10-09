@@ -23,6 +23,12 @@ const step = (name) => console.log('✓', name);
 
 await p.goto(URL, { waitUntil: 'networkidle' });
 
+// Startseite erscheint sofort (ohne auf die Grafik zu warten), leer bei neuem Browserprofil
+await p.waitForSelector('[data-testid=start-screen]');
+assert.equal(await p.locator('[data-testid=start-last]').count(), 0);
+await p.click('[data-testid=start-new]');
+step('Startseite');
+
 // Onboarding: Polygon + Kalibrierung
 await p.waitForSelector('[data-testid=wizard]');
 await p.click('[data-testid=contour-edges]');
@@ -139,11 +145,15 @@ step('Editor: Kontur ziehen, Bild an zwei Ecken ausrichten');
 await p.waitForFunction(() => document.querySelector('[data-testid=save-state]')?.textContent === 'Gespeichert');
 const n = Object.keys(d.objects).length;
 await p.reload({ waitUntil: 'networkidle' });
+// Startseite: zuletzt bearbeiteter Garten mit Vorschaubild
+await p.waitForSelector('[data-testid=start-last] >> text=Smoke');
+await p.click('[data-testid=start-last]');
 await p.waitForSelector('[data-testid=tool-rail]');
+await p.waitForSelector('[data-testid=start-screen]', { state: 'detached' });
 d = await doc();
 assert.equal(d.name, 'Smoke');
 assert.equal(Object.keys(d.objects).length, n);
-step('Autosave und Wiederherstellen');
+step('Autosave, Startseite und Wiederherstellen');
 
 // PNG-Export
 await p.click('[data-testid=export-btn]');
@@ -170,6 +180,14 @@ step('JSON-Export und -Import');
 await p.click('button[aria-label=Projekte]');
 await p.click('[data-testid=menu-sample]');
 await p.waitForFunction(() => window.__gw.editor.getState().doc?.name.includes('Mustergarten'));
+// Startseite über das Logo: Vorschaubilder, Mustergarten nur einmal gespeichert
+await p.click('[data-testid=home]');
+await p.waitForSelector('[data-testid=start-last] img', { timeout: 30000 });
+await p.click('[data-testid=open-sample]');
+await p.waitForSelector('[data-testid=start-screen]', { state: 'detached' });
+const names = await p.evaluate(async () => (await new Promise((res) => { const r = indexedDB.open('gartenwerk'); r.onsuccess = () => { const q = r.result.transaction('meta').objectStore('meta').getAll(); q.onsuccess = () => res(q.result.map((m) => m.name)); }; })));
+assert.equal(names.filter((x) => x.includes('Mustergarten')).length, 1);
+step('Startseite mit Vorschaubild, Mustergarten ohne Duplikat');
 const tab = (name) => p.click(`header >> text=${name}`);
 
 await tab('Sonne');

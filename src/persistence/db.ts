@@ -4,7 +4,7 @@
  */
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 import { area } from '../core/geometry/polygon';
-import type { Id, Project } from '../core/model/types';
+import type { Id, Project, Vec2 } from '../core/model/types';
 import { migrate } from './migrations';
 
 export interface ProjectMeta {
@@ -15,6 +15,8 @@ export interface ProjectMeta {
   areaM2: number;
   objectCount: number;
   location: string | null;
+  /** vereinfachte Grundstückskontur für die Vorschau, solange kein Vorschaubild existiert */
+  outline?: Vec2[];
 }
 
 interface GwDB extends DBSchema {
@@ -45,7 +47,14 @@ export const metaOf = (p: Project): ProjectMeta => ({
   areaM2: area(p.site.boundary),
   objectCount: Object.keys(p.objects).length,
   location: p.site.location?.label || p.site.location?.place || null,
+  outline: simplify(p.site.boundary, 64),
 });
+
+/** höchstens `max` Punkte, auf Zentimeter gerundet */
+function simplify(pts: Vec2[], max: number): Vec2[] {
+  const step = Math.max(1, Math.ceil(pts.length / max));
+  return pts.filter((_, i) => i % step === 0).map((q) => ({ x: Math.round(q.x * 100) / 100, y: Math.round(q.y * 100) / 100 }));
+}
 
 export async function saveProject(p: Project): Promise<void> {
   const d = await db();
@@ -69,6 +78,7 @@ export async function deleteProject(id: Id): Promise<void> {
   const p = await d.get('projects', id);
   const tx = d.transaction(['projects', 'meta', 'blobs'], 'readwrite');
   if (p?.background) await tx.objectStore('blobs').delete(p.background.blobId);
+  await tx.objectStore('blobs').delete(thumbKey(id));
   await Promise.all([tx.objectStore('projects').delete(id), tx.objectStore('meta').delete(id), tx.done]);
 }
 
@@ -80,7 +90,38 @@ export async function getBlob(id: Id): Promise<Blob | undefined> {
   return (await db()).get('blobs', id);
 }
 
+/* ---------- Vorschaubilder für die Startseite ---------- */
+
+const thumbKey = (id: Id) => `thumb:${id}`;
+
+export async function putThumbnail(id: Id, blob: Blob): Promise<void> {
+  await putBlob(thumbKey(id), blob);
+}
+
+export async function getThumbnail(id: Id): Promise<Blob | undefined> {
+  return getBlob(thumbKey(id));
+}
+
 const LAST = 'gw:lastProject';
+const SAMPLE = 'gw:sampleProject';
+
+/** Id der gespeicherten Kopie des Mustergartens (damit „Mustergarten“ keine Duplikate anlegt) */
+export function sampleProjectId(): Id | null {
+  try {
+    return localStorage.getItem(SAMPLE);
+  } catch {
+    return null;
+  }
+}
+
+export function rememberSample(id: Id | null) {
+  try {
+    if (id) localStorage.setItem(SAMPLE, id);
+    else localStorage.removeItem(SAMPLE);
+  } catch {
+    /* privater Modus */
+  }
+}
 
 export function rememberLast(id: Id | null) {
   try {

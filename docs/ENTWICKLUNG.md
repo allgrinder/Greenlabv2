@@ -16,6 +16,10 @@
 - `/?bench=1000` lädt ein Benchmark-Projekt mit 1.000 Objekten. Frame-Zeiten stehen in der Konsole unter `__gw.renderer.frameTimes` (nur im Dev-Modus).
 - Im Dev-Modus sind `window.__gw` (Renderer und Store) und `window.__gwTools` verfügbar.
 
+## Start
+
+Die App öffnet mit der Startseite: zuletzt bearbeiteter Garten, alle gespeicherten Gärten mit Vorschaubild, Neuer Garten, Mustergarten, JSON-Import. Grafik und Bilder laden währenddessen im Hintergrund (Fortschritt oben rechts); ein Garten öffnet erst, wenn er vollständig gezeichnet ist. `?bench=N` öffnet weiterhin direkt einen Benchmark-Garten.
+
 ## Stand Phase 1
 
 Umgesetzt sind alle acht Kernfunktionen der Phase 1 sowie PNG-Export (siehe `ARCHITEKTUR.md`):

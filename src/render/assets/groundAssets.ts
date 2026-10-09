@@ -89,6 +89,16 @@ export async function loadGroundAssets(onReady: () => void): Promise<void> {
   }
 }
 
+/** alle geladenen Bodenbilder (zum Vorab-Hochladen auf die Grafikkarte) */
+export function allGroundTextures(): Texture[] {
+  return [
+    ...[...tiles.values()].flatMap((t) => [t.texture, ...(t.variants ?? [])]),
+    ...[...edges.values()].map((t) => t.texture),
+    ...[...scatterParts.values()].flatMap((l) => l.map((x) => x.texture)),
+    ...stones.map((x) => x.texture),
+  ];
+}
+
 export const groundTile = (key: string): GroundTile | undefined => tiles.get(key);
 export const steppingStones = (): SteppingStone[] => stones;
 /** Streuteile einer Art (Kiesel, Basalt, Rinde, Laub): freigestellte Einzelbilder mit Größe in Metern */

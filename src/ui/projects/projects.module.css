@@ -131,3 +131,12 @@
   composes: toast;
   color: #8a2f1f;
 }
+
+.confirmDel {
+  flex: none;
+  padding: 5px 9px;
+  border-radius: 7px;
+  background: var(--terracotta);
+  color: #fff;
+  font-size: 12px;
+}

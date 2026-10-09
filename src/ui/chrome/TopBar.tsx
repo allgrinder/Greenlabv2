@@ -16,17 +16,17 @@ const TABS: { v: LensTab; label: string }[] = [
   { v: 'costs', label: 'Kosten' },
 ];
 
-export function TopBar({ saveState, onExport, onProjects }: { saveState: SaveState; onExport: () => void; onProjects: () => void }) {
+export function TopBar({ saveState, onExport, onProjects, onHome }: { saveState: SaveState; onExport: () => void; onProjects: () => void; onHome: () => void }) {
   const name = useEditor((st) => st.doc?.name ?? '');
   const lens = useEditor((st) => st.session.lens);
   const setSession = useEditor((st) => st.setSession);
 
   return (
     <header className={s.topbar}>
-      <div className={s.brand}>
+      <button type="button" className={s.brand} onClick={onHome} title="Alle Gärten" data-testid="home">
         <Logo />
         <span className={s.brandName}>Gartenwerk</span>
-      </div>
+      </button>
       <div className={u.divider} style={{ height: 20 }} />
       <div className={s.projectTitle}>
         <input

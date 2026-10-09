@@ -11,6 +11,7 @@ const dateFmt = new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'short
 export function ProjectMenu({
   onClose,
   onOpen,
+  onHome,
   onNew,
   onSample,
   onImport,
@@ -18,6 +19,7 @@ export function ProjectMenu({
 }: {
   onClose: () => void;
   onOpen: (id: string) => void;
+  onHome: () => void;
   onNew: () => void;
   onSample: () => void;
   onImport: (f: File) => void;
@@ -25,6 +27,8 @@ export function ProjectMenu({
 }) {
   const current = useEditor((st) => st.doc?.id);
   const [items, setItems] = useState<ProjectMeta[] | null>(null);
+  /** Löschen in zwei Schritten (confirm() steht im Artifact nicht zur Verfügung) */
+  const [doomed, setDoomed] = useState<string | null>(null);
   const file = useRef<HTMLInputElement>(null);
   const box = useRef<HTMLDivElement>(null);
 
@@ -56,24 +60,33 @@ export function ProjectMenu({
                 {num(m.areaM2, 0)} m² · {m.objectCount} Objekte · {dateFmt.format(new Date(m.updatedAt))}
               </span>
             </button>
-            {m.id !== current && (
-              <button
-                type="button"
-                className={u.iconBtn}
-                aria-label={`${m.name} löschen`}
-                onClick={async () => {
-                  if (!confirm(`„${m.name}“ endgültig löschen?`)) return;
-                  await deleteProject(m.id);
-                  setItems(await listProjects());
-                }}
-              >
-                <Icon name="trash" size={14} />
-              </button>
-            )}
+            {m.id !== current &&
+              (doomed === m.id ? (
+                <button
+                  type="button"
+                  className={s.confirmDel}
+                  onClick={async () => {
+                    await deleteProject(m.id);
+                    setDoomed(null);
+                    setItems(await listProjects());
+                  }}
+                  onBlur={() => setDoomed(null)}
+                  autoFocus
+                >
+                  Löschen?
+                </button>
+              ) : (
+                <button type="button" className={u.iconBtn} aria-label={`${m.name} löschen`} onClick={() => setDoomed(m.id)}>
+                  <Icon name="trash" size={14} />
+                </button>
+              ))}
           </div>
         ))}
       </div>
       <div className={s.actions}>
+        <button type="button" className={s.action} onClick={onHome} data-testid="menu-home">
+          <Icon name="lib" size={14} /> Alle Gärten
+        </button>
         <button type="button" className={s.action} onClick={onNew} data-testid="menu-new">
           <Icon name="plus" size={14} /> Neues Projekt
         </button>

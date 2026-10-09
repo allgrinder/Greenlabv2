@@ -689,6 +689,27 @@ export function macroPattern(texture: string): FillPattern | null {
 }
 
 /** Belag ohne Fugenraster? (Kanten dürfen ausfransen, Textur wird aufgebrochen) */
+/**
+ * Kacheln und Großflächen-Variation im Voraus berechnen (z. B. während die Startseite offen ist),
+ * eine Textur je Leerlaufphase, damit die Oberfläche bedienbar bleibt. Ergebnis wie beim ersten Zeichnen.
+ */
+export async function warmMaterialTextures(keys: Material['texture'][]): Promise<Texture[]> {
+  const out: Texture[] = [];
+  for (const k of new Set(keys)) {
+    await idle();
+    out.push(tile(k).texture);
+    const macro = k === 'lawn' ? lawnMacroPattern() : k === 'meadow' ? meadowMacroPattern() : macroPattern(k);
+    if (macro?.texture) out.push(macro.texture);
+  }
+  return out;
+}
+
+export const idle = () =>
+  new Promise<void>((res) => {
+    if ('requestIdleCallback' in window) requestIdleCallback(() => res(), { timeout: 200 });
+    else setTimeout(res, 16);
+  });
+
 export const isOrganic = (texture: string) => ORGANIC.has(texture);
 
 const swatchCache = new Map<string, string>();

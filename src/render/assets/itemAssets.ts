@@ -55,6 +55,9 @@ export async function loadItemAssets(onReady: () => void): Promise<void> {
   }
 }
 
+/** alle geladenen Objektbilder (zum Vorab-Hochladen auf die Grafikkarte) */
+export const allItemTextures = (): Texture[] => [...textures.values()];
+
 export const hasItemAsset = (symbol: string) => !!manifest?.items[symbol];
 
 /** Nächstgelegene vorgerenderte Drehung (Index 0–3) und Restwinkel in Grad */

@@ -409,3 +409,58 @@ def stepping_stone(rnd: random.Random, i: int):
     m = pmat(f"stone{i}", lin(tone), 0.82, 0.12, 0.35, 14, 0.3)
     ob.data.materials.append(m)
     return ob
+
+
+#: Rasenkante: Streifen mit Grashalmen, die über die Kante hängen (Länge × Tiefe in m, Pixel je m)
+EDGE = {"grass": ((2.0, 0.4), 420)}
+
+
+def grass_edge(T, rnd):
+    """
+    Nahtloser Streifen entlang x: Wurzellinie in der Mitte (y = T[1]/2). Halme wachsen überwiegend
+    nach oben im Bild (= nach außen über die Kante), einige zurück in den Rasen; Hintergrund transparent.
+    Farben wie der Rasen der App.
+    """
+    gm = [pmat(f"eg{i}", lin(h), 0.6, 0.1, 0.0, 10, 0.3, 0.5) for i, h in enumerate(["#6f7d31", "#7f8e3c", "#8e9c46", "#5f6c28", "#9aa654", "#748236"])]
+    me = bpy.data.meshes.new("edgeblades")
+    bm = bmesh.new()
+    y0 = T[1] / 2
+    # Büschel in unregelmäßigen Abständen, dazwischen Lücken; je Büschel ein Fächer nach außen
+    x = 0.0
+    i = 0
+    while x < T[0]:
+        x += rnd.uniform(0.008, 0.03)
+        if rnd.random() < 0.12:
+            x += rnd.uniform(0.02, 0.06)  # Lücke
+            continue
+        size = rnd.uniform(0.6, 1.5)
+        ty = y0 + 0.015 + rnd.gauss(0, 0.012)  # Wurzeln leicht im Rasen
+        for _ in range(int(rnd.uniform(8, 18) * size)):
+            i += 1
+            bx = (x + rnd.gauss(0, 0.008)) % T[0]
+            out = rnd.random() < 0.85
+            a = (-math.pi / 2 if out else math.pi / 2) + rnd.gauss(0, 0.6)
+            L = rnd.uniform(0.04, 0.15) * size * (1.0 if out else 0.5)
+            lean = rnd.uniform(0.55, 0.95)
+            w = 0.003
+            d = Vector((math.cos(a), -math.sin(a), 0))
+            s_ = Vector((math.sin(a), math.cos(a), 0)) * w
+            prev = None
+            for k in range(4):
+                t = k / 3
+                pos = Vector((bx, -ty, 0)) + d * (L * lean * t) + Vector((0, 0, L * (1 - lean) * t * (1 - 0.5 * t) + 0.004))
+                ww = s_ * (1 - t * 0.85)
+                v1, v2 = bm.verts.new(pos - ww), bm.verts.new(pos + ww)
+                if prev:
+                    f = bm.faces.new((prev[0], prev[1], v2, v1))
+                    f.material_index = i % len(gm)
+                prev = (v1, v2)
+    bm.to_mesh(me)
+    bm.free()
+    ob = link(bpy.data.objects.new("edgeblades", me), outline=False)
+    for m in gm:
+        ob.data.materials.append(m)
+    for dx in (-T[0], T[0]):
+        c = ob.copy()
+        c.location = (dx, 0, 0)
+        bpy.context.scene.collection.objects.link(c)

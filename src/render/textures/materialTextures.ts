@@ -387,10 +387,96 @@ SPECS.basalt = {
 
 const cache = new Map<string, { texture: Texture; spec: TileSpec }>();
 
+/* ---------- Anti-Kachel: Texture-Bombing, einmal beim Laden gebacken ---------- */
+
+/** Organische Beläge ohne Fugenraster: dürfen versetzt und überblendet werden */
+const ORGANIC = new Set<string>(['lawn', 'gravel', 'basalt', 'mulch', 'barkMulch', 'soil', 'sand', 'meadow']);
+const MAX_PX = 2048;
+
+/**
+ * Große, nahtlose Kachel aus einer kleinen: erst normal gekachelt, dann viele weich maskierte Ausschnitte
+ * der Vorlage an zufälligen Stellen mit zufälligem Versatz darübergelegt (nur verschoben, nicht gedreht –
+ * das Licht in den Blender-Bildern kommt immer von links oben). Das Raster der Vorlage verschwindet,
+ * die Wiederholung erst nach k Kachelbreiten (≥ 8 m) – mit Makro-Variation darüber praktisch unsichtbar.
+ */
+function bomb(src: CanvasImageSource, tileW: number, tileH: number, ppm: number, seed: number) {
+  const k = Math.min(8, Math.max(3, Math.ceil(8 / Math.max(tileW, tileH))));
+  const ppmT = Math.min(ppm, MAX_PX / (k * Math.max(tileW, tileH)));
+  const tw = Math.round(tileW * ppmT);
+  const th = Math.round(tileH * ppmT);
+  const W = tw * k;
+  const H = th * k;
+  // Vorlage auf Zielauflösung
+  const base = document.createElement('canvas');
+  base.width = tw;
+  base.height = th;
+  base.getContext('2d')!.drawImage(src, 0, 0, tw, th);
+  const out = document.createElement('canvas');
+  out.width = W;
+  out.height = H;
+  const ctx = out.getContext('2d')!;
+  const pat = ctx.createPattern(base, 'repeat')!;
+  ctx.fillStyle = pat;
+  ctx.fillRect(0, 0, W, H);
+  const r = rng(seed);
+  const R = Math.round(Math.min(tw, th) * 0.55);
+  const patch = document.createElement('canvas');
+  patch.width = patch.height = R * 2;
+  const pc = patch.getContext('2d')!;
+  const ppat = pc.createPattern(base, 'repeat')!;
+  const step = R * 1.05;
+  for (let y = 0; y < H; y += step)
+    for (let x = 0; x < W; x += step) {
+      const cx = x + (r() - 0.5) * step;
+      const cy = y + (r() - 0.5) * step;
+      const rr = R * (0.7 + r() * 0.3);
+      pc.globalCompositeOperation = 'source-over';
+      pc.clearRect(0, 0, R * 2, R * 2);
+      ppat.setTransform(new DOMMatrix().translateSelf(r() * tw, r() * th));
+      pc.fillStyle = ppat;
+      pc.fillRect(0, 0, R * 2, R * 2);
+      // weiche, leicht unrunde Maske
+      pc.globalCompositeOperation = 'destination-in';
+      const g = pc.createRadialGradient(R, R, rr * 0.35, R, R, rr);
+      g.addColorStop(0, 'rgba(0,0,0,1)');
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      pc.fillStyle = g;
+      pc.save();
+      pc.translate(R, R);
+      pc.scale(1 + (r() - 0.5) * 0.5, 1 + (r() - 0.5) * 0.5);
+      pc.translate(-R, -R);
+      pc.fillRect(0, 0, R * 2, R * 2);
+      pc.restore();
+      for (const ox of [0, -W, W])
+        for (const oy of [0, -H, H]) {
+          const px = cx - R + ox;
+          const py = cy - R + oy;
+          if (px > W || py > H || px + 2 * R < 0 || py + 2 * R < 0) continue;
+          ctx.drawImage(patch, px, py);
+        }
+    }
+  const texture = Texture.from(out);
+  texture.source.style.addressMode = 'repeat';
+  texture.source.style.scaleMode = 'linear';
+  texture.source.autoGenerateMipmaps = true;
+  return { texture, spec: { w: tileW * k, h: tileH * k, pxPerM: ppmT, paint: () => undefined } as TileSpec };
+}
+
+const bombed = new Map<string, { texture: Texture; spec: TileSpec }>();
+
 function tile(key: Material['texture']) {
-  // Blender-Kachel, sobald geladen; sonst die gemalte
+  // Blender-Kachel, sobald geladen; sonst die gemalte. Organische Beläge werden aufgebrochen (s. bomb)
   const g = groundTile(key);
-  if (g) return { texture: g.texture, spec: { w: g.w, h: g.h, pxPerM: g.ppm, paint: () => undefined } as TileSpec };
+  if (g) {
+    if (!ORGANIC.has(key)) return { texture: g.texture, spec: { w: g.w, h: g.h, pxPerM: g.ppm, paint: () => undefined } as TileSpec };
+    const k = `img|${key}`;
+    let hit = bombed.get(k);
+    if (!hit) {
+      hit = bomb(g.texture.source.resource as CanvasImageSource, g.w, g.h, g.ppm, key.length * 977 + 13);
+      bombed.set(k, hit);
+    }
+    return hit;
+  }
   let hit = cache.get(key);
   if (hit) return hit;
   const spec = SPECS[key];
@@ -400,6 +486,12 @@ function tile(key: Material['texture']) {
   canvas.width = cw;
   canvas.height = ch;
   spec.paint(canvas.getContext('2d')!, cw, ch, spec.pxPerM);
+  if (key === 'lawn') {
+    // Rasen ist immer gemalt: ebenfalls aufbrechen
+    hit = bomb(canvas, spec.w, spec.h, spec.pxPerM, 4711);
+    cache.set(key, hit);
+    return hit;
+  }
   const texture = Texture.from(canvas);
   texture.source.style.addressMode = 'repeat';
   texture.source.style.scaleMode = 'linear';
@@ -520,6 +612,79 @@ export function meadowMacroPattern(): FillPattern {
   return pattern;
 }
 
+/* ---------- Makro-Variation für alle Beläge: Verschmutzung, Abnutzung, Moos, Silbern ---------- */
+
+interface MacroSpec {
+  dark: RGB;
+  light: RGB;
+  aDark: number;
+  aLight: number;
+  /** Grundfrequenz der Wolken je Kachel (36 m) */
+  f: number;
+  seed: number;
+  /** Moos/Grünstich in feinen Flecken (Platten, Holz) */
+  moss?: number;
+}
+
+const MACROS: Record<string, MacroSpec> = {
+  gravel: { dark: [88, 80, 66], light: [238, 232, 218], aDark: 80, aLight: 60, f: 7, seed: 101 },
+  basalt: { dark: [8, 8, 10], light: [120, 122, 128], aDark: 70, aLight: 45, f: 7, seed: 102 },
+  paving: { dark: [64, 66, 58], light: [236, 233, 226], aDark: 70, aLight: 45, f: 6, seed: 103, moss: 40 },
+  slabs: { dark: [64, 66, 58], light: [236, 233, 226], aDark: 65, aLight: 45, f: 5, seed: 104, moss: 35 },
+  wood: { dark: [56, 44, 32], light: [205, 198, 186], aDark: 55, aLight: 70, f: 6, seed: 105, moss: 20 },
+  mulch: { dark: [24, 16, 10], light: [160, 128, 92], aDark: 80, aLight: 45, f: 8, seed: 106 },
+  barkMulch: { dark: [16, 11, 8], light: [130, 100, 74], aDark: 80, aLight: 40, f: 8, seed: 107 },
+  soil: { dark: [22, 16, 10], light: [140, 112, 84], aDark: 80, aLight: 40, f: 8, seed: 108 },
+  sand: { dark: [150, 126, 92], light: [252, 244, 226], aDark: 60, aLight: 60, f: 6, seed: 109 },
+};
+const MACRO2 = { size: 36, pxPerM: 6 };
+const macroTexs = new Map<string, Texture>();
+
+/** Halbtransparente Überlagerung gegen Gleichförmigkeit; null für Beläge ohne (Wasser, Rasen/Wiese haben eigene) */
+export function macroPattern(texture: string): FillPattern | null {
+  const ms = MACROS[texture];
+  if (!ms) return null;
+  let tex = macroTexs.get(texture);
+  if (!tex) {
+    const n = MACRO2.size * MACRO2.pxPerM;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = n;
+    const ctx = canvas.getContext('2d')!;
+    const img = ctx.createImageData(n, n);
+    const mossC: RGB = [74, 92, 40];
+    for (let j = 0; j < n; j++)
+      for (let i = 0; i < n; i++) {
+        const t = tfbm(i / n, j / n, ms.f, ms.seed, 4);
+        const k = (j * n + i) * 4;
+        let c = t < 0.5 ? ms.dark : ms.light;
+        let a = Math.min(1, Math.abs(t - 0.5) * 2.6);
+        a = a * a * (t < 0.5 ? ms.aDark : ms.aLight);
+        if (ms.moss) {
+          const m2 = tfbm(i / n, j / n, ms.f * 4, ms.seed + 7, 3);
+          if (m2 > 0.62) {
+            c = mossC;
+            a = Math.max(a, (m2 - 0.62) * 3 * ms.moss);
+          }
+        }
+        img.data[k] = c[0];
+        img.data[k + 1] = c[1];
+        img.data[k + 2] = c[2];
+        img.data[k + 3] = Math.round(a);
+      }
+    ctx.putImageData(img, 0, 0);
+    tex = Texture.from(canvas);
+    tex.source.style.addressMode = 'repeat';
+    tex.source.scaleMode = 'linear';
+    macroTexs.set(texture, tex);
+  }
+  const pattern = new FillPattern({ texture: tex, repetition: 'repeat', textureSpace: 'global' });
+  pattern.setTransform(new Matrix().scale(1 / MACRO2.pxPerM, 1 / MACRO2.pxPerM).translate(ms.seed % 17, (ms.seed * 3) % 13));
+  return pattern;
+}
+
+/** Belag ohne Fugenraster? (Kanten dürfen ausfransen, Textur wird aufgebrochen) */
+export const isOrganic = (texture: string) => ORGANIC.has(texture);
+
 const swatchCache = new Map<string, string>();
 
 /**
@@ -530,10 +695,11 @@ export function materialSwatchStyle(m: Material, pxPerM = 70): { backgroundImage
   const g = groundTile(m.texture);
   if (g) return { backgroundImage: `url(${g.url})`, backgroundSize: `${g.w * pxPerM}px ${g.h * pxPerM}px` };
   let url = swatchCache.get(m.texture);
+  const t = tile(m.texture);
   if (!url) {
-    url = (tile(m.texture).texture.source.resource as HTMLCanvasElement).toDataURL();
+    url = (t.texture.source.resource as HTMLCanvasElement).toDataURL();
     swatchCache.set(m.texture, url);
   }
-  const spec = SPECS[m.texture];
+  const spec = t.spec;
   return { backgroundImage: `url(${url})`, backgroundSize: `${spec.w * pxPerM}px ${spec.h * pxPerM}px` };
 }

@@ -46,7 +46,8 @@ npm run assets:looks                                              # Katalog + Lo
   und Schrauben, Häcksel, Rinde, Erde, Sand, Wildwiese (Grasbüschel + Blütennester), Großformatplatten, Basaltsplitt (kantig gebrochen, flach schattiert).
 - Nahtlos: Ein Muster deckt genau eine Kachel ab; Elemente am Rand werden um ± Kachelgröße dupliziert (`tiled()`).
   Nichts darf doppelt übereinander liegen – sonst flackern Flächen schwarz oder bekommen schräge Schattenstreifen.
-- Ergebnis: `public/assets/ground/<schlüssel>.webp` (Schlüssel = `Material.texture`), `stepping_<n>.webp`
+- `EDGE`/`grass_edge`: nahtloser Halmstreifen (2 × 0,4 m, freigestellt) für Rasenkanten – Büschel mit Lücken, Halme überwiegend nach außen.
+- Ergebnis: `public/assets/ground/<schlüssel>.webp` (Schlüssel = `Material.texture`), `edge_grass.webp`, `stepping_<n>.webp`
   (freigestellte Trittplatten) und `manifest.json`. Fehlt ein Bild, malt die App die prozedurale Kachel.
 
 ## Aufbau

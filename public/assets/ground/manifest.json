@@ -95,5 +95,13 @@
    ],
    "ppm": 300
   }
- ]
+ ],
+ "edges": {
+  "grass": {
+   "file": "edge_grass.webp",
+   "w": 2.0,
+   "h": 0.4,
+   "ppm": 420
+  }
+ }
 }

@@ -68,6 +68,22 @@ def main():
         man["tiles"][key] = {"file": f"{key}.webp", "w": T[0], "h": T[1], "ppm": int(ppm * q)}
         json.dump(man, open(man_path, "w"), indent=1)
         print(f"[ground] {key}: {time.time() - t0:.0f} s", flush=True)
+    if not only or "edges" in only:
+        man.setdefault("edges", {})
+        for key, (T, ppm) in ground.EDGE.items():
+            sc = lib.reset_scene(12 if args.quick else 48, ground=False, outlines=False)
+            sc.render.film_transparent = True
+            q = 0.4 if args.quick else 1.0
+            ground.grass_edge(T, random.Random(11))
+            top_camera(T, int(ppm * q))
+            png = os.path.join(args.out, f"edge_{key}.png")
+            sc.render.filepath = png
+            bpy.ops.render.render(write_still=True)
+            Image.open(png).save(png[:-4] + ".webp", "WEBP", quality=90, method=6)
+            os.remove(png)
+            man["edges"][key] = {"file": f"edge_{key}.webp", "w": T[0], "h": T[1], "ppm": int(ppm * q)}
+            json.dump(man, open(man_path, "w"), indent=1)
+            print(f"[ground] edge {key}", flush=True)
     if not only or "stepping" in only:
         man["stepping"] = []
         for i in range(ground.STEPPING):

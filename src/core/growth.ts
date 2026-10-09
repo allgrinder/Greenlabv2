@@ -65,7 +65,7 @@ export function inBloom(sp: PlantSpecies, season: Season): boolean {
 }
 
 /** Rasenfarbe je Jahreszeit (aus GardenPlan.dc.html) */
-export const LAWN_COLOR: Record<Season, string> = { spring: '#A7BB7B', summer: '#9BAE74', autumn: '#A3A672', winter: '#B6B8A8' };
+export const LAWN_COLOR: Record<Season, string> = { spring: '#879B4A', summer: '#76863A', autumn: '#868A4C', winter: '#A2A48E' };
 
 /** Wie stark ein Gehölz Schatten wirft (Winter: kahle Krone lässt Licht durch) */
 export const shadeDensity = (sp: PlantSpecies, season: Season) => (isBare(sp, season) ? 0.3 : 1);

@@ -16,7 +16,7 @@ export class ShadowLayer {
   private light = new Graphics();
   private denseWrap = new Container();
   private lightWrap = new Container();
-  private blurA = new BlurFilter({ strength: 4, quality: 3 });
+  private blurA = new BlurFilter({ strength: 6, quality: 3 });
   private blurB = new BlurFilter({ strength: 4, quality: 3 });
   private alphaA = new AlphaFilter({ alpha: 0.3 });
   private alphaB = new AlphaFilter({ alpha: 0.1 });

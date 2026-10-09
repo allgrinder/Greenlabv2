@@ -5,7 +5,7 @@ import type { Material, MaterialId } from '../model/types';
  * Preise sind plausible Beispielwerte (netto), keine Marktpreise.
  */
 export const MATERIALS: Material[] = [
-  { id: 'lawn', name: 'Rollrasen', texture: 'lawn', baseColor: '#9BAE74', tileSizeM: 1, anchor: 'world', unit: 'm2', depthM: null, unitSizeM: null, price: 7.9 },
+  { id: 'lawn', name: 'Rollrasen', texture: 'lawn', baseColor: '#76863A', tileSizeM: 1, anchor: 'world', unit: 'm2', depthM: null, unitSizeM: null, price: 7.9 },
   { id: 'gravel', name: 'Kies 8/16, Jurakalk', texture: 'gravel', baseColor: '#D6CDBB', tileSizeM: 0.5, anchor: 'world', unit: 'm3', depthM: 0.08, unitSizeM: null, price: 68 },
   { id: 'paving', name: 'Terrassenplatten 80 × 40', texture: 'paving', baseColor: '#CFC3AE', tileSizeM: 1.6, anchor: 'object', unit: 'pcs', depthM: null, unitSizeM: { w: 0.8, d: 0.4 }, price: 20.48 },
   { id: 'wood', name: 'Holzdeck Lärche', texture: 'wood', baseColor: '#B78C61', tileSizeM: 1.2, anchor: 'object', unit: 'm2', depthM: null, unitSizeM: null, price: 119 },
@@ -16,8 +16,8 @@ export const MATERIALS: Material[] = [
   { id: 'slabs', name: 'Betonplatten 120 × 60, hellgrau', texture: 'slabs', baseColor: '#C6C2BA', tileSizeM: 2.4, anchor: 'object', unit: 'pcs', depthM: null, unitSizeM: { w: 1.2, d: 0.6 }, price: 46 },
   { id: 'meadow', name: 'Blumenwiese, heimische Wildblumen', texture: 'meadow', baseColor: '#8E9A4E', tileSizeM: 2, anchor: 'world', unit: 'm2', depthM: null, unitSizeM: null, price: 4.6 },
   { id: 'sand', name: 'Spielsand 0/2', texture: 'sand', baseColor: '#D8C7A0', tileSizeM: 1, anchor: 'world', unit: 'm3', depthM: 0.3, unitSizeM: null, price: 52 },
-  // Trittplatten im Schrittmaß 72 cm auf einem 90 cm breiten Weg: eine Platte je 0,65 m² Wegfläche
-  { id: 'stepping', name: 'Trittplatten Naturstein', texture: 'stepping', baseColor: '#ABA59B', tileSizeM: 0.6, anchor: 'world', unit: 'pcs', depthM: null, unitSizeM: { w: 0.72, d: 0.9 }, price: 34 },
+  // Trittplatten 85 × 40 im Schrittmaß 58 cm auf einem 90 cm breiten Weg: eine Platte je 0,52 m² Wegfläche
+  { id: 'stepping', name: 'Trittplatten Beton 85 × 40', texture: 'stepping', baseColor: '#ABA59B', tileSizeM: 0.6, anchor: 'world', unit: 'pcs', depthM: null, unitSizeM: { w: 0.58, d: 0.9 }, price: 29 },
   { id: 'water', name: 'Wasserfläche', texture: 'water', baseColor: '#6E9AA0', tileSizeM: 2, anchor: 'world', unit: 'm2', depthM: null, unitSizeM: null, price: 196.8 },
 ];
 

@@ -12,7 +12,7 @@ import random
 
 import bpy  # noqa: I001
 import bmesh
-from mathutils import Vector
+from mathutils import Matrix, Vector
 
 from lib import _ao, _leaf_mat, _principled, link, mat
 
@@ -36,8 +36,18 @@ def leaf_material(hex_: str, tint: float = 1.0) -> bpy.types.Material:
     key = f"leafm_{hex_}_{tint}"
     if key not in _cache:
         c = lin(hex_)
-        m, _ = _leaf_mat(key, scale(c, 0.42 * tint), scale(c, 1.15 * tint))
+        m, b = _leaf_mat(key, scale(c, 0.42 * tint), scale(c, 1.15 * tint))
         _ao(m, 0.85)
+        # Lichtdurchlass: ein Teil des Lichts scheint durch das Blatt (warm-grün), Krone wirkt lebendiger
+        nt = m.node_tree
+        out = nt.nodes["Material Output"]
+        tr = nt.nodes.new("ShaderNodeBsdfTranslucent")
+        tr.inputs["Color"].default_value = (*scale(c, 1.3 * tint), 1)
+        mix = nt.nodes.new("ShaderNodeMixShader")
+        mix.inputs["Fac"].default_value = 0.22
+        nt.links.new(b.outputs["BSDF"], mix.inputs[1])
+        nt.links.new(tr.outputs["BSDF"], mix.inputs[2])
+        nt.links.new(mix.outputs["Shader"], out.inputs["Surface"])
         _cache[key] = m
     return _cache[key]
 
@@ -134,6 +144,47 @@ def leaf_obj(material: bpy.types.Material, size: float, shape: str = "oval") -> 
     return _hidden(ob)
 
 
+def leaf_spray(material: bpy.types.Material, size: float, shape: str = "oval", n: int = 7) -> bpy.types.Object:
+    """Zweigstück mit mehreren Blättern (fächerförmig, leicht gewölbt) – liest sich wie echtes Laub statt Konfetti"""
+    name = f"S_{material.name}_{size:.3f}_{shape}_{n}"
+    ob = bpy.data.objects.get(name)
+    if ob:
+        return ob
+    base = leaf_obj(material, size, shape)
+    bm = bmesh.new()
+    rnd = random.Random(len(name))
+    for i in range(n):
+        a = (i / max(1, n - 1) - 0.5) * 2.4 + rnd.uniform(-0.2, 0.2)
+        t = 0.3 + 0.7 * (i % 3) / 2
+        tmp = bmesh.new()
+        tmp.from_mesh(base.data)
+        k = rnd.uniform(0.75, 1.15)
+        mtx = Matrix.Translation(Vector((math.sin(a) * size * 1.2 * t, math.cos(a) * size * 1.4 * t, size * 0.15 * (1 - t)))) @ Matrix.Rotation(-a, 4, "Z") @ Matrix.Rotation(rnd.uniform(-0.35, 0.35), 4, "X") @ Matrix.Scale(k, 4)
+        bmesh.ops.transform(tmp, matrix=mtx, verts=tmp.verts)
+        me_tmp = bpy.data.meshes.new("tmp")
+        tmp.to_mesh(me_tmp)
+        tmp.free()
+        bm.from_mesh(me_tmp)
+        bpy.data.meshes.remove(me_tmp)
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    ob = link(bpy.data.objects.new(name, me), outline=False)
+    ob.data.materials.append(material)
+    return _hidden(ob)
+
+
+def density_texture(seed: int, size: float, contrast: float = 2.2):
+    """Wolken-Rauschen als Dichtemaske für Partikel: Lücken und Klumpen in der Krone"""
+    tex = bpy.data.textures.new(f"dens{seed}", "CLOUDS")
+    tex.noise_scale = size
+    tex.noise_depth = 2
+    tex.contrast = contrast
+    tex.intensity = 1.0
+    tex.noise_basis = "BLENDER_ORIGINAL"
+    return tex
+
+
 def flower_obj(petal_hex: str, size: float, kind: str = "saucer") -> bpy.types.Object:
     """Blüte als Instanz: Schale (5 Blütenblätter), Margerite (Kranz + dunkle Mitte), Kugel (Dolde)"""
     name = f"F_{petal_hex}_{size:.3f}_{kind}"
@@ -174,7 +225,7 @@ def flower_obj(petal_hex: str, size: float, kind: str = "saucer") -> bpy.types.O
     return _hidden(ob)
 
 
-def emit(emitter: bpy.types.Object, inst: bpy.types.Object, count: int, seed: int, size_random: float = 0.5, normal_align: bool = True, show_emitter: bool = True, volume: bool = False, random_rot: float = 0.75):
+def emit(emitter: bpy.types.Object, inst: bpy.types.Object, count: int, seed: int, size_random: float = 0.5, normal_align: bool = True, show_emitter: bool = True, volume: bool = False, random_rot: float = 0.75, density=None):
     ps = emitter.modifiers.new(f"p{len(emitter.modifiers)}", "PARTICLE_SYSTEM").particle_system
     ps.seed = seed
     st = ps.settings
@@ -187,11 +238,18 @@ def emit(emitter: bpy.types.Object, inst: bpy.types.Object, count: int, seed: in
     st.use_rotations = True
     st.rotation_mode = "NOR" if normal_align else "GLOB_Z"
     st.phase_factor_random = 2.0
-    st.rotation_factor_random = random_rot if normal_align else 0.25
+    st.rotation_factor_random = random_rot if normal_align else 0.35
     st.particle_size = 1.0
     st.size_random = size_random
     st.emit_from = "VOLUME" if volume else "FACE"
     st.use_emit_random = True
+    if density is not None:
+        slot = st.texture_slots.add()
+        slot.texture = density
+        slot.texture_coords = "GLOBAL"
+        slot.use_map_time = False
+        slot.use_map_density = True
+        slot.density_factor = 1.0
     emitter.show_instancer_for_render = show_emitter
 
 
@@ -265,13 +323,15 @@ def bend(a: Vector, b: Vector, rnd: random.Random, k: float = 0.25, up: float = 
     return [a, m1, m2, b]
 
 
-def twigs(br: Branches, c: Vector, r: float, rnd: random.Random, n: int, rad: float, depth: int = 1):
+def twigs(br: Branches, c: Vector, r: float, rnd: random.Random, n: int, rad: float, depth: int = 1, along: Vector | None = None):
     for _ in range(n):
         d = Vector((rnd.uniform(-1, 1), rnd.uniform(-1, 1), rnd.uniform(-0.2, 0.9))).normalized()
+        if along is not None:  # in Wuchsrichtung weiter, leicht gefächert und nach oben
+            d = (along.normalized() * 1.6 + d * 0.7 + Vector((0, 0, 0.35))).normalized()
         e = c + d * r * rnd.uniform(0.6, 1.0)
         br.add(bend(c, e, rnd, 0.3, 0.1), [rad, rad * 0.7, rad * 0.45, rad * 0.2])
         if depth > 1:
-            twigs(br, e, r * 0.45, rnd, 2, rad * 0.45, depth - 1)
+            twigs(br, e, r * 0.5, rnd, 3, rad * 0.45, depth - 1, along=e - c if along is not None else None)
 
 
 # ------------------------------------------------------------------ Arten-Parameter
@@ -308,11 +368,13 @@ PERENNIALS = {
     "nepeta": dict(leaf=0.025, form="oval", flower="spike", fsize=0.009, n=60, tint=1.2, leaf_hex="#8c9a82"),
     "achillea": dict(leaf=0.04, form="needle", flower="umbel", fsize=0.05, n=10, tint=1.05),
     "anemone": dict(leaf=0.07, form="big", flower="saucer", fsize=0.035, n=16, tint=1.0),
+    "perovskia": dict(leaf=0.03, form="needle", flower="spike", fsize=0.01, n=55, tint=1.25, leaf_hex="#9aa69a"),
 }
 GRASSES = {
     "stipa": dict(blades=700, width=0.006, arch=0.55, plume="feather"),
     "pennisetum": dict(blades=600, width=0.009, arch=0.75, plume="brush"),
     "calamagrostis": dict(blades=420, width=0.01, arch=0.15, plume="upright"),
+    "hakonechloa": dict(blades=520, width=0.012, arch=0.95, plume="none"),
 }
 
 
@@ -361,7 +423,15 @@ def tree(sp: dict, look: dict, seed: int):
                 return Vector((u.x * R * 0.92, u.y * R * 0.92, zc + u.z * min(ch, R) * 0.92))
             return Vector((u.x * rr * 0.86, u.y * rr * 0.86, zc + u.z * ch * 0.86))
 
-    cr = R * (0.27 if shape == "globe" else 0.24)
+    if shape == "globe":
+        _crown_clumps(br, tops, R, ch, zc, shape, p, look, rnd, trunk_r, envelope_point)
+        return
+    _crown_tips(br, tops, R, ch, zc, shape, p, look, rnd, trunk_r, envelope_point)
+
+
+def _crown_clumps(br, tops, R, ch, zc, shape, p, look, rnd, trunk_r, envelope_point):
+    """dichte Kugelkrone (Formgehölze wie Kugelahorn): geschlossene Laubwolken"""
+    cr = R * 0.27
     n = int(max(18, min(95, (R / cr) ** 2 * 8)))
     centers: list[Vector] = []
     tries = 0
@@ -370,12 +440,10 @@ def tree(sp: dict, look: dict, seed: int):
         c = envelope_point()
         if all((c - o).length > cr * 0.75 for o in centers):
             centers.append(c)
-    # Gerüstäste (4–6) vom Stamm schräg nach außen/oben, Seitenäste zu den Wolken, Zweige darin
     scaffolds = []
     for t in tops:
-        k = 5 if p["multi"] == 1 else 2
-        for j in range(k):
-            a = j / k * math.tau + rnd.uniform(-0.4, 0.4)
+        for j in range(5):
+            a = j / 5 * math.tau + rnd.uniform(-0.4, 0.4)
             e = t + Vector((math.cos(a) * R * 0.5, math.sin(a) * R * 0.5, ch * rnd.uniform(0.35, 0.8)))
             r0 = trunk_r * 0.62
             br.add(bend(t, e, rnd, 0.25, 0.1), [r0, r0 * 0.85, r0 * 0.7, r0 * 0.55])
@@ -386,15 +454,179 @@ def tree(sp: dict, look: dict, seed: int):
         twigs(br, c, cr * 1.0, rnd, 6 if look["bare"] else 3, max(0.01, r0 * 0.3), 2 if look["bare"] else 1)
     if look["bare"]:
         return
-    lm = leaf_material(look["color"])
-    ls = max(p["leaf"], R * 0.012)  # große Bäume: Blätter als Blattbüschel lesen
-    leaf = leaf_obj(lm, ls, p["form"])
-    bloom = flower_obj(look["bloom"], ls * 0.5, "saucer") if look.get("bloom") else None
-    fruit = flower_obj(look["fruit"], 0.035, "ball") if look.get("fruit") else None
-    extra = ([(bloom, 0.35)] if bloom else []) + ([(fruit, 0.006)] if fruit else [])
+    ls = max(p["leaf"], R * 0.012)
+    leaf = leaf_obj(leaf_material(look["color"]), ls, p["form"])
     for i, c in enumerate(centers):
         r = cr * rnd.uniform(0.75, 1.3)
-        foliage_cluster(f"clump{i}", c, r, rnd, leaf, ls, look["color"], rnd.uniform(0.7, 0.95), 2.9, 5, extra)
+        foliage_cluster(f"clump{i}", c, r, rnd, leaf, ls, look["color"], rnd.uniform(0.7, 0.95), 2.9, 5)
+
+
+def _crown_tips(br, tops, R, ch, zc, shape, p, look, rnd, trunk_r, envelope_point):
+    """
+    Natürliche Krone: Gerüstäste → Seitenäste → Zweigspitzen; Laub nur als lockere Büschel an den Spitzen.
+    Dadurch entstehen Lücken, ein fransiger Umriss mit herausragenden Zweigen und Licht im Inneren.
+    Kleine, dunkle Kernwolken nahe am Stamm verhindern, dass man von oben durch die Mitte auf den Boden sieht.
+    """
+    # Zweigspitzen: Poisson-artig in der Hülle, außen dichter; einige ragen über die Hülle hinaus
+    n_tips = int(max(90, min(420, (R * R) * 9)))
+    tip_r = R * 0.11
+    tips: list[Vector] = []
+    tries = 0
+    while len(tips) < n_tips and tries < n_tips * 80:
+        tries += 1
+        c = envelope_point()
+        rel = Vector(((c.x) / R, (c.y) / R, (c.z - zc) / max(ch, 0.1)))
+        if rel.length < 0.45 and rnd.random() < 0.7:  # innen weniger Laub (dort ist es dunkel)
+            continue
+        if rnd.random() < 0.08:  # Ausreißer: Zweig ragt über die Hülle
+            c = Vector((c.x * 1.18, c.y * 1.18, zc + (c.z - zc) * 1.12))
+        if all((c - o).length > tip_r * 0.9 for o in tips):
+            tips.append(c)
+    # Gerüstäste
+    scaffolds = []
+    for t in tops:
+        k = 6 if len(tops) == 1 else 3
+        for j in range(k):
+            a = j / k * math.tau + rnd.uniform(-0.35, 0.35)
+            e = t + Vector((math.cos(a) * R * rnd.uniform(0.35, 0.55), math.sin(a) * R * rnd.uniform(0.35, 0.55), ch * rnd.uniform(0.3, 0.85)))
+            r0 = trunk_r * 0.6
+            br.add(bend(t, e, rnd, 0.3, 0.12), [r0, r0 * 0.82, r0 * 0.66, r0 * 0.5])
+            scaffolds.append((e, r0 * 0.5))
+    # Seitenäste: je Gerüstast einige Knoten, die nahe gelegene Spitzen bedienen
+    nodes = []
+    for e, r0 in scaffolds:
+        for _ in range(4):
+            d = Vector((rnd.uniform(-1, 1), rnd.uniform(-1, 1), rnd.uniform(-0.1, 0.8))).normalized()
+            m = e + d * R * rnd.uniform(0.25, 0.45)
+            br.add(bend(e, m, rnd, 0.3, 0.1), [r0, r0 * 0.75, r0 * 0.55, r0 * 0.4])
+            nodes.append((m, r0 * 0.4))
+    for c in tips:
+        m, r0 = min(nodes, key=lambda q: (q[0] - c).length)
+        rr = max(0.008, r0 * 0.6)
+        br.add(bend(m, c, rnd, 0.4, 0.12), [rr, rr * 0.7, rr * 0.45, rr * 0.25])
+        if look["bare"]:
+            twigs(br, c, tip_r * 1.6, rnd, 4, rr * 0.4, 2, along=c - m)
+        else:
+            twigs(br, c, tip_r * 0.9, rnd, 2, rr * 0.35, 1, along=c - m)
+    if look["bare"]:
+        return
+    lm = leaf_material(look["color"])
+    ls = max(p["leaf"] * 0.85, R * 0.008)
+    spray = leaf_spray(lm, ls, p["form"])
+    bloom = flower_obj(look["bloom"], ls * 0.6, "saucer") if look.get("bloom") else None
+    fruit = flower_obj(look["fruit"], 0.035, "ball") if look.get("fruit") else None
+    extra = ([(bloom, 2.5)] if bloom else []) + ([(fruit, 0.04)] if fruit else [])
+    spray_area = 7 * 0.7 * ls * ls
+    pts = crown_points(R, ch, zc, shape, rnd, spray_area)
+    cloud = point_cloud("leafcloud", pts)
+    emit_verts(cloud, spray, len(pts), rnd.randint(1, 99999))
+    for inst, share in extra:
+        sub = point_cloud("extra", [q for q in pts if q.z > zc and rnd.random() < share / 7])
+        emit_verts(sub, inst, len(sub.data.vertices), rnd.randint(1, 99999), 0.4)
+    # dunkler Kern gegen Durchblick in der Mitte
+    blob("core", Vector((0, 0, zc)), R * 0.5, rnd, ch / max(R, 0.1) * 0.9, look["color"])
+
+
+def crown_points(R: float, ch: float, zc: float, shape: str, rnd: random.Random, spray_area: float, n_min: int = 14, sep: float = 0.68, rrange: tuple[float, float] = (0.17, 0.3), cov: float = 2.6) -> list[Vector]:
+    """
+    Positionen der Blattzweige: Laubmassen (Klumpen) in der Kronenhülle, außen dichter, einzelne ragen hinaus.
+    In jedem Klumpen liegen die Zweige bevorzugt in der äußeren Schicht (Licht oben, Schatten unten),
+    der Rand franst aus; die Klumpenränder sind mit Rauschen verbeult.
+    """
+    from mathutils import noise
+
+    off = Vector((rnd.uniform(0, 99), rnd.uniform(0, 99), rnd.uniform(0, 99)))
+    n_cl = int(max(n_min, min(90, R * R * 3.2)))
+    centers: list[tuple[Vector, float]] = []
+    tries = 0
+    while len(centers) < n_cl and tries < n_cl * 200:
+        tries += 1
+        u = Vector((rnd.uniform(-1, 1), rnd.uniform(-1, 1), rnd.uniform(-1, 1)))
+        if u.length > 1 or u.length < 0.35:
+            continue
+        u = u.normalized() * (0.55 + 0.45 * u.length)
+        if rnd.random() < 0.1:
+            u *= 1.12
+        rr = R
+        if shape == "vase":
+            rr = R * (0.55 + 0.45 * (u.z + 1) / 2)
+        c = Vector((u.x * rr * 0.82, u.y * rr * 0.82, zc + u.z * ch * 0.8))
+        r = R * rnd.uniform(*rrange)
+        if all((c - o).length > (r + orr) * sep for o, orr in centers):
+            centers.append((c, r))
+    pts: list[Vector] = []
+    for c, r in centers:
+        n = int(4 * math.pi * r * r * cov / spray_area)
+        sq = rnd.uniform(0.6, 0.85)
+        for _ in range(n):
+            d = Vector((rnd.gauss(0, 1), rnd.gauss(0, 1), rnd.gauss(0, 1))).normalized()
+            bump = 1 + 0.28 * noise.noise(d * 1.7 + c + off) + 0.12 * noise.noise(d * 4.3 + c * 2 + off)
+            t = rnd.random() ** 0.35  # zur Außenschicht hin
+            if rnd.random() < 0.12:
+                t *= rnd.uniform(1.0, 1.25)  # Fransen
+            q = c + Vector((d.x * r, d.y * r, d.z * r * sq)) * bump * t
+            pts.append(q)
+    return pts
+
+
+def point_cloud(name: str, pts: list[Vector]) -> bpy.types.Object:
+    me = bpy.data.meshes.new(name)
+    me.from_pydata([tuple(q) for q in pts], [], [])
+    return link(bpy.data.objects.new(name, me), outline=False)
+
+
+def emit_verts(ob: bpy.types.Object, inst: bpy.types.Object, count: int, seed: int, size_random: float = 0.55):
+    """genau ein Exemplar je Punkt, Blätter überwiegend zum Licht gedreht"""
+    ps = ob.modifiers.new(f"p{len(ob.modifiers)}", "PARTICLE_SYSTEM").particle_system
+    ps.seed = seed
+    st = ps.settings
+    st.type = "HAIR"
+    st.use_advanced_hair = True
+    st.count = max(1, count)
+    st.hair_length = 1
+    st.emit_from = "VERT"
+    st.use_emit_random = False
+    st.render_type = "OBJECT"
+    st.instance_object = inst
+    st.use_rotations = True
+    st.rotation_mode = "GLOB_Z"
+    st.rotation_factor_random = 0.45
+    st.phase_factor_random = 2.0
+    st.particle_size = 1.0
+    st.size_random = size_random
+    ob.show_instancer_for_render = False
+
+
+def crown_shell(name: str, R: float, ch: float, zc: float, shape: str, rnd: random.Random, color: str, core: bool = False, holes: float = 0.0) -> bpy.types.Object:
+    """Kronenhülle: Ellipsoid mit großräumigen Beulen (unregelmäßiger Umriss), Form je nach Wuchs"""
+    me = bpy.data.meshes.new(name)
+    bm = bmesh.new()
+    bmesh.ops.create_icosphere(bm, subdivisions=4, radius=1.0)
+    ph = [rnd.random() * 6 for _ in range(6)]
+    for v in bm.verts:
+        d = v.co.normalized()
+        k = 1 + 0.14 * math.sin(d.x * 2.3 + ph[0]) * math.sin(d.y * 2.1 + ph[1]) + 0.1 * math.sin(d.z * 3.1 + ph[2]) + 0.06 * math.sin(d.x * 5.3 + d.y * 4.1 + ph[3]) + 0.04 * math.sin(d.y * 7.7 + d.z * 6.1 + ph[4])
+        rr = R
+        if shape == "vase":
+            rr = R * (0.55 + 0.45 * (d.z + 1) / 2)
+        z = d.z
+        if shape == "spread":
+            z = d.z * 0.8
+        v.co = Vector((d.x * rr * k, d.y * rr * k, zc + z * ch * k))
+    if holes:
+        # Lücken: Flächen wegschneiden, wo fraktales Rauschen unter der Schwelle liegt (große und kleine Löcher)
+        from mathutils import noise
+
+        off = Vector((rnd.uniform(0, 100), rnd.uniform(0, 100), rnd.uniform(0, 100)))
+        f = 1.0 / max(0.4, R * 0.32)
+        thr = -0.05 + (holes - 0.5) * 0.6
+        dead = [fc for fc in bm.faces if noise.fractal(fc.calc_center_median() * f + off, 0.6, 2.0, 3) < thr]
+        bmesh.ops.delete(bm, geom=dead, context="FACES")
+    bm.to_mesh(me)
+    bm.free()
+    ob = link(bpy.data.objects.new(name, me), outline=False)
+    ob.data.materials.append(core_material(color))
+    return ob
 
 
 def shrub(sp: dict, look: dict, seed: int):
@@ -433,6 +665,23 @@ def shrub(sp: dict, look: dict, seed: int):
     leaf = leaf_obj(leaf_material(look["color"]), ls, p["form"])
     heads = p["heads"] if look.get("bloom") else None
     compact = shape in ("globe", "hedge")
+    if not compact:
+        # natürlicher Strauch: Laubmassen mit fransigem Rand (wie Baumkronen), Blütenstände oben auf den Massen
+        spray = leaf_spray(leaf_material(look["color"]), ls * 0.8, p["form"], 5)
+        spray_area = 5 * 0.7 * (ls * 0.8) ** 2
+        ch = H * 0.47
+        pts = crown_points(R * 0.95, ch, H * 0.52, "vase" if shape == "vase" else "round", rnd, spray_area, n_min=26, sep=0.45, rrange=(0.24, 0.4), cov=3.4)
+        emit_verts(point_cloud("leafcloud", pts), spray, len(pts), rnd.randint(1, 99999))
+        blob("core", Vector((0, 0, H * 0.45)), R * 0.38, rnd, H / max(2 * R, 0.1) * 0.8, look["color"])
+        if heads:
+            hk, hs, hn = heads
+            top = sorted(pts, key=lambda q: -q.z)[: max(1, len(pts) // 3)]
+            chosen = [rnd.choice(top) for _ in range(int(hn * (R / 0.75) ** 2))]
+            emit_verts(point_cloud("heads", chosen), flower_obj(look["bloom"], hs * 0.8, "ball"), len(chosen), rnd.randint(1, 99999), 0.35)
+        elif look.get("bloom"):
+            chosen = [q for q in pts if rnd.random() < 0.25]
+            emit_verts(point_cloud("bl", chosen), flower_obj(look["bloom"], ls * 0.5), len(chosen), rnd.randint(1, 99999), 0.4)
+        return
     for i, c in enumerate(centers):
         r = cr * rnd.uniform(0.85, 1.12)
         extra = []

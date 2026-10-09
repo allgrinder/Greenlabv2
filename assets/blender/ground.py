@@ -209,7 +209,8 @@ def slabs(T, rnd):
 def wood(T, rnd):
     """Holzdeck Lärche: 14-cm-Dielen mit 6 mm Fugen, versetzte Stöße, Maserung, Schraubenpaare"""
     base_plane(T, pmat("gap", lin("#2a221b"), 1.0), -0.03)
-    tones = ["#a07a55", "#94704d", "#ab855e", "#8c6a49", "#b08b63"]
+    # Lärche, leicht vergraut (wie im Konzept): warmes Graubraun statt Orange
+    tones = ["#9a8166", "#8e765d", "#a48b70", "#85705a", "#ab937a"]
     gm = []
     for i, h in enumerate(tones):
         m, b = _principled(f"plank{i}")
@@ -395,36 +396,16 @@ STEPPING = 4
 
 
 def stepping_stone(rnd: random.Random, i: int):
-    """Natursteinplatte ca. 60 × 40 cm, unregelmäßig gerundet, leicht gewölbt"""
-    me = bpy.data.meshes.new("stone")
-    bm = bmesh.new()
-    n = 28
-    pts = []
-    ph = [rnd.random() * 6 for _ in range(3)]
-    for k in range(n):
-        a = k / n * math.tau
-        r = 1 + 0.06 * math.sin(a * 3 + ph[0]) + 0.04 * math.sin(a * 5 + ph[1])
-        # Superellipse: eher rechteckig mit runden Ecken
-        cx, cy = math.cos(a), math.sin(a)
-        e = 0.35
-        x = math.copysign(abs(cx) ** e, cx) * 0.3 * r
-        y = math.copysign(abs(cy) ** e, cy) * 0.2 * r
-        pts.append((x, y))
-    top = [bm.verts.new((x, y, 0.04)) for x, y in pts]
-    bot = [bm.verts.new((x * 0.97, y * 0.97, -0.02)) for x, y in pts]
-    bm.faces.new(top)
-    bm.faces.new(list(reversed(bot)))
-    for k in range(n):
-        bm.faces.new((top[k], top[(k + 1) % n], bot[(k + 1) % n], bot[k]))
-    bmesh.ops.subdivide_edges(bm, edges=[e for e in bm.edges if all(v in top for v in e.verts)], cuts=1)
-    bm.to_mesh(me)
-    bm.free()
-    ob = link(bpy.data.objects.new("stone", me), outline=False)
-    sub = ob.modifiers.new("s", "SUBSURF")
-    sub.levels = 2
-    sub.render_levels = 2
+    """Betontrittplatte 85 × 40 × 5 cm: scharfe, leicht gefaste Kanten, feine Poren, etwas Patina an den Rändern"""
+    w, d, t = 0.85, 0.4, 0.05
+    ob = link(bpy.data.objects.new("stone", slab_mesh("stone", w, d, t)), outline=False)
+    ob.location = (0, 0, t / 2 - 0.01)
+    ob.rotation_euler = (rnd.uniform(-0.008, 0.008), rnd.uniform(-0.008, 0.008), 0)
     bev = ob.modifiers.new("b", "BEVEL")
-    bev.width = 0.01
-    tone = ["#a9a49a", "#9e978b", "#b3ada2", "#958e84"][i % 4]
-    ob.data.materials.append(pmat(f"stone{i}", lin(tone), 0.85, 0.22, 1.0, 9, 0.3))
+    bev.width = 0.006
+    bev.segments = 2
+    bev.limit_method = "ANGLE"
+    tone = ["#8e8b84", "#87847d", "#94918a", "#827f78"][i % 4]
+    m = pmat(f"stone{i}", lin(tone), 0.82, 0.12, 0.35, 14, 0.3)
+    ob.data.materials.append(m)
     return ob

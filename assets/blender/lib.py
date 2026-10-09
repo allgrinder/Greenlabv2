@@ -457,11 +457,50 @@ def mat(kind: str) -> bpy.types.Material:
         m, b = _principled(kind)
         _color_noise(m, b, (0.05, 0.052, 0.056), (0.085, 0.088, 0.092), 20)
         b.inputs["Roughness"].default_value = 0.55
+    elif kind == "wood_natural":  # naturbelassene Lärche (Spielgeräte, Bank): warm, leicht vergraut
+        m, b = _principled(kind)
+        _planks(m, b, (0.17, 0.11, 0.065), (0.32, 0.22, 0.14), 0.12, (0.05, 0.035, 0.02), ("X",))
+        b.inputs["Roughness"].default_value = 0.78
+    elif kind == "alu_light":  # Gewächshausprofile, hell eloxiert
+        m, b = _principled(kind)
+        b.inputs["Base Color"].default_value = (0.62, 0.63, 0.62, 1)
+        b.inputs["Metallic"].default_value = 0.6
+        b.inputs["Roughness"].default_value = 0.35
+    elif kind == "glass_greenhouse":  # leicht mattes, helles Gewächshausglas
+        m, b = _principled(kind)
+        b.inputs["Base Color"].default_value = (0.92, 0.95, 0.96, 1)
+        b.inputs["Transmission Weight"].default_value = 1.0
+        b.inputs["Roughness"].default_value = 0.06
+        b.inputs["IOR"].default_value = 1.45
+    elif kind == "gravel_light":  # heller Splitt für Sitzplätze: Voronoi-Kiesel
+        m, b = _principled(kind)
+        nt = m.node_tree
+        tc = nt.nodes.new("ShaderNodeTexCoord")
+        vor = nt.nodes.new("ShaderNodeTexVoronoi")
+        vor.inputs["Scale"].default_value = 90
+        ramp = nt.nodes.new("ShaderNodeValToRGB")
+        ramp.color_ramp.elements[0].color = (0.22, 0.21, 0.19, 1)
+        ramp.color_ramp.elements[1].color = (0.52, 0.5, 0.46, 1)
+        nt.links.new(tc.outputs["Object"], vor.inputs["Vector"])
+        nt.links.new(vor.outputs["Color"], ramp.inputs["Fac"])
+        nt.links.new(ramp.outputs["Color"], b.inputs["Base Color"])
+        bump = nt.nodes.new("ShaderNodeBump")
+        bump.inputs["Strength"].default_value = 0.8
+        bump.invert = True
+        nt.links.new(vor.outputs["Distance"], bump.inputs["Height"])
+        nt.links.new(bump.outputs["Normal"], b.inputs["Normal"])
+        b.inputs["Roughness"].default_value = 0.85
+    elif kind == "flame":  # Flammen: leuchtend, nach oben heller
+        m, b = _principled(kind)
+        b.inputs["Base Color"].default_value = (1.0, 0.45, 0.08, 1)
+        b.inputs["Emission Color"].default_value = (1.0, 0.55, 0.12, 1)
+        b.inputs["Emission Strength"].default_value = 3.5
+        b.inputs["Alpha"].default_value = 0.85
     elif kind == "ember":  # Glut / Flammen
         m, b = _principled(kind)
         b.inputs["Base Color"].default_value = (0.8, 0.25, 0.04, 1)
         b.inputs["Emission Color"].default_value = (1.0, 0.35, 0.06, 1)
-        b.inputs["Emission Strength"].default_value = 6.0
+        b.inputs["Emission Strength"].default_value = 3.0
     elif kind == "log":
         m, b = _principled(kind)
         _color_noise(m, b, (0.05, 0.03, 0.02), (0.12, 0.08, 0.05), 20)
@@ -479,7 +518,7 @@ def mat(kind: str) -> bpy.types.Material:
         _bump(m, b, 120, 0.3)
     else:
         raise KeyError(kind)
-    if kind not in {"glass", "water", "window", "solar", "ember"}:
+    if kind not in {"glass", "water", "window", "solar", "ember", "flame", "glass_greenhouse"}:
         _ao(m, 0.85 if kind in LEAF_COLORS else 0.7)
     _mats[kind] = m
     return m

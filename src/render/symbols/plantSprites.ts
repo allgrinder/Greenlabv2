@@ -81,6 +81,35 @@ export function hedgeNode(line: Vec2[], width: number, sp: PlantSpecies, season:
       node.addChild(plantAssetSprite(sp, season, sd, p, { view: 'top', width: d, rotation: (sd % 360) * (Math.PI / 180) }) ?? crownSprite(sp, p, d, sd, { color, bare: false, bloom: null, fruit: null }, true));
     }
   }
+  // Formschnitt: Laub auf die geschnittene Kontur beschneiden (gerade Flanken statt Blasenrand)
+  const cut = new Graphics();
+  for (const r of offsetPolyline(line, width * 1.02, 'miter')) cut.poly(r.outer.flatMap((p) => [p.x, p.y]), true).fill(0xffffff);
+  node.addChild(cut);
+  node.mask = cut;
+  // Volumen: Lichtkante auf der Sonnenseite (Licht von links oben), Schattenflanke gegenüber
+  const shade = new Graphics();
+  const L = { x: -0.62, y: -0.78 };
+  for (let i = 1; i < line.length; i++) {
+    const a = line[i - 1];
+    const b = line[i];
+    const len = Math.hypot(b.x - a.x, b.y - a.y);
+    if (len < 1e-6) continue;
+    let nx = -(b.y - a.y) / len;
+    let ny = (b.x - a.x) / len;
+    if (nx * L.x + ny * L.y < 0) {
+      nx = -nx;
+      ny = -ny;
+    }
+    const lit = (k: number) => [a.x + nx * width * k, a.y + ny * width * k, b.x + nx * width * k, b.y + ny * width * k] as const;
+    const dark = (k: number) => [a.x - nx * width * k, a.y - ny * width * k, b.x - nx * width * k, b.y - ny * width * k] as const;
+    const [x1, y1, x2, y2] = lit(0.44);
+    shade.moveTo(x1, y1).lineTo(x2, y2).stroke({ color: 0xe2e8b0, alpha: 0.2, width: width * 0.12 });
+    for (const [k, al] of [[0.42, 0.34], [0.34, 0.18]] as const) {
+      const [u1, v1, u2, v2] = dark(k);
+      shade.moveTo(u1, v1).lineTo(u2, v2).stroke({ color: 0x142010, alpha: al, width: width * 0.16 });
+    }
+  }
+  node.addChild(shade);
   return node;
 }
 
@@ -137,8 +166,11 @@ export function plantingNode(region: FlatRegion, mix: { sp: PlantSpecies; share:
   const rnd = rng(seed);
   const b = bbox(region.outer);
   const inside = (p: Vec2) => pointInRegion(p, region.outer, region.holes);
-  const cell = 1.6;
+  // Pflanzgruppen im Raster; schmale Beete bekommen ein feineres Raster, sonst fallen sie leer aus
+  const cell = Math.min(1.6, Math.max(0.55, Math.min(b.maxX - b.minX, b.maxY - b.minY) * 0.75));
   const perDrift = Math.max(1, Math.round(perSquareMeter * cell * cell));
+  // dicht und überlappend wie eine eingewachsene Pflanzung; hohe Arten zuletzt (liegen oben)
+  const items: { h: number; s: Container }[] = [];
   for (let y = b.minY + cell / 2; y < b.maxY; y += cell)
     for (let x = b.minX + cell / 2; x < b.maxX; x += cell) {
       const c = { x: x + (rnd() - 0.5) * cell * 0.8, y: y + (rnd() - 0.5) * cell * 0.8 };
@@ -150,9 +182,12 @@ export function plantingNode(region: FlatRegion, mix: { sp: PlantSpecies; share:
         const d = Math.sqrt(rnd()) * cell * 0.6;
         const p = { x: c.x + Math.cos(a) * d, y: c.y + Math.sin(a) * d };
         if (!inside(p)) continue;
-        node.addChild(perennialSprite(pick.sp, p, Math.min(0.7, pick.sp.diameterMature) * (0.85 + rnd() * 0.3), Math.floor(rnd() * 1e6), season));
+        const size = Math.min(0.95, pick.sp.diameterMature * 1.15) * (0.85 + rnd() * 0.35);
+        items.push({ h: pick.sp.heightMature + rnd() * 0.1, s: perennialSprite(pick.sp, p, size, Math.floor(rnd() * 1e6), season) });
       }
     }
+  items.sort((a, b2) => a.h - b2.h);
+  for (const it of items) node.addChild(it.s);
   return node;
 }
 

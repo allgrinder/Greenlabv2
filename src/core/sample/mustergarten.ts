@@ -119,14 +119,15 @@ export function createMustergarten(): Project {
   // ---------- Flächen, Wege, Beete (zuerst bauen: der Rasen wird darum herum ausgeschnitten)
   // grün dominiert, Gräser als helle Akzente (wie im Konzept)
   const BORDER: [string, number][] = [
-    ['salvia', 0.2],
-    ['nepeta', 0.18],
-    ['geranium', 0.16],
-    ['echinacea', 0.12],
-    ['pennisetum', 0.12],
-    ['sedum', 0.1],
-    ['lavandula', 0.07],
-    ['stipa', 0.05],
+    ['salvia', 0.17],
+    ['nepeta', 0.14],
+    ['geranium', 0.14],
+    ['perovskia', 0.12],
+    ['hakonechloa', 0.12],
+    ['echinacea', 0.1],
+    ['pennisetum', 0.08],
+    ['sedum', 0.08],
+    ['lavandula', 0.05],
   ];
   // breite, mehrschichtige Rabatten wie im Konzept: Sträucher hinten an der Hecke, Stauden und Gräser davor
   const borders = [
@@ -145,17 +146,20 @@ export function createMustergarten(): Project {
   ];
   const meadow = area('Naturwiese', simpleRegion(MEADOW), 'meadow');
   const deck = area('Holzdeck Lärche', simpleRegion(rect(22.9, 8, 6.6, 9)), 'wood');
-  const sand = area('Spielsand', simpleRegion(rect(6.4, 22.6, 6.6, 7, 0.6)), 'sand');
-  const kiesBeete = area('Kiesfläche Hochbeete', simpleRegion(rect(8.05, 33.5, 6.9, 10, 0.3)), 'gravel', { catalogId: 'edge.kantenstein-8x20', sides: 'outline' });
+  const sand = area('Spielsand', simpleRegion(rect(6.6, 24.6, 6.4, 3.2, 0.6)), 'sand');
+  // Hochbeete auf schmalem Kiesbett, Gewächshaus auf Betonplatten – der Rest bleibt Rasen (wie im Konzept)
+  const kiesBeete = area('Kiesbett Hochbeete', simpleRegion(rect(7.7, 33.3, 4.6, 8.8, 0.2)), 'gravel', { catalogId: 'edge.kantenstein-8x20', sides: 'outline' });
+  const glasPlatten = area('Platten Gewächshaus', simpleRegion(rect(11.1, 33.3, 2.4, 3.6)), 'slabs');
   const entry = path('Kiesweg Eingang', ENTRY_CENTERLINE, 1.4, 'gravel', { catalogId: 'edge.kantenstein-8x20', sides: 'both' });
 
-  const lawnCut = [...borders, meadow, deck, sand, kiesBeete, entry].flatMap((o) => footprint(o));
+  const lawnCut = [...borders, meadow, deck, sand, kiesBeete, glasPlatten, entry].flatMap((o) => footprint(o));
   const lawn = difference([flattenRegion(simpleRegion(rect(15, 25, 28.2, 48.2)))], lawnCut);
   lawn.forEach((r, i) => add(area(i === 0 ? 'Rasen' : `Rasen ${i + 1}`, flatToRegion(r), 'lawn')));
   add(meadow);
   add(deck);
   add(sand);
   add(kiesBeete);
+  add(glasPlatten);
   add(entry);
   add(path('Trittplatten', STEPPING_CENTERLINE, 0.9, 'stepping'));
   borders.forEach((b) => add(b));
@@ -221,18 +225,17 @@ export function createMustergarten(): Project {
   });
   add(item('office-pod', 24.6, 7.2, 90, null, 'Homeoffice-Pod'));
   add(item('table-6', 21.4, 10.4, 90, { width: 1.8, depth: 2.6, height: 0.75 }));
-  add(item('planter', 20.1, 4.4));
-  add(item('planter', 20.1, 5.3));
+  add(item('deck-bench', 20.0, 6.2, 90));
   add(item('pavilion-4x4', 20.5, 34, 0, null, 'Pavillon'));
   add(item('firepit-round', 15, 43.5, 0, null, 'Feuerstelle'));
-  add(item('play-swing', 6.4, 22.1, 0, null, 'Spielturm'));
+  add(item('play-swing', 7.4, 20.9, 0, null, 'Spielturm'));
   add(item('trampoline-ground', 13.2, 24.6));
   add(item('gate-double', 4.05, 49.6, 0, null, 'Gartentor'));
   const BEDS: [number, number][] = [[6.6, 31], [8.8, 31], [6.6, 35.6], [8.8, 35.6]];
   BEDS.forEach(([x, y]) => add(item('raised-bed-corten-300x100', x, y, 90)));
-  add(item('greenhouse-4x3.5', 10.6, 33.3, 0, { width: 1.8, depth: 3, height: 2.2 }, 'Gewächshaus'));
+  add(item('greenhouse-4x3.5', 11.1, 33.3, 0, { width: 1.8, depth: 3, height: 2.2 }, 'Gewächshaus'));
   for (let x = 5.6; x < 11.2; x += 1) add(item('stone-wall-1m', x, 28.3));
-  add(item('rain-barrel', 11.2, 37.6));
+  add(item('rain-barrel', 12.7, 35.6));
   // Basalt: Stelen am Pavillon, Findlinge in den Rabatten und an der Feuerstelle
   add(item('basalt-columns', 17.7, 32.2));
   add(item('basalt-columns', 23.3, 36.7, 90));

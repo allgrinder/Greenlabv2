@@ -6,8 +6,6 @@
  * - Gerendert wird auf Anforderung (dirty-Flag + requestAnimationFrame), nicht im Dauerlauf.
  */
 import { Application, Container, Graphics, RenderTexture, Sprite, Texture } from 'pixi.js';
-import type { Season } from '../core/growth';
-import { getSpecies } from '../core/catalog/plants';
 import { coverage } from '../core/irrigation';
 import { lensShowsObject } from '../core/lens';
 import { privacyGrid } from '../core/privacy';
@@ -17,103 +15,34 @@ import { bbox, expandBBox } from '../core/geometry/polygon';
 import type { FlatRegion } from '../core/geometry/shape';
 import type { Id, LampObject, PlanObject, Project, Vec2 } from '../core/model/types';
 import { sunHours } from '../core/sun/shadows';
-import { DEFAULT_LOCATION, dayInfo, shadowVector, sunAt } from '../core/sun/sun';
+import { DEFAULT_LOCATION, shadowVector, sunAt } from '../core/sun/sun';
 import type { EditorStoreApi, EditorStore } from '../state/store';
-import type { LensTab, SessionState, Viewport } from '../state/types';
+import type { SessionState, Viewport } from '../state/types';
 import { GapLayer } from './effects/GapLayer';
 import { HeatLayer } from './effects/HeatLayer';
 import { NightLayer } from './effects/NightLayer';
 import { ShadowLayer } from './effects/ShadowLayer';
 import { EdgeLayer } from './effects/EdgeLayer';
-import { LabelPool, drawBoundary, drawDimension, drawGrid, drawSelection, type ToScreen } from './overlays/overlay';
+import { LabelPool } from './overlays/overlay';
 import { SpatialIndex } from './SpatialIndex';
-import { buildObjectView, viewKey, type ObjectView, type ViewContext } from './views/objectView';
+import { buildObjectView, viewKey, type ViewContext } from './views/objectView';
 import { screenToWorld, tiltCos, tiltTan, visibleWorldBBox, worldToScreen, type ScreenSize } from './Viewport';
-import { isOrganic, materialPattern, warmMaterialTextures } from './textures/materialTextures';
+import { isOrganic, warmMaterialTextures } from './textures/materialTextures';
 import { idle } from './util/idle';
 import { allGroundTextures, groundManifestVersion, loadGroundAssets } from './assets/groundAssets';
 import { persistTextureCache, restoreTextureCache } from './textures/texCache';
 import { loadItemAssets, preloadItems } from './assets/itemAssets';
-import { getItem } from '../core/catalog/items';
 import { loadPlantAssets, preloadPlants } from './assets/plantAssets';
-import { getMaterial, MATERIALS } from '../core/catalog/materials';
+import { MATERIALS } from '../core/catalog/materials';
+import { DESIGN_SHADOW, lodFor, seasonOfDoy, sunTimes, viewParamsFrom, type ViewParams } from './viewParams';
+import { itemsOf, speciesOf } from './planContents';
+import { orderNodes, PLANT_TYPES, syncLayers, type Mounted } from './sceneOrder';
+import { applyBackground, drawGroundShape } from './planGround';
+import { drawOverlay, type PreviewDrawer } from './planOverlay';
+import { exportFrame } from './exportFrame';
 
-interface Mounted {
-  ref: PlanObject;
-  view: ObjectView;
-  key: string;
-}
-
-/** Was die Darstellung beeinflusst; für Exporte und Jahreszeiten-Vorschau überschreibbar */
-export interface ViewParams {
-  lens: LensTab;
-  night: boolean;
-  years: number;
-  season: Season;
-  /** Sonnenstand-Linse: Tag im Jahr und Uhrzeit */
-  sun: { doy: number; hour: number; heat: boolean };
-  nightHour: number;
-  scene: string | null;
-}
-
-/** Schatten der Planansicht ohne Sonnenlinse: Sonne aus Südost, wie im Design */
-// Abendsonne von links oben wie im Gartenkonzept: lange, weiche Schatten nach rechts unten
-const DESIGN_SHADOW: Vec2 = { x: 0.34, y: 0.44 };
-
-const seasonOfDoy = (doy: number): Season => (doy < 80 || doy >= 355 ? 'winter' : doy < 172 ? 'spring' : doy < 266 ? 'summer' : 'autumn');
-
-/** Zeichenreihenfolge in der Pflanzenebene: niedrig vor hoch (stabil innerhalb einer Stufe) */
-function heightRank(o: PlanObject | undefined): number {
-  if (!o) return 0;
-  if (o.type === 'planting' || o.type === 'scatter') return 0;
-  if (o.type === 'hedge') return 2;
-  if (o.type === 'espalier') return 3;
-  if (o.type === 'plant') {
-    const k = getSpecies(o.speciesId).kind;
-    return k === 'tree' ? 5 : k === 'shrub' || k === 'espalier' || k === 'hedge' ? 4 : 1;
-  }
-  return 1;
-}
-
-function viewParamsFrom(s: SessionState): ViewParams {
-  return {
-    lens: s.lens,
-    night: s.mode === 'night',
-    years: s.lens === 'growth' ? s.years : 0,
-    season: s.lens === 'seasons' ? s.season : s.lens === 'sun' ? seasonOfDoy(s.sun.doy) : s.lens === 'privacy' ? s.privacy.season : 'summer',
-    sun: s.sun,
-    nightHour: s.night.hour,
-    scene: s.night.scene,
-  };
-}
-
-/** Vorschau eines Werkzeugs, im Bildschirmraum gezeichnet */
-export type PreviewDrawer = (g: Graphics, toScreen: ToScreen, labels: LabelPool) => void;
-
-/** Werkzeuge ohne Raster (Auswahl, Hintergrund ausrichten); alle Zeichenwerkzeuge zeigen es */
-const NO_GRID_TOOLS = new Set(['select', 'calibrate', 'bgmove', 'bgalign']);
-
-const PLANT_TYPES = new Set<PlanObject['type']>(['plant', 'hedge', 'planting', 'scatter', 'espalier']);
-
-/** alle Pflanzenarten eines Gartens */
-function speciesOf(doc: Project) {
-  const ids = new Set(Object.values(doc.objects).flatMap((o) => ('speciesId' in o ? [o.speciesId] : o.type === 'planting' ? o.mix.map((m) => m.speciesId) : o.type === 'scatter' ? o.plants.map((p) => p.speciesId) : [])));
-  return [...ids].map((id) => getSpecies(id));
-}
-
-/** Katalogobjekte eines Gartens mit Drehung (für das Vorladen ihrer Bilder) */
-function itemsOf(doc: Project) {
-  return Object.values(doc.objects).flatMap((o) => {
-    if (o.type !== 'item') return [];
-    try {
-      return [{ symbol: getItem(o.catalogId).symbol, rotationDeg: o.rotationDeg }];
-    } catch {
-      return [];
-    }
-  });
-}
-
-const lodFor = (ppm: number) => (ppm < 6 ? 0 : ppm < 14 ? 1 : 2);
+export type { ViewParams } from './viewParams';
+export type { PreviewDrawer } from './planOverlay';
 
 export class PlanRenderer {
   readonly app = new Application();
@@ -366,11 +295,7 @@ export class PlanRenderer {
       await Promise.all([preloadPlants(speciesOf(doc), [opts.view?.season ?? 'summer']), preloadItems(itemsOf(doc), false)]);
       this.rebuildAll();
     }
-    const b = expandBBox(bbox(doc.site.boundary), opts.marginM);
-    const maxTex = 8192;
-    const ppm = Math.min(opts.pxPerMeter, maxTex / (b.maxX - b.minX), maxTex / (b.maxY - b.minY));
-    const size = { width: Math.round((b.maxX - b.minX) * ppm), height: Math.round((b.maxY - b.minY) * ppm) };
-    const vp: Viewport = { center: { x: (b.minX + b.maxX) / 2, y: (b.minY + b.maxY) / 2 }, pxPerMeter: ppm, rotationDeg: 0 };
+    const { ppm, size, vp } = exportFrame(doc, opts.pxPerMeter, opts.marginM);
     const rt = RenderTexture.create({ width: size.width, height: size.height, resolution: 1, antialias: true });
     const bg = new Graphics();
     if (opts.background) bg.rect(0, 0, size.width, size.height).fill(opts.background);
@@ -539,65 +464,19 @@ export class PlanRenderer {
       const view = buildObjectView(o, ctx);
       this.mounted.set(o.id, { ref: o, view, key });
     }
-    // Reihenfolge je Ebene herstellen
-    const bedLayer = doc.layerOrder.find((id) => doc.layers[id].kind === 'plants');
-    for (const lid of doc.layerOrder) {
-      const layer = doc.layers[lid];
-      const c = this.layers.get(lid)!;
-      // Pflanzen: Bodendecker und Stauden unter Hecken, Spalieren, Sträuchern und Kronen
-      const sorted = layer.kind === 'plants' ? [...layer.objectOrder].sort((a, b) => heightRank(doc.objects[a]) - heightRank(doc.objects[b])) : layer.objectOrder;
-      // Körper der Schrägansicht liegen im gemeinsamen Tiefen-Container
-      const order = sorted.filter((id) => this.mounted.get(id)?.view.depth === undefined);
-      // Rasenhalme über den Beeträndern: nach Pflanzflächen und Streupflanzungen, vor Sträuchern und Kronen
-      const bedAt = lid === bedLayer ? order.filter((id) => this.mounted.has(id) && heightRank(doc.objects[id]) === 0).length : -1;
-      order.filter((id) => this.mounted.has(id)).forEach((id, j) => {
-        const i = bedAt >= 0 && j >= bedAt ? j + 1 : j;
-        const m = this.mounted.get(id)!;
-        if (m.view.node.parent !== c) c.addChild(m.view.node);
-        if (c.getChildIndex(m.view.node) !== i) c.setChildIndex(m.view.node, Math.min(i, c.children.length - 1));
-      });
-      if (bedAt >= 0) {
-        const bed = this.edgeLayer.bedContainer;
-        if (bed.parent !== c) c.addChild(bed);
-        if (c.getChildIndex(bed) !== bedAt) c.setChildIndex(bed, Math.min(bedAt, c.children.length - 1));
-      }
-    }
-    const solids = [...this.mounted.values()].filter((m) => m.view.depth !== undefined).sort((a, b) => a.view.depth! - b.view.depth!);
-    solids.forEach((m, i) => {
-      if (m.view.node.parent !== this.solids) this.solids.addChild(m.view.node);
-      if (this.solids.getChildIndex(m.view.node) !== i) this.solids.setChildIndex(m.view.node, Math.min(i, this.solids.children.length - 1));
-    });
+    orderNodes(doc, this.mounted, this.layers, this.edgeLayer.bedContainer, this.solids);
     this.drawGround(doc);
     this.shadowLayer.setClip(doc.site.boundary);
   }
 
   private syncLayers(doc: Project) {
-    for (const [id, c] of this.layers) {
-      if (!doc.layers[id]) {
-        c.destroy({ children: true });
-        this.layers.delete(id);
-      }
-    }
-    const order: Container[] = [];
-    for (const id of doc.layerOrder) {
-      let c = this.layers.get(id);
-      if (!c) {
-        c = new Container();
-        c.label = `layer:${doc.layers[id].kind}`;
-        this.layers.set(id, c);
-      }
-      // Heatmap und Schatten liegen direkt unter den Pflanzen (über Flächen und Wegen)
-      // Rasenkanten über Flächen und Wegen; Heatmap und Schatten direkt unter den Pflanzen
-      if (doc.layers[id].kind === 'plants') order.push(this.edgeLayer.container, this.heatLayer.container, this.shadowLayer.container);
-      order.push(c);
-      // Bewässerungslücken über der Bewässerungsebene
-      if (doc.layers[id].kind === 'water') order.push(this.gapLayer.container);
-    }
-    order.push(this.solids, this.privacyLayer.container);
-    const base = 3; // ground, groundTex, background
-    order.forEach((c, i) => {
-      if (c.parent !== this.world) this.world.addChild(c);
-      this.world.setChildIndex(c, base + i);
+    syncLayers(doc, this.layers, this.world, {
+      edge: this.edgeLayer.container,
+      heat: this.heatLayer.container,
+      shadow: this.shadowLayer.container,
+      gap: this.gapLayer.container,
+      solids: this.solids,
+      privacy: this.privacyLayer.container,
     });
   }
 
@@ -611,26 +490,11 @@ export class PlanRenderer {
     // Grundstück unverändert: nichts neu zeichnen
     if (b === this.groundFor) return;
     this.groundFor = b;
-    this.ground.clear();
-    this.groundTex.clear();
-    if (b.length < 3) return;
-    const pts = b.flatMap((p) => [p.x, p.y]);
-    this.ground.poly(pts, true).fill(0xd3c9b3);
-    this.groundTex.poly(pts, true).fill(materialPattern(getMaterial('mulch')));
+    drawGroundShape(this.ground, this.groundTex, b);
   }
 
   private applyBackground(doc: Project) {
-    const bg = doc.background;
-    const sp = this.background;
-    if (!bg || !bg.visible || !this.bgUrl) {
-      sp.visible = false;
-      return;
-    }
-    sp.visible = true;
-    sp.position.set(bg.origin.x, bg.origin.y);
-    sp.scale.set(bg.metersPerPixel);
-    sp.rotation = (bg.rotationDeg * Math.PI) / 180;
-    sp.alpha = bg.opacity;
+    applyBackground(this.background, doc, this.bgUrl);
   }
 
   private applyViewport(vp: Viewport) {
@@ -674,15 +538,7 @@ export class PlanRenderer {
   private dayCache = new Map<string, { sunrise: number; sunset: number }>();
 
   private sunTimes(doc: Project, doy: number) {
-    const loc = doc.site.location ?? DEFAULT_LOCATION;
-    const key = `${loc.lat},${loc.lon},${doy}`;
-    let v = this.dayCache.get(key);
-    if (!v) {
-      const d = dayInfo(loc, new Date().getFullYear(), doy);
-      v = { sunrise: d.sunrise ?? 6, sunset: d.sunset ?? 20 };
-      this.dayCache.set(key, v);
-    }
-    return v;
+    return sunTimes(this.dayCache, doc, doy);
   }
 
   /** Sonnenschatten, Heatmap, Bewässerungslücken, Nachtlicht und Ebenen-Abblendung */
@@ -773,54 +629,21 @@ export class PlanRenderer {
   }
 
   private drawOverlay(s: EditorStore, exporting = false) {
-    const g = this.overlay;
-    g.clear();
-    this.hoverG.clear();
-    this.previewG.clear();
-    this.labels.begin();
-    const doc = s.doc;
-    const vp = this.vp;
-    const toScreen = this.toScreen;
-    if (doc) {
-      const plotLayer = doc.layerOrder.map((id) => doc.layers[id]).find((l) => l.kind === 'plot');
-      if (doc.settings.snapToGrid && !exporting) {
-        const want = !NO_GRID_TOOLS.has(s.session.tool) || s.mergeOpen ? 1 : 0;
-        this.gridA += (want - this.gridA) * 0.3;
-        if (Math.abs(want - this.gridA) < 0.02) this.gridA = want;
-        else this.invalidate();
-        drawGrid(g, toScreen, vp.pxPerMeter, doc.site.boundary, doc.settings.gridStepM, this.gridA, expandBBox(visibleWorldBBox(vp, this.viewSize), 1));
-      }
-      if (!plotLayer || plotLayer.visible) drawBoundary(g, toScreen, doc.site.boundary, vp.pxPerMeter, s.session.mode === 'night');
-      // Bemaßungen
-      for (const lid of doc.layerOrder) {
-        const layer = doc.layers[lid];
-        if (!layer.visible) continue;
-        for (const id of layer.objectOrder) {
-          const o = doc.objects[id];
-          if (o?.type === 'dimension' && !o.hidden) drawDimension(g, this.labels, toScreen, o, doc);
-        }
-      }
-      if (exporting) {
-        this.labels.end();
-        return;
-      }
-      // Hover
-      const hover = s.session.hoverId && !s.session.selection.includes(s.session.hoverId) ? doc.objects[s.session.hoverId] : null;
-      this.hoverG.clear();
-      this.hoverG.alpha = 0.55;
-      if (hover) drawSelection(this.hoverG, toScreen, hover, doc, false, null);
-      // Auswahl
-      const single = s.session.selection.length === 1;
-      for (const id of s.session.selection) {
-        const o = doc.objects[id];
-        if (!o) continue;
-        const active = s.session.activeNode?.objectId === id ? s.session.activeNode.nodeIndex : null;
-        drawSelection(g, toScreen, o, doc, single, active);
-      }
-    }
-    const pg = this.previewG;
-    pg.clear();
-    if (this.preview) this.preview(pg, toScreen, this.labels);
-    this.labels.end();
+    this.gridA = drawOverlay(
+      {
+        overlay: this.overlay,
+        hoverG: this.hoverG,
+        previewG: this.previewG,
+        labels: this.labels,
+        vp: this.vp,
+        viewSize: this.viewSize,
+        toScreen: this.toScreen,
+        preview: this.preview,
+        gridA: this.gridA,
+        invalidate: () => this.invalidate(),
+      },
+      s,
+      exporting,
+    );
   }
 }

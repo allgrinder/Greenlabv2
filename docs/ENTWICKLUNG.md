@@ -103,4 +103,4 @@ Umgesetzt sind alle acht Kernfunktionen der Phase 1 sowie PNG-Export (siehe `ARC
 - Anschlussdruck und maximaler Durchfluss sind feste Annahmen (3,5 bar, 30 l/min je Zone), Strompreis 0,35 €/kWh.
 - PDF-Lagepläne müssen vorher als Bild exportiert werden (PNG, JPEG oder WebP).
 - Die Standortsuche hat kein Geocoding. Breite und Länge kommen aus der Browser-Ortung, ohne Ortung gilt der Vorgabewert Frankfurt.
-- Das Haupt-Bundle hat rund 290 kB gzip; jsPDF (≈130 kB gzip) wird erst beim ersten PDF-Export nachgeladen.
+- Das Haupt-Bundle hat rund 330 kB gzip; jsPDF (≈130 kB gzip) und html2canvas (≈47 kB gzip) werden erst beim ersten PDF-Export nachgeladen. Die Blender-Bilder kommen getrennt aus `public/assets/`.

@@ -29,15 +29,26 @@ export class SpatialIndex {
     }
     for (const [id, o] of Object.entries(doc.objects)) {
       if (this.refs.get(id) === o) continue;
-      const old = this.entries.get(id);
-      if (old) this.tree.remove(old);
-      const e: Entry = { ...objectBBox(o, doc.objects), id };
-      this.tree.insert(e);
-      this.entries.set(id, e);
-      this.refs.set(id, o);
+      this.put(id, o, doc);
       changed.add(id);
     }
+    // Maßketten, die an einem Objekt hängen, wandern mit: deren Rahmen ebenfalls erneuern
+    if (changed.size)
+      for (const o of Object.values(doc.objects))
+        if (o.type === 'dimension' && !changed.has(o.id) && [o.a, o.b].some((a) => a.kind === 'vertex' && changed.has(a.objectId))) {
+          this.put(o.id, o, doc);
+          changed.add(o.id);
+        }
     return changed;
+  }
+
+  private put(id: Id, o: PlanObject, doc: Project) {
+    const old = this.entries.get(id);
+    if (old) this.tree.remove(old);
+    const e: Entry = { ...objectBBox(o, doc.objects), id };
+    this.tree.insert(e);
+    this.entries.set(id, e);
+    this.refs.set(id, o);
   }
 
   query(b: BBox): Id[] {

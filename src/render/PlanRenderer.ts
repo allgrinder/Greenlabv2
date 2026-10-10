@@ -138,6 +138,7 @@ export class PlanRenderer {
   private heatTimer: ReturnType<typeof setTimeout> | null = null;
   private gapDoc: Project | null = null;
   private gaps: FlatRegion[] = [];
+  private gapShown: FlatRegion[] | null = null;
   /** Ansicht für Export/Vorschau statt der Sitzung */
   private viewOverride: ViewParams | null = null;
   private lastCtxKey = '';
@@ -421,6 +422,7 @@ export class PlanRenderer {
   }
 
   private rebuildAll() {
+    this.groundFor = null;
     for (const m of this.mounted.values()) this.unmount(m);
     this.mounted.clear();
     this.lastDoc = null;
@@ -480,8 +482,18 @@ export class PlanRenderer {
 
   /** Szenengraph an das Dokument angleichen */
   private get params(): ViewParams {
-    return this.viewOverride ?? viewParamsFrom(this.store.getState().session);
+    if (this.viewOverride) return this.viewOverride;
+    // je Sitzungsstand einmal berechnen (wird pro Bild an mehreren Stellen gebraucht)
+    const ss = this.store.getState().session;
+    if (ss !== this.paramsFor) {
+      this.paramsFor = ss;
+      this.paramsCache = viewParamsFrom(ss);
+    }
+    return this.paramsCache!;
   }
+
+  private paramsFor: SessionState | null = null;
+  private paramsCache: ViewParams | null = null;
 
   private viewCtx(doc: Project, lod: number): ViewContext {
     const p = this.params;
@@ -496,6 +508,7 @@ export class PlanRenderer {
   }
 
   private reconcile(doc: Project, lod: number) {
+    this.reconciled++;
     const ctx = this.viewCtx(doc, lod);
     this.lastCtxKey = this.ctxKey(doc);
     this.index.sync(doc);
@@ -586,6 +599,9 @@ export class PlanRenderer {
   /** Grundstücksfläche: Erdton mit angedeuteter Mulchstruktur (35 %), wie im Design */
   private drawGround(doc: Project) {
     const b = doc.site.boundary;
+    // Grundstück unverändert: nichts neu zeichnen
+    if (b === this.groundFor) return;
+    this.groundFor = b;
     this.ground.clear();
     this.groundTex.clear();
     if (b.length < 3) return;
@@ -621,6 +637,12 @@ export class PlanRenderer {
 
   /** Nur Objekte im sichtbaren Bereich zeichnen */
   private cull(doc: Project, vp: Viewport) {
+    // nur neu prüfen, wenn sich Ausschnitt, Dokument, Linse oder die Menge der Ansichten geändert hat
+    const p0 = this.params;
+    const key = `${vp.center.x}|${vp.center.y}|${vp.pxPerMeter}|${vp.tiltDeg ?? 0}|${vp.rotationDeg}|${this.viewSize.width}x${this.viewSize.height}|${p0.lens}|${p0.night}|${this.reconciled}`;
+    if (doc === this.culledDoc && key === this.cullKey) return;
+    this.culledDoc = doc;
+    this.cullKey = key;
     const vb = expandBBox(visibleWorldBBox(vp, this.viewSize), 2);
     // Schrägansicht: hohe Körper unterhalb des Bildrands ragen ins Bild
     if (vp.tiltDeg) vb.maxY += 25 * tiltTan(vp);
@@ -633,6 +655,12 @@ export class PlanRenderer {
       m.view.node.visible = on;
     }
   }
+
+  private groundFor: Vec2[] | null = null;
+  private culledDoc: Project | null = null;
+  private cullKey = '';
+  /** zählt Abgleiche: neue Ansichten müssen in die Sichtbarkeitsprüfung */
+  private reconciled = 0;
 
   private dayCache = new Map<string, { sunrise: number; sunset: number }>();
 
@@ -688,7 +716,12 @@ export class PlanRenderer {
         this.gaps = [];
       }
     }
-    this.gapLayer.set(irr ? this.gaps : null);
+    // nur neu zeichnen, wenn sich die Lücken (oder die Linse) geändert haben
+    const gaps = irr ? this.gaps : null;
+    if (gaps !== this.gapShown) {
+      this.gapShown = gaps;
+      this.gapLayer.set(gaps);
+    }
     // Einsehbarkeit (nur im Editor, nicht im Export)
     const pv = this.store.getState().session.privacy;
     if (exporting || p.lens !== 'privacy') this.privacyLayer.hide();
@@ -746,7 +779,7 @@ export class PlanRenderer {
         this.gridA += (want - this.gridA) * 0.3;
         if (Math.abs(want - this.gridA) < 0.02) this.gridA = want;
         else this.invalidate();
-        drawGrid(g, toScreen, vp.pxPerMeter, doc.site.boundary, doc.settings.gridStepM, this.gridA);
+        drawGrid(g, toScreen, vp.pxPerMeter, doc.site.boundary, doc.settings.gridStepM, this.gridA, expandBBox(visibleWorldBBox(vp, this.viewSize), 1));
       }
       if (!plotLayer || plotLayer.visible) drawBoundary(g, toScreen, doc.site.boundary, vp.pxPerMeter, s.session.mode === 'night');
       // Bemaßungen

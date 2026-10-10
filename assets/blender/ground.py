@@ -129,6 +129,220 @@ def slab_mesh(name: str, w: float, d: float, t: float):
     return me
 
 
+# ------------------------------------------------------------------ Beton, Fugen, Holz (Detail)
+
+
+def _n(nt, typ, **inputs):
+    node = nt.nodes.new(typ)
+    if typ == "ShaderNodeTexVoronoi":
+        node.voronoi_dimensions = "2D"  # Plattenoberfläche: 2D-Zellen, kein Schnitt durch 3D-Zellen
+    for k, v in inputs.items():
+        node.inputs[k].default_value = v
+    return node
+
+
+def _mix(nt, a, b, fac, blend="MIX"):
+    """Farbmischung: a, b Sockel oder RGB-Tupel; fac Sockel oder Zahl"""
+    mx = nt.nodes.new("ShaderNodeMix")
+    mx.data_type = "RGBA"
+    mx.blend_type = blend
+    for sock, val in (("A", a), ("B", b)):
+        if isinstance(val, tuple):
+            mx.inputs[sock].default_value = (*val, 1) if len(val) == 3 else val
+        else:
+            nt.links.new(val, mx.inputs[sock])
+    if isinstance(fac, (int, float)):
+        mx.inputs["Factor"].default_value = fac
+    else:
+        nt.links.new(fac, mx.inputs["Factor"])
+    return mx.outputs["Result"]
+
+
+def _range(nt, src, a, b, scale=1.0):
+    """src von [a, b] auf [0, scale] abbilden (geklemmt)"""
+    mr = nt.nodes.new("ShaderNodeMapRange")
+    mr.clamp = True
+    nt.links.new(src, mr.inputs["Value"])
+    mr.inputs["From Min"].default_value = a
+    mr.inputs["From Max"].default_value = b
+    mr.inputs["To Max"].default_value = scale
+    return mr.outputs["Result"]
+
+
+def _coords(nt, rnd):
+    """Objektkoordinaten in Metern mit festem Versatz je Material (keine Objekt-Zufallswerte: nahtlose Kachelkopien bleiben gleich)"""
+    tc = nt.nodes.new("ShaderNodeTexCoord")
+    off = nt.nodes.new("ShaderNodeVectorMath")
+    off.operation = "ADD"
+    off.inputs[1].default_value = (rnd.uniform(0, 50), rnd.uniform(0, 50), rnd.uniform(0, 50))
+    nt.links.new(tc.outputs["Object"], off.inputs[0])
+    return off.outputs["Vector"]
+
+
+def concrete_mat(name: str, hex_: str, rnd: random.Random, rough: float = 0.84, stain: float = 1.0, moss: float = 0.0, wear: float = 1.0, pore: float = 1.0):
+    """
+    Betonoberfläche wie gealterte Gartenplatten: wolkige Tonwerte, feine Gesteinskörnung, Poren (Relief),
+    Wasser- und Laubflecken, abgenutzte hellere Kanten, auf Wunsch Moos-/Flechtenpunkte.
+    """
+    m, b = _principled(name)
+    nt = m.node_tree
+    v = _coords(nt, rnd)
+    c = lin(hex_)
+    mott = _n(nt, "ShaderNodeTexNoise", Scale=3.2, Detail=6.0, Roughness=0.62)
+    nt.links.new(v, mott.inputs["Vector"])
+    ramp = nt.nodes.new("ShaderNodeValToRGB")
+    ramp.color_ramp.elements[0].color = (*[x * 0.74 for x in c], 1)
+    ramp.color_ramp.elements[1].color = (*[min(1, x * 1.12) for x in c], 1)
+    ramp.color_ramp.elements[0].position = 0.36
+    ramp.color_ramp.elements[1].position = 0.64
+    nt.links.new(mott.outputs["Fac"], ramp.inputs["Fac"])
+    col = ramp.outputs["Color"]
+    # Gesteinskörnung: helle und dunkle Körnchen
+    vor = _n(nt, "ShaderNodeTexVoronoi", Scale=120.0)
+    nt.links.new(v, vor.inputs["Vector"])
+    grain = _n(nt, "ShaderNodeTexNoise", Scale=160.0, Detail=3.0)
+    nt.links.new(v, grain.inputs["Vector"])
+    col = _mix(nt, col, tuple(min(1, x * 1.22) for x in c), _range(nt, vor.outputs["Distance"], 0.2, 0.05, 0.22))
+    col = _mix(nt, col, tuple(x * 0.55 for x in c), _range(nt, grain.outputs["Fac"], 0.64, 0.76, 0.7))
+    # Poren und Lunker: kleine dunkle Punkte, mittelfeine Wolken
+    pit = _n(nt, "ShaderNodeTexVoronoi", Scale=26.0, Randomness=1.0)
+    nt.links.new(v, pit.inputs["Vector"])
+    # nur in Nestern: Rauschmaske mal Punktabstand
+    pmask = _n(nt, "ShaderNodeTexNoise", Scale=5.0, Detail=2.0)
+    nt.links.new(v, pmask.inputs["Vector"])
+    pm = nt.nodes.new("ShaderNodeMath")
+    pm.operation = "MULTIPLY"
+    nt.links.new(_range(nt, pit.outputs["Distance"], 0.05, 0.015, 0.85 * pore), pm.inputs[0])
+    nt.links.new(_range(nt, pmask.outputs["Fac"], 0.45, 0.6), pm.inputs[1])
+    col = _mix(nt, col, tuple(x * 0.58 for x in c), pm.outputs["Value"])
+    mid = _n(nt, "ShaderNodeTexNoise", Scale=22.0, Detail=4.0)
+    nt.links.new(v, mid.inputs["Vector"])
+    col = _mix(nt, col, tuple(x * 0.76 for x in c), _range(nt, mid.outputs["Fac"], 0.48, 0.7, 0.6))
+    # Flecken (Wasser, Laub, Erde)
+    st = _n(nt, "ShaderNodeTexNoise", Scale=1.6, Detail=5.0, Roughness=0.6)
+    nt.links.new(v, st.inputs["Vector"])
+    col = _mix(nt, col, tuple(x * f for x, f in zip(c, (0.6, 0.57, 0.5))), _range(nt, st.outputs["Fac"], 0.54, 0.7, 0.65 * stain))
+    # Tropf- und Laubflecken: kleine, scharf begrenzte dunkle Punkte
+    sp = _n(nt, "ShaderNodeTexVoronoi", Scale=7.0)
+    nt.links.new(v, sp.inputs["Vector"])
+    col = _mix(nt, col, tuple(x * f for x, f in zip(c, (0.66, 0.62, 0.55))), _range(nt, sp.outputs["Distance"], 0.07, 0.03, 0.5 * stain))
+    if moss:
+        mo = _n(nt, "ShaderNodeTexNoise", Scale=16.0, Detail=5.0)
+        nt.links.new(v, mo.inputs["Vector"])
+        col = _mix(nt, col, lin("#6f7a45"), _range(nt, mo.outputs["Fac"], 0.62, 0.7, 0.7 * moss))
+        li = _n(nt, "ShaderNodeTexVoronoi", Scale=34.0)
+        nt.links.new(v, li.inputs["Vector"])
+        col = _mix(nt, col, lin("#d9d5c4"), _range(nt, li.outputs["Distance"], 0.08, 0.02, 0.6 * moss))
+    # abgenutzte Kanten: Abweichung der gerundeten (Bevel-)Normale von der echten
+    bev = _n(nt, "ShaderNodeBevel", Radius=0.006)
+    geo = nt.nodes.new("ShaderNodeNewGeometry")
+    dot = nt.nodes.new("ShaderNodeVectorMath")
+    dot.operation = "DOT_PRODUCT"
+    nt.links.new(bev.outputs["Normal"], dot.inputs[0])
+    nt.links.new(geo.outputs["Normal"], dot.inputs[1])
+    col = _mix(nt, col, tuple(min(1, x * 1.22) for x in c), _range(nt, dot.outputs["Value"], 0.995, 0.9, 0.7 * wear))
+    nt.links.new(col, b.inputs["Base Color"])
+    b.inputs["Roughness"].default_value = rough
+    b.inputs["Specular IOR Level"].default_value = 0.3
+    # Relief: Poren und feine Unebenheit
+    pores = _n(nt, "ShaderNodeTexNoise", Scale=90.0, Detail=8.0, Roughness=0.6)
+    nt.links.new(v, pores.inputs["Vector"])
+    add = nt.nodes.new("ShaderNodeMath")
+    add.operation = "MULTIPLY_ADD"
+    nt.links.new(vor.outputs["Distance"], add.inputs[0])
+    add.inputs[1].default_value = 0.6
+    nt.links.new(pores.outputs["Fac"], add.inputs[2])
+    bump = _n(nt, "ShaderNodeBump", Strength=0.32 * pore, Distance=0.002)
+    nt.links.new(add.outputs["Value"], bump.inputs["Height"])
+    nt.links.new(bev.outputs["Normal"], bump.inputs["Normal"])
+    nt.links.new(bump.outputs["Normal"], b.inputs["Normal"])
+    _ao(m, 0.55, 0.03)
+    return m
+
+
+def joint_mat(name: str, rnd: random.Random, moss: float = 0.6):
+    """Fuge: Splitt und Sand, dunkel verschmutzt, mit Moos"""
+    m, b = _principled(name)
+    nt = m.node_tree
+    v = _coords(nt, rnd)
+    n1 = _n(nt, "ShaderNodeTexNoise", Scale=140.0, Detail=6.0)
+    nt.links.new(v, n1.inputs["Vector"])
+    ramp = nt.nodes.new("ShaderNodeValToRGB")
+    ramp.color_ramp.elements[0].color = (*lin("#3e3a33"), 1)
+    ramp.color_ramp.elements[1].color = (*lin("#7d7466"), 1)
+    nt.links.new(n1.outputs["Fac"], ramp.inputs["Fac"])
+    mo = _n(nt, "ShaderNodeTexNoise", Scale=9.0, Detail=4.0)
+    nt.links.new(v, mo.inputs["Vector"])
+    col = _mix(nt, ramp.outputs["Color"], lin("#4f5e2a"), _range(nt, mo.outputs["Fac"], 0.5, 0.62, moss))
+    nt.links.new(col, b.inputs["Base Color"])
+    b.inputs["Roughness"].default_value = 1.0
+    bump = _n(nt, "ShaderNodeBump", Strength=0.6, Distance=0.003)
+    nt.links.new(n1.outputs["Fac"], bump.inputs["Height"])
+    nt.links.new(bump.outputs["Normal"], b.inputs["Normal"])
+    return m
+
+
+def larch_mat(name: str, hex_: str, rnd: random.Random, weather: float = 0.45):
+    """Lärchendiele, teils vergraut: Jahresringe mit Relief, feine Risse längs der Faser, silbrige Verwitterung"""
+    m, b = _principled(name)
+    nt = m.node_tree
+    v = _coords(nt, rnd)
+    c = lin(hex_)
+    def stretch(sx, sy):
+        vm = nt.nodes.new("ShaderNodeVectorMath")
+        vm.operation = "MULTIPLY"
+        vm.inputs[1].default_value = (sx, sy, 1.0)
+        nt.links.new(v, vm.inputs[0])
+        return vm.outputs["Vector"]
+
+    # Jahresringe: lange, sanft schwingende Linien entlang der Diele (x)
+    wave = _n(nt, "ShaderNodeTexWave", Scale=26.0, Distortion=7.0, Detail=4.0, **{"Detail Scale": 0.8, "Detail Roughness": 0.6})
+    wave.bands_direction = "Y"
+    nt.links.new(stretch(0.09, 1.0), wave.inputs["Vector"])
+    ramp = nt.nodes.new("ShaderNodeValToRGB")
+    ramp.color_ramp.elements[0].color = (*[x * 0.7 for x in c], 1)
+    ramp.color_ramp.elements[1].color = (*[min(1, x * 1.12) for x in c], 1)
+    nt.links.new(wave.outputs["Fac"], ramp.inputs["Fac"])
+    col = ramp.outputs["Color"]
+    # Fasern: feine, lange Streifen
+    fib = _n(nt, "ShaderNodeTexNoise", Scale=1.0, Detail=6.0, Roughness=0.7)
+    nt.links.new(stretch(4.0, 320.0), fib.inputs["Vector"])
+    col = _mix(nt, col, tuple(x * 0.72 for x in c), _range(nt, fib.outputs["Fac"], 0.5, 0.7, 0.55))
+    # Verwitterung: silbergraue Partien entlang der Faser, stärker an Stellen ohne Abrieb
+    we = _n(nt, "ShaderNodeTexNoise", Scale=1.0, Detail=5.0)
+    nt.links.new(stretch(1.6, 9.0), we.inputs["Vector"])
+    col = _mix(nt, col, lin("#8e8a84"), _range(nt, we.outputs["Fac"], 0.42, 0.62, weather))
+    # feine Risse längs der Faser
+    cr = _n(nt, "ShaderNodeTexWave", Scale=60.0, Distortion=3.0, Detail=3.0)
+    cr.bands_direction = "Y"
+    cr.wave_profile = "SAW"
+    nt.links.new(stretch(0.1, 1.0), cr.inputs["Vector"])
+    crm = _n(nt, "ShaderNodeTexNoise", Scale=4.0)
+    nt.links.new(v, crm.inputs["Vector"])
+    crack = nt.nodes.new("ShaderNodeMath")
+    crack.operation = "MULTIPLY"
+    nt.links.new(_range(nt, cr.outputs["Fac"], 0.96, 1.0), crack.inputs[0])
+    nt.links.new(_range(nt, crm.outputs["Fac"], 0.55, 0.65), crack.inputs[1])
+    col = _mix(nt, col, lin("#2a221b"), crack.outputs["Value"])
+    nt.links.new(col, b.inputs["Base Color"])
+    b.inputs["Roughness"].default_value = 0.72
+    # Relief: Jahresringe und Risse
+    hm = nt.nodes.new("ShaderNodeMath")
+    hm.operation = "SUBTRACT"
+    hf = nt.nodes.new("ShaderNodeMath")
+    hf.operation = "MULTIPLY_ADD"
+    nt.links.new(fib.outputs["Fac"], hf.inputs[0])
+    hf.inputs[1].default_value = 0.6
+    nt.links.new(wave.outputs["Fac"], hf.inputs[2])
+    nt.links.new(hf.outputs["Value"], hm.inputs[0])
+    nt.links.new(crack.outputs["Value"], hm.inputs[1])
+    bump = _n(nt, "ShaderNodeBump", Strength=0.5, Distance=0.0015)
+    nt.links.new(hm.outputs["Value"], bump.inputs["Height"])
+    nt.links.new(bump.outputs["Normal"], b.inputs["Normal"])
+    _ao(m, 0.6, 0.04)
+    return m
+
+
 # ------------------------------------------------------------------ Beläge
 
 GROUND = {}
@@ -162,11 +376,11 @@ def basalt(T, rnd):
     scatter_pebbles(T, 700, 0.006, 0.01, mats, rnd, 0.6, 0.006, protos=20, angular=True)
 
 
-@ground("paving", (1.6, 0.8), 360)
+@ground("paving", (1.6, 0.8), 420)
 def paving(T, rnd):
-    """Betonplatten 80 × 40, hellgrau, Kreuzfuge versetzt, leicht gefast"""
-    base_plane(T, pmat("joint", lin("#5d5850"), 1.0, 0.2, 0.8, 120), -0.01)
-    mats = [pmat(f"slab{i}", lin(h), 0.8, 0.05, 0.15, 6, 0.35) for i, h in enumerate(["#c9c4ba", "#c2bcb1", "#cfcac1", "#bdb7ac"])]
+    """Betonplatten 80 × 40, hellgrau, Kreuzfuge versetzt, gefast; Körnung, Flecken, abgenutzte Kanten, Moos in den Fugen"""
+    base_plane(T, joint_mat("joint", rnd, 0.7), -0.01)
+    mats = [concrete_mat(f"slab{i}", h, rnd, stain=0.9, moss=0.15) for i, h in enumerate(["#c9c4ba", "#bdb7ab", "#d1ccc3", "#b3ada1", "#c4beb2", "#aca69a"])]
     for row in range(3):
         off = (row % 2) * 0.4
         y0 = row * 0.4
@@ -175,62 +389,44 @@ def paving(T, rnd):
         # genau eine Periode je Reihe; tiled() ergänzt die Ränder (keine doppelten Flächen)
         for col in range(2):
             x0 = col * 0.8 + off
-            ob = link(bpy.data.objects.new("slab", slab_mesh("slab", 0.794, 0.394, 0.03)), outline=False)
-            ob.location = P(x0 + 0.4, y0 + 0.2, -0.015 + rnd.uniform(-0.001, 0.001))
-            ob.rotation_euler = Euler((rnd.uniform(-0.004, 0.004), rnd.uniform(-0.004, 0.004), rnd.uniform(-0.004, 0.004)))
+            ob = link(bpy.data.objects.new("slab", slab_mesh("slab", 0.792, 0.392, 0.03)), outline=False)
+            # leichte Höhenunterschiede und Verkippung wie verlegte Platten
+            ob.location = P(x0 + 0.4, y0 + 0.2, -0.015 + rnd.uniform(-0.0025, 0.0025))
+            ob.rotation_euler = Euler((rnd.uniform(-0.012, 0.012), rnd.uniform(-0.012, 0.012), rnd.uniform(-0.004, 0.004)))
             bev = ob.modifiers.new("b", "BEVEL")
-            bev.width = 0.004
-            bev.segments = 2
+            bev.width = 0.005
+            bev.segments = 3
             bev.limit_method = "ANGLE"
             ob.data.materials.append(mats[rnd.randrange(len(mats))])
             tiled(ob, T, 0.5)
 
 
-@ground("slabs", (2.4, 1.2), 260)
+@ground("slabs", (2.4, 1.2), 320)
 def slabs(T, rnd):
-    """Großformatplatten 120 × 60 Beton hellgrau, enge Fuge, Halbverband"""
-    base_plane(T, pmat("joint2", lin("#55524c"), 1.0, 0.2, 0.8, 120), -0.01)
-    mats = [pmat(f"lslab{i}", lin(h), 0.75, 0.06, 0.12, 3, 0.35) for i, h in enumerate(["#c6c2ba", "#bfbbb3", "#cbc7c0", "#b9b5ad"])]
+    """Großformatplatten 120 × 60 Beton hellgrau, enge Fuge, Halbverband; feine Körnung, Wasserflecken, Kantenabrieb"""
+    base_plane(T, joint_mat("joint2", rnd, 0.5), -0.01)
+    mats = [concrete_mat(f"lslab{i}", h, rnd, stain=0.75, moss=0.08, pore=0.8) for i, h in enumerate(["#c6c2ba", "#bfbbb3", "#cbc7c0", "#b9b5ad", "#c2bdb4"])]
     for row in range(2):
         off = (row % 2) * 0.6
         for col in range(2):
-            ob = link(bpy.data.objects.new("lslab", slab_mesh("lslab", 1.195, 0.595, 0.04)), outline=False)
-            ob.location = P(col * 1.2 + off + 0.6, row * 0.6 + 0.3, -0.02 + rnd.uniform(-0.001, 0.001))
-            ob.rotation_euler = Euler((rnd.uniform(-0.003, 0.003), rnd.uniform(-0.003, 0.003), rnd.uniform(-0.002, 0.002)))
+            ob = link(bpy.data.objects.new("lslab", slab_mesh("lslab", 1.194, 0.594, 0.04)), outline=False)
+            ob.location = P(col * 1.2 + off + 0.6, row * 0.6 + 0.3, -0.02 + rnd.uniform(-0.002, 0.002))
+            ob.rotation_euler = Euler((rnd.uniform(-0.008, 0.008), rnd.uniform(-0.008, 0.008), rnd.uniform(-0.002, 0.002)))
             bev = ob.modifiers.new("b", "BEVEL")
-            bev.width = 0.003
-            bev.segments = 2
+            bev.width = 0.004
+            bev.segments = 3
             bev.limit_method = "ANGLE"
             ob.data.materials.append(mats[rnd.randrange(len(mats))])
             tiled(ob, T, 0.7)
 
 
-@ground("wood", (2.4, 1.12), 300)
+@ground("wood", (2.4, 1.12), 360)
 def wood(T, rnd):
     """Holzdeck Lärche: 14-cm-Dielen mit 6 mm Fugen, versetzte Stöße, Maserung, Schraubenpaare"""
     base_plane(T, pmat("gap", lin("#2a221b"), 1.0), -0.03)
-    # Lärche, leicht vergraut (wie im Konzept): warmes Graubraun statt Orange
-    tones = ["#9a8166", "#8e765d", "#a48b70", "#85705a", "#ab937a"]
-    gm = []
-    for i, h in enumerate(tones):
-        m, b = _principled(f"plank{i}")
-        nt = m.node_tree
-        tc = nt.nodes.new("ShaderNodeTexCoord")
-        wave = nt.nodes.new("ShaderNodeTexWave")
-        wave.bands_direction = "Y"
-        wave.inputs["Scale"].default_value = 9
-        wave.inputs["Distortion"].default_value = 4
-        wave.inputs["Detail"].default_value = 6
-        ramp = nt.nodes.new("ShaderNodeValToRGB")
-        c = lin(h)
-        ramp.color_ramp.elements[0].color = (*[v * 0.72 for v in c], 1)
-        ramp.color_ramp.elements[1].color = (*[min(1, v * 1.12) for v in c], 1)
-        nt.links.new(tc.outputs["Object"], wave.inputs["Vector"])
-        nt.links.new(wave.outputs["Fac"], ramp.inputs["Fac"])
-        nt.links.new(ramp.outputs["Color"], b.inputs["Base Color"])
-        b.inputs["Roughness"].default_value = 0.65
-        _ao(m, 0.6, 0.04)
-        gm.append(m)
+    # Lärche, teils vergraut (wie im Konzept): warmes Graubraun mit silbrigen Partien, Risse, Faserrelief
+    tones = ["#9a8166", "#8e765d", "#a48b70", "#85705a", "#ab937a", "#93806b"]
+    gm = [larch_mat(f"plank{i}", h, rnd, weather=0.3 + 0.35 * rnd.random()) for i, h in enumerate(tones)]
     pitch = 0.14
     rows = int(round(T[1] / pitch))
     for r in range(rows):
@@ -396,21 +592,107 @@ STEPPING = 4
 
 
 def stepping_stone(rnd: random.Random, i: int):
-    """Betontrittplatte 85 × 40 × 5 cm: scharfe, leicht gefaste Kanten, feine Poren, etwas Patina an den Rändern"""
+    """
+    Betontrittplatte 85 × 40 × 5 cm, fast bündig im Rasen: schmale Erdfuge rundum, Gras wächst von außen
+    über den Rand. Kein Schattenfänger – die Platte schwebt nicht. Bildausschnitt fest (Platte + 12 cm),
+    damit die App das Bild unabhängig vom Gras auf die Plattengröße abbilden kann.
+    """
     w, d, t = 0.85, 0.4, 0.05
     ob = link(bpy.data.objects.new("stone", slab_mesh("stone", w, d, t)), outline=False)
-    ob.location = (0, 0, t / 2 - 0.01)
-    ob.rotation_euler = (rnd.uniform(-0.008, 0.008), rnd.uniform(-0.008, 0.008), 0)
+    ob.location = (0, 0, -t / 2 + 0.006)
+    ob.rotation_euler = (rnd.uniform(-0.004, 0.004), rnd.uniform(-0.004, 0.004), 0)
     bev = ob.modifiers.new("b", "BEVEL")
-    bev.width = 0.006
-    bev.segments = 2
+    bev.width = 0.007
+    bev.segments = 3
     bev.limit_method = "ANGLE"
     tone = ["#8e8b84", "#87847d", "#94918a", "#827f78"][i % 4]
-    m = pmat(f"stone{i}", lin(tone), 0.82, 0.12, 0.35, 14, 0.3)
-    ob.data.materials.append(m)
+    ob.data.materials.append(concrete_mat(f"stone{i}", tone, rnd, rough=0.86, stain=0.9, moss=0.22, wear=1.2, pore=1.0))
+
+    # Erdfuge: unregelmäßig breiter Ring, dunkle, leicht krümelige Erde
+    soil = pmat(f"soil{i}", lin("#3a2f24"), 0.95, 0.35, 0.6, 140, 0.2, 0.5)
+    me = bpy.data.meshes.new("soilring")
+    bm = bmesh.new()
+    per = []
+    n = 72
+    for k in range(n):
+        # Umfang gleichmäßig abtasten
+        u = k / n * 2 * (w + d)
+        if u < w:
+            p, nrm = Vector((-w / 2 + u, -d / 2, 0)), Vector((0, -1, 0))
+        elif u < w + d:
+            p, nrm = Vector((w / 2, -d / 2 + (u - w), 0)), Vector((1, 0, 0))
+        elif u < 2 * w + d:
+            p, nrm = Vector((w / 2 - (u - w - d), d / 2, 0)), Vector((0, 1, 0))
+        else:
+            p, nrm = Vector((-w / 2, d / 2 - (u - 2 * w - d), 0)), Vector((-1, 0, 0))
+        per.append((p, nrm))
+    inner, outer = [], []
+    for p, nrm in per:
+        inner.append(bm.verts.new(p - nrm * 0.004 + Vector((0, 0, -0.002))))
+        outer.append(bm.verts.new(p + nrm * rnd.uniform(0.006, 0.016) + Vector((0, 0, -0.003))))
+    for k in range(n):
+        bm.faces.new((inner[k], inner[(k + 1) % n], outer[(k + 1) % n], outer[k]))
+    bm.to_mesh(me)
+    bm.free()
+    ring = link(bpy.data.objects.new("soilring", me), outline=False)
+    ring.data.materials.append(soil)
+
+    # Gras: Büschel mit Wurzeln 0–3 cm außerhalb der Kante, die meisten Halme neigen sich nach innen
+    # über den Plattenrand (1–5 cm), einige nach außen in den Rasen; dazwischen Lücken
+    gm = [pmat(f"sg{i}_{j}", lin(h), 0.7, 0.1, 0.0, 10, 0.2, 0.5) for j, h in enumerate(["#4d5a22", "#5a6a28", "#647530", "#43501d", "#6e7d36", "#55642a"])]
+    me = bpy.data.meshes.new("stoneblades")
+    bm = bmesh.new()
+    L_ = 2 * (w + d)
+    u = 0.0
+    j = 0
+    while u < L_:
+        u += rnd.uniform(0.008, 0.026)
+        if rnd.random() < 0.15:
+            u += rnd.uniform(0.03, 0.09)  # Lücke
+            continue
+        k = int(u / L_ * n) % n
+        p, nrm = per[k]
+        tan = Vector((-nrm.y, nrm.x, 0))
+        frac = (u / L_ * n) % 1
+        p = p.lerp(per[(k + 1) % n][0], frac) if (per[(k + 1) % n][1] - nrm).length < 1e-6 else p
+        root = p + nrm * rnd.uniform(0.004, 0.03)
+        size = rnd.uniform(0.55, 1.05)
+        for _ in range(int(rnd.uniform(6, 13) * size)):
+            j += 1
+            inward = rnd.random() < 0.7
+            base = (-nrm if inward else nrm) + tan * rnd.gauss(0, 0.5)
+            base.normalize()
+            dist = (root - p).dot(nrm)
+            reach = dist + rnd.uniform(0.006, 0.03) if inward else rnd.uniform(0.015, 0.045)
+            L = max(0.02, reach) * size * rnd.uniform(0.9, 1.25)
+            if not inward:
+                L = min(L, 0.105 - dist)
+            lean = rnd.uniform(0.85, 0.97)
+            bw = 0.0034
+            side = Vector((-base.y, base.x, 0)) * bw
+            start = root + tan * rnd.gauss(0, 0.006)
+            prev = None
+            for q in range(4):
+                tt = q / 3
+                pos = start + base * (L * lean * tt) + Vector((0, 0, 0.004 + L * (1 - lean) * tt * (1 - 0.5 * tt) + 0.006 * tt))
+                ww = side * (1 - tt * 0.85)
+                v1, v2 = bm.verts.new(pos - ww), bm.verts.new(pos + ww)
+                if prev:
+                    f = bm.faces.new((prev[0], prev[1], v2, v1))
+                    f.material_index = j % len(gm)
+                prev = (v1, v2)
+    bm.to_mesh(me)
+    bm.free()
+    bl = link(bpy.data.objects.new("stoneblades", me), outline=False)
+    for m in gm:
+        bl.data.materials.append(m)
+
+    # fester Bildausschnitt: vier lose Punkte (unsichtbar) bei Platte + 12 cm
+    fm = bpy.data.meshes.new("frame")
+    m_ = 0.12
+    fm.from_pydata([(sx * (w / 2 + m_), sy * (d / 2 + m_), 0) for sx in (-1, 1) for sy in (-1, 1)], [], [])
+    link(bpy.data.objects.new("frame", fm), outline=False)
     return ob
-
-
 
 
 def grass_edge(T, rnd):

@@ -160,26 +160,26 @@ function steppingNode(line: Vec2[], width: number, seed: number): Container {
       const rot = Math.atan2(dir.y, dir.x) + Math.PI / 2 + (r() - 0.5) * 0.05;
       const st = stones.length ? stones[Math.floor(r() * stones.length)] : null;
       if (st) {
-        // Kontaktschatten: Platte liegt leicht vertieft im Rasen
-        const cs = Math.cos(rot);
-        const sn = Math.sin(rot);
-        const corner = (u: number, v: number, ox: number, oy: number) => [x + ox + u * cs - v * sn, y + oy + u * sn + v * cs];
-        g.poly([[-1, -1], [1, -1], [1, 1], [-1, 1]].flatMap(([u, v]) => corner((u * across) / 2, (v * along) / 2, 0.03, 0.04)), true).fill({ color: 0x1d2610, alpha: 0.35 });
+        // Platte liegt bündig im Rasen: Erdfuge und überwachsendes Gras sind im Bild, kein Schlagschatten
         const s = new Sprite(st.texture);
         s.anchor.set(0.5);
         s.position.set(x, y);
         s.rotation = rot;
-        // Bild ist 85 × 40 cm (Längsseite = x, mit schmalem Rand): auf Wegbreite × 40 cm strecken
+        // Bild ist 85 × 40 cm plus 12 cm Rasenrand ringsum (Längsseite = x): Platte auf Wegbreite × 40 cm strecken
         s.scale.set((st.w * (across / 0.85)) / st.texture.width, (st.h * (along / 0.4)) / st.texture.height);
         c.addChild(s);
       } else {
-        // gemalter Ersatz: Kontaktschatten und gerundete Platte
+        // gemalter Ersatz: schmale Erdfuge rundum (mittig, kein Versatz) und Platte
         const cos = Math.cos(rot);
         const sin = Math.sin(rot);
-        const pts = (ox: number, oy: number) =>
-          [[-across / 2, -along / 2], [across / 2, -along / 2], [across / 2, along / 2], [-across / 2, along / 2]].flatMap(([u, v]) => [x + ox + u * cos - v * sin, y + oy + u * sin + v * cos]);
-        g.poly(pts(0.02, 0.025), true).fill({ color: 0x2c3318, alpha: 0.25 });
-        g.poly(pts(0, 0), true).fill(0xaba59b).stroke({ color: 0x8a847a, width: 0.015 });
+        const pts = (grow: number) =>
+          [[-1, -1], [1, -1], [1, 1], [-1, 1]].flatMap(([u, v]) => {
+            const uu = u * (across / 2 + grow);
+            const vv = v * (along / 2 + grow);
+            return [x + uu * cos - vv * sin, y + uu * sin + vv * cos];
+          });
+        g.poly(pts(0.012), true).fill({ color: 0x3a2f24, alpha: 0.55 });
+        g.poly(pts(0), true).fill(0xaba59b).stroke({ color: 0x8a847a, width: 0.015 });
       }
     }
     carry = t - len;

@@ -115,10 +115,10 @@ def main():
     if not only or "stepping" in only:
         man["stepping"] = []
         for i in range(ground.STEPPING):
-            lib.reset_scene(12 if args.quick else 48, ground=True, outlines=False)
+            lib.reset_scene(12 if args.quick else 48, ground=False, outlines=False)
             ground.stepping_stone(random.Random(100 + i), i)
             png = os.path.join(args.out, f"stepping_{i}.png")
-            v = lib.render_view(png, 300 if not args.quick else 120, 0.0, margin=0.02)
+            v = lib.render_view(png, 300 if not args.quick else 120, 0.0, margin=0.0)
             Image.open(png).save(png[:-4] + ".webp", "WEBP", quality=88, method=6)
             os.remove(png)
             man["stepping"].append({"file": f"stepping_{i}.webp", "px": [v.width, v.height], "ppm": 300 if not args.quick else 120})

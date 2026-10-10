@@ -13,7 +13,7 @@ import {
 } from './types';
 
 /** Ebenen gemäß Design (Chrome.dc.html), Reihenfolge = Zeichenreihenfolge unten → oben */
-export const DEFAULT_LAYERS: { kind: LayerKind; name: string; color: string }[] = [
+const DEFAULT_LAYERS: { kind: LayerKind; name: string; color: string }[] = [
   { kind: 'plot', name: 'Grundstück', color: '#2D3033' },
   { kind: 'areas', name: 'Flächen', color: '#9BAE74' },
   { kind: 'paths', name: 'Wege', color: '#D3CAB8' },
@@ -25,7 +25,7 @@ export const DEFAULT_LAYERS: { kind: LayerKind; name: string; color: string }[] 
   { kind: 'annotation', name: 'Beschriftung', color: '#5D615D' },
 ];
 
-export const DEFAULT_SETTINGS: ProjectSettings = {
+const DEFAULT_SETTINGS: ProjectSettings = {
   gridStepM: 0.5,
   snapToGrid: true,
   snapToGeometry: true,

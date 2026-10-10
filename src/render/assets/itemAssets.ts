@@ -5,9 +5,10 @@
  * (0/90/180/270°) mit Pixelmaß, Pixel je Meter und dem Bildpunkt des Bodenursprungs.
  * Geladen wird im Hintergrund; bis dahin (oder ohne Manifest) zeichnet die App die gemalte Version.
  */
-import { Assets, Sprite, type Texture } from 'pixi.js';
+import { Sprite, type Texture } from 'pixi.js';
+import { lazyTextures } from './lazyTextures';
 
-export interface AssetView {
+interface AssetView {
   file: string;
   rot: number;
   px: [number, number];
@@ -15,7 +16,7 @@ export interface AssetView {
   anchor: [number, number];
 }
 
-export interface ItemAssetEntry {
+interface ItemAssetEntry {
   w: number;
   d: number;
   h: number;
@@ -25,13 +26,13 @@ export interface ItemAssetEntry {
   oblique: AssetView[];
 }
 
-export interface AssetManifest {
+interface AssetManifest {
   version: number;
   items: Record<string, ItemAssetEntry>;
 }
 
 const BASE = `${import.meta.env.BASE_URL}assets/items/`;
-const textures = new Map<string, Texture>();
+const lazy = lazyTextures(BASE);
 let manifest: AssetManifest | null = null;
 
 /**
@@ -40,7 +41,7 @@ let manifest: AssetManifest | null = null;
  * Fehlt das Manifest, bleibt alles gemalt. `onLoaded` meldet nachgeladene Bilder (gebündelt).
  */
 export async function loadItemAssets(onLoaded: () => void): Promise<void> {
-  loadedCb = onLoaded;
+  lazy.onLoaded(onLoaded);
   try {
     const res = await fetch(`${BASE}manifest.json`);
     if (!res.ok) return;
@@ -48,29 +49,6 @@ export async function loadItemAssets(onLoaded: () => void): Promise<void> {
   } catch (e) {
     console.warn('Objekt-Bilder nicht geladen, gemalte Darstellung bleibt', e);
   }
-}
-
-let loadedCb: (() => void) | null = null;
-let timer: ReturnType<typeof setTimeout> | null = null;
-const pending = new Map<string, Promise<void>>();
-
-function request(file: string): Promise<void> {
-  let p = pending.get(file);
-  if (!p) {
-    p = Assets.load<Texture>(BASE + file)
-      .then((t) => {
-        t.source.scaleMode = 'linear';
-        t.source.autoGenerateMipmaps = true;
-        t.source.updateMipmaps?.();
-        textures.set(file, t);
-        // mehrere Bilder kurz hintereinander: einmal neu aufbauen
-        if (timer) clearTimeout(timer);
-        timer = setTimeout(() => loadedCb?.(), 120);
-      })
-      .catch(() => undefined);
-    pending.set(file, p);
-  }
-  return p;
 }
 
 /** Bilder für diese Objekte (Symbol + Drehung) laden, Draufsicht und auf Wunsch Schrägansicht; liefert die Texturen */
@@ -86,11 +64,8 @@ export async function preloadItems(list: { symbol: string; rotationDeg: number }
       if (v) files.add(v.file);
     }
   }
-  await Promise.all([...files].map(request));
-  return [...files].flatMap((f) => textures.get(f) ?? []);
+  return lazy.preload(files);
 }
-
-export const hasItemAsset = (symbol: string) => !!manifest?.items[symbol];
 
 /** Nächstgelegene vorgerenderte Drehung (Index 0–3) und Restwinkel in Grad */
 export function nearestRotation(rotationDeg: number): { k: number; rest: number } {
@@ -111,9 +86,9 @@ export function itemAssetSprite(symbol: string, at: { x: number; y: number }, w:
   const { k, rest } = nearestRotation(rotationDeg);
   const v = (tiltCos === null ? e.top : e.oblique)[k] ?? (tiltCos === null ? e.top : e.oblique)[0];
   if (!v) return null;
-  const tex = textures.get(v.file);
+  const tex = lazy.get(v.file);
   if (!tex) {
-    void request(v.file);
+    void lazy.request(v.file);
     return null;
   }
   const s = new Sprite(tex);

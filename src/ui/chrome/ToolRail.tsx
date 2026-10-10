@@ -3,7 +3,7 @@ import type { ToolId } from '../../state/types';
 import { Icon, type IconName } from '../icons';
 import s from './chrome.module.css';
 
-export const TOOLS: { id: ToolId; label: string; key: string; icon: IconName }[] = [
+const TOOLS: { id: ToolId; label: string; key: string; icon: IconName }[] = [
   { id: 'select', label: 'Auswahl', key: 'V', icon: 'select' },
   { id: 'rect', label: 'Rechteck', key: 'R', icon: 'rect' },
   { id: 'poly', label: 'Polygon', key: 'P', icon: 'poly' },

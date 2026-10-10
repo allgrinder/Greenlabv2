@@ -14,14 +14,6 @@ export const SEASONS: { k: Season; name: string; month: string; doy: number }[] 
   { k: 'winter', name: 'Winter', month: 'Januar', doy: 15 },
 ];
 
-export interface ViewParams {
-  /** Jahre ab heute (Wachstums-Zeitreise) */
-  years: number;
-  season: Season;
-}
-
-export const DEFAULT_VIEW: ViewParams = { years: 0, season: 'summer' };
-
 /** Kronen-Ø heute: Bestandsgröße oder aus dem Pflanzjahr hochgerechnet */
 export function diameterToday(o: Extract<PlanObject, { type: 'plant' }>, nowYear = new Date().getFullYear()): number {
   const sp = getSpecies(o.speciesId);

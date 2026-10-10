@@ -1,7 +1,7 @@
 import type { Vec2 } from '../model/types';
 import { angleDeg, closestOnSegment, dist, fromAngle, mid, sub } from './vec';
 
-export type SnapKind = 'vertex' | 'midpoint' | 'edge' | 'grid' | 'none';
+type SnapKind = 'vertex' | 'midpoint' | 'edge' | 'grid' | 'none';
 
 export interface SnapCandidates {
   vertices: Vec2[];
@@ -23,7 +23,7 @@ export interface SnapResult {
   segment?: [Vec2, Vec2];
 }
 
-export const snapToGrid = (p: Vec2, step: number): Vec2 =>
+const snapToGrid = (p: Vec2, step: number): Vec2 =>
   step > 0 ? { x: Math.round(p.x / step) * step, y: Math.round(p.y / step) * step } : p;
 
 /**
@@ -76,11 +76,4 @@ export function constrainAngle(origin: Vec2, p: Vec2, stepDeg = 15): Vec2 {
   const a = Math.round(angleDeg(d) / stepDeg) * stepDeg;
   const r = fromAngle(a, l);
   return { x: origin.x + r.x, y: origin.y + r.y };
-}
-
-/** Punkt in exakter Entfernung entlang der aktuellen Richtung (Zahleneingabe beim Zeichnen) */
-export function atDistance(origin: Vec2, toward: Vec2, length: number): Vec2 {
-  const d = sub(toward, origin);
-  const a = Math.atan2(d.y, d.x);
-  return { x: origin.x + Math.cos(a) * length, y: origin.y + Math.sin(a) * length };
 }

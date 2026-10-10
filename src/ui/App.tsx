@@ -32,7 +32,7 @@ import ps from './projects/projects.module.css';
 import { StartScreen } from './start/StartScreen';
 
 /** Von Panels verdeckte Ränder, damit „Einpassen“ den Plan in die freie Mitte legt */
-export const PLAN_INSETS = { left: 316, right: 330, top: 84, bottom: 80 };
+const PLAN_INSETS = { left: 316, right: 330, top: 84, bottom: 80 };
 
 type Screen = 'start' | 'wizard' | 'editor';
 
@@ -81,12 +81,7 @@ export function App() {
   const saveThumb = useCallback(async () => {
     const doc = editor.getState().doc;
     if (!renderer || !doc || benchmark.current) return;
-    try {
-      const blob = await renderer.thumbnail();
-      if (blob) await putThumbnail(doc.id, blob);
-    } catch (e) {
-      console.warn('Vorschaubild nicht gespeichert', e);
-    }
+    await saveThumbFor(renderer, doc.id);
   }, [renderer]);
 
   const switchTo = useCallback((next: Screen) => {
@@ -402,6 +397,7 @@ export function App() {
   );
 }
 
+/** Vorschaubild ablegen, sofern der Garten noch offen ist */
 async function saveThumbFor(r: PlanRenderer, id: string) {
   if (editor.getState().doc?.id !== id) return;
   try {

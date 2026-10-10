@@ -29,7 +29,8 @@ import { LabelPool, drawBoundary, drawDimension, drawGrid, drawSelection, type T
 import { SpatialIndex } from './SpatialIndex';
 import { buildObjectView, viewKey, type ObjectView, type ViewContext } from './views/objectView';
 import { screenToWorld, tiltCos, tiltTan, visibleWorldBBox, worldToScreen, type ScreenSize } from './Viewport';
-import { idle, isOrganic, materialPattern, warmMaterialTextures } from './textures/materialTextures';
+import { isOrganic, materialPattern, warmMaterialTextures } from './textures/materialTextures';
+import { idle } from './util/idle';
 import { allGroundTextures, groundManifestVersion, loadGroundAssets } from './assets/groundAssets';
 import { persistTextureCache, restoreTextureCache } from './textures/texCache';
 import { loadItemAssets, preloadItems } from './assets/itemAssets';
@@ -59,7 +60,7 @@ export interface ViewParams {
 // Abendsonne von links oben wie im Gartenkonzept: lange, weiche Schatten nach rechts unten
 const DESIGN_SHADOW: Vec2 = { x: 0.34, y: 0.44 };
 
-export const seasonOfDoy = (doy: number): Season => (doy < 80 || doy >= 355 ? 'winter' : doy < 172 ? 'spring' : doy < 266 ? 'summer' : 'autumn');
+const seasonOfDoy = (doy: number): Season => (doy < 80 || doy >= 355 ? 'winter' : doy < 172 ? 'spring' : doy < 266 ? 'summer' : 'autumn');
 
 /** Zeichenreihenfolge in der Pflanzenebene: niedrig vor hoch (stabil innerhalb einer Stufe) */
 function heightRank(o: PlanObject | undefined): number {
@@ -74,7 +75,7 @@ function heightRank(o: PlanObject | undefined): number {
   return 1;
 }
 
-export function viewParamsFrom(s: SessionState): ViewParams {
+function viewParamsFrom(s: SessionState): ViewParams {
   return {
     lens: s.lens,
     night: s.mode === 'night',
@@ -165,6 +166,7 @@ export class PlanRenderer {
   onProgress: ((p: number) => void) | null = null;
   private frameWaiters: (() => void)[] = [];
   private uploaded = new WeakSet<object>();
+  private destroyed = false;
   /** Deckkraft des Zeichenrasters: nur beim Zeichnen und Verschieben sichtbar, weich ein- und ausgeblendet */
   private gridA = 0;
 
@@ -225,12 +227,14 @@ export class PlanRenderer {
     try {
       // ab dem 2. Start: fertig berechnete Bodentexturen aus dem Browser statt neu malen
       await restoreTextureCache(groundManifestVersion());
-      await this.upload(await warmMaterialTextures(MATERIALS.map((m) => m.texture)));
+      const warm = await warmMaterialTextures(MATERIALS.map((m) => m.texture));
+      await this.upload(warm);
       step();
       await this.upload(allGroundTextures((k) => !isOrganic(k)));
     } catch (e) {
       console.warn('Vorbereitung der Texturen unvollständig', e);
     }
+    if (this.destroyed) return;
     step();
     this.booting = false;
     this.rebuildAll();
@@ -240,6 +244,8 @@ export class PlanRenderer {
 
   /** Texturen in kleinen Paketen auf die Grafikkarte legen, damit das erste Bild nicht stockt */
   private async upload(list: Texture[]) {
+    // in der Entwicklung baut React StrictMode den ersten Renderer gleich wieder ab
+    if (this.destroyed) return;
     const sys = (this.app.renderer as unknown as { texture?: { initSource?: (s: unknown) => void } }).texture;
     if (!sys?.initSource) return;
     let n = 0;
@@ -287,6 +293,7 @@ export class PlanRenderer {
   }
 
   destroy(): void {
+    this.destroyed = true;
     cancelAnimationFrame(this.frame);
     this.unsub?.();
     this.resizeObs?.disconnect();
@@ -451,11 +458,11 @@ export class PlanRenderer {
     this.invalidate();
   }
 
-  /** Letzte Frame-Dauern in ms (Abgleich + Zeichnen), für Benchmarks */
+  /** Letzte Frame-Dauern in ms (Abgleich + Zeichnen), für Benchmarks; nur in der Entwicklung gefüllt */
   readonly frameTimes: number[] = [];
 
   private renderNow(): void {
-    const t0 = performance.now();
+    const t0 = import.meta.env.DEV ? performance.now() : 0;
     const s = this.store.getState();
     const doc = s.doc;
     const vp = this.vp;
@@ -474,8 +481,10 @@ export class PlanRenderer {
     }
     this.drawOverlay(s);
     this.app.render();
-    this.frameTimes.push(performance.now() - t0);
-    if (this.frameTimes.length > 240) this.frameTimes.shift();
+    if (import.meta.env.DEV) {
+      this.frameTimes.push(performance.now() - t0);
+      if (this.frameTimes.length > 240) this.frameTimes.shift();
+    }
     const w = this.frameWaiters.splice(0);
     w.forEach((f) => f());
   }

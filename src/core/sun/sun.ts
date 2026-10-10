@@ -28,10 +28,6 @@ export function zonedDate(year: number, dayOfYear: number, hour: number, timeZon
   return new Date(utc);
 }
 
-export function dayOfYear(d: Date): number {
-  return Math.floor((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - Date.UTC(d.getFullYear(), 0, 1)) / 86_400_000) + 1;
-}
-
 export function sunAt(loc: GeoLocation, year: number, doy: number, hour: number): SunPosition {
   const date = zonedDate(year, doy, hour, loc.timeZone);
   const p = SunCalc.getPosition(date, loc.lat, loc.lon);

@@ -10,7 +10,7 @@ import { projectSummary, type CostLine } from './quantities';
 
 export type CostGroupKey = 'areas' | 'plants' | 'build' | 'tech';
 
-export const GROUP_NAMES: Record<CostGroupKey, string> = {
+const GROUP_NAMES: Record<CostGroupKey, string> = {
   areas: 'Flächen & Wege',
   plants: 'Pflanzen',
   build: 'Bauten & Wasser',
@@ -28,7 +28,7 @@ export function groupOf(key: string): CostGroupKey {
   return 'build';
 }
 
-export interface CostGroup {
+interface CostGroup {
   key: CostGroupKey;
   name: string;
   lines: CostLine[];
@@ -43,7 +43,7 @@ export interface CostReport {
   figures: { label: string; value: string }[];
 }
 
-export const VAT_RATE = 0.19;
+const VAT_RATE = 0.19;
 
 export function costReport(doc: Project): CostReport {
   const { lines, total } = projectSummary(doc);

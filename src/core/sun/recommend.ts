@@ -9,13 +9,13 @@ import type { Polygon } from '../geometry/polygon';
 import type { Project } from '../model/types';
 import { heatColor, meanHoursIn, type SunGrid } from './shadows';
 
-export interface SunSpot {
+interface SunSpot {
   name: string;
   polys: Polygon[];
 }
 
 /** Bereiche, für die eine Empfehlung sinnvoll ist */
-export function sunSpots(doc: Project): SunSpot[] {
+function sunSpots(doc: Project): SunSpot[] {
   const spots: SunSpot[] = [];
   const beds: Polygon[] = [];
   for (const o of Object.values(doc.objects)) {
@@ -33,7 +33,7 @@ export function sunSpots(doc: Project): SunSpot[] {
   return spots;
 }
 
-export function recommendation(hours: number): string {
+function recommendation(hours: number): string {
   if (hours >= 10) return 'Ideal für Tomaten, Paprika, Basilikum';
   if (hours >= 7) return 'Präriestauden, Salbei, Lavendel, Gräser';
   if (hours >= 4) return 'Halbschatten: Hortensie, Storchschnabel, Salat';

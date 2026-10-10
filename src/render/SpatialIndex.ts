@@ -97,7 +97,7 @@ export class SpatialIndex {
   }
 }
 
-export function hitObject(o: PlanObject, p: Vec2, tol: number, doc: Project): boolean {
+function hitObject(o: PlanObject, p: Vec2, tol: number, doc: Project): boolean {
   if (o.type === 'dimension') {
     const a = resolveAnchor(o.a, doc.objects);
     const b = resolveAnchor(o.b, doc.objects);

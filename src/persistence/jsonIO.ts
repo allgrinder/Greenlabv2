@@ -7,7 +7,7 @@ import { newId } from '../core/model/ids';
 import type { Project } from '../core/model/types';
 import { migrate } from './migrations';
 
-export const FILE_FORMAT = 'gartenwerk';
+const FILE_FORMAT = 'gartenwerk';
 
 const vec = z.object({ x: z.number().finite(), y: z.number().finite() });
 const OBJECT_TYPES = ['area', 'path', 'plant', 'planting', 'hedge', 'espalier', 'scatter', 'item', 'dimension', 'text', 'lamp', 'sprinkler', 'drip', 'pipe', 'fixture'] as const;
@@ -27,9 +27,7 @@ const fileSchema = z.object({
   blobs: z.record(z.string(), z.string()).optional(),
 });
 
-export type GartenwerkFile = z.infer<typeof fileSchema>;
-
-export async function blobToDataUrl(b: Blob): Promise<string> {
+async function blobToDataUrl(b: Blob): Promise<string> {
   return new Promise((res, rej) => {
     const r = new FileReader();
     r.onload = () => res(r.result as string);
@@ -38,7 +36,7 @@ export async function blobToDataUrl(b: Blob): Promise<string> {
   });
 }
 
-export async function dataUrlToBlob(url: string): Promise<Blob> {
+async function dataUrlToBlob(url: string): Promise<Blob> {
   return (await fetch(url)).blob();
 }
 

@@ -21,7 +21,7 @@ export function cubicDerivative([p0, p1, p2, p3]: Cubic, t: number): Vec2 {
 }
 
 /** Ist die Kurve eine Gerade (Griffe auf den Endpunkten)? */
-export const isStraight = (c: Cubic): boolean =>
+const isStraight = (c: Cubic): boolean =>
   c[0].x === c[1].x && c[0].y === c[1].y && c[2].x === c[3].x && c[2].y === c[3].y;
 
 /** Abstand der Kontrollpunkte zur Sehne – Maß für die Flachheit */

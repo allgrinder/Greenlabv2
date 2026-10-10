@@ -23,7 +23,7 @@ const POSES = [
   ['lying', 'Liegen'],
 ] as const;
 
-export function PrivacyPanel() {
+function PrivacyPanel() {
   const doc = useEditor((st) => st.doc);
   const pv = useEditor((st) => st.session.privacy);
   const tool = useEditor((st) => st.session.tool);

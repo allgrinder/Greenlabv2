@@ -16,7 +16,7 @@ const sn = (v: number) => (snap ? Math.round(v / snap) * snap : v);
 const toRing = (pts: Polygon): Ring => pts.map((p) => [sn(p.x), sn(p.y)] as [number, number]);
 const toPc = (r: FlatRegion): PcPolygon => [toRing(r.outer), ...r.holes.map(toRing)];
 
-export class GeometryError extends Error {}
+class GeometryError extends Error {}
 
 /**
  * polygon-clipping scheitert gelegentlich an fast-kollinearen Kanten („Unable to complete
@@ -71,13 +71,6 @@ export function difference(subject: FlatRegion[], clip: FlatRegion[]): FlatRegio
   if (!s.length) return [];
   const c = valid(clip);
   return fromPc(robust(() => pc.difference(s.map(toPc), ...c.map(toPc))));
-}
-
-export function intersect(a: FlatRegion[], b: FlatRegion[]): FlatRegion[] {
-  const va = valid(a);
-  const vb = valid(b);
-  if (!va.length || !vb.length) return [];
-  return fromPc(robust(() => pc.intersection(va.map(toPc), vb.map(toPc))));
 }
 
 /**
@@ -224,7 +217,7 @@ function segIntersect(a: Vec2, b: Vec2, c: Vec2, d: Vec2): Vec2 | null {
  * Lokale Schleifen einer Offsetlinie entfernen (Innenseite enger Bögen):
  * schneidet Segment i ein späteres Segment j, wird alles dazwischen durch den Schnittpunkt ersetzt.
  */
-export function removeLoops(pts: Vec2[], window = 400): Vec2[] {
+function removeLoops(pts: Vec2[], window = 400): Vec2[] {
   const out = pts.slice();
   for (let i = 0; i < out.length - 3; i++) {
     const lim = Math.min(out.length - 1, i + window);

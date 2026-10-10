@@ -7,6 +7,8 @@ import { FillPattern, Matrix, Texture } from 'pixi.js';
 import type { Material } from '../../core/model/types';
 import { groundTile } from '../assets/groundAssets';
 import { rng } from '../util/rng';
+import { mix, rgbOf, type RGB } from '../util/color';
+import { idle } from '../util/idle';
 
 type Painter = (ctx: CanvasRenderingContext2D, w: number, h: number, pxPerM: number) => void;
 
@@ -85,9 +87,6 @@ function tfbm(u: number, v: number, f: number, s: number, oct = 4) {
   return sum / n;
 }
 
-type RGB = [number, number, number];
-const C = (h: string): RGB => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
-const mixc = (a: RGB, b: RGB, t: number): RGB => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
 
 /** Pixelweise malen: fn(u, v) mit u, v ∈ [0,1) über die Kachel */
 function pixels(ctx: CanvasRenderingContext2D, w: number, h: number, fn: (u: number, v: number) => RGB) {
@@ -145,15 +144,15 @@ const SPECS: Record<Material['texture'], TileSpec> = {
     pxPerM: 100,
     paint(ctx, w, h) {
       // satt und olivgrün wie im Gartenkonzept (Mittel etwa #75843a)
-      const A = C('#66752c');
-      const B = C('#7f8e3c');
-      const D = C('#99a552');
+      const A = rgbOf('#66752c');
+      const B = rgbOf('#7f8e3c');
+      const D = rgbOf('#99a552');
       pixels(ctx, w, h, (u, v) => {
         const mid = tfbm(u, v, 4, 5, 3);
         const fine = tfbm(u, v, 24, 7, 2);
         const grain = pnoise(u * 400, v * 400, 400, 9) * 0.55 + pnoise(u * 160, v * 160, 160, 4) * 0.45;
-        let c = mixc(A, B, Math.min(1, Math.max(0, mid * 1.5 - 0.25)));
-        c = mixc(c, D, Math.max(0, fine - 0.6) * 1.6);
+        let c = mix(A, B, Math.min(1, Math.max(0, mid * 1.5 - 0.25)));
+        c = mix(c, D, Math.max(0, fine - 0.6) * 1.6);
         const f = 0.87 + grain * 0.22;
         return [c[0] * f, c[1] * f, c[2] * f];
       });
@@ -169,7 +168,7 @@ const SPECS: Record<Material['texture'], TileSpec> = {
     h: 1,
     pxPerM: 256,
     paint(ctx, w, h) {
-      const base = C('#cdbfa4');
+      const base = rgbOf('#cdbfa4');
       pixels(ctx, w, h, (u, v) => {
         const n = tfbm(u, v, 4, 21, 3);
         const g = pnoise(u * 180, v * 180, 180, 22);
@@ -177,7 +176,7 @@ const SPECS: Record<Material['texture'], TileSpec> = {
         return [base[0] * f, base[1] * f, base[2] * f];
       });
       const r = rng(23);
-      pebbles(ctx, r, 520, w, h, 2.2, 5.2, [C('#d9ccb3'), C('#c7b79a'), C('#e6dcc8'), C('#b3a184'), C('#9e9078'), C('#e9e3d6')]);
+      pebbles(ctx, r, 520, w, h, 2.2, 5.2, [rgbOf('#d9ccb3'), rgbOf('#c7b79a'), rgbOf('#e6dcc8'), rgbOf('#b3a184'), rgbOf('#9e9078'), rgbOf('#e9e3d6')]);
     },
   },
   paving: {
@@ -195,7 +194,7 @@ const SPECS: Record<Material['texture'], TileSpec> = {
       for (let row = 0; row < 2; row++) {
         const off = row ? pw / 2 : 0;
         for (let x = -pw + off; x < w; x += pw) {
-          const tone = mixc(C('#cfc4b0'), C('#b9ab95'), r());
+          const tone = mix(rgbOf('#cfc4b0'), rgbOf('#b9ab95'), r());
           const x0 = x + joint / 2;
           const y0 = row * ph + joint / 2;
           const sw = pw - joint;
@@ -233,7 +232,7 @@ const SPECS: Record<Material['texture'], TileSpec> = {
     paint(ctx, w, h) {
       const bw = h / 4;
       const r = rng(5);
-      const tones = [0, 1, 2, 3].map(() => mixc(C('#9c6e45'), C('#c08f5f'), r()));
+      const tones = [0, 1, 2, 3].map(() => mix(rgbOf('#9c6e45'), rgbOf('#c08f5f'), r()));
       const ends = [0.3, 0.8, 0.55, 0.05];
       pixels(ctx, w, h, (u, v) => {
         const row = Math.min(3, Math.floor(v * 4));
@@ -256,13 +255,13 @@ const SPECS: Record<Material['texture'], TileSpec> = {
     h: 0.6,
     pxPerM: 320,
     paint(ctx, w, h) {
-      const base = C('#5e4532');
+      const base = rgbOf('#5e4532');
       pixels(ctx, w, h, (u, v) => {
         const f = 0.8 + tfbm(u, v, 4, 31, 3) * 0.3;
         return [base[0] * f, base[1] * f, base[2] * f];
       });
       const r = rng(31);
-      pebbles(ctx, r, 260, w, h, 3, 7, [C('#8a6849'), C('#6e533f'), C('#a7845f'), C('#5a412f')], 0.35);
+      pebbles(ctx, r, 260, w, h, 3, 7, [rgbOf('#8a6849'), rgbOf('#6e533f'), rgbOf('#a7845f'), rgbOf('#5a412f')], 0.35);
     },
   },
   barkMulch: {
@@ -270,13 +269,13 @@ const SPECS: Record<Material['texture'], TileSpec> = {
     h: 0.6,
     pxPerM: 320,
     paint(ctx, w, h) {
-      const base = C('#3e2d22');
+      const base = rgbOf('#3e2d22');
       pixels(ctx, w, h, (u, v) => {
         const f = 0.8 + tfbm(u, v, 4, 37, 3) * 0.3;
         return [base[0] * f, base[1] * f, base[2] * f];
       });
       const r = rng(37);
-      pebbles(ctx, r, 140, w, h, 5, 11, [C('#5a3f2d'), C('#6b4a33'), C('#4a3324'), C('#7a5638')], 0.45);
+      pebbles(ctx, r, 140, w, h, 5, 11, [rgbOf('#5a3f2d'), rgbOf('#6b4a33'), rgbOf('#4a3324'), rgbOf('#7a5638')], 0.45);
     },
   },
   soil: {
@@ -284,10 +283,10 @@ const SPECS: Record<Material['texture'], TileSpec> = {
     h: 0.8,
     pxPerM: 256,
     paint(ctx, w, h) {
-      const A = C('#4a3626');
-      const B = C('#6a4d34');
+      const A = rgbOf('#4a3626');
+      const B = rgbOf('#6a4d34');
       pixels(ctx, w, h, (u, v) => {
-        const c = mixc(A, B, tfbm(u, v, 3, 41, 3));
+        const c = mix(A, B, tfbm(u, v, 3, 41, 3));
         const f = 0.78 + pnoise(u * 160, v * 160, 160, 42) * 0.3 + (pnoise(u * 40, v * 40, 40, 43) > 0.8 ? 0.12 : 0);
         return [c[0] * f, c[1] * f, c[2] * f];
       });
@@ -299,10 +298,10 @@ const SPECS: Record<Material['texture'], TileSpec> = {
     h: 2,
     pxPerM: 120,
     paint(ctx, w, h) {
-      const A = C('#6f7a36');
-      const B = C('#a4ac5c');
+      const A = rgbOf('#6f7a36');
+      const B = rgbOf('#a4ac5c');
       pixels(ctx, w, h, (u, v) => {
-        const c = mixc(A, B, tfbm(u, v, 4, 61, 3));
+        const c = mix(A, B, tfbm(u, v, 4, 61, 3));
         const f = 0.8 + pnoise(u * 220, v * 220, 220, 62) * 0.35;
         return [c[0] * f, c[1] * f, c[2] * f];
       });
@@ -322,10 +321,10 @@ const SPECS: Record<Material['texture'], TileSpec> = {
     h: 1,
     pxPerM: 200,
     paint(ctx, w, h) {
-      const A = C('#c2ab80');
-      const B = C('#e2d2ad');
+      const A = rgbOf('#c2ab80');
+      const B = rgbOf('#e2d2ad');
       pixels(ctx, w, h, (u, v) => {
-        const c = mixc(A, B, tfbm(u, v, 3, 71, 3));
+        const c = mix(A, B, tfbm(u, v, 3, 71, 3));
         const f = 0.9 + pnoise(u * 180, v * 180, 180, 72) * 0.16;
         return [c[0] * f, c[1] * f, c[2] * f];
       });
@@ -346,12 +345,12 @@ const SPECS: Record<Material['texture'], TileSpec> = {
     h: 3,
     pxPerM: 100,
     paint(ctx, w, h) {
-      const deep = C('#2f5d66');
-      const lite = C('#6f9fa3');
+      const deep = rgbOf('#2f5d66');
+      const lite = rgbOf('#6f9fa3');
       pixels(ctx, w, h, (u, v) => {
         const n = tfbm(u, v, 3, 51, 4);
         const rip = Math.sin((u * 12 + tfbm(u, v, 2, 52, 2) * 4) * Math.PI * 2) * 0.5 + 0.5;
-        const c = mixc(deep, lite, n * 0.7 + rip * 0.12);
+        const c = mix(deep, lite, n * 0.7 + rip * 0.12);
         return c;
       });
       // Glanzlichter
@@ -382,7 +381,7 @@ SPECS.basalt = {
   paint(ctx, w, h) {
     ctx.fillStyle = '#26282a';
     ctx.fillRect(0, 0, w, h);
-    pebbles(ctx, rng(91), 900, w, h, 3, 7, [C('#3c3f42'), C('#4a4d50'), C('#2f3234'), C('#55585b')], 0.6);
+    pebbles(ctx, rng(91), 900, w, h, 3, 7, [rgbOf('#3c3f42'), rgbOf('#4a4d50'), rgbOf('#2f3234'), rgbOf('#55585b')], 0.6);
   },
 };
 
@@ -710,12 +709,6 @@ export async function warmMaterialTextures(keys: Material['texture'][]): Promise
   }
   return out;
 }
-
-export const idle = () =>
-  new Promise<void>((res) => {
-    if ('requestIdleCallback' in window) requestIdleCallback(() => res(), { timeout: 200 });
-    else setTimeout(res, 16);
-  });
 
 export const isOrganic = (texture: string) => ORGANIC.has(texture);
 

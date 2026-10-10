@@ -20,7 +20,7 @@ export function circlePolygon(c: Vec2, r: number, segments = 48): Polygon {
   return pts;
 }
 
-export function rotatedRect(center: Vec2, w: number, d: number, rotationDeg: number): Polygon {
+function rotatedRect(center: Vec2, w: number, d: number, rotationDeg: number): Polygon {
   const hw = w / 2;
   const hd = d / 2;
   return [
@@ -34,7 +34,7 @@ export function rotatedRect(center: Vec2, w: number, d: number, rotationDeg: num
 export const plantDiameter = (o: Extract<PlanObject, { type: 'plant' }>): number =>
   o.plantedDiameter ?? getSpecies(o.speciesId).diameterPlanted;
 
-export const hedgeWidth = (o: Extract<PlanObject, { type: 'hedge' }>): number => getSpecies(o.speciesId).diameterPlanted;
+const hedgeWidth = (o: Extract<PlanObject, { type: 'hedge' }>): number => getSpecies(o.speciesId).diameterPlanted;
 
 export function itemSize(o: Extract<PlanObject, { type: 'item' }>): { width: number; depth: number; height: number } {
   if (o.size) return o.size;

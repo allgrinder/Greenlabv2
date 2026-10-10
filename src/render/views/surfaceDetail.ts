@@ -4,7 +4,7 @@
  */
 import type { FillPattern, Graphics } from 'pixi.js';
 import type { Season } from '../../core/growth';
-import { pointInRegion } from '../../core/geometry/polygon';
+import { bbox, pointInRegion } from '../../core/geometry/polygon';
 import type { FlatRegion } from '../../core/geometry/shape';
 import { rng } from '../util/rng';
 
@@ -38,16 +38,7 @@ export function fringe(g: Graphics, regions: FlatRegion[], pattern: FillPattern,
 function scatter(regions: FlatRegion[], perM2: number, seed: number, cb: (x: number, y: number, r: () => number) => void) {
   const r = rng(seed);
   for (const reg of regions) {
-    let minX = Infinity;
-    let minY = Infinity;
-    let maxX = -Infinity;
-    let maxY = -Infinity;
-    for (const p of reg.outer) {
-      minX = Math.min(minX, p.x);
-      minY = Math.min(minY, p.y);
-      maxX = Math.max(maxX, p.x);
-      maxY = Math.max(maxY, p.y);
-    }
+    const { minX, minY, maxX, maxY } = bbox(reg.outer);
     const n = Math.round((maxX - minX) * (maxY - minY) * perM2);
     for (let i = 0; i < n; i++) {
       const x = minX + r() * (maxX - minX);

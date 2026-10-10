@@ -2,8 +2,8 @@ import type { Vec2 } from '../core/model/types';
 import type { BBox } from '../core/geometry/polygon';
 import type { Viewport } from '../state/types';
 
-export const MIN_PX_PER_M = 2;
-export const MAX_PX_PER_M = 600;
+const MIN_PX_PER_M = 2;
+const MAX_PX_PER_M = 600;
 /** 1:100 bei 96 dpi: 1 m = 1 cm auf dem Bildschirm = 37,8 px */
 export const PX_PER_M_AT_1_100 = 96 / 2.54;
 

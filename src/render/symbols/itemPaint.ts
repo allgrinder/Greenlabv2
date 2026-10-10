@@ -5,7 +5,8 @@
  * und als Textur zwischengespeichert. Licht von oben links wie bei den Pflanzen.
  * Für die Schrägansicht liefert `itemSolid` den Körper (Wandhöhe, Dachform, Wandmaterial).
  */
-import { L, css, mix, mul, palette, prng, rgbOf, tuft, type RGB } from './foliage';
+import { css, mix, mul, rgbOf, type RGB } from '../util/color';
+import { L, palette, prng, tuft } from './foliage';
 
 type Ctx = CanvasRenderingContext2D;
 type Pt = [number, number];
@@ -709,7 +710,7 @@ const PAINTERS: Record<string, Painter> = {
 };
 
 /** Auflösung je Objektgröße: kleine Möbel fein, Häuser gröber (Textur ≤ 1024 px) */
-export function itemPpm(w: number, d: number): number {
+function itemPpm(w: number, d: number): number {
   return Math.max(16, Math.min(160, 1024 / Math.max(w, d)));
 }
 
@@ -726,7 +727,7 @@ export function paintItem(symbol: string, w: number, d: number, seed: number): H
 
 /* ---------------- Körper für die Schrägansicht ---------------- */
 
-export type RoofKind = 'flat' | 'hip' | 'gable';
+type RoofKind = 'flat' | 'hip' | 'gable';
 
 export interface ItemSolid {
   /** Körperform: Quader mit Dach, Zylinder (Tonne, Kübel), Platte auf Beinen (Tisch, Liege), flach */

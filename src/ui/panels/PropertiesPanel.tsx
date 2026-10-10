@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { Draft } from 'immer';
 import { getItem } from '../../core/catalog/items';
-import { getMaterial } from '../../core/catalog/materials';
+import { AREA_MATERIALS, getMaterial, MULCH_MATERIALS, PATH_MATERIALS } from '../../core/catalog/materials';
 import { getSpecies } from '../../core/catalog/plants';
 import { degrees, elevation, euros, meters, num, squareMeters, unitLabel } from '../../core/format';
 import { itemSize, plantDiameter, resolveAnchor } from '../../core/geometry/objects';
@@ -18,7 +18,7 @@ import { Icon } from '../icons';
 import { glyphSrc, irrGlyph, SYMBOL_GLYPH } from '../library/glyphs';
 import type { Brush } from '../../state/types';
 import { BackgroundSection } from './BackgroundSection';
-import { BedEditor, BedToolPanel, MULCH_MATERIALS } from './BedProps';
+import { BedEditor, BedToolPanel } from './BedProps';
 import { makeBed } from '../../tools/BedTool';
 import { BrushPaintPanel, EspalierProps, EspalierToolPanel, ScatterProps } from './GardenProps';
 import { LocationFields } from '../components/LocationFields';
@@ -48,8 +48,6 @@ const TYPE_LABEL: Record<PlanObject['type'], string> = {
 
 const SOURCE_LABEL: Record<string, string> = { rect: 'Rechteck', polygon: 'Polygon', bezier: 'Bézier', freehand: 'Freihand', boolean: 'Polygon' };
 
-const PATH_MATERIALS = ['gravel', 'basalt', 'paving', 'slabs', 'stepping', 'wood', 'mulch', 'barkMulch', 'soil'];
-const AREA_MATERIALS = ['lawn', 'meadow', 'gravel', 'basalt', 'paving', 'slabs', 'wood', 'sand', 'mulch', 'barkMulch', 'soil', 'water'];
 
 function update<T extends PlanObject>(o: T, label: string, fn: (d: Draft<T>) => unknown) {
   cmd.updateObject<T>(o.id, label, fn);

@@ -29,7 +29,7 @@ export function applyCalibration<T extends BgPlacement & { calibration: Calibrat
 }
 
 /** Winkel auf (−180, 180] normieren */
-export function normDeg(a: number): number {
+function normDeg(a: number): number {
   let x = ((((a + 180) % 360) + 360) % 360) - 180;
   if (x === -180) x = 180;
   return Math.round(x * 1000) / 1000;

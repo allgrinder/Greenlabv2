@@ -5,12 +5,12 @@ import type { EditorState, HistoryEntry, SessionState } from './types';
 
 enablePatches();
 
-export interface ApplyOptions {
+interface ApplyOptions {
   /** Gleiche mergeKey hintereinander → ein Undo-Schritt (Ziehen, Slider) */
   mergeKey?: string;
 }
 
-export interface EditorActions {
+interface EditorActions {
   /** Einzige Schreibstelle für das Projekt */
   apply(label: string, recipe: (doc: Draft<Project>) => void, opts?: ApplyOptions): void;
   undo(): void;
@@ -23,7 +23,7 @@ export interface EditorActions {
 
 export type EditorStore = EditorState & EditorActions & { mergeOpen: boolean };
 
-export const initialSession = (): SessionState => ({
+const initialSession = (): SessionState => ({
   tool: 'select',
   toolBeforePan: null,
   selection: [],

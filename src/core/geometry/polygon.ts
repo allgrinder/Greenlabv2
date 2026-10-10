@@ -31,7 +31,7 @@ export const area = (poly: Polygon): number => Math.abs(signedArea(poly));
 export const areaWithHoles = (outer: Polygon, holes: Polygon[]): number =>
   area(outer) - holes.reduce((s, h) => s + area(h), 0);
 
-export function polylineLength(pts: Polyline): number {
+function polylineLength(pts: Polyline): number {
   let l = 0;
   for (let i = 1; i < pts.length; i++) l += dist(pts[i - 1], pts[i]);
   return l;
@@ -71,13 +71,6 @@ export function bbox(pts: Vec2[]): BBox {
   }
   return { minX, minY, maxX, maxY };
 }
-
-export const unionBBox = (a: BBox, b: BBox): BBox => ({
-  minX: Math.min(a.minX, b.minX),
-  minY: Math.min(a.minY, b.minY),
-  maxX: Math.max(a.maxX, b.maxX),
-  maxY: Math.max(a.maxY, b.maxY),
-});
 
 export const expandBBox = (b: BBox, m: number): BBox => ({
   minX: b.minX - m,

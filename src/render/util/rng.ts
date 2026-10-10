@@ -8,11 +8,14 @@ export function rng(seed: number): () => number {
   };
 }
 
-/** Stabiler Seed aus einer Objekt-ID */
-export function seedFrom(id: string): number {
+/** FNV-1a-Hash (32 Bit, vorzeichenlos) */
+export function fnv1a(s: string): number {
   let h = 2166136261;
-  for (let i = 0; i < id.length; i++) h = Math.imul(h ^ id.charCodeAt(i), 16777619);
-  return (h >>> 0) % 2147483646 || 1;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+  return h >>> 0;
 }
+
+/** Stabiler Seed aus einer Objekt-ID */
+export const seedFrom = (id: string): number => fnv1a(id) % 2147483646 || 1;
 
 export const hex = (c: string): number => parseInt(c.replace('#', ''), 16);

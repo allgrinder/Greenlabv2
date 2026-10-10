@@ -8,7 +8,7 @@
 import type { Project } from '../core/model/types';
 import { exportProject, importProject, type ImportResult } from './jsonIO';
 
-export const BACKUP_FORMAT = 'gartenwerk-backup';
+const BACKUP_FORMAT = 'gartenwerk-backup';
 
 export interface BackupFile {
   format: typeof BACKUP_FORMAT;

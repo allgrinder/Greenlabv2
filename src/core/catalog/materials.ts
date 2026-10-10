@@ -23,6 +23,12 @@ export const MATERIALS: Material[] = [
 
 const BY_ID = new Map(MATERIALS.map((m) => [m.id, m]));
 
+/** Auswahl je Objektart in den Eigenschaften */
+export const PATH_MATERIALS = ['gravel', 'basalt', 'paving', 'slabs', 'stepping', 'wood', 'mulch', 'barkMulch', 'soil'];
+export const AREA_MATERIALS = ['lawn', 'meadow', 'gravel', 'basalt', 'paving', 'slabs', 'wood', 'sand', 'mulch', 'barkMulch', 'soil', 'water'];
+/** Abdeckung zwischen den Pflanzen einer Rabatte */
+export const MULCH_MATERIALS = ['barkMulch', 'mulch', 'gravel', 'basalt', 'soil'];
+
 export function getMaterial(id: MaterialId): Material {
   const m = BY_ID.get(id);
   if (!m) throw new Error(`Unbekanntes Material: ${id}`);

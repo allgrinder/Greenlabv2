@@ -103,7 +103,7 @@ export interface HistoryEntry {
   at: number;
 }
 
-export interface HistoryState {
+interface HistoryState {
   past: HistoryEntry[];
   future: HistoryEntry[];
   /** Obergrenze, älteste Einträge fallen weg */

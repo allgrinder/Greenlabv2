@@ -8,7 +8,7 @@ import { getLamp, kelvinHex } from '../../core/catalog/lamps';
 import type { LampType } from '../../core/model/types';
 import { getMaterial } from '../../core/catalog/materials';
 import { getSpecies } from '../../core/catalog/plants';
-import { euros, num, parseNumber, unitLabel } from '../../core/format';
+import { euros, formatDate, num, parseNumber, unitLabel } from '../../core/format';
 import { costCsv, costReport, GROUP_COLORS } from '../../core/quantities/costReport';
 import type { CostLine } from '../../core/quantities/quantities';
 import { materialSwatchStyle } from '../../render/textures/materialTextures';
@@ -166,11 +166,7 @@ export function CostsView({ onClose, onPdf }: { onClose: () => void; onPdf: () =
   if (!doc || !report) return null;
   const overrides = doc.priceOverrides;
   const all = report.groups.flatMap((g) => g.lines);
-  const date = new Intl.DateTimeFormat('de-DE', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  }).format(new Date());
+  const date = formatDate(new Date(), 'short');
   const csv = () =>
     downloadBlob(
       new Blob([costCsv(editor.getState().doc!)], {

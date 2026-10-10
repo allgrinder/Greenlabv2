@@ -59,7 +59,7 @@ export function translateObject(o: PlanObject, d: Vec2): void {
 }
 
 /** Rechteck in einen bearbeitbaren Pfad umwandeln (vor dem Ziehen einzelner Ecken) */
-export function rectToPath(r: Region): void {
+function rectToPath(r: Region): void {
   if (r.outer.kind === 'rect') r.outer = { kind: 'path', nodes: rectNodes(r.outer), closed: true, source: 'polygon' };
 }
 

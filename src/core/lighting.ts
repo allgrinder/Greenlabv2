@@ -43,7 +43,7 @@ export function lampLevel(l: LampObject, scene: string | null, schedule: () => b
 }
 
 /** Strompreis für die Abschätzung „pro Abend“, €/kWh */
-export const POWER_PRICE = 0.35;
+const POWER_PRICE = 0.35;
 /** angenommene Dauer einer manuell gestarteten Szene, h */
 const SCENE_HOURS = 4;
 

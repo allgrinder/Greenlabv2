@@ -3,7 +3,6 @@
  * Legende und Pflanzenliste. Reine Rechenlogik in Millimetern – das Zeichnen übernimmt ui/export/pdf.
  */
 import { getItem } from '../catalog/items';
-import { getLamp } from '../catalog/lamps';
 import { getMaterial } from '../catalog/materials';
 import { getSpecies } from '../catalog/plants';
 import { projectSummary } from '../quantities/quantities';
@@ -148,5 +147,3 @@ export function plantList(doc: Project): PlantListRow[] {
     })
     .sort((a, b) => a.note.localeCompare(b.note, 'de') || a.name.localeCompare(b.name, 'de'));
 }
-
-export const lampName = (t: Parameters<typeof getLamp>[0]) => getLamp(t).name;

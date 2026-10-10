@@ -43,7 +43,7 @@ const rect = (cx: number, cy: number, w: number, d: number, r = 0, rot = 0): Rec
 const line = (pts: [number, number][]): PathGeometry => ({ kind: 'path', closed: false, source: 'polygon', nodes: pts.map(([x, y]) => ({ p: P(x, y) })) });
 
 /** Trittplattenweg: vom Südrand an der Ostseite hinauf, um den Feldahorn herum, bis zum Deck am Pod */
-export const STEPPING_CENTERLINE: PathGeometry = {
+const STEPPING_CENTERLINE: PathGeometry = {
   kind: 'path',
   closed: false,
   source: 'bezier',

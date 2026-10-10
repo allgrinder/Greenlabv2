@@ -6,7 +6,7 @@ import { getItem } from '../catalog/items';
 import { getSpecies } from '../catalog/plants';
 import { getLamp } from '../catalog/lamps';
 import { getBedMix } from '../catalog/bedMixes';
-import { defaultLayerKind, layerOfKind, objectBase } from './defaults';
+import { layerOfKind, objectBase } from './defaults';
 import type {
   AreaObject,
   DimensionObject,
@@ -117,7 +117,7 @@ export function newFromCatalog(doc: Project, catalogId: string, position: Vec2):
 }
 
 /** Ellipse aus vier Bézier-Knoten */
-export function ellipseNodes(c: Vec2, rx: number, ry: number) {
+function ellipseNodes(c: Vec2, rx: number, ry: number) {
   const k = 0.5522847498;
   return [
     { p: { x: c.x + rx, y: c.y }, in: { x: 0, y: -k * ry }, out: { x: 0, y: k * ry }, smooth: true },
@@ -134,9 +134,6 @@ export function newDimension(doc: Project, a: Vec2, b: Vec2, offset: number): Di
 export function newText(doc: Project, position: Vec2, text = 'Beschriftung', sizeM = 0.6): TextObject {
   return { ...objectBase(layerFor(doc, 'annotation')), type: 'text', position: { ...position }, text, style: 'label', sizeM, rotationDeg: 0 };
 }
-
-/** Standard-Ebene für einen Objekttyp im Projekt */
-export const layerIdFor = (doc: Project, o: Pick<PlanObject, 'type'>) => layerFor(doc, defaultLayerKind(o));
 
 /** Leuchte mit den Vorgaben ihres Typs; Lichterketten bekommen einen Verlauf */
 export function newLamp(doc: Project, lampType: LampType, position: Vec2, path: PathGeometry | null = null): LampObject {

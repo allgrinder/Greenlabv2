@@ -9,7 +9,7 @@ const ln = 'rgba(30,40,20,.35)';
 
 export type GlyphKind = 'tree' | 'shrub' | 'peren' | 'veg' | 'bed' | 'shed' | 'deck' | 'pond' | 'pool' | 'play' | 'furn' | 'hedge' | 'glass' | 'comp' | 'lamp' | 'house' | 'barrel' | 'lounger' | 'planter' | 'fence' | 'edge';
 
-export function glyph(kind: GlyphKind, c1 = '#7E9A5C', c2 = '#8FA56C'): P[] {
+function glyph(kind: GlyphKind, c1 = '#7E9A5C', c2 = '#8FA56C'): P[] {
   switch (kind) {
     case 'tree': {
       const g: P[] = [];

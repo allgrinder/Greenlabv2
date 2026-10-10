@@ -1,7 +1,7 @@
 import type { PlotEdge, PlotSpec, Vec2 } from '../model/types';
 import { add, angleDeg, dist, fromAngle, sub } from './vec';
 
-export interface ClosingEdge {
+interface ClosingEdge {
   length: number;
   /** Innenwinkel am Startpunkt der Schlusskante (letzter Punkt) */
   angleDeg: number;

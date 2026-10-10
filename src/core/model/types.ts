@@ -12,7 +12,7 @@
  */
 
 export type Id = string; // nanoid, 12 Zeichen
-export type ISODate = string;
+type ISODate = string;
 
 export interface Vec2 {
   x: number;
@@ -36,7 +36,7 @@ export interface PathNode {
 }
 
 /** Woher die Geometrie stammt. Steuert, welches Werkzeug sie bearbeitet. */
-export type GeometrySource = 'rect' | 'polygon' | 'bezier' | 'freehand' | 'boolean';
+type GeometrySource = 'rect' | 'polygon' | 'bezier' | 'freehand' | 'boolean';
 
 /** Parametrisches Rechteck: Maße bleiben exakt editierbar. */
 export interface RectGeometry {
@@ -230,7 +230,7 @@ interface ObjectBase {
   notes: Note[];
 }
 
-export interface Note {
+interface Note {
   id: Id;
   author: string; // Initialen, z. B. „MS“
   text: string;
@@ -377,7 +377,7 @@ export interface LampObject extends ObjectBase {
 
 export type LampType = 'bollard' | 'spot' | 'pathLight' | 'stringLights' | 'wall' | 'underwater' | 'treeUplight';
 
-export interface LampSchedule {
+interface LampSchedule {
   from: 'dusk' | string; // „HH:MM“ oder Dämmerung
   to: 'dawn' | string;
   weekdays: boolean[]; // Mo..So, Länge 7
@@ -440,8 +440,6 @@ export type PlanObject =
   | DimensionObject
   | TextObject
   | LampObject;
-
-export type PlanObjectType = PlanObject['type'];
 
 /* ------------------------------------------------------------------ */
 /* Katalog (statisch, versioniert mit der App, nicht im Projekt)       */

@@ -27,7 +27,7 @@ interface GwDB extends DBSchema {
 
 let dbp: Promise<IDBPDatabase<GwDB>> | null = null;
 
-export function db(): Promise<IDBPDatabase<GwDB>> {
+function db(): Promise<IDBPDatabase<GwDB>> {
   dbp ??= openDB<GwDB>('gartenwerk', 1, {
     upgrade(d) {
       d.createObjectStore('projects', { keyPath: 'id' });
@@ -39,7 +39,7 @@ export function db(): Promise<IDBPDatabase<GwDB>> {
   return dbp;
 }
 
-export const metaOf = (p: Project): ProjectMeta => ({
+const metaOf = (p: Project): ProjectMeta => ({
   id: p.id,
   name: p.name,
   updatedAt: p.updatedAt,

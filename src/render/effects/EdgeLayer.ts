@@ -9,8 +9,9 @@
 import { Container, Graphics, MeshSimple, Sprite, type Texture } from 'pixi.js';
 import { getMaterial } from '../../core/catalog/materials';
 import { footprint } from '../../core/geometry/objects';
-import { pointInRegion } from '../../core/geometry/polygon';
+import { bbox as bboxOf, pointInRegion } from '../../core/geometry/polygon';
 import type { FlatRegion } from '../../core/geometry/shape';
+import { closestOnSegment, normalize } from '../../core/geometry/vec';
 import type { Season } from '../../core/growth';
 import type { PlanObject, Project, Vec2 } from '../../core/model/types';
 import { edgeStrip, scatterSprites } from '../assets/groundAssets';
@@ -177,7 +178,7 @@ export class EdgeLayer {
       }
       return null;
     };
-    const nearEdging = (p: Vec2) => edgedSegs.some(([a, b]) => distToSeg(p, a, b) < 0.12);
+    const nearEdging = (p: Vec2) => edgedSegs.some(([a, b]) => closestOnSegment(p, a, b).d < 0.12);
 
     for (const e of list) {
       if (!e.edges.length) continue;
@@ -281,7 +282,7 @@ export class EdgeLayer {
 const probeOut = (pts: Vec2[], i: number, sign: number) => {
   const p = pts[i];
   const q = pts[(i + 1) % pts.length];
-  const n = norm(-(q.y - p.y), q.x - p.x);
+  const n = normalize({ x: -(q.y - p.y), y: q.x - p.x });
   return { x: (p.x + q.x) / 2 + n.x * 0.1 * sign, y: (p.y + q.y) / 2 + n.y * 0.1 * sign };
 };
 
@@ -298,23 +299,9 @@ function densify(ring: Vec2[], step: number): Vec2[] {
   return out;
 }
 
-function distToSeg(p: Vec2, a: Vec2, b: Vec2) {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  const l2 = dx * dx + dy * dy || 1e-9;
-  const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / l2));
-  return Math.hypot(p.x - a.x - t * dx, p.y - a.y - t * dy);
-}
-
 function bbox(pts: Vec2[]): Box {
-  let [x0, y0, x1, y1] = [Infinity, Infinity, -Infinity, -Infinity];
-  for (const p of pts) {
-    x0 = Math.min(x0, p.x);
-    y0 = Math.min(y0, p.y);
-    x1 = Math.max(x1, p.x);
-    y1 = Math.max(y1, p.y);
-  }
-  return [x0, y0, x1, y1];
+  const b = bboxOf(pts);
+  return [b.minX, b.minY, b.maxX, b.maxY];
 }
 
 /** Zusammenhängende Abschnitte eines Rings, deren Punkte `free` sind (z. B. nicht an einer Einfassung) */
@@ -365,8 +352,8 @@ function stripMesh(pts0: Vec2[], closed: boolean, depth: number, repeat: number,
     const p = pts[i];
     const prev = i > 0 ? pts[i - 1] : closed ? pts[n - 2] : null;
     const next = i < n - 1 ? pts[i + 1] : closed ? pts[1] : null;
-    const n1 = prev ? norm(-(p.y - prev.y), p.x - prev.x) : null;
-    const n2 = next ? norm(-(next.y - p.y), next.x - p.x) : null;
+    const n1 = prev ? normalize({ x: -(p.y - prev.y), y: p.x - prev.x }) : null;
+    const n2 = next ? normalize({ x: -(next.y - p.y), y: next.x - p.x }) : null;
     const a = n1 ?? n2!;
     const b = n2 ?? n1!;
     let mx = a.x + b.x;
@@ -385,11 +372,6 @@ function stripMesh(pts0: Vec2[], closed: boolean, depth: number, repeat: number,
     }
   }
   return new MeshSimple({ texture, vertices: new Float32Array(verts), uvs: new Float32Array(uvs), indices: new Uint32Array(idx) });
-}
-
-function norm(x: number, y: number) {
-  const l = Math.hypot(x, y) || 1;
-  return { x: x / l, y: y / l };
 }
 
 /** Streuteile entlang der Kontur, überwiegend knapp außerhalb (über die Kante gewandert), einige innen */

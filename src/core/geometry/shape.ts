@@ -4,7 +4,7 @@ import { add, rotate } from './vec';
 import { dedupe, type Polygon, type Polyline } from './polygon';
 
 /** Standard-Toleranz der Flachlegung in Metern (5 mm) */
-export const FLATTEN_TOL = 0.005;
+const FLATTEN_TOL = 0.005;
 
 /** Kreisnäherung mit Bézier: Griff-Länge = r · KAPPA */
 const KAPPA = 0.5522847498;
@@ -74,6 +74,3 @@ export const flattenRegion = (r: Region, tol = FLATTEN_TOL): FlatRegion => ({
 export function pathLength(path: { nodes: PathNode[]; closed: boolean }): number {
   return pathSegments(path).reduce((s, c) => s + cubicLength(c), 0);
 }
-
-/** Alle Knotenpunkte einer Form (für Fang und Griffe) */
-export const shapeVertices = (shape: ShapeGeometry): Vec2[] => toPath(shape).nodes.map((n) => n.p);

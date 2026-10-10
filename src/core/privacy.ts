@@ -32,7 +32,7 @@ export interface ObstacleGrid {
 }
 
 /** Augenhöhe der beobachteten Person */
-export const TARGET_HEIGHTS = { sitting: 1.2, standing: 1.7, lying: 0.5 } as const;
+const TARGET_HEIGHTS = { sitting: 1.2, standing: 1.7, lying: 0.5 } as const;
 export type TargetPose = keyof typeof TARGET_HEIGHTS;
 
 export function obstacleGrid(doc: Project, season: Season, years = 0, cell = 0.5, margin = 0): ObstacleGrid {

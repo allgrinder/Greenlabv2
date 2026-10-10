@@ -426,13 +426,6 @@
   pointer-events: none;
 }
 
-.kbd {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  padding: 1px 5px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.18);
-}
 
 .slider {
   width: 100%;

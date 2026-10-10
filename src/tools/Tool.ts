@@ -22,7 +22,7 @@ export interface WorldPointerEvent {
   dbl: boolean;
 }
 
-export interface SnapRequest {
+interface SnapRequest {
   /** Objekte, die nicht als Fangziel dienen (das gerade bewegte) */
   exclude?: Set<Id>;
   /** Ursprung für Winkelfang mit ⇧ */

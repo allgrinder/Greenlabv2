@@ -1,5 +1,5 @@
 /** Icon-Pfade 1:1 aus Chrome.dc.html / Gartenwerk.dc.html (24er-Raster) */
-export const ICON = {
+const ICON = {
   select: 'M6 3.5l12 7-5.3 1.5-2.6 5.2Z',
   rect: 'M4.5 6.5h15v11h-15Z',
   poly: 'M5 18.5L3.5 9.5 11 4.5l9 3.5-2 10.5Z',

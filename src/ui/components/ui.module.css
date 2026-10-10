@@ -25,11 +25,6 @@
   text-transform: uppercase;
 }
 
-.serifTitle {
-  font-family: var(--font-serif);
-  font-size: 21px;
-  line-height: 1.1;
-}
 
 .mono {
   font-family: var(--font-mono);

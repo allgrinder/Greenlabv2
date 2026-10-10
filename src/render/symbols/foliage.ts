@@ -7,8 +7,8 @@
  * Licht kommt von oben links (wie im Schattenlayer).
  */
 import { Texture } from 'pixi.js';
+import { css, mix, mul, rgbOf, type RGB } from '../util/color';
 
-export type RGB = [number, number, number];
 export const L = [-0.62, -0.78] as const;
 
 export function prng(seed: number) {
@@ -22,10 +22,6 @@ export function prng(seed: number) {
   };
 }
 
-export const rgbOf = (h: string): RGB => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
-export const mix = (a: RGB, b: RGB, t: number): RGB => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
-export const mul = (a: RGB, k: number): RGB => [a[0] * k, a[1] * k, a[2] * k];
-export const css = (c: RGB, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
 const SUN: RGB = [255, 244, 200];
 
 /** Dunkel-, Mittel- und Lichtton aus einer Laubfarbe */
@@ -321,18 +317,20 @@ export function paintEspalier(widthM: number, depthM: number, ppm: number, color
 /* ---------------- Cache ---------------- */
 
 const cache = new Map<string, Texture>();
-/** Messwerte für Entwicklung und Tests */
-export const stats = { count: 0, ms: 0 };
-if (import.meta.env.DEV) (globalThis as Record<string, unknown>).__gwFoliage = stats;
+/** Messwerte nur in der Entwicklung (Malzeit der Laubtexturen) */
+const stats = import.meta.env.DEV ? { count: 0, ms: 0 } : null;
+if (stats) (globalThis as Record<string, unknown>).__gwFoliage = stats;
 
 /** Textur aus Cache oder neu malen */
 export function foliageTexture(key: string, paint: () => HTMLCanvasElement): Texture {
   let t = cache.get(key);
   if (!t) {
-    const t0 = performance.now();
+    const t0 = stats ? performance.now() : 0;
     const canvas = paint();
-    stats.count++;
-    stats.ms += performance.now() - t0;
+    if (stats) {
+      stats.count++;
+      stats.ms += performance.now() - t0;
+    }
     t = Texture.from(canvas);
     t.source.scaleMode = 'linear';
     t.source.autoGenerateMipmaps = canvas.width >= 256;

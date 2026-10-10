@@ -4,6 +4,8 @@
  * Bis zum Laden (oder ohne Manifest) bleiben die prozeduralen Kacheln aus materialTextures.
  */
 import { Assets, type Texture } from 'pixi.js';
+import { fnv1a } from '../util/rng';
+import { prepTexture } from './lazyTextures';
 
 export interface GroundTile {
   texture: Texture;
@@ -40,55 +42,35 @@ let manifestVersion = 'none';
 /** Fingerabdruck des Manifests: ändert sich, sobald neue Bodenbilder gerendert wurden */
 export const groundManifestVersion = () => manifestVersion;
 
-function hash(s: string): string {
-  let h = 2166136261;
-  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
-  return (h >>> 0).toString(36);
-}
-
 export async function loadGroundAssets(onReady: () => void): Promise<void> {
   try {
     const res = await fetch(`${BASE}manifest.json`);
     if (!res.ok) return;
     const text = await res.text();
-    manifestVersion = hash(text);
+    manifestVersion = fnv1a(text).toString(36);
     const m = JSON.parse(text) as Manifest;
     await Promise.all([
       ...Object.entries(m.tiles).map(async ([key, t]) => {
-        const texture = await Assets.load<Texture>(BASE + t.file);
-        texture.source.style.addressMode = 'repeat';
-        texture.source.scaleMode = 'linear';
-        texture.source.autoGenerateMipmaps = true;
-        texture.source.updateMipmaps?.();
+        const texture = prepTexture(await Assets.load<Texture>(BASE + t.file), true);
         const variants = await Promise.all((t.variants ?? []).map((f) => Assets.load<Texture>(BASE + f)));
         tiles.set(key, { texture, w: t.w, h: t.h, ppm: t.ppm, url: BASE + t.file, variants });
       }),
       ...Object.entries(m.scatter ?? {}).map(async ([kind, list]) => {
         const items = await Promise.all(
           list.map(async (x) => {
-            const texture = await Assets.load<Texture>(BASE + x.file);
-            texture.source.scaleMode = 'linear';
-            texture.source.autoGenerateMipmaps = true;
-            texture.source.updateMipmaps?.();
+            const texture = prepTexture(await Assets.load<Texture>(BASE + x.file));
             return { texture, w: x.w, h: x.h };
           }),
         );
         scatterParts.set(kind, items);
       }),
       ...Object.entries(m.edges ?? {}).map(async ([key, t]) => {
-        const texture = await Assets.load<Texture>(BASE + t.file);
-        texture.source.style.addressMode = 'repeat';
-        texture.source.scaleMode = 'linear';
-        texture.source.autoGenerateMipmaps = true;
-        texture.source.updateMipmaps?.();
+        const texture = prepTexture(await Assets.load<Texture>(BASE + t.file), true);
         edges.set(key, { texture, w: t.w, h: t.h, ppm: t.ppm, url: BASE + t.file });
       }),
       Promise.all(
         m.stepping.map(async (s) => {
-          const texture = await Assets.load<Texture>(BASE + s.file);
-          texture.source.scaleMode = 'linear';
-          texture.source.autoGenerateMipmaps = true;
-          texture.source.updateMipmaps?.();
+          const texture = prepTexture(await Assets.load<Texture>(BASE + s.file));
           return { texture, w: s.px[0] / s.ppm, h: s.px[1] / s.ppm };
         }),
       ).then((s) => {

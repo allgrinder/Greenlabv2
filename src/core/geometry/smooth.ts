@@ -31,7 +31,7 @@ export function simplify(pts: Vec2[], eps: number): Vec2[] {
  * Catmull-Rom (zentripetal angenähert über die Sehnenlänge) → kubische Bézier-Knoten.
  * Die Kurve läuft exakt durch alle Punkte.
  */
-export function catmullRomNodes(pts: Vec2[], closed: boolean, tension = 1 / 6): PathNode[] {
+function catmullRomNodes(pts: Vec2[], closed: boolean, tension = 1 / 6): PathNode[] {
   const n = pts.length;
   if (n < 3) return pts.map((p) => ({ p }));
   const at = (i: number): Vec2 => (closed ? pts[(i + n) % n] : pts[Math.max(0, Math.min(n - 1, i))]);

@@ -4,7 +4,7 @@
  */
 import { useMemo } from 'react';
 import { BED_MIXES, getBedMix, rankBedMixes, sunClass, SUN_LABEL } from '../../core/catalog/bedMixes';
-import { getMaterial } from '../../core/catalog/materials';
+import { getMaterial, MULCH_MATERIALS } from '../../core/catalog/materials';
 import { PLANTS, getSpecies } from '../../core/catalog/plants';
 import { meanSunHours } from '../../core/bedSun';
 import { meters, num } from '../../core/format';
@@ -26,9 +26,6 @@ const SHAPES = [
   ['bezier', 'Kurve'],
   ['free', 'Freihand'],
 ] as const;
-
-/** Abdeckung zwischen den Pflanzen */
-export const MULCH_MATERIALS = ['barkMulch', 'mulch', 'gravel', 'basalt', 'soil'];
 
 const PERENNIALS = PLANTS.filter((p) => p.kind === 'perennial' || p.kind === 'grass');
 

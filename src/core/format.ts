@@ -7,9 +7,16 @@ export const num = (v: number, digits: 0 | 1 | 2 = 1): string => NF[digits].form
 
 export const meters = (v: number, digits: 0 | 1 | 2 = 2): string => `${num(v, digits)} m`;
 export const squareMeters = (v: number, digits: 0 | 1 | 2 = 1): string => `${num(v, digits)} m²`;
-export const cubicMeters = (v: number): string => `${num(v, 1)} m³`;
 export const euros = (v: number, digits: 0 | 2 = 0): string => `${num(v, digits)} €`;
 export const degrees = (v: number): string => `${num(v, 0)}°`;
+
+/** Datumsformate: „09.10.2026“, „9. Okt. 2026“, „9. Oktober 2026“ */
+const DF = {
+  numeric: new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+  short: new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'short', year: 'numeric' }),
+  long: new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'long', year: 'numeric' }),
+};
+export const formatDate = (d: Date, style: keyof typeof DF = 'numeric'): string => DF[style].format(d);
 
 export function elevation(v: number): string {
   if (Math.abs(v) < 0.005) return '±0,00 m';

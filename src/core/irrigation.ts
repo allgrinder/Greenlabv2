@@ -15,7 +15,7 @@ import type { DripObject, PlanObject, Project, SprinklerObject, Vec2 } from './m
 const visible = (doc: Project, o: PlanObject) => !o.hidden && doc.layers[o.layerId]?.visible !== false;
 
 /** Flächen, die Wasser brauchen */
-export function irrigationTargets(doc: Project): { lawn: FlatRegion[]; beds: FlatRegion[] } {
+function irrigationTargets(doc: Project): { lawn: FlatRegion[]; beds: FlatRegion[] } {
   const lawn: FlatRegion[] = [];
   const beds: FlatRegion[] = [];
   for (const o of Object.values(doc.objects)) {
@@ -28,7 +28,7 @@ export function irrigationTargets(doc: Project): { lawn: FlatRegion[]; beds: Fla
   return { lawn, beds };
 }
 
-export function wateredRegions(doc: Project): FlatRegion[] {
+function wateredRegions(doc: Project): FlatRegion[] {
   const out: FlatRegion[] = [];
   for (const o of Object.values(doc.objects)) {
     if (!visible(doc, o)) continue;
@@ -90,7 +90,7 @@ export function zoneSummaries(doc: Project): ZoneSummary[] {
 export const dailyDemandLiters = (doc: Project) => zoneSummaries(doc).reduce((s, z) => s + z.liters, 0);
 
 /** Fläche eines Regnersektors (für die Niederschlagsrate) */
-export function sprinklerArea(o: SprinklerObject): number {
+function sprinklerArea(o: SprinklerObject): number {
   let sweep = o.arcEndDeg - o.arcStartDeg;
   while (sweep <= 0) sweep += 360;
   return Math.PI * o.radius * o.radius * (Math.min(360, sweep) / 360);

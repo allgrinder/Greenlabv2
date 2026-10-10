@@ -8,7 +8,7 @@
  */
 import type { jsPDF as JsPDF } from 'jspdf';
 import { legendEntries, PDF_MARGIN_M, plantList, scaleBarMeters, sheetLayout, type PaperId, type Rect } from '../../core/export/sheet';
-import { euros, num, unitLabel } from '../../core/format';
+import { euros, formatDate, num, unitLabel } from '../../core/format';
 import { expandBBox, bbox } from '../../core/geometry/polygon';
 import type { Project } from '../../core/model/types';
 import { costReport } from '../../core/quantities/costReport';
@@ -180,11 +180,7 @@ function titleBlock(pdf: JsPDF, doc: Project, side: Rect, o: PlanPdfOptions, she
   pdf.setFont('courier', 'normal');
   pdf.setFontSize(6.3 * k);
   pdf.setTextColor(INK);
-  const date = new Intl.DateTimeFormat('de-DE', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  }).format(new Date());
+  const date = formatDate(new Date());
   const cells = [`M 1:${o.scale}`, `${o.paper} quer`, date, `Blatt 1/${sheets}`, 'Gartenwerk', 'Index A'];
   cells.forEach((c, i) => pdf.text(c, x + (i % 2) * (w / 2), gy + 4 * k + Math.floor(i / 2) * 3.6 * k));
 }
@@ -318,11 +314,7 @@ export async function costPdfBlob(doc: Project): Promise<Blob> {
   const X = 20;
   const W = 170;
   let y = 24;
-  const date = new Intl.DateTimeFormat('de-DE', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date());
+  const date = formatDate(new Date(), 'long');
   pdf.setProperties({
     title: t(`${doc.name} – Material & Kosten`),
     creator: 'Gartenwerk',

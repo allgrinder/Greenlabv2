@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { num } from '../../core/format';
+import { formatDate, num } from '../../core/format';
 import { backupDue, REMIND_DAYS, type StorageState } from '../../persistence/backup';
 import { deleteProject, getThumbnail, listProjects, type ProjectMeta } from '../../persistence/db';
 import { Icon, Logo } from '../icons';
 import s from './start.module.css';
 
-const dateFmt = new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
 const timeFmt = new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit' });
 
 function when(iso: string): string {
@@ -13,7 +12,7 @@ function when(iso: string): string {
   const days = Math.floor((Date.now() - d.getTime()) / 86400000);
   if (days < 1 && new Date().getDate() === d.getDate()) return `heute, ${timeFmt.format(d)}`;
   if (days < 2) return `gestern, ${timeFmt.format(d)}`;
-  return dateFmt.format(d);
+  return formatDate(d, 'long');
 }
 
 /**

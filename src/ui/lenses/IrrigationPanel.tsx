@@ -13,7 +13,7 @@ import u from '../components/ui.module.css';
 import s from './lenses.module.css';
 
 /** Hausanschluss: typischer Wasserdruck und maximaler Durchfluss je Zone */
-export const SUPPLY = { bar: 3.5, maxLpm: 30 };
+const SUPPLY = { bar: 3.5, maxLpm: 30 };
 
 const HM = /^([01]?\d|2[0-3]):([0-5]\d)$/;
 

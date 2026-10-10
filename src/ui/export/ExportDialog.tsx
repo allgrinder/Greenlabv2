@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { fits, legendEntries, PAPERS, PDF_MARGIN_M, SCALES, sheetLayout, type PaperId } from '../../core/export/sheet';
 import { bbox, expandBBox } from '../../core/geometry/polygon';
 import type { Look, PlanPdfOptions } from './pdf';
-import { num } from '../../core/format';
+import { formatDate, num } from '../../core/format';
 import { useRenderer } from '../canvas/PlanCanvas';
 import { useEditor } from '../../state';
 import { Segmented } from '../components/controls';
@@ -11,7 +11,7 @@ import u from '../components/ui.module.css';
 import s from './export.module.css';
 
 /** Pixel pro Meter für Maßstab und Druckauflösung: dpi / 0,0254 / Maßstabszahl */
-export const exportPxPerMeter = (scaleDen: number, dpi: number) => dpi / 0.0254 / scaleDen;
+const exportPxPerMeter = (scaleDen: number, dpi: number) => dpi / 0.0254 / scaleDen;
 
 export function downloadBlob(blob: Blob, name: string) {
   const url = URL.createObjectURL(blob);
@@ -159,11 +159,7 @@ export function ExportDialog({ onClose }: { onClose: () => void }) {
   };
 
   const L = sheetLayout(paper);
-  const date = new Intl.DateTimeFormat('de-DE', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  }).format(new Date());
+  const date = formatDate(new Date());
   const legendItems = doc ? legendEntries(doc, night) : [];
   const northDeg = doc?.site.northDeg ?? 0;
 

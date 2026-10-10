@@ -9,7 +9,7 @@ import type { Polygon } from '../../core/geometry/polygon';
 import type { DripObject, FixtureObject, LampObject, PipeObject, SprinklerObject, Vec2 } from '../../core/model/types';
 import { planDirection } from '../../core/sun/sun';
 
-export const IRR_BLUE = 0x2f76b8;
+const IRR_BLUE = 0x2f76b8;
 
 const flat = (pts: Polygon) => pts.flatMap((p) => [p.x, p.y]);
 

@@ -71,7 +71,7 @@ function edgingLine(prices: Prices, e: Edging, length: number): CostLine {
 }
 
 /** Kantenlänge für einen Weg mit Mittellinie L */
-export function pathEdgingLength(sides: Edging['sides'], centerlineLength: number, outlinePerimeter: number): number {
+function pathEdgingLength(sides: Edging['sides'], centerlineLength: number, outlinePerimeter: number): number {
   switch (sides) {
     case 'both':
       return 2 * centerlineLength;

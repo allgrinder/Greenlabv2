@@ -9,17 +9,17 @@ import type { EspalierObject, ScatterObject, Vec2 } from './model/types';
 
 type Season = 'spring' | 'summer' | 'autumn' | 'winter';
 
-export const espalierLine = (o: EspalierObject): Vec2[] => flattenPath(o.centerline, 0.02);
+const espalierLine = (o: EspalierObject): Vec2[] => flattenPath(o.centerline, 0.02);
 
 /** Länge der Pflanzlinie, m */
-export function lineLength(line: Vec2[]): number {
+function lineLength(line: Vec2[]): number {
   let L = 0;
   for (let i = 1; i < line.length; i++) L += Math.hypot(line[i].x - line[i - 1].x, line[i].y - line[i - 1].y);
   return L;
 }
 
 /** Punkt und Richtung bei Bogenlänge s */
-export function along(line: Vec2[], s: number): { p: Vec2; dir: Vec2 } {
+function along(line: Vec2[], s: number): { p: Vec2; dir: Vec2 } {
   let acc = 0;
   for (let i = 1; i < line.length; i++) {
     const a = line[i - 1];
@@ -66,7 +66,7 @@ export function espalierDensity(speciesId: string, season: Season): number {
 export const scatterDiameter = (speciesId: string) => getSpecies(speciesId).diameterMature * 0.85;
 
 /** Konvexe Hülle (Andrew) */
-export function convexHull(pts: Vec2[]): Polygon {
+function convexHull(pts: Vec2[]): Polygon {
   const p = [...pts].sort((a, b) => a.x - b.x || a.y - b.y);
   if (p.length < 3) return p;
   const cross = (o: Vec2, a: Vec2, b: Vec2) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);

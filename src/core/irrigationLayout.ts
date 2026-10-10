@@ -11,7 +11,7 @@ import { newDrip, newSprinkler } from './model/factory';
 import type { DripObject, Id, PlanObject, Project, SprinklerObject } from './model/types';
 
 /** Durchfluss je Vollkreis-Regner, l/min (Sektoren anteilig → gleicher Niederschlag) */
-export const FULL_CIRCLE_LPM = 1.5;
+const FULL_CIRCLE_LPM = 1.5;
 
 export function sprinklersFor(doc: Project, region: FlatRegion, zone: number, radius = 6): SprinklerObject[] {
   return autoSprinklerPositions(region, radius).map((q) => {
@@ -25,7 +25,7 @@ export function sprinklersFor(doc: Project, region: FlatRegion, zone: number, ra
   });
 }
 
-export function dripFor(doc: Project, region: FlatRegion, zone: number, spacing = 0.55): DripObject | null {
+function dripFor(doc: Project, region: FlatRegion, zone: number, spacing = 0.55): DripObject | null {
   const pts = autoDripPath(region, spacing);
   if (pts.length < 2) return null;
   return {

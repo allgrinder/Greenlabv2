@@ -19,7 +19,7 @@ function upd<T extends PlanObject>(o: T, label: string, fn: (d: Draft<T>) => unk
 }
 
 const COMPASS = ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW'];
-export const compassLabel = (deg: number) => `${num(((deg % 360) + 360) % 360, 0)}° ${COMPASS[Math.round((((deg % 360) + 360) % 360) / 45) % 8]}`;
+const compassLabel = (deg: number) => `${num(((deg % 360) + 360) % 360, 0)}° ${COMPASS[Math.round((((deg % 360) + 360) % 360) / 45) % 8]}`;
 const rgb = (k: number) => `rgb(${kelvinRgb(k).join(',')})`;
 const WEEK = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 

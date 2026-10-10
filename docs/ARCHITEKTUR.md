@@ -1,6 +1,6 @@
 # Gartenwerk – Architektur & Datenmodell
 
-Stand: 06.10.2026 · Grundlage: Design-Handoff `project/Gartenwerk.dc.html` (inkl. `Chrome`, `GardenPlan`)
+Stand: 10.10.2026 · Grundlage war der Design-Prototyp „Gartenwerk“ (Chrome, GardenPlan); der Handoff selbst liegt nicht mehr im Repository.
 
 Dieses Dokument wurde vor dem UI-Bau abgestimmt und beschreibt jetzt den Stand nach Phase 2 (Abschnitt 12). Maßgeblich für das Datenmodell ist der Code:
 `src/core/model/types.ts` (Projekt, Ebenen, Objekte, Katalog) und `src/state/types.ts` (Sitzung, Undo-Historie). Beide Dateien sind typgeprüft (`tsc --strict`).
@@ -65,7 +65,8 @@ src/
     SpatialIndex.ts   rbush über Objekt-Bounding-Boxes (Culling, Hit-Test, Snapping)
     layers/           PlotLayer, AreaLayer, PathLayer, PlantLayer, ItemLayer, AnnotationLayer, ShadowLayer
     symbols/          Baumkrone, Strauch, Staudengruppe, Hochbeet, Gartenhaus … (Draufsicht)
-    textures/         prozedurale Kacheltexturen je Material
+    textures/         Kacheltexturen je Material (Blender-Bild oder gemalt), Anti-Kachel-Mischung, Browser-Cache
+    assets/           Laden der Blender-Bilder (Böden, Objekte, Pflanzen; Objekte und Pflanzen erst bei Bedarf)
     overlays/         Auswahl, Griffe, Fangführungen, Bemaßungen, Raster
   tools/          Tool.ts, ToolController.ts, select/, rect/, polygon/, bezier/,
                   freehand/, path/, dimension/, text/, plant/, calibrate/
@@ -168,12 +169,12 @@ Phase-1-Materialien: Rasen, Kies, Pflaster, Holz, Mulch, Rindenmulch, Erde/Beet,
 - **Szenengraph:** eine Welt-Container-Ebene pro Layer, in der Reihenfolge `layerOrder`, plus eigene Container für Hintergrundbild, Raster, Schatten und Overlays.
 - **Abgleich statt Neuaufbau:** Der Renderer abonniert `doc.objects`. Dank Immers struktureller Teilung reicht ein Referenzvergleich pro Objekt. Nur geänderte Objekte bekommen neue Graphics. Unveränderte Geometrie bleibt auf der GPU.
 - **Viewport:** Eine einzige Transformation (Skalierung = px/m, Translation) auf dem Welt-Container. Zoom und Pan ändern keine Objekte, deshalb kosten sie kein Neuzeichnen.
-- **Culling:** Ein rbush-Index über die Objekt-Bounding-Boxes. Pro Frame mit geändertem Viewport werden nur Objekte im sichtbaren Bereich (plus Rand) auf `visible` gesetzt. Derselbe Index dient für Hit-Tests und Fang.
+- **Culling:** Ein rbush-Index über die Objekt-Bounding-Boxes. Nur wenn sich Ausschnitt, Dokument, Linse, Nacht oder die Menge der Ansichten ändert, werden die Objekte im sichtbaren Bereich (plus 2 m Rand, in der Schrägansicht nach unten erweitert) auf `visible` gesetzt; Ebenen-Sichtbarkeit und Linse fließen mit ein. Derselbe Index dient für Hit-Tests und Fang.
 - **LOD:** Baumkronen haben drei Detailstufen (Lappen, Büschel, Licht/Schatten wie in `GardenPlan`), abhängig von px/m. Stauden werden bei kleinem Zoom zu einer Fläche zusammengefasst.
-- **Texturen:** Sie werden beim Start prozedural per Canvas 2D erzeugt (Halmstruktur, Kieskörnung, Fugenraster, Dielen, Mulch, Wasserglanz). Farben und Muster kommen aus dem Design. Gefüllt wird mit `Graphics.fill({ texture, matrix })`. Die Matrix setzt die Verankerung um (Welt oder Objekt) und skaliert die Kachel auf ihre Größe in Metern. Externe Bilddateien und Lizenzen sind nicht nötig.
+- **Texturen:** Bodenbeläge sind in Blender gerenderte, nahtlose Kacheln (`public/assets/ground/`, Abschnitt 17). Bis sie geladen sind – und für Rasen immer – malt `materialTextures` die Kachel per Canvas 2D. Gefüllt wird mit `Graphics.fill({ texture, matrix })`. Die Matrix setzt die Verankerung um (Welt oder Objekt) und skaliert die Kachel auf ihre Größe in Metern. Fertig berechnete Kacheln liegen ab dem zweiten Start im Browser-Cache (IndexedDB).
 - **Schatten:** Weiche Schlagschatten auf einem eigenen Container mit `BlurFilter`, nur bei Änderungen neu berechnet. In der Planansicht mit festem Versatz wie im Design (Sonne ≈ Südost), in der Sonnen-Linse aus SunCalc für Datum, Uhrzeit, Standort und Nordrichtung. Kronen sind Zylinder vom Kronenansatz bis zur Spitze, Gebäude und Hecken extrudierte Grundrisse.
 - **Zeichenraster:** nur beim Zeichnen (alle Zeichenwerkzeuge) und während einer Verschiebe-Geste sichtbar, weich ein- und ausgeblendet; beim Ansehen bleibt der Garten frei von Hilfslinien. Der Rasterfang wirkt unabhängig davon.
-- **Overlays** (Auswahl, Griffe, Fangführungen, Maßlinien) werden im Bildschirmraum gezeichnet, damit sie bei jedem Zoom haarfein bleiben. Maßzahlen und Kantenlängen-Pills (Geist Mono, wie im Onboarding) sind ein schlankes DOM-Overlay über dem Canvas. Das ergibt scharfe Schrift und exakt das Design-Styling.
+- **Overlays** (Auswahl, Griffe, Fangführungen, Maßlinien) werden im Bildschirmraum gezeichnet, damit sie bei jedem Zoom haarfein bleiben. Maßzahlen und Kantenlängen-Pills (Geist Mono, wie im Onboarding) sind Pixi-Texte aus einem Pool (`overlays/overlay.ts`, `LabelPool`), ebenfalls im Bildschirmraum und damit bei jedem Zoom scharf.
 - **Nacht:** Licht wird additiv (Farbtemperatur → RGB) in eine RenderTexture mit halber Auflösung akkumuliert und multiplikativ über die abgedunkelte Szene gelegt. Gebäude und Hecken verdecken über eine inverse Maske; Wasser spiegelt Licht.
 - **Linsen:** Jede Linse wählt, welche Ebenen gezeichnet werden (`core/lens.ts`): Bewässerung und Leitungen nur in der Bewässerungs-Linse, Leuchten in der Planansicht und bei Nacht. Wachstum und Jahreszeit fließen über einen `ViewContext` in die Symbole ein; Objekte werden nur neu gebaut, wenn sich ihr `viewKey` ändert.
 

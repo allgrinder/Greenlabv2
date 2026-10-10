@@ -34,29 +34,61 @@ const BASE = `${import.meta.env.BASE_URL}assets/items/`;
 const textures = new Map<string, Texture>();
 let manifest: AssetManifest | null = null;
 
-/** Manifest und alle Bilder laden; ruft `onReady` nach dem Laden auf. Fehlt das Manifest, bleibt alles gemalt. */
-export async function loadItemAssets(onReady: () => void): Promise<void> {
+/**
+ * Manifest laden; die Bilder kommen erst, wenn ein Objekt sie braucht (oder `preloadItems` vor dem Öffnen
+ * eines Gartens). Alle 184 Bilder auf einmal wären entpackt über 400 MB – zu viel für Tablets und Handys.
+ * Fehlt das Manifest, bleibt alles gemalt. `onLoaded` meldet nachgeladene Bilder (gebündelt).
+ */
+export async function loadItemAssets(onLoaded: () => void): Promise<void> {
+  loadedCb = onLoaded;
   try {
     const res = await fetch(`${BASE}manifest.json`);
     if (!res.ok) return;
-    const m = (await res.json()) as AssetManifest;
-    const files = Object.values(m.items).flatMap((e) => [...e.top, ...e.oblique].map((v) => v.file));
-    const loaded = await Promise.all(files.map((f) => Assets.load<Texture>(BASE + f).then((t) => [f, t] as const)));
-    for (const [f, t] of loaded) {
-      t.source.scaleMode = 'linear';
-      t.source.autoGenerateMipmaps = true;
-      t.source.updateMipmaps?.();
-      textures.set(f, t);
-    }
-    manifest = m;
-    onReady();
+    manifest = (await res.json()) as AssetManifest;
   } catch (e) {
     console.warn('Objekt-Bilder nicht geladen, gemalte Darstellung bleibt', e);
   }
 }
 
-/** alle geladenen Objektbilder (zum Vorab-Hochladen auf die Grafikkarte) */
-export const allItemTextures = (): Texture[] => [...textures.values()];
+let loadedCb: (() => void) | null = null;
+let timer: ReturnType<typeof setTimeout> | null = null;
+const pending = new Map<string, Promise<void>>();
+
+function request(file: string): Promise<void> {
+  let p = pending.get(file);
+  if (!p) {
+    p = Assets.load<Texture>(BASE + file)
+      .then((t) => {
+        t.source.scaleMode = 'linear';
+        t.source.autoGenerateMipmaps = true;
+        t.source.updateMipmaps?.();
+        textures.set(file, t);
+        // mehrere Bilder kurz hintereinander: einmal neu aufbauen
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => loadedCb?.(), 120);
+      })
+      .catch(() => undefined);
+    pending.set(file, p);
+  }
+  return p;
+}
+
+/** Bilder für diese Objekte (Symbol + Drehung) laden, Draufsicht und auf Wunsch Schrägansicht; liefert die Texturen */
+export async function preloadItems(list: { symbol: string; rotationDeg: number }[], oblique: boolean): Promise<Texture[]> {
+  if (!manifest) return [];
+  const files = new Set<string>();
+  for (const { symbol, rotationDeg } of list) {
+    const e = manifest.items[symbol];
+    if (!e) continue;
+    const { k } = nearestRotation(rotationDeg);
+    for (const views of oblique ? [e.top, e.oblique] : [e.top]) {
+      const v = views[k] ?? views[0];
+      if (v) files.add(v.file);
+    }
+  }
+  await Promise.all([...files].map(request));
+  return [...files].flatMap((f) => textures.get(f) ?? []);
+}
 
 export const hasItemAsset = (symbol: string) => !!manifest?.items[symbol];
 
@@ -78,8 +110,12 @@ export function itemAssetSprite(symbol: string, at: { x: number; y: number }, w:
   if (!e) return null;
   const { k, rest } = nearestRotation(rotationDeg);
   const v = (tiltCos === null ? e.top : e.oblique)[k] ?? (tiltCos === null ? e.top : e.oblique)[0];
-  const tex = v && textures.get(v.file);
-  if (!v || !tex) return null;
+  if (!v) return null;
+  const tex = textures.get(v.file);
+  if (!tex) {
+    void request(v.file);
+    return null;
+  }
   const s = new Sprite(tex);
   s.anchor.set(v.anchor[0], v.anchor[1]);
   s.position.set(at.x, at.y);

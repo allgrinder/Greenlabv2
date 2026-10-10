@@ -29,10 +29,11 @@ import { LabelPool, drawBoundary, drawDimension, drawGrid, drawSelection, type T
 import { SpatialIndex } from './SpatialIndex';
 import { buildObjectView, viewKey, type ObjectView, type ViewContext } from './views/objectView';
 import { screenToWorld, tiltCos, tiltTan, visibleWorldBBox, worldToScreen, type ScreenSize } from './Viewport';
-import { idle, materialPattern, warmMaterialTextures } from './textures/materialTextures';
+import { idle, isOrganic, materialPattern, warmMaterialTextures } from './textures/materialTextures';
 import { allGroundTextures, groundManifestVersion, loadGroundAssets } from './assets/groundAssets';
 import { persistTextureCache, restoreTextureCache } from './textures/texCache';
-import { allItemTextures, loadItemAssets } from './assets/itemAssets';
+import { loadItemAssets, preloadItems } from './assets/itemAssets';
+import { getItem } from '../core/catalog/items';
 import { loadPlantAssets, preloadPlants } from './assets/plantAssets';
 import { getMaterial, MATERIALS } from '../core/catalog/materials';
 
@@ -97,6 +98,18 @@ const PLANT_TYPES = new Set<PlanObject['type']>(['plant', 'hedge', 'planting', '
 function speciesOf(doc: Project) {
   const ids = new Set(Object.values(doc.objects).flatMap((o) => ('speciesId' in o ? [o.speciesId] : o.type === 'planting' ? o.mix.map((m) => m.speciesId) : o.type === 'scatter' ? o.plants.map((p) => p.speciesId) : [])));
   return [...ids].map((id) => getSpecies(id));
+}
+
+/** Katalogobjekte eines Gartens mit Drehung (für das Vorladen ihrer Bilder) */
+function itemsOf(doc: Project) {
+  return Object.values(doc.objects).flatMap((o) => {
+    if (o.type !== 'item') return [];
+    try {
+      return [{ symbol: getItem(o.catalogId).symbol, rotationDeg: o.rotationDeg }];
+    } catch {
+      return [];
+    }
+  });
 }
 
 const lodFor = (ppm: number) => (ppm < 6 ? 0 : ppm < 14 ? 1 : 2);
@@ -203,7 +216,7 @@ export class PlanRenderer {
     };
     const rebuild = () => !this.booting && this.rebuildAll();
     await Promise.all([
-      loadItemAssets(rebuild).then(step),
+      loadItemAssets(() => (this.booting ? undefined : this.rebuildType('item'))).then(step),
       loadGroundAssets(rebuild).then(step),
       loadPlantAssets(() => (this.booting ? undefined : this.rebuildPlants())).then(step),
       (document.fonts?.ready ?? Promise.resolve()).then(step),
@@ -213,7 +226,7 @@ export class PlanRenderer {
       await restoreTextureCache(groundManifestVersion());
       await this.upload(await warmMaterialTextures(MATERIALS.map((m) => m.texture)));
       step();
-      await this.upload([...allGroundTextures(), ...allItemTextures()]);
+      await this.upload(allGroundTextures((k) => !isOrganic(k)));
     } catch (e) {
       console.warn('Vorbereitung der Texturen unvollständig', e);
     }
@@ -238,10 +251,14 @@ export class PlanRenderer {
     }
   }
 
-  /** Pflanzenbilder eines Gartens schon laden (z. B. beim Überfahren seiner Karte) */
-  prefetch(doc: Project): Promise<Texture[]> {
+  /** Pflanzen- und Objektbilder eines Gartens schon laden (z. B. beim Überfahren seiner Karte) */
+  async prefetch(doc: Project): Promise<Texture[]> {
     const tilt = !!this.store.getState().session.viewport.tiltDeg;
-    return preloadPlants(speciesOf(doc), [this.store.getState().session.season], tilt ? ['top', 'oblique'] : ['top']);
+    const [plants, items] = await Promise.all([
+      preloadPlants(speciesOf(doc), [this.store.getState().session.season], tilt ? ['top', 'oblique'] : ['top']),
+      preloadItems(itemsOf(doc), tilt),
+    ]);
+    return [...plants, ...items];
   }
 
   /** Vor dem Öffnen: Grundbilder bereit, Pflanzenbilder des Gartens geladen und hochgeladen */
@@ -338,7 +355,7 @@ export class PlanRenderer {
     if (!doc) throw new Error('Kein Projekt geladen');
     if (!opts.quick) {
       // Pflanzenbilder der Export-Jahreszeit vorher laden (sonst gemalte Ersatzdarstellung)
-      await preloadPlants(speciesOf(doc), [opts.view?.season ?? 'summer']);
+      await Promise.all([preloadPlants(speciesOf(doc), [opts.view?.season ?? 'summer']), preloadItems(itemsOf(doc), false)]);
       this.rebuildAll();
     }
     const b = expandBBox(bbox(doc.site.boundary), opts.marginM);
@@ -406,6 +423,17 @@ export class PlanRenderer {
   private rebuildAll() {
     for (const m of this.mounted.values()) this.unmount(m);
     this.mounted.clear();
+    this.lastDoc = null;
+    this.invalidate();
+  }
+
+  /** Nur Objekte neu aufbauen (neue Objektbilder sind da) */
+  private rebuildType(type: PlanObject['type']) {
+    for (const [id, m] of this.mounted)
+      if (m.ref.type === type) {
+        this.unmount(m);
+        this.mounted.delete(id);
+      }
     this.lastDoc = null;
     this.invalidate();
   }

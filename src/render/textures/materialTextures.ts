@@ -392,7 +392,11 @@ const cache = new Map<string, { texture: Texture; spec: TileSpec }>();
 
 /** Organische Beläge ohne Fugenraster: dürfen versetzt und überblendet werden */
 const ORGANIC = new Set<string>(['lawn', 'gravel', 'basalt', 'mulch', 'barkMulch', 'soil', 'sand', 'meadow']);
-const MAX_PX = 2048;
+/**
+ * Größte Seitenlänge aufgebrochener Kacheln. Handys/Tablets (grober Zeiger, kein Mauszeiger) bekommen 1024 px:
+ * ein Viertel des Speichers, auf dem kleinen Bildschirm ohne sichtbaren Unterschied; der Desktop bleibt bei 2048.
+ */
+const MAX_PX = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches ? 1024 : 2048;
 
 /**
  * Große, nahtlose Kachel aus einer kleinen: erst normal gekachelt, dann viele weich maskierte Ausschnitte

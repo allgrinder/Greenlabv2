@@ -57,10 +57,10 @@ export interface ImportResult {
 }
 
 /**
- * Datei prüfen, migrieren und als Kopie mit neuer ID zurückgeben.
+ * Datei prüfen, migrieren und als Kopie mit neuer ID zurückgeben (`keepId`: unverändert, für Sicherungen).
  * Referenzielle Integrität (Ebenen ↔ Objekte) wird repariert statt abgelehnt.
  */
-export async function importProject(text: string): Promise<ImportResult> {
+export async function importProject(text: string, opts: { keepId?: boolean } = {}): Promise<ImportResult> {
   let json: unknown;
   try {
     json = JSON.parse(text);
@@ -87,6 +87,8 @@ export async function importProject(text: string): Promise<ImportResult> {
   }
   const blobs: Record<string, Blob> = {};
   for (const [id, url] of Object.entries(parsed.data.blobs ?? {})) blobs[id] = await dataUrlToBlob(url);
+  // Wiederherstellung aus einer Sicherung: ID und Stand bleiben; sonst Kopie mit neuer ID
+  if (opts.keepId) return { project, blobs };
   const now = new Date().toISOString();
   return { project: { ...project, id: newId(), updatedAt: now }, blobs };
 }

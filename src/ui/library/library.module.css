@@ -165,3 +165,11 @@
   line-height: 1.45;
   color: var(--ink2);
 }
+
+/* Blender-Rendering als Vorschau: ganz sichtbar, leichter Schatten wie im Plan */
+.photo {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 1.5px rgba(30, 32, 22, 0.25));
+}

@@ -4,7 +4,7 @@
  */
 import { Container, Graphics, Text } from 'pixi.js';
 import { footprint, editableNodes, resolveAnchor } from '../../core/geometry/objects';
-import type { Polygon } from '../../core/geometry/polygon';
+import type { BBox, Polygon } from '../../core/geometry/polygon';
 import { flattenPath, toPath } from '../../core/geometry/shape';
 import { num } from '../../core/format';
 import type { DimensionObject, PlanObject, Project, Vec2 } from '../../core/model/types';
@@ -43,14 +43,16 @@ export function dashed(g: Graphics, pts: Vec2[], closed: boolean, pattern: numbe
 }
 
 /** Rasterpunkte und 5-m-Linien; `strength` 0…1 zum Ein- und Ausblenden */
-export function drawGrid(g: Graphics, toScreen: ToScreen, ppm: number, boundary: Polygon, step: number, strength = 1) {
+export function drawGrid(g: Graphics, toScreen: ToScreen, ppm: number, boundary: Polygon, step: number, strength = 1, view?: BBox) {
   if (boundary.length < 3 || strength <= 0.01) return;
   const xs = boundary.map((p) => p.x);
   const ys = boundary.map((p) => p.y);
-  const minX = Math.floor(Math.min(...xs));
-  const maxX = Math.ceil(Math.max(...xs));
-  const minY = Math.floor(Math.min(...ys));
-  const maxY = Math.ceil(Math.max(...ys));
+  // nur der sichtbare Teil des Grundstücks (beim Hineinzoomen sonst Tausende unsichtbarer Punkte je Bild)
+  const minX = Math.floor(Math.max(Math.min(...xs), view ? view.minX : -Infinity));
+  const maxX = Math.ceil(Math.min(Math.max(...xs), view ? view.maxX : Infinity));
+  const minY = Math.floor(Math.max(Math.min(...ys), view ? view.minY : -Infinity));
+  const maxY = Math.ceil(Math.min(Math.max(...ys), view ? view.maxY : Infinity));
+  if (minX > maxX || minY > maxY) return;
   // Punkte im Rasterabstand, sobald sie mind. 8 px auseinander liegen
   const s = [step, 0.5, 1, 5].find((v) => v >= step && v * ppm >= 8) ?? 5;
   const r = Math.max(0.6, Math.min(1.1, ppm / 30));
@@ -177,6 +179,7 @@ export class LabelPool {
   readonly container = new Container();
   private pool: Text[] = [];
   private used = 0;
+  private styleKey = new WeakMap<Text, string>();
 
   begin() {
     this.used = 0;
@@ -195,8 +198,13 @@ export class LabelPool {
       this.container.addChild(t);
     }
     if (t.text !== text) t.text = text;
-    t.style.fill = color;
-    t.style.stroke = pill ? { color: 0xffffff, width: 0 } : { color: 0xf3efe6, width: 4, join: 'round' };
+    // Stil nur bei Änderung setzen: jede Zuweisung lässt Pixi den Text neu rastern (sonst in jedem Bild)
+    const key = `${color}|${pill ? 1 : 0}`;
+    if (this.styleKey.get(t) !== key) {
+      this.styleKey.set(t, key);
+      t.style.fill = color;
+      t.style.stroke = pill ? { color: 0xffffff, width: 0 } : { color: 0xf3efe6, width: 4, join: 'round' };
+    }
     t.position.set(x, y);
     t.rotation = rotation;
     t.visible = true;

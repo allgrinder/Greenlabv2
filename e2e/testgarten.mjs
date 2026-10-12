@@ -1,7 +1,7 @@
 /**
  * Bildprüfung an einem selbst angelegten Garten statt am Mustergarten:
- * neuer Garten über den Assistenten, dann mit den Werkzeugen wie ein Nutzer Rasen, Holzdeck und Platten
- * auf dem Rasen, Rabatte, Trittplatten und Kiesweg. Schreibt Bildschirmfotos nach e2e/out/ (Gesamtplan
+ * neuer Garten über den Assistenten (Standard: mit Rasen), dann mit den Werkzeugen wie ein Nutzer Holzdeck und
+ * Platten über den Rasenrand, Rabatte, Trittplatten und Kiesweg. Schreibt Bildschirmfotos nach e2e/out/ (Gesamtplan
  * und Nahansichten) und prüft, dass keine Rasenkante unter einer aufliegenden Fläche gezeichnet wird.
  *   GW_URL=http://localhost:5173/ node e2e/testgarten.mjs   (Dev-Server muss laufen)
  */
@@ -47,13 +47,12 @@ const mx = (x0 + x1) / 2, my = (y0 + y1) / 2;
 await set({ viewport: { center: { x: mx, y: my }, pxPerMeter: Math.min(700 / (x1 - x0), 600 / (y1 - y0)), rotationDeg: 0, tiltDeg: 0 } });
 await p.waitForTimeout(800);
 
-// Startpunkte mit Abstand zu den Grundstücksecken (deren Griffe sonst den Zug übernehmen)
-await set({ tool: 'rect', defaults: { areaMaterial: 'lawn' } }); await drag(x0 + 1.5, y0 + 1.5, x1 - 1.5, y1 - 1.5);
-await set({ tool: 'rect', defaults: { areaMaterial: 'wood' } }); await drag(x0 + 1, y0 + 1, x0 + 6, y0 + 5);
+// Rasen kommt aus dem Assistenten (30 cm vom Rand); Startpunkte mit Abstand zu den Grundstücksecken (deren Griffe sonst den Zug übernehmen)
+await set({ tool: 'rect', defaults: { areaMaterial: 'wood' } }); await drag(x0 + 6, y0 + 5, x0 + 0.15, y0 + 1);
 await set({ tool: 'rect', defaults: { areaMaterial: 'slabs' } }); await drag(x1 - 5, y0 + 1, x1 - 1, y0 + 4);
 await set({ tool: 'bed', defaults: { bedShape: 'rect', bedMix: 'auto' } }); await drag(x0 + 1, y1 - 4, x1 - 1, y1 - 1.5);
 await pathAt([[mx, y0 + 5.5], [mx + 2, my], [mx, y1 - 4.5]], 'stepping', 0.9);
-await pathAt([[x0 + 0.8, y0 + 6], [x0 + 0.8, y1 - 4.5]], 'gravel', 1.2);
+await pathAt([[x0 + 2.5, y0 + 7], [x0 + 2.5, y1 - 5]], 'gravel', 1.2);
 assert.equal(await count(), 6, 'Rasen, Deck, Platten, Rabatte, Trittplatten, Kiesweg');
 await set({ tool: 'select', selection: [], panels: { layers: false, library: false, properties: false } });
 
@@ -62,7 +61,7 @@ const hidden = await p.evaluate(([x, y]) => {
   const edges = window.__gw.renderer.edgeLayer;
   const lawn = [...edges.entries.values()].find((e) => e.tex === 'lawn');
   return lawn.edges.flatMap((ed) => ed.pts.map((q, i) => ({ q, shade: ed.shade[i] }))).filter(({ q }) => q.x > x - 0.2 && q.x < x + 0.2 && q.y > y + 0.3 && q.y < y + 2).map((e) => e.shade);
-}, [x0 + 1.5, y0 + 1.5]);
+}, [x0 + 0.3, y0 + 1]);
 assert.ok(hidden.length > 0 && hidden.every((s) => !s), 'Rasenkante unter dem Deck ohne Schatten');
 
 await p.waitForTimeout(25000);

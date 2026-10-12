@@ -6,6 +6,8 @@ import { getItem } from '../catalog/items';
 import { getSpecies } from '../catalog/plants';
 import { getLamp } from '../catalog/lamps';
 import { getBedMix } from '../catalog/bedMixes';
+import { difference, offsetPolyline } from '../geometry/clip';
+import { flatToRegion } from '../geometry/regions';
 import { layerOfKind, objectBase } from './defaults';
 import type {
   AreaObject,
@@ -167,4 +169,23 @@ export function newPipe(doc: Project, path: PathGeometry, kind: PipeObject['kind
 
 export function newFixture(doc: Project, kind: FixtureObject['kind'], position: Vec2): FixtureObject {
   return { ...objectBase(layerFor(doc, 'water')), type: 'fixture', kind, position: { ...position }, valves: kind === 'manifold' ? 4 : 0 };
+}
+
+/**
+ * Rasen über das ganze Grundstück, 30 cm vom Rand abgesetzt (schmaler Erdstreifen am Zaun, die Halme hängen
+ * nicht über die Grundstücksgrenze). Für den Assistenten: neue Gärten beginnen wie der Mustergarten mit Rasen.
+ */
+export function withPlotLawn(doc: Project, inset = 0.3): Project {
+  const b = doc.site.boundary;
+  if (b.length < 3) return doc;
+  const flat = difference([{ outer: b, holes: [] }], offsetPolyline([...b, b[0]], inset * 2, 'miter'));
+  if (!flat.length) return doc;
+  const objects = { ...doc.objects };
+  const layers = { ...doc.layers };
+  for (const r of flat) {
+    const o: AreaObject = { ...newArea(doc, flatToRegion(r), 'lawn'), name: 'Rasen' };
+    objects[o.id] = o;
+    layers[o.layerId] = { ...layers[o.layerId], objectOrder: [...layers[o.layerId].objectOrder, o.id] };
+  }
+  return { ...doc, objects, layers };
 }

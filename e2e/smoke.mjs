@@ -58,6 +58,7 @@ let d = await doc();
 assert.equal(d.site.boundary.length, 5);
 assert.equal(d.site.northDeg, -12);
 assert.ok(Math.abs(d.background.metersPerPixel - 0.05) < 1e-9);
+assert.ok(Object.values(d.objects).some((o) => o.type === 'area' && o.materialId === 'lawn'), 'Rasen aus dem Assistenten');
 assert.equal(d.site.location.place, 'Hamburg');
 assert.ok(Math.abs(d.site.location.lat - 53.55) < 0.01);
 step('Onboarding mit Polygon, Punkt ziehen, Kalibrierung, Ort');

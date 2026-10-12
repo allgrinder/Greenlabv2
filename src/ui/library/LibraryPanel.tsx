@@ -3,7 +3,7 @@
  * Klick wählt das Element für „Pflanze setzen“, Ziehen legt es direkt auf den Plan.
  */
 import { useMemo, useState } from 'react';
-import { ITEMS } from '../../core/catalog/items';
+import { LIBRARY_ITEMS } from '../../core/catalog/items';
 import { PLANTS } from '../../core/catalog/plants';
 import type { PlantKind } from '../../core/model/types';
 import { useEditor } from '../../state';
@@ -67,9 +67,9 @@ function useSections() {
     // Pinsel vorn in „Stauden & Gräser“
     const per = sections.find((x) => x.h === 'Stauden & Gräser');
     per?.items.unshift({ key: 'tool:brush', name: 'Pinsel', src: BRUSH_GLYPH, brush: 'brush', search: 'pinsel malen streuen stauden blumen', filter: ['all', 'plants'], sub: 'Mischung im Radius malen, Alt radiert' });
-    const build: Entry[] = ITEMS.filter((i) => i.category !== 'edging' && i.category !== 'building').map((i) => ({
+    const build: Entry[] = LIBRARY_ITEMS.map((i) => ({
       key: `item:${i.id}`,
-      name: i.name.replace(/ \d.*$/, '').replace(/,.*$/, ''),
+      name: i.name.replace(/ \(.*$/, '').replace(/ \d.*$/, '').replace(/,.*$/, ''),
       src: glyphSrc(SYMBOL_GLYPH[i.symbol] ?? 'edge'),
       brush: { kind: 'item', catalogId: i.id } as Brush,
       search: i.name.toLowerCase(),

@@ -487,6 +487,267 @@
   ]
  },
  {
+  "id": "aesculus-hippocastanum",
+  "name": "Rosskastanie",
+  "kind": "tree",
+  "deciduous": true,
+  "marcescent": false,
+  "diameterMature": 14,
+  "heightMature": 20,
+  "colors": {
+   "summer": "#5E7C45",
+   "spring": "#8FAE5E",
+   "autumn": "#B8873C",
+   "winter": "#7A6E5E",
+   "bloom": "#F4EFE4"
+  },
+  "looks": [
+   {
+    "key": "#8FAE5E|0|#F4EFE4|",
+    "look": {
+     "color": "#8FAE5E",
+     "bare": false,
+     "bloom": "#F4EFE4",
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#5E7C45|0||",
+    "look": {
+     "color": "#5E7C45",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#B8873C|0||",
+    "look": {
+     "color": "#B8873C",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7A6E5E|1||",
+    "look": {
+     "color": "#7A6E5E",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "juglans-regia",
+  "name": "Walnuss",
+  "kind": "tree",
+  "deciduous": true,
+  "marcescent": false,
+  "diameterMature": 14,
+  "heightMature": 18,
+  "colors": {
+   "summer": "#6A8A4E",
+   "spring": "#9DA46A",
+   "autumn": "#B39A4A",
+   "winter": "#7A6E5E"
+  },
+  "looks": [
+   {
+    "key": "#9DA46A|0||",
+    "look": {
+     "color": "#9DA46A",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6A8A4E|0||",
+    "look": {
+     "color": "#6A8A4E",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#B39A4A|0||",
+    "look": {
+     "color": "#B39A4A",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7A6E5E|1||",
+    "look": {
+     "color": "#7A6E5E",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "quercus-rubra",
+  "name": "Amerikanische Roteiche",
+  "kind": "tree",
+  "deciduous": true,
+  "marcescent": false,
+  "diameterMature": 16,
+  "heightMature": 22,
+  "colors": {
+   "summer": "#5C7A44",
+   "spring": "#A6A85E",
+   "autumn": "#A3322A",
+   "winter": "#7A6E5E"
+  },
+  "looks": [
+   {
+    "key": "#A6A85E|0||",
+    "look": {
+     "color": "#A6A85E",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#5C7A44|0||",
+    "look": {
+     "color": "#5C7A44",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#A3322A|0||",
+    "look": {
+     "color": "#A3322A",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7A6E5E|1||",
+    "look": {
+     "color": "#7A6E5E",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "cercis-siliquastrum",
+  "name": "Judasbaum",
+  "kind": "tree",
+  "deciduous": true,
+  "marcescent": false,
+  "diameterMature": 6,
+  "heightMature": 7,
+  "colors": {
+   "summer": "#6E8C55",
+   "autumn": "#C9A23E",
+   "winter": "#7A6E5E",
+   "bloom": "#C04A86"
+  },
+  "looks": [
+   {
+    "key": "#6E8C55|1|#C04A86|",
+    "look": {
+     "color": "#6E8C55",
+     "bare": true,
+     "bloom": "#C04A86",
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6E8C55|0||",
+    "look": {
+     "color": "#6E8C55",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#C9A23E|0||",
+    "look": {
+     "color": "#C9A23E",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7A6E5E|1||",
+    "look": {
+     "color": "#7A6E5E",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
   "id": "spiraea",
   "name": "Prachtspiere",
   "kind": "shrub",

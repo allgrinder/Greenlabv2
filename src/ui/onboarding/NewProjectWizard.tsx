@@ -10,9 +10,11 @@ import { num, squareMeters } from '../../core/format';
 import { area, bbox } from '../../core/geometry/polygon';
 import { plotEdgesFromPoints, pointsFromEdges, polygonFromEdges } from '../../core/geometry/plot';
 import { createProject } from '../../core/model/defaults';
+import { withPlotLawn } from '../../core/model/factory';
 import { newId } from '../../core/model/ids';
 import type { BackgroundImage, GeoLocation, PlotEdge, PlotSpec, Project, Vec2 } from '../../core/model/types';
 import { LocationFields } from '../components/LocationFields';
+import u from '../components/ui.module.css';
 import { Icon, Logo } from '../icons';
 import { AlignBox, FilePick } from './BackgroundControls';
 import { CalibStage } from './CalibStage';
@@ -38,6 +40,8 @@ export function NewProjectWizard({ onCreate, onCancel, onSample, canCancel }: { 
   const [bg, setBg] = useState<BgDraft | null>(null);
   const [stageTab, setStageTab] = useState<'contour' | 'calib'>('contour');
   const [name, setName] = useState('');
+  /** Rasen über das ganze Grundstück anlegen (wie im Mustergarten); sonst beginnt der Garten als Erdfläche */
+  const [lawn, setLawn] = useState(true);
 
   const boundary = useMemo(() => (kind === 'rect' ? rectPoints(width, depth) : poly), [kind, width, depth, poly]);
   const edges = useMemo(() => plotEdgesFromPoints(poly), [poly]);
@@ -104,7 +108,8 @@ export function NewProjectWizard({ onCreate, onCancel, onSample, canCancel }: { 
   const create = () => {
     const plot: PlotSpec = kind === 'rect' ? { kind: 'rect', width, depth } : { kind: 'edges', edges };
     const place = loc.place || loc.label;
-    const project = createProject({ name: name.trim() || (place ? `Garten ${(loc.label || place).split(',')[0]}` : 'Neuer Garten'), plot, northDeg: north, location: loc });
+    const base = createProject({ name: name.trim() || (place ? `Garten ${(loc.label || place).split(',')[0]}` : 'Neuer Garten'), plot, northDeg: north, location: loc });
+    const project = lawn ? withPlotLawn(base) : base;
     // Das Projekt beginnt bei A = (0,0); Bildlage entsprechend verschieben
     const offset = kind === 'rect' ? { x: 0, y: 0 } : poly[0];
     let background: BackgroundImage | null = null;
@@ -293,6 +298,10 @@ export function NewProjectWizard({ onCreate, onCancel, onSample, canCancel }: { 
           <div className={s.fieldCard}>
             <input placeholder="Projektname (optional)" value={name} onChange={(e) => setName(e.target.value)} aria-label="Projektname" data-testid="project-name" />
           </div>
+          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 10, fontSize: 12.5, color: 'var(--ink2)', cursor: 'pointer' }}>
+            <span>Grundstück mit Rasen anlegen</span>
+            <button type="button" role="switch" aria-checked={lawn} aria-label="Grundstück mit Rasen anlegen" className={lawn ? u.toggleOn : u.toggle} onClick={() => setLawn(!lawn)} data-testid="wiz-lawn" />
+          </label>
         </div>
 
         <div className={s.footer}>

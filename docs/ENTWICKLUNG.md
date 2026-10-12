@@ -25,6 +25,10 @@ Jede Änderung an der Darstellung wird an zwei Gärten geprüft: am Mustergarten
 
 Die App öffnet mit der Startseite: zuletzt bearbeiteter Garten, alle gespeicherten Gärten mit Vorschaubild, Neuer Garten, Mustergarten, JSON-Import. Grafik und Bilder laden währenddessen im Hintergrund (Fortschritt oben rechts); ein Garten öffnet erst, wenn er vollständig gezeichnet ist. `?bench=N` öffnet weiterhin direkt einen Benchmark-Garten.
 
+## Neuer Garten
+
+Der Assistent legt das Grundstück standardmäßig mit Rasen an (Schalter „Grundstück mit Rasen anlegen“): eine Rasenfläche über das ganze Grundstück, 30 cm vom Rand abgesetzt. Beete, Wege, Deck und Platten werden obenauf gezeichnet; Halme hängen über ihre Kanten, die Rasenkante darunter bleibt unsichtbar. Ohne Schalter beginnt der Garten als Erdfläche.
+
 ## Sicherung
 
 Gärten liegen nur im Browser. „Alle Gärten sichern“ (Startseite, Projektmenü) lädt eine Datei mit allen Gärten und Hintergrundbildern; „JSON importieren“ holt sie zurück. Die Startseite erinnert nach 14 Tagen mit Änderungen. Die Bibliothek zeigt die Blender-Renderings (Draufsicht, Sommer) als Vorschaubilder.

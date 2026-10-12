@@ -6088,6 +6088,139 @@
      "oblique": []
     }
    }
+  },
+  "aesculus-hippocastanum": {
+   "kind": "tree",
+   "w": 14,
+   "d": 14,
+   "h": 20,
+   "ppm": 51.429,
+   "looks": {
+    "#8FAE5E|0|#F4EFE4|": {
+     "seasons": [
+      "spring"
+     ],
+     "top": [
+      {
+       "file": "aesculus-hippocastanum_0_0_top.webp",
+       "px": [
+        766,
+        793
+       ],
+       "anchor": [
+        0.5382,
+        0.519
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "aesculus-hippocastanum_0_0_oblique.webp",
+       "px": [
+        766,
+        787
+       ],
+       "anchor": [
+        0.5382,
+        0.9747
+       ]
+      }
+     ]
+    },
+    "#5E7C45|0||": {
+     "seasons": [
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "aesculus-hippocastanum_1_0_top.webp",
+       "px": [
+        784,
+        778
+       ],
+       "anchor": [
+        0.525,
+        0.4886
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "aesculus-hippocastanum_1_0_oblique.webp",
+       "px": [
+        784,
+        799
+       ],
+       "anchor": [
+        0.525,
+        0.9759
+       ]
+      }
+     ]
+    },
+    "#B8873C|0||": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "aesculus-hippocastanum_2_0_top.webp",
+       "px": [
+        802,
+        769
+       ],
+       "anchor": [
+        0.5063,
+        0.5041
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "aesculus-hippocastanum_2_0_oblique.webp",
+       "px": [
+        802,
+        767
+       ],
+       "anchor": [
+        0.5063,
+        0.9762
+       ]
+      }
+     ]
+    },
+    "#7A6E5E|1||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "aesculus-hippocastanum_3_0_top.webp",
+       "px": [
+        767,
+        838
+       ],
+       "anchor": [
+        0.4769,
+        0.5014
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "aesculus-hippocastanum_3_0_oblique.webp",
+       "px": [
+        767,
+        796
+       ],
+       "anchor": [
+        0.4769,
+        0.977
+       ]
+      }
+     ]
+    }
+   }
   }
  },
  "graded": true

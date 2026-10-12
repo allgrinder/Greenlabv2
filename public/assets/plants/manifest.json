@@ -6221,6 +6221,405 @@
      ]
     }
    }
+  },
+  "juglans-regia": {
+   "kind": "tree",
+   "w": 14,
+   "d": 14,
+   "h": 18,
+   "ppm": 51.429,
+   "looks": {
+    "#9DA46A|0||": {
+     "seasons": [
+      "spring"
+     ],
+     "top": [
+      {
+       "file": "juglans-regia_0_0_top.webp",
+       "px": [
+        776,
+        807
+       ],
+       "anchor": [
+        0.4948,
+        0.5014
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "juglans-regia_0_0_oblique.webp",
+       "px": [
+        776,
+        684
+       ],
+       "anchor": [
+        0.4948,
+        0.9521
+       ]
+      }
+     ]
+    },
+    "#6A8A4E|0||": {
+     "seasons": [
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "juglans-regia_1_0_top.webp",
+       "px": [
+        747,
+        790
+       ],
+       "anchor": [
+        0.5186,
+        0.4974
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "juglans-regia_1_0_oblique.webp",
+       "px": [
+        747,
+        700
+       ],
+       "anchor": [
+        0.5186,
+        0.9483
+       ]
+      }
+     ]
+    },
+    "#B39A4A|0||": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "juglans-regia_2_0_top.webp",
+       "px": [
+        820,
+        746
+       ],
+       "anchor": [
+        0.4516,
+        0.5037
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "juglans-regia_2_0_oblique.webp",
+       "px": [
+        820,
+        653
+       ],
+       "anchor": [
+        0.4516,
+        0.9398
+       ]
+      }
+     ]
+    },
+    "#7A6E5E|1||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "juglans-regia_3_0_top.webp",
+       "px": [
+        837,
+        764
+       ],
+       "anchor": [
+        0.5002,
+        0.5169
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "juglans-regia_3_0_oblique.webp",
+       "px": [
+        837,
+        759
+       ],
+       "anchor": [
+        0.5002,
+        0.9241
+       ]
+      }
+     ]
+    }
+   }
+  },
+  "quercus-rubra": {
+   "kind": "tree",
+   "w": 16,
+   "d": 16,
+   "h": 22,
+   "ppm": 45.0,
+   "looks": {
+    "#A6A85E|0||": {
+     "seasons": [
+      "spring"
+     ],
+     "top": [
+      {
+       "file": "quercus-rubra_0_0_top.webp",
+       "px": [
+        748,
+        828
+       ],
+       "anchor": [
+        0.5057,
+        0.5102
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "quercus-rubra_0_0_oblique.webp",
+       "px": [
+        748,
+        744
+       ],
+       "anchor": [
+        0.5057,
+        0.9722
+       ]
+      }
+     ]
+    },
+    "#5C7A44|0||": {
+     "seasons": [
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "quercus-rubra_1_0_top.webp",
+       "px": [
+        772,
+        839
+       ],
+       "anchor": [
+        0.5213,
+        0.5164
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "quercus-rubra_1_0_oblique.webp",
+       "px": [
+        772,
+        867
+       ],
+       "anchor": [
+        0.5213,
+        0.9317
+       ]
+      }
+     ]
+    },
+    "#A3322A|0||": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "quercus-rubra_2_0_top.webp",
+       "px": [
+        760,
+        816
+       ],
+       "anchor": [
+        0.5031,
+        0.5156
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "quercus-rubra_2_0_oblique.webp",
+       "px": [
+        760,
+        788
+       ],
+       "anchor": [
+        0.5031,
+        0.9773
+       ]
+      }
+     ]
+    },
+    "#7A6E5E|1||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "quercus-rubra_3_0_top.webp",
+       "px": [
+        797,
+        811
+       ],
+       "anchor": [
+        0.4997,
+        0.5032
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "quercus-rubra_3_0_oblique.webp",
+       "px": [
+        797,
+        833
+       ],
+       "anchor": [
+        0.4997,
+        0.9545
+       ]
+      }
+     ]
+    }
+   }
+  },
+  "cercis-siliquastrum": {
+   "kind": "tree",
+   "w": 6,
+   "d": 6,
+   "h": 7,
+   "ppm": 120.0,
+   "looks": {
+    "#6E8C55|1|#C04A86|": {
+     "seasons": [
+      "spring"
+     ],
+     "top": [
+      {
+       "file": "cercis-siliquastrum_0_0_top.webp",
+       "px": [
+        683,
+        762
+       ],
+       "anchor": [
+        0.4678,
+        0.5456
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "cercis-siliquastrum_0_0_oblique.webp",
+       "px": [
+        683,
+        701
+       ],
+       "anchor": [
+        0.4678,
+        0.8845
+       ]
+      }
+     ]
+    },
+    "#6E8C55|0||": {
+     "seasons": [
+      "summer"
+     ],
+     "top": [
+      {
+       "file": "cercis-siliquastrum_1_0_top.webp",
+       "px": [
+        734,
+        768
+       ],
+       "anchor": [
+        0.5109,
+        0.5168
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "cercis-siliquastrum_1_0_oblique.webp",
+       "px": [
+        734,
+        660
+       ],
+       "anchor": [
+        0.5109,
+        0.8514
+       ]
+      }
+     ]
+    },
+    "#C9A23E|0||": {
+     "seasons": [
+      "autumn"
+     ],
+     "top": [
+      {
+       "file": "cercis-siliquastrum_2_0_top.webp",
+       "px": [
+        745,
+        716
+       ],
+       "anchor": [
+        0.4964,
+        0.5233
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "cercis-siliquastrum_2_0_oblique.webp",
+       "px": [
+        745,
+        660
+       ],
+       "anchor": [
+        0.4964,
+        0.8507
+       ]
+      }
+     ]
+    },
+    "#7A6E5E|1||": {
+     "seasons": [
+      "winter"
+     ],
+     "top": [
+      {
+       "file": "cercis-siliquastrum_3_0_top.webp",
+       "px": [
+        768,
+        719
+       ],
+       "anchor": [
+        0.4871,
+        0.5232
+       ]
+      }
+     ],
+     "oblique": [
+      {
+       "file": "cercis-siliquastrum_3_0_oblique.webp",
+       "px": [
+        768,
+        713
+       ],
+       "anchor": [
+        0.4871,
+        0.7984
+       ]
+      }
+     ]
+    }
+   }
   }
  },
  "graded": true

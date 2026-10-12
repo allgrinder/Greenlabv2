@@ -34,6 +34,17 @@ export const ITEMS: CatalogItem[] = [
 
 const BY_ID = new Map(ITEMS.map((i) => [i.id, i]));
 
+/** Was die Bibliothek unter „Bauten & Ausstattung“ anbietet: alles außer Einfassungen (die gibt es an Flächen, Wegen und Beeten) */
+export const LIBRARY_ITEMS = ITEMS.filter((i) => i.category !== 'edging');
+
+/** Einfassungen zur Wahl an Flächen, Wegen und Beeten */
+export const EDGINGS: [string | null, string][] = [
+  [null, 'Ohne'],
+  ['edge.kantenstein-8x20', 'Stein'],
+  ['edge.stahl-anthrazit', 'Stahl'],
+  ['edge.corten', 'Corten'],
+];
+
 export function getItem(id: string): CatalogItem {
   const it = BY_ID.get(id);
   if (!it) throw new Error(`Unbekanntes Katalogobjekt: ${id}`);

@@ -3,6 +3,7 @@
  * Einfassungswahl, Ebenen-Auswahl, Höhenfeld sowie Farben/Symbole für Jahreslauf und Standort.
  */
 import type { Draft } from 'immer';
+import { EDGINGS } from '../../core/catalog/items';
 import { getMaterial } from '../../core/catalog/materials';
 import { elevation, meters, num } from '../../core/format';
 import type { PlanObject, Project } from '../../core/model/types';
@@ -46,14 +47,6 @@ export function MaterialPicker({ o, ids }: { o: Extract<PlanObject, { type: 'are
     </div>
   );
 }
-
-/** Einfassung: keine, Betonstein, Stahl anthrazit oder Cortenstahl */
-export const EDGINGS: [string | null, string][] = [
-  [null, 'Ohne'],
-  ['edge.kantenstein-8x20', 'Stein'],
-  ['edge.stahl-anthrazit', 'Stahl'],
-  ['edge.corten', 'Corten'],
-];
 
 export function EdgingPicker({ o, sides, length }: { o: Extract<PlanObject, { type: 'area' | 'path' | 'planting' }>; sides: 'outline' | 'both'; length: number | null }) {
   const cur = o.edging?.catalogId ?? null;

@@ -68,6 +68,8 @@ interface Edge {
   pts: Vec2[];
   sign: number;
   free: boolean[];
+  /** Rasenkante sichtbar (nicht von einer Fläche, einem Beet oder Weg obenauf verdeckt): dort liegt der Kontaktschatten */
+  shade: boolean[];
   /** Halme hängen in die Fläche hinein (Beet/Kies auf dem Rasen) statt aus dem Rasen heraus */
   inward: boolean;
   planting: boolean;
@@ -187,11 +189,16 @@ export class EdgeLayer {
       // nur Punkte in der Nähe der Änderung neu bewerten
       for (const ed of e.edges) {
         const all = fresh || ed.free.length !== ed.pts.length;
-        if (all) ed.free = new Array(ed.pts.length).fill(false);
+        if (all) {
+          ed.free = new Array(ed.pts.length).fill(false);
+          ed.shade = new Array(ed.pts.length).fill(true);
+        }
         ed.pts.forEach((p, i) => {
           if (!all && !zones.some((z) => inBox(p, z))) return;
           const t = topAt(probeOut(ed.pts, i, ed.sign));
           ed.free[i] = !nearEdging(p) && (ed.inward ? t === 'lawn' : t === null);
+          // liegt etwas auf dem Rasenrand (z. B. ein Holzdeck über dem Rasen), bleibt die Kante darunter unsichtbar
+          if (!ed.inward) ed.shade[i] = topAt(probeOut(ed.pts, i, -ed.sign)) === 'lawn';
         });
       }
       for (const c of e.grass) c.destroy({ children: true });
@@ -215,7 +222,7 @@ export class EdgeLayer {
       e.edges = rings.map((r) => {
         const pts = densify(r.pts, 0.25);
         const sign = outwardSign(pts, r.region);
-        return { pts, sign, free: [], inward: !lawn, planting };
+        return { pts, sign, free: [], shade: [], inward: !lawn, planting };
       });
 
     // Streuung über die Kanten (unter den Halmen)
@@ -253,8 +260,8 @@ export class EdgeLayer {
     const blades = new Container();
     for (const ed of e.edges) {
       const runs = runsOf(ed.pts, ed.free);
-      // Rasenflächen: Schatten entlang der ganzen Kontur; Beete auf dem Rasen nur, wo Rasen angrenzt
-      const shaded = ed.inward ? runs : [{ pts: ed.pts, closed: true }];
+      // Rasenflächen: Schatten entlang der sichtbaren Kontur; Beete auf dem Rasen nur, wo Rasen angrenzt
+      const shaded = ed.inward ? runs : runsOf(ed.pts, ed.shade);
       for (const r of shaded)
         for (const [w, a] of [[0.32, 0.05], [0.18, 0.06], [0.08, 0.08]] as const)
           shade.poly(r.pts.flatMap((p) => [p.x, p.y]), r.closed).stroke({ color: 0x1b240c, alpha: a, width: w, join: 'round', cap: 'round' });

@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "node e2e/smoke.mjs",
+    "e2e:garten": "node e2e/testgarten.mjs",
     "assets:looks": "rolldown scripts/plant-looks.ts --format esm --platform node --file node_modules/.cache/plant-looks.mjs && node node_modules/.cache/plant-looks.mjs"
   },
   "dependencies": {

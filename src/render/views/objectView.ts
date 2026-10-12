@@ -235,7 +235,7 @@ export function buildObjectView(o: PlanObject, ctx: ViewContext): ObjectView {
           if (ctx.season !== 'summer') fillRegions(g, fp, { color: hex(LAWN_COLOR[ctx.season]), alpha: 0.45 });
         }
         // nur das Holzdeck hat eine echte Stirnkante; Kies und Platten enden ohne gemalte Linie
-        if (m.texture === 'wood') strokeRegions(g, fp, { color: 0x7e5c3d, width: 0.045 });
+        if (m.texture === 'wood') strokeRegions(g, fp, { color: 0x6e6152, width: 0.04 });
       }
       // Einfassung als gerendertes Band liegt in der Kanten-Ebene; gemalte Linie nur, bis das Bild geladen ist
       if (o.edging && !edgeStrip(EDGING_STRIP[o.edging.catalogId] ?? '')) strokeRegions(g, fp, { color: 0x8c857a, alpha: 0.75, width: 0.08 });

@@ -10,6 +10,11 @@
 | `npm run typecheck` | TypeScript strikt prüfen |
 | `npm run build` | Produktions-Build nach `dist/` (statisch hostbar) |
 | `npm run e2e` | Browser-Smoke-Test der Kernabläufe aus Phase 1 und 2 (Dev-Server muss laufen; Chromium über `PLAYWRIGHT_CHROMIUM`, andere Adresse über `GW_URL`) |
+| `npm run e2e:garten` | Bildprüfung an einem selbst angelegten Garten (Assistent, dann Rasen, Deck und Platten auf dem Rasen, Rabatte, Trittplatten, Kiesweg mit den Werkzeugen); Bildschirmfotos in `e2e/out/` |
+
+## Grafik prüfen
+
+Jede Änderung an der Darstellung wird an zwei Gärten geprüft: am Mustergarten und an einem Garten, der wie von einem Nutzer mit den Werkzeugen angelegt wird (`npm run e2e:garten`). Der Mustergarten ist sauber gebaut (Rasen um alle Flächen ausgeschnitten); eigene Gärten haben überlappende Flächen, Beete auf dem Rasen und Wege quer darüber. Alles, was im Mustergarten zu sehen ist – Laub und Steine im Gras, Rasenwolken, Kanten, Halme –, entsteht für jede Fläche gleich und gilt für jeden Garten.
 
 ## Nützliche URLs
 

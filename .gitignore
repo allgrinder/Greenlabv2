@@ -3,3 +3,4 @@ dist
 *.tsbuildinfo
 __pycache__
 .venv-blender
+e2e/out

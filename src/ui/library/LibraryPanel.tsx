@@ -4,6 +4,7 @@
  */
 import { useMemo, useState } from 'react';
 import { LIBRARY_ITEMS } from '../../core/catalog/items';
+import { ITEM_FALLBACK } from '../../render/symbols/itemFallbacks';
 import { PLANTS } from '../../core/catalog/plants';
 import type { CatalogItem, PlantKind } from '../../core/model/types';
 import { useEditor } from '../../state';
@@ -88,7 +89,7 @@ function useSections() {
       const items: Entry[] = LIBRARY_ITEMS.filter((i) => cats.includes(i.category)).map((i) => ({
         key: `item:${i.id}`,
         name: i.name.replace(/ \(.*$/, '').replace(/ \d.*$/, '').replace(/,.*$/, ''),
-        src: glyphSrc(SYMBOL_GLYPH[i.symbol] ?? 'edge'),
+        src: glyphSrc(SYMBOL_GLYPH[i.symbol] ?? SYMBOL_GLYPH[ITEM_FALLBACK[i.symbol]] ?? 'edge'),
         brush: { kind: 'item', catalogId: i.id } as Brush,
         search: i.name.toLowerCase(),
         filter: (i.category === 'pond' || i.category === 'pool' || i.category === 'water' ? ['all', 'build', 'water'] : ['all', 'build']) as Filter[],

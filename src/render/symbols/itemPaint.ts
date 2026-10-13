@@ -12,6 +12,7 @@ import { lounger, table } from './itemFurniture';
 import { barrel, compost, planter, raisedBed } from './itemGarden';
 import { play, pool } from './itemLeisure';
 import type { Painter } from './itemPrimitives';
+import { ITEM_FALLBACK } from './itemFallbacks';
 
 export { gableFaces, hipFaces } from './itemRoofs';
 
@@ -33,7 +34,7 @@ export function paintItem(symbol: string, w: number, d: number, seed: number): H
   c.width = Math.max(4, Math.round(w * ppm));
   c.height = Math.max(4, Math.round(d * ppm));
   const g = c.getContext('2d')!;
-  (PAINTERS[symbol] ?? edge)(g, c.width, c.height, ppm, prng(seed));
+  (PAINTERS[symbol] ?? PAINTERS[ITEM_FALLBACK[symbol]] ?? edge)(g, c.width, c.height, ppm, prng(seed));
   return c;
 }
 
@@ -57,6 +58,8 @@ export interface ItemSolid {
 }
 
 export function itemSolid(symbol: string, h: number): ItemSolid {
+  // neue Objekte: Körper ihres Platzhalters, bis das Blender-Bild geladen ist
+  if (ITEM_FALLBACK[symbol]) return itemSolid(ITEM_FALLBACK[symbol], h);
   switch (symbol) {
     case 'house':
       return { kind: 'box', eave: h * 0.6, roof: 'hip', wall: '#e8e1d2', windows: 'house' };

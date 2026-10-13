@@ -1094,7 +1094,7 @@ def vegetable(sp: dict, look: dict, seed: int):
         for i in range(4):
             a = rnd.random() * math.tau
             d = rnd.random() * R * 0.4
-            b = blob(f"z{i}", Vector((math.cos(a) * d * 0.7, math.sin(a) * d * 0.7, 0.2)), R * 0.33, rnd, 0.6)
+            b = blob(f"z{i}", Vector((math.cos(a) * d * 0.5, math.sin(a) * d * 0.5, 0.2)), R * 0.26, rnd, 0.6)
             emit(b, leaf, 55, rnd.randint(1, 99999))
             emit(b, flower_obj("#E9B52E", 0.05, "lily"), 2, rnd.randint(1, 99999), 0.3, False)
         return

@@ -129,13 +129,43 @@ def leaf_obj(material: bpy.types.Material, size: float, shape: str = "oval") -> 
         outline = [(0, -s * 0.9, 0)] + [(math.sin(a) * s * 0.75, math.cos(a) * s * 0.85, s * 0.12 * math.cos(a) ** 2) for a in [i * math.pi / 5 for i in range(1, 10)]]
     elif shape == "big":  # Hortensie, Kürbis: breit, gewellt
         outline = [(0, -s, 0), (s * 0.7, -s * 0.4, s * 0.2), (s * 0.8, s * 0.4, s * 0.12), (s * 0.4, s * 0.95, 0), (0, s * 1.2, -s * 0.1), (-s * 0.4, s * 0.95, 0), (-s * 0.8, s * 0.4, s * 0.12), (-s * 0.7, -s * 0.4, s * 0.2)]
+    elif shape == "heart":  # Judasbaum: breit-rund mit Einbuchtung am Stiel
+        outline = [(0, -s * 0.55, 0)] + [(math.sin(a) * s * 0.85, -math.cos(a) * s * 0.8 + s * 0.15, s * 0.1 * math.sin(a) ** 2) for a in [i * math.pi / 7 for i in range(1, 7)]] + [(0, s * 1.05, 0)] + [(-math.sin(a) * s * 0.85, -math.cos(a) * s * 0.8 + s * 0.15, s * 0.1 * math.sin(a) ** 2) for a in [i * math.pi / 7 for i in range(6, 0, -1)]]
+    elif shape == "lobed":  # Roteiche: tiefe, spitze Lappen
+        right = []
+        for i in range(1, 10):
+            t = i / 10
+            w = (0.25 + 0.55 * math.sin(math.pi * t)) * (1.0 if i % 2 else 0.45)
+            right.append((s * w, -s + 2.1 * s * t, s * 0.06 * (1 - abs(0.5 - t))))
+        outline = [(0, -s, 0)] + right + [(0, s * 1.15, 0)] + [(-x, y, z) for x, y, z in reversed(right)]
     else:
         outline = [(0, -s, 0), (s * 0.42, -s * 0.45, s * 0.12), (s * 0.5, s * 0.2, s * 0.14), (s * 0.28, s * 0.75, s * 0.06), (0, s * 1.15, -s * 0.08), (-s * 0.28, s * 0.75, s * 0.06), (-s * 0.5, s * 0.2, s * 0.14), (-s * 0.42, -s * 0.45, s * 0.12)]
+    # zusammengesetzte Blätter: mehrere Teilblätter (je eine Fläche um ihren Mittelpunkt)
+    parts: list[list[tuple[float, float, float]]] = []
+    if shape == "palmate":  # Rosskastanie: 7 Teilblätter, fingerförmig vom Stielende
+        for k in range(7):
+            a = (k - 3) * 0.42
+            ln = s * (1.0 - 0.12 * abs(k - 3))
+            leaflet = [(0, 0, 0), (ln * 0.22, ln * 0.35, ln * 0.05), (ln * 0.3, ln * 0.75, ln * 0.06), (0, ln * 1.05, 0), (-ln * 0.3, ln * 0.75, ln * 0.06), (-ln * 0.22, ln * 0.35, ln * 0.05)]
+            parts.append([(x * math.cos(a) + y * math.sin(a), -x * math.sin(a) + y * math.cos(a) - s * 0.3, z) for x, y, z in leaflet])
+    elif shape == "pinnate":  # Walnuss: 7 Fiederblättchen an einer Spindel
+        for k in range(7):
+            side = 0 if k == 6 else (1 if k % 2 == 0 else -1)
+            y0 = -s + (k // 2) * s * 0.55 if side else s * 0.7
+            ln = s * (0.42 + 0.06 * (k // 2)) if side else s * 0.5
+            a = side * 1.05
+            leaflet = [(0, 0, 0), (ln * 0.25, ln * 0.4, ln * 0.04), (0, ln, 0), (-ln * 0.25, ln * 0.4, ln * 0.04)]
+            parts.append([(x * math.cos(a) + y * math.sin(a), -x * math.sin(a) + y * math.cos(a) + y0, z + s * 0.02) for x, y, z in leaflet])
+    else:
+        parts.append(outline)
     bm = bmesh.new()
-    vs = [bm.verts.new(v) for v in outline]
-    mid = bm.verts.new((0, 0, s * 0.03))
-    for i in range(len(vs)):
-        bm.faces.new((mid, vs[i], vs[(i + 1) % len(vs)]))
+    for outline in parts:
+        vs = [bm.verts.new(v) for v in outline]
+        cx = sum(v[0] for v in outline) / len(outline)
+        cy = sum(v[1] for v in outline) / len(outline)
+        mid = bm.verts.new((cx, cy, s * 0.03))
+        for i in range(len(vs)):
+            bm.faces.new((mid, vs[i], vs[(i + 1) % len(vs)]))
     me = bpy.data.meshes.new(name)
     bm.to_mesh(me)
     bm.free()
@@ -347,6 +377,10 @@ TREES = {
     "acer-globosum": dict(shape="globe", stem=0.45, leaf=0.075, form="round", dens=230, multi=1),
     "liquidambar": dict(shape="oval", stem=0.3, leaf=0.08, form="round", dens=170, multi=1),
     "carpinus-betulus": dict(shape="oval", stem=0.22, leaf=0.05, form="oval", dens=220, multi=1),
+    "aesculus-hippocastanum": dict(shape="oval", stem=0.24, leaf=0.12, form="palmate", dens=110, multi=1, candles=True),
+    "juglans-regia": dict(shape="spread", stem=0.3, leaf=0.11, form="pinnate", dens=110, multi=1),
+    "quercus-rubra": dict(shape="round", stem=0.27, leaf=0.09, form="lobed", dens=150, multi=1),
+    "cercis-siliquastrum": dict(shape="spread", stem=0.18, leaf=0.05, form="heart", dens=200, multi=4),
 }
 SHRUBS = {
     "hydrangea": dict(shape="mound", leaf=0.09, form="big", dens=130, heads=("ball", 0.2, 30)),
@@ -495,7 +529,7 @@ def _crown_tips(br, tops, R, ch, zc, shape, p, look, rnd, trunk_r, envelope_poin
         tries += 1
         c = envelope_point()
         rel = Vector(((c.x) / R, (c.y) / R, (c.z - zc) / max(ch, 0.1)))
-        if rel.length < 0.45 and rnd.random() < 0.7:  # innen weniger Laub (dort ist es dunkel)
+        if rel.length < 0.45 and rnd.random() < (0.15 if p.get("fill") else 0.7):  # innen weniger Laub (dort ist es dunkel); kleine Kronen bleiben geschlossen
             continue
         if rnd.random() < 0.08:  # Ausreißer: Zweig ragt über die Hülle
             c = Vector((c.x * 1.18, c.y * 1.18, zc + (c.z - zc) * 1.12))
@@ -528,22 +562,40 @@ def _crown_tips(br, tops, R, ch, zc, shape, p, look, rnd, trunk_r, envelope_poin
         else:
             twigs(br, c, tip_r * 0.9, rnd, 2, rr * 0.35, 1, along=c - m)
     if look["bare"]:
+        if look.get("bloom"):
+            # Blüte am kahlen Holz (Judasbaum): dichte Büschel kleiner Blüten entlang der Zweigspitzen
+            fl = flower_obj(look["bloom"], 0.03, "ball")
+            pts = []
+            for c in tips:
+                for _ in range(90):
+                    d = Vector((rnd.uniform(-1, 1), rnd.uniform(-1, 1), rnd.uniform(-0.6, 1)))
+                    pts.append(c + d * tip_r * rnd.uniform(0.2, 1.5))
+            emit_verts(point_cloud("bareBloom", pts), fl, len(pts), rnd.randint(1, 99999), 0.45)
         return
     lm = leaf_material(look["color"])
     ls = max(p["leaf"] * 0.85, R * 0.008)
     spray = leaf_spray(lm, ls, p["form"])
-    bloom = flower_obj(look["bloom"], ls * 0.6, "saucer") if look.get("bloom") else None
+    if look.get("bloom") and p.get("candles"):
+        # Rosskastanie: aufrechte weiße Blütenkerzen über dem Laub
+        bloom = flower_obj(look["bloom"], ls * 0.9, "ball")
+    else:
+        bloom = flower_obj(look["bloom"], ls * 0.6, "saucer") if look.get("bloom") else None
     fruit = flower_obj(look["fruit"], 0.035, "ball") if look.get("fruit") else None
-    extra = ([(bloom, 2.5)] if bloom else []) + ([(fruit, 0.04)] if fruit else [])
+    extra = ([(bloom, 3.2 if p.get("candles") else 2.5)] if bloom else []) + ([(fruit, 0.04)] if fruit else [])
     spray_area = 7 * 0.7 * ls * ls
-    pts = crown_points(R, ch, zc, shape, rnd, spray_area)
+    pts = crown_points(R, ch, zc, shape, rnd, spray_area, n_min=46, sep=0.42, rrange=(0.11, 0.19), cov=3.4) if p.get("fill") else crown_points(R, ch, zc, shape, rnd, spray_area)
     cloud = point_cloud("leafcloud", pts)
     emit_verts(cloud, spray, len(pts), rnd.randint(1, 99999))
     for inst, share in extra:
         sub = point_cloud("extra", [q for q in pts if q.z > zc and rnd.random() < share / 7])
         emit_verts(sub, inst, len(sub.data.vertices), rnd.randint(1, 99999), 0.4)
-    # dunkler Kern gegen Durchblick in der Mitte
-    blob("core", Vector((0, 0, zc)), R * 0.5, rnd, ch / max(R, 0.1) * 0.9, look["color"])
+    # dunkler Kern gegen Durchblick in der Mitte (kleine, dicht gefüllte Kronen brauchen ihn nicht – er schiene durch)
+    if not p.get("fill"):
+        core = blob("core", Vector((0, 0, zc)), R * 0.5, rnd, ch / max(R, 0.1) * 0.9, look["color"])
+        if R < 4.5:
+            # kleine Kronen: zwischen den Laubmassen sähe man sonst die glatte Kugel – sie bekommt selbst Blattzweige (etwas dunkler, innen)
+            area = 4 * math.pi * (R * 0.5) ** 2
+            emit(core, leaf_spray(leaf_material(look["color"], 0.8), ls, p["form"]), area / spray_area * 2.2, rnd.randint(1, 99999))
 
 
 def crown_points(R: float, ch: float, zc: float, shape: str, rnd: random.Random, spray_area: float, n_min: int = 14, sep: float = 0.68, rrange: tuple[float, float] = (0.17, 0.3), cov: float = 2.6) -> list[Vector]:

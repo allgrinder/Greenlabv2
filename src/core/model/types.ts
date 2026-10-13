@@ -505,6 +505,8 @@ export interface PlantSpecies {
   price: number;
   /** hält trockenes Laub im Winter (Hainbuche, Buche) – Sichtschutz bleibt teilweise */
   marcescent?: boolean;
+  /** blüht vor dem Laubaustrieb am kahlen Holz (Judasbaum): im Frühling kahl mit Blüte */
+  bloomOnBareWood?: boolean;
 }
 
 export interface CatalogItem {

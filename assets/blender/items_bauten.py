@@ -28,7 +28,7 @@ _WOOD = {
     "thermo": ((0.13, 0.068, 0.034), (0.27, 0.155, 0.08)),  # Thermo-Kiefer, warmes Dunkelbraun
     "thermo_grey": ((0.12, 0.11, 0.095), (0.24, 0.225, 0.2)),  # vergrautes Thermoholz
     "larch_oiled": ((0.22, 0.115, 0.05), (0.42, 0.25, 0.12)),  # Lärche frisch geölt (Schneidebrett, Akzente)
-    "silver": ((0.2, 0.19, 0.17), (0.4, 0.38, 0.34)),  # silbergrau verwittertes Holz (Schuppen, Stall)
+    "silver": ((0.27, 0.26, 0.235), (0.5, 0.48, 0.44)),  # silbergrau verwittertes Holz (Schuppen, Stall)
 }
 
 
@@ -150,7 +150,7 @@ def xmat(kind: str) -> bpy.types.Material:
     elif kind == "trapez":  # anthrazit Trapezblech, Rippen in Plan-y
         m, b = lib._principled(kind)
         nt = m.node_tree
-        b.inputs["Base Color"].default_value = (0.04, 0.039, 0.037, 1)
+        lib._color_noise(m, b, (0.032, 0.031, 0.029), (0.052, 0.05, 0.047), 1.3)
         b.inputs["Metallic"].default_value = 0.35
         b.inputs["Roughness"].default_value = 0.45
         tc = nt.nodes.new("ShaderNodeTexCoord")
@@ -215,7 +215,10 @@ def xmat(kind: str) -> bpy.types.Material:
         b.inputs["Emission Strength"].default_value = 2.0
         ao = False
     elif kind.rsplit("_", 1)[0] in _WOOD and kind.rsplit("_", 1)[-1] in ("x", "y", "z"):
+        # Latten liegen dicht an dicht: kurze Verdeckungsreichweite, sonst wird die ganze Wand schwarz
         m, b = _wood(kind, kind.rsplit("_", 1)[-1])
+        lib._ao(m, 0.55, 0.06)
+        ao = False
     else:
         return lib.mat(kind)
     if ao:

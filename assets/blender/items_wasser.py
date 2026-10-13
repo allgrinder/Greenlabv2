@@ -507,7 +507,6 @@ def climber_on(name: str, paths: list[list[Vector]], rr: random.Random, leaf_hex
     spray_area = 5 * 0.7 * leaf_size**2
     n = area * coverage / spray_area
     pl.emit(core, spray, n, rr.randint(1, 99999), 0.5, random_rot=1.0)
-    pl.emit(core, pl.leaf_obj(lm, leaf_size, "oval"), n * 1.2, rr.randint(1, 99999), 0.5, random_rot=1.0)
     pl.emit(core, spray, n * 0.25, rr.randint(1, 99999), 0.5, volume=True, random_rot=1.0)
     for hex_, size, kind, per_m2 in blooms:
         fl = _rose_obj(pl, hex_, size) if kind == "rose" else pl.flower_obj(hex_, size, kind)

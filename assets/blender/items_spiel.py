@@ -175,10 +175,11 @@ def _cm(kind: str) -> str:
     elif kind == "straw":  # trockene Halme, Grasrispen
         _color_noise(m, b, (0.36, 0.28, 0.14), (0.52, 0.42, 0.24), 25)
         b.inputs["Roughness"].default_value = 0.8
-    elif kind == "plume":  # Blütenstände Lampenputzergras
-        _color_noise(m, b, (0.4, 0.33, 0.24), (0.55, 0.47, 0.36), 18)
+    elif kind == "plume":  # Blütenstände Lampenputzergras, rötlich-beige
+        _color_noise(m, b, (0.32, 0.24, 0.18), (0.48, 0.38, 0.3), 18)
         b.inputs["Roughness"].default_value = 0.95
         b.inputs["Sheen Weight"].default_value = 0.6
+        _bump(m, b, 500, 0.7)  # fedrige Oberfläche
     elif kind == "endgrain":  # Hirnholz mit Jahresringen (um die Mitte der Scheibe)
         tc = nt.nodes.new("ShaderNodeTexCoord")
         sub = nt.nodes.new("ShaderNodeVectorMath")
@@ -409,8 +410,8 @@ def _grass(name: str, cx: float, cy: float, z: float, height: float, spread: flo
     for _ in range(n):
         a = r.uniform(0, TAU)
         L = height * r.uniform(0.75, 1.25)
-        tilt0 = r.uniform(0.05, 0.55) * spread  # Startneigung aus der Senkrechten
-        bend = r.uniform(0.5, 1.4) * spread  # zusätzliche Biegung bis zur Spitze
+        tilt0 = r.uniform(0.0, 0.6) ** 1.5 * spread  # Startneigung aus der Senkrechten (innen steiler)
+        bend = (0.6 + tilt0 * 2.2 + r.uniform(0, 0.5)) * spread  # überhängend: äußere Halme biegen stärker
         hx, hy = math.cos(a), math.sin(a)
         rad0 = r.uniform(0.0, 0.05)
         pos = Vector((cx + hx * rad0, cy + hy * rad0, z))
@@ -441,15 +442,16 @@ def _grass(name: str, cx: float, cy: float, z: float, height: float, spread: flo
         stems = _Batch(name + "_stem", _cm("straw"), True, False)
         for _ in range(plumes):
             a = r.uniform(0, TAU)
-            tilt = r.uniform(0.15, 0.75) * spread
-            L = height * r.uniform(1.0, 1.35)
+            tilt = r.uniform(0.2, 0.85) * spread
+            L = height * r.uniform(0.95, 1.25)
             base = P(cx + math.cos(a) * 0.03, cy + math.sin(a) * 0.03, z)
             dvec = Vector((math.cos(a) * math.sin(tilt), -math.sin(a) * math.sin(tilt), math.cos(tilt)))
             top = base + dvec * L
-            stems.rod(base, top, 0.0025, 5)
-            # Ähre: gestrecktes Ellipsoid entlang der Halmrichtung, leicht nickend
-            q = dvec.to_track_quat("Z", "Y").to_matrix()
-            bt.blob(top + dvec * 0.06, 0.022, (1, 1, 4.2), 2, 0.25, r.randint(1, 999), q)
+            stems.rod(base, top, 0.0018, 5)
+            # Ähre (Flaschenbürste): schlankes, nickendes Ellipsoid in Verlängerung des Halms
+            nod = Vector((dvec.x, dvec.y, dvec.z - 0.35)).normalized()
+            q = nod.to_track_quat("Z", "Y").to_matrix()
+            bt.blob(top + nod * 0.045, 0.012, (1, 1, 4.5), 3, 0.0, 0, q)
         bt.build()
         stems.build()
     return ob
@@ -1083,9 +1085,9 @@ def planter_large(w: float, d: float, h: float):
     zs = h - 0.07
     box("mulch", -w / 2 + t + 0.004, -d / 2 + t + 0.004, h - 0.12, w / 2 - t - 0.004, d / 2 - t - 0.004, zs, _cm("bark_mulch"))
     # Lampenputzergras (Pennisetum) in der Mitte: drei Halmobjekte für Farbschwankung, Blütenähren
-    _grass("grass_a", 0.02, -0.02, zs, 0.55, 1.0, 420, 5, "leaf", 0.008, 0)
-    _grass("grass_b", -0.02, 0.03, zs, 0.6, 0.85, 320, 9, "leaf_light", 0.007, 0)
-    _grass("grass_c", 0.0, 0.0, zs, 0.5, 1.15, 220, 13, "leaf_sedum", 0.007, 34)
+    _grass("grass_a", 0.02, -0.02, zs, 0.6, 1.0, 700, 5, "leaf", 0.0055, 0)
+    _grass("grass_b", -0.02, 0.03, zs, 0.65, 0.9, 500, 9, "leaf_light", 0.005, 0)
+    _grass("grass_c", 0.0, 0.0, zs, 0.55, 1.1, 350, 13, "leaf_sedum", 0.005, 55)
     # Unterpflanzung: Polster in den Ecken, teils über den Rand hängend
     r = rng(21)
     for (cx, cy) in ((-0.32, -0.32), (0.32, -0.32), (0.33, 0.33), (-0.33, 0.32)):

@@ -108,6 +108,35 @@ def _cm(kind: str) -> str:
     if kind in ("larch_x", "larch_y"):  # Lärche wie wood_natural, aber durchgehende Bretter mit Maserung entlang x bzw. y
         _planks(m, b, (0.17, 0.11, 0.065), (0.32, 0.22, 0.14), 40.0, (0.05, 0.035, 0.02), ("Y",) if kind == "larch_x" else ("X",))
         b.inputs["Roughness"].default_value = 0.78
+    elif kind == "corten_aged":  # gealterter Cortenstahl: dunkles Rotbraun, fleckig, Ablaufspuren senkrecht
+        tc = nt.nodes.new("ShaderNodeTexCoord")
+        mp = nt.nodes.new("ShaderNodeMapping")
+        mp.inputs["Scale"].default_value = (1.0, 1.0, 0.12)  # senkrecht gestreckt → Laufspuren
+        nt.links.new(tc.outputs["Object"], mp.inputs["Vector"])
+        nz = nt.nodes.new("ShaderNodeTexNoise")
+        nz.inputs["Scale"].default_value = 30
+        nz.inputs["Detail"].default_value = 6
+        nt.links.new(mp.outputs["Vector"], nz.inputs["Vector"])
+        nz2 = nt.nodes.new("ShaderNodeTexNoise")
+        nz2.inputs["Scale"].default_value = 9
+        nz2.inputs["Detail"].default_value = 10
+        nt.links.new(tc.outputs["Object"], nz2.inputs["Vector"])
+        mx = nt.nodes.new("ShaderNodeMix")
+        mx.inputs["Factor"].default_value = 0.5
+        nt.links.new(nz.outputs["Fac"], mx.inputs["A"])
+        nt.links.new(nz2.outputs["Fac"], mx.inputs["B"])
+        ramp = nt.nodes.new("ShaderNodeValToRGB")
+        ramp.color_ramp.elements[0].position = 0.35
+        ramp.color_ramp.elements[0].color = (0.05, 0.018, 0.008, 1)
+        ramp.color_ramp.elements[1].position = 0.7
+        ramp.color_ramp.elements[1].color = (0.2, 0.065, 0.02, 1)
+        e = ramp.color_ramp.elements.new(0.52)
+        e.color = (0.12, 0.04, 0.014, 1)
+        nt.links.new(mx.outputs["Result"], ramp.inputs["Fac"])
+        nt.links.new(ramp.outputs["Color"], b.inputs["Base Color"])
+        b.inputs["Roughness"].default_value = 0.9
+        b.inputs["Metallic"].default_value = 0.1
+        _bump(m, b, 220, 0.18)
     elif kind == "granite":  # grauer Granit: Feldspat hell/rötlich, Glimmer dunkel, leichte Moosflecken oben
         mix = _speckle(
             m, b, (0.2, 0.195, 0.185), (0.3, 0.29, 0.27),
@@ -1001,39 +1030,30 @@ def corten_sculpture(w: float, d: float, h: float):
     zp = 0.08
     box("plinth", -w / 2 + 0.04, -d / 2 + 0.04, 0, w / 2 - 0.04, d / 2 - 0.04, zp, "basalt", 0.008)
     box("plinth_top", -w / 2 + 0.06, -d / 2 + 0.06, zp, w / 2 - 0.06, d / 2 - 0.06, zp + 0.008, "basalt_cut", 0.003)
-    n = 80
+    # Stele: Flachstahl 30 mm, um 120° verdreht, nach oben schmaler; Kanten leicht gefast, oben gerade gesägt
+    n = 90
     bm = bmesh.new()
     rings = []
     for i in range(n + 1):
         t = i / n
         z = zp + 0.008 + (h - zp - 0.008) * t
-        wid = (min(w, d) * 0.42) * (1 - 0.45 * t) * (1 + 0.12 * math.sin(t * math.pi))
-        thk = 0.05 * (1 - 0.4 * t)
-        ang = math.radians(25) + t * math.pi * 0.85
+        wid = min(w, d) * 0.4 * (1 - 0.38 * t)
+        thk = 0.015
+        ch = 0.004
+        ang = math.radians(20) + t * math.radians(120)
         ca, sa = math.cos(ang), math.sin(ang)
-        # Querschnitt: flaches Linsenprofil (gerundete Kanten)
-        sec = []
-        for k in range(16):
-            a = k / 16 * TAU
-            px = math.cos(a) * wid
-            py = math.sin(a) * thk * (abs(math.cos(a)) ** 0.0 if abs(math.sin(a)) > 0.2 else 1)
-            py = math.copysign(abs(math.sin(a)) ** 0.6, math.sin(a)) * thk
-            px = math.copysign(abs(math.cos(a)) ** 0.35, math.cos(a)) * wid
-            sec.append((px * ca - py * sa, px * sa + py * ca))
-        # Spitze: Linse schließt sich
-        if i == n:
-            sec = [(x * 0.15, y * 0.15) for x, y in sec]
-        rings.append([bm.verts.new(P(x, y, z)) for x, y in sec])
+        sec = [(wid, thk - ch), (wid - ch, thk), (-wid + ch, thk), (-wid, thk - ch), (-wid, -thk + ch), (-wid + ch, -thk), (wid - ch, -thk), (wid, -thk + ch)]
+        rings.append([bm.verts.new(P(x * ca - y * sa, x * sa + y * ca, z)) for x, y in sec])
+    m_ = len(rings[0])
     for i in range(n):
-        for k in range(16):
-            bm.faces.new((rings[i][k], rings[i][(k + 1) % 16], rings[i + 1][(k + 1) % 16], rings[i + 1][k]))
+        for k in range(m_):
+            bm.faces.new((rings[i][k], rings[i][(k + 1) % m_], rings[i + 1][(k + 1) % m_], rings[i + 1][k]))
     bm.faces.new(list(reversed(rings[0])))
     bm.faces.new(rings[-1])
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    ob = _obj("blade", bm, "corten", True)
-    sub = ob.modifiers.new("s", "SUBSURF")
-    sub.levels = 1
-    sub.render_levels = 1
+    _obj("blade", bm, _cm("corten_aged"), True)
+    # Fußplatte der Stele, auf den Sockel geschraubt
+    box("foot", -0.1, -0.1, zp + 0.008, 0.1, 0.1, zp + 0.02, _cm("corten_aged"), 0.002)
 
 
 def planter_large(w: float, d: float, h: float):

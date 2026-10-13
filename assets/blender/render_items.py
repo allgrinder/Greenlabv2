@@ -36,6 +36,12 @@ def catalog_sizes() -> dict[str, tuple[float, float, float]]:
     for m in re.finditer(r"width: ([\d.]+), depth: ([\d.]+), height: ([\d.]+), symbol: '(\w+)'", src):
         w, d, h, sym = float(m[1]), float(m[2]), float(m[3]), m[4]
         out.setdefault(sym, (w, d, h))
+    # neue Objektgruppen, die noch nicht im Katalog stehen: Maße aus assets/blender/catalog_<gruppe>.json
+    import glob
+
+    for path in sorted(glob.glob(os.path.join(ROOT, "assets/blender/catalog_*.json"))):
+        for e in json.load(open(path, encoding="utf-8")):
+            out.setdefault(e["symbol"], (float(e["width"]), float(e["depth"]), float(e["height"])))
     return out
 
 

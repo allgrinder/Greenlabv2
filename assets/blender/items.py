@@ -768,3 +768,13 @@ GENERATORS = {
     "basaltColumns": basalt_columns,
     "deckBench": deck_bench,
 }
+
+# Weitere Objektgruppen in eigenen Modulen (items_<gruppe>.py), je mit eigenem GENERATORS-Verzeichnis
+import importlib  # noqa: E402
+
+for _mod in ("items_bauten", "items_moebel", "items_spiel", "items_wasser", "items_zaun"):
+    try:
+        GENERATORS.update(importlib.import_module(_mod).GENERATORS)
+    except ModuleNotFoundError as _e:
+        if _e.name != _mod:
+            raise

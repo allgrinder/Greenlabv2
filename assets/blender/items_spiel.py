@@ -19,7 +19,7 @@ import bpy
 from mathutils import Matrix, Vector, noise
 
 import lib
-from lib import P, _ao, _bump, _color_noise, _principled, box, cylinder, foliage_ball, foliage_carpet, link, mat, plate, rng
+from lib import P, _ao, _bump, _color_noise, _planks, _principled, box, cylinder, foliage_ball, foliage_carpet, link, mat, plate, rng
 
 TAU = math.tau
 
@@ -105,7 +105,10 @@ def _cm(kind: str) -> str:
         return kind
     m, b = _principled(kind)
     nt = m.node_tree
-    if kind == "granite":  # grauer Granit: Feldspat hell/rötlich, Glimmer dunkel, leichte Moosflecken oben
+    if kind in ("larch_x", "larch_y"):  # Lärche wie wood_natural, aber durchgehende Bretter mit Maserung entlang x bzw. y
+        _planks(m, b, (0.17, 0.11, 0.065), (0.32, 0.22, 0.14), 40.0, (0.05, 0.035, 0.02), ("Y",) if kind == "larch_x" else ("X",))
+        b.inputs["Roughness"].default_value = 0.78
+    elif kind == "granite":  # grauer Granit: Feldspat hell/rötlich, Glimmer dunkel, leichte Moosflecken oben
         mix = _speckle(
             m, b, (0.2, 0.195, 0.185), (0.3, 0.29, 0.27),
             [(0.0, (0.55, 0.55, 0.56)), (0.18, (0.8, 0.8, 0.8)), (0.6, (1.0, 1.0, 1.0)), (0.88, (1.08, 0.98, 0.9)), (0.96, (0.35, 0.35, 0.37))],
@@ -234,6 +237,7 @@ def _obj(name: str, bm: bmesh.types.BMesh, material: str, smooth: bool = False, 
     if smooth:
         for p in me.polygons:
             p.use_smooth = True
+        me.set_sharp_from_angle(angle=math.radians(40))  # Deckel und Kanten bleiben hart
     return ob
 
 
@@ -426,28 +430,29 @@ def _grass(name: str, cx: float, cy: float, z: float, height: float, spread: flo
 
 
 def sandbox(w: float, d: float, h: float):
-    """Sandkasten aus Lärche: Bohlenrahmen, umlaufende Sitzkante, Deckel als Bank mit Lehne (Nordseite), Sand mit Spuren"""
+    """Sandkasten aus Lärche: Bohlenrahmen, umlaufende Sitzkante, Deckel als Bank mit Lehne (Nordseite), Sand mit Burg und Spuren"""
+    lx, ly = _cm("larch_x"), _cm("larch_y")
     t = 0.045  # Bohlenstärke
     bh = (h - 0.03) / 2
     # zwei Bohlen je Seite, an den Ecken überlappend
     for k in range(2):
         z0 = k * bh
-        box("plank_n", -w / 2, -d / 2, z0 + 0.003, w / 2, -d / 2 + t, z0 + bh - 0.003, "wood_natural", 0.005)
-        box("plank_s", -w / 2, d / 2 - t, z0 + 0.003, w / 2, d / 2, z0 + bh - 0.003, "wood_natural", 0.005)
-        box("plank_w", -w / 2 + 0.002, -d / 2 + t, z0 + 0.003, -w / 2 + t, d / 2 - t, z0 + bh - 0.003, "wood_natural", 0.005)
-        box("plank_e", w / 2 - t, -d / 2 + t, z0 + 0.003, w / 2 - 0.002, d / 2 - t, z0 + bh - 0.003, "wood_natural", 0.005)
+        box("plank_n", -w / 2, -d / 2, z0 + 0.003, w / 2, -d / 2 + t, z0 + bh - 0.003, lx, 0.005)
+        box("plank_s", -w / 2, d / 2 - t, z0 + 0.003, w / 2, d / 2, z0 + bh - 0.003, lx, 0.005)
+        box("plank_w", -w / 2 + 0.002, -d / 2 + t, z0 + 0.003, -w / 2 + t, d / 2 - t, z0 + bh - 0.003, ly, 0.005)
+        box("plank_e", w / 2 - t, -d / 2 + t, z0 + 0.003, w / 2 - 0.002, d / 2 - t, z0 + bh - 0.003, ly, 0.005)
     for sx in (-1, 1):
         for sy in (-1, 1):
             x = sx * (w / 2 - t) - (0.07 if sx > 0 else 0)
             y = sy * (d / 2 - t) - (0.07 if sy > 0 else 0)
-            box("corner", x, y, 0, x + 0.07, y + 0.07, h - 0.03, "wood_natural", 0.004)
-    # Sitzkante: 4 Bretter 16 cm, Gehrung angedeutet durch Fuge
+            box("corner", x, y, 0, x + 0.07, y + 0.07, h - 0.03, ly, 0.004)
+    # Sitzkante: 4 Bretter 16 cm mit Fugen an den Ecken
     s = 0.16
     zc0, zc1 = h - 0.03, h
-    box("seat_s", -w / 2 - 0.01, d / 2 - s, zc0, w / 2 + 0.01, d / 2 + 0.01, zc1, "wood_natural", 0.006)
-    box("seat_w", -w / 2 - 0.01, -d / 2 + s + 0.006, zc0, -w / 2 + s, d / 2 - s - 0.006, zc1, "wood_natural", 0.006)
-    box("seat_e", w / 2 - s, -d / 2 + s + 0.006, zc0, w / 2 + 0.01, d / 2 - s - 0.006, zc1, "wood_natural", 0.006)
-    box("seat_n", -w / 2 - 0.01, -d / 2 - 0.01, zc0, w / 2 + 0.01, -d / 2 + s, zc1, "wood_natural", 0.006)
+    box("seat_s", -w / 2 - 0.01, d / 2 - s, zc0, w / 2 + 0.01, d / 2 + 0.01, zc1, lx, 0.006)
+    box("seat_w", -w / 2 - 0.01, -d / 2 + s + 0.006, zc0, -w / 2 + s, d / 2 - s - 0.006, zc1, ly, 0.006)
+    box("seat_e", w / 2 - s, -d / 2 + s + 0.006, zc0, w / 2 + 0.01, d / 2 - s - 0.006, zc1, ly, 0.006)
+    box("seat_n", -w / 2 - 0.01, -d / 2 - 0.01, zc0, w / 2 + 0.01, -d / 2 + s, zc1, lx, 0.006)
     # Eckbänke (Dreieck) an den südlichen Ecken
     for sx in (-1, 1):
         x0 = sx * (w / 2 - s)
@@ -463,52 +468,69 @@ def sandbox(w: float, d: float, h: float):
         for i in range(3):
             bm.faces.new((bot[i], bot[(i + 1) % 3], top[(i + 1) % 3], top[i]))
         bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-        _obj("cornerseat", bm, "wood_natural")
+        _obj("cornerseat", bm, lx)
     # Bankdeckel: Sitzfläche aus Latten über der Nordkante, Lehne schräg nach hinten
     lat = 0.09
     gap = 0.012
     yb = -d / 2 + s + 0.02
     for i in range(3):
         y0 = yb + i * (lat + gap)
-        box("bench_slat", -w / 2 + s + 0.04, y0, zc1 + 0.025, w / 2 - s - 0.04, y0 + lat, zc1 + 0.05, "wood_natural", 0.004)
-    for x in (-w / 2 + s + 0.08, 0.0, w / 2 - s - 0.12):
-        box("bench_batten", x, yb, zc1, x + 0.04, yb + 3 * lat + 2 * gap, zc1 + 0.025, "wood_natural", 0.003)
+        box("bench_slat", -w / 2 + s + 0.04, y0, zc1 + 0.025, w / 2 - s - 0.04, y0 + lat, zc1 + 0.05, lx, 0.004)
+    for x in (-w / 2 + s + 0.08, -0.02, w / 2 - s - 0.12):
+        box("bench_batten", x, yb, zc1, x + 0.04, yb + 3 * lat + 2 * gap, zc1 + 0.025, ly, 0.003)
     a = math.radians(14)
     e = Vector((1, 0, 0))
     up = Vector((0, math.sin(a), math.cos(a)))  # Lehne nach Plan-Norden geneigt (Blender +y)
     nrm = e.cross(up)
     for i in range(3):
         o = P(-w / 2 + s + 0.04, -d / 2 + s - 0.01, zc1 + 0.05) + up * (0.02 + i * (lat + gap))
-        plate("back_slat", o, e, up, nrm, w - 2 * s - 0.08, lat, 0.025, "wood_natural")
-    # Sand: welliger Spiegel mit Hügel und Mulde, ein Eimer und eine Schaufel
-    zs = h - 0.12
-    nx = 48
+        plate("back_slat", o, e, up, nrm, w - 2 * s - 0.08, lat, 0.025, lx)
+    # Sand: welliger Spiegel, Burghügel, gegrabene Mulde und Wall, Rechen-/Fußspuren als feine Rillen
+    zs = h - 0.13
+    nx = 90
     bm = bmesh.new()
     x0, x1 = -w / 2 + t, w / 2 - t
     y0, y1 = -d / 2 + t, d / 2 - t
     grid = []
     rr = rng(31)
     off = Vector((rr.uniform(0, 9), rr.uniform(0, 9), 0))
+    bx, by = 0.3, 0.2  # Sandburg
+    mx, my = -0.35, 0.05  # Mulde
+
+    def g(x, y, cx, cy, r2):
+        return math.exp(-((x - cx) ** 2 + (y - cy) ** 2) / r2)
+
     for j in range(nx + 1):
         row = []
         for i in range(nx + 1):
             x = x0 + (x1 - x0) * i / nx
             y = y0 + (y1 - y0) * j / nx
-            zz = zs + 0.02 * noise.noise(Vector((x * 2.2, y * 2.2, 0)) + off) + 0.006 * noise.noise(Vector((x * 9, y * 9, 1)) + off)
-            zz += 0.11 * math.exp(-((x - 0.35) ** 2 + (y - 0.25) ** 2) / 0.09)  # Sandburg-Hügel
-            zz -= 0.05 * math.exp(-((x + 0.3) ** 2 + (y - 0.1) ** 2) / 0.03)  # gegrabene Mulde
+            zz = zs + 0.025 * noise.noise(Vector((x * 2.2, y * 2.2, 0)) + off) + 0.008 * noise.noise(Vector((x * 11, y * 11, 1)) + off)
+            zz += 0.07 * g(x, y, bx, by, 0.08)  # Hügel unter der Burg
+            rd = math.hypot(x - mx, y - my)
+            zz -= 0.07 * g(x, y, mx, my, 0.025)  # Mulde
+            zz += 0.03 * math.exp(-((rd - 0.26) ** 2) / 0.004)  # aufgeworfener Rand
+            # Spuren: ein paar geschwungene Rillen (Finger/Schaufel)
+            zz -= 0.008 * max(0.0, math.cos((x * 0.7 + y) * 34)) * g(x, y, 0.1, -0.15, 0.06)
             row.append(bm.verts.new(P(x, y, zz)))
         grid.append(row)
     for j in range(nx):
         for i in range(nx):
             bm.faces.new((grid[j][i], grid[j][i + 1], grid[j + 1][i + 1], grid[j + 1][i]))
     _obj("sand", bm, _cm("sand_wet"), True, outline=False)
+    # Sandburg aus Eimerformen: drei Kegelstümpfe, oben eingekerbt
+    zb = zs + 0.06
+    for (cx, cy, sc) in ((bx, by, 1.0), (bx + 0.17, by + 0.06, 0.8), (bx + 0.06, by - 0.15, 0.75)):
+        rb = 0.075 * sc
+        _lathe("tower", [(0.0, zb - 0.04), (rb * 1.12, zb - 0.04), (rb, zb + 0.13 * sc), (rb * 0.9, zb + 0.135 * sc), (0.0, zb + 0.13 * sc)], _cm("sand_wet"), cx, cy, 28, outline=False)
     # Eimer (Kegelstumpf, offen) und Schaufel
-    _lathe("bucket", [(0.06, zs + 0.005), (0.085, zs + 0.15), (0.09, zs + 0.155), (0.08, zs + 0.15), (0.055, zs + 0.03)], _cm("plastic_sage"), -0.55, 0.35, 32)
-    _rod("handle", P(-0.64, 0.35, zs + 0.155), P(-0.55, 0.35, zs + 0.23), 0.004, "graphite", 6)
-    _rod("handle", P(-0.55, 0.35, zs + 0.23), P(-0.46, 0.35, zs + 0.155), 0.004, "graphite", 6)
-    _plank("spade", P(0.1, 0.55, zs + 0.03), P(0.32, 0.47, zs + 0.06), Vector((0, 1, 0)), 0.02, 0.012, _cm("plastic_sage"), 0.003)
-    _plank("spade_blade", P(0.3, 0.475, zs + 0.055), P(0.42, 0.44, zs + 0.07), Vector((0, 1, 0)), 0.09, 0.006, _cm("plastic_sage"), 0.003)
+    ex, ey = -0.55, 0.45
+    zb = zs + 0.0
+    _lathe("bucket", [(0.06, zb), (0.085, zb + 0.15), (0.09, zb + 0.155), (0.08, zb + 0.15), (0.055, zb + 0.03)], _cm("plastic_sage"), ex, ey, 32)
+    _rod("handle", P(ex - 0.088, ey, zb + 0.15), P(ex, ey + 0.02, zb + 0.22), 0.004, "graphite", 6)
+    _rod("handle", P(ex, ey + 0.02, zb + 0.22), P(ex + 0.088, ey, zb + 0.15), 0.004, "graphite", 6)
+    _plank("spade", P(0.0, 0.62, zs + 0.03), P(0.22, 0.55, zs + 0.05), Vector((0, 1, 0)), 0.02, 0.012, _cm("plastic_sage"), 0.003)
+    _plank("spade_blade", P(0.2, 0.555, zs + 0.048), P(0.32, 0.52, zs + 0.06), Vector((0, 1, 0)), 0.09, 0.006, _cm("plastic_sage"), 0.003)
 
 
 def slide_tower(w: float, d: float, h: float):
@@ -589,8 +611,8 @@ def slide_tower(w: float, d: float, h: float):
     sol.offset = -1
     # Stütze am Auslauf
     for sy in (-1, 1):
-        box("foot", xe - 0.3, sy * 0.2 - 0.025, 0, xe - 0.25, sy * 0.2 + 0.025, ze, "anthracite", 0.004)
-    box("foot_bar", xe - 0.31, -0.24, ze - 0.06, xe - 0.24, 0.24, ze - 0.01, "anthracite", 0.004)
+        box("foot", xe - 0.3, sy * 0.2 - 0.025, 0, xe - 0.25, sy * 0.2 + 0.025, ze - 0.04, "anthracite", 0.004)
+    box("foot_bar", xe - 0.31, -0.24, ze - 0.09, xe - 0.24, 0.24, ze - 0.04, "anthracite", 0.004)
 
 
 def soccer_goal(w: float, d: float, h: float):
@@ -725,16 +747,15 @@ def stilt_house(w: float, d: float, h: float):
     zw = zd + 1.15
     box("hut", hx0, hy0, zd, hx1, hy1, zw, "wood_grey")
     zr = h
-    # Giebel (Dreiecke) an West und Ost, First entlang y? → First entlang x, Giebel an West/Ost
+    # Giebeldreiecke an West und Ost (First entlang x)
     yc = (hy0 + hy1) / 2
     for x in (hx0, hx1):
         bm = bmesh.new()
-        tri = [P(x, hy0, zw), P(x, hy1, zw), P(x, yc, zr - 0.12)]
-        a = [bm.verts.new(p) for p in tri]
-        b_ = [bm.verts.new(p + Vector((0.04 if x == hx1 else -0.0, 0, 0)) - Vector((0.04 if x == hx0 else 0.0, 0, 0)) * 0) for p in tri]
-        bm.faces.new(a)
-        _ = b_
-        _obj("gable", bm, "wood_grey")
+        bm.faces.new([bm.verts.new(p) for p in (P(x, hy0, zw), P(x, hy1, zw), P(x, yc, zr - 0.12))])
+        gb = _obj("gable", bm, "wood_grey")
+        sol = gb.modifiers.new("t", "SOLIDIFY")
+        sol.thickness = 0.03
+        sol.offset = 0
     # Tür (Öffnung dunkel) und Fenster mit anthrazit Rahmen
     dx0, dx1 = hx0 + 0.18, hx0 + 0.78
     box("door_frame", dx0 - 0.05, hy1, zd, dx1 + 0.05, hy1 + 0.03, zd + 1.0, "anthracite", 0.004)

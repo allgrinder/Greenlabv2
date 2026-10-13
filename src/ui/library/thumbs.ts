@@ -5,6 +5,7 @@
  */
 import { useEffect, useState } from 'react';
 import { PLANTS } from '../../core/catalog/plants';
+import { assetUrl } from '../../render/assets/assetPack';
 import { lookKey, plantLook } from '../../render/assets/plantLooks';
 
 export interface Thumbs {
@@ -35,13 +36,13 @@ function load(): Promise<Thumbs> {
     const items: Record<string, string> = {};
     for (const [sym, e] of Object.entries(im?.items ?? {})) {
       const v = e.top.find((x) => x.rot === 0) ?? e.top[0];
-      if (v) items[sym] = `${BASE}assets/items/${v.file}`;
+      if (v) items[sym] = await assetUrl(`${BASE}assets/items/${v.file}`);
     }
     const plants: Record<string, string> = {};
     for (const sp of PLANTS) {
       const e = pm?.plants[sp.id];
       const v = e?.looks[lookKey(plantLook(sp, 'summer'))]?.top[0] ?? Object.values(e?.looks ?? {})[0]?.top[0];
-      if (v) plants[sp.id] = `${BASE}assets/plants/${v.file}`;
+      if (v) plants[sp.id] = await assetUrl(`${BASE}assets/plants/${v.file}`);
     }
     return { items, plants };
   })();

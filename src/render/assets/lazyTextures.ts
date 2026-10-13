@@ -3,6 +3,7 @@
  * jede Datei genau einmal anfordern, fertige Texturen vorhalten und Nachladen gebündelt melden.
  */
 import { Assets, type Texture } from 'pixi.js';
+import { assetUrl } from './assetPack';
 
 /** Einstellungen für vorgerenderte Bilder: weich skaliert, mit Mipmaps; Kacheln auf Wunsch wiederholend */
 export function prepTexture(t: Texture, repeat = false): Texture {
@@ -22,7 +23,8 @@ export function lazyTextures(base: string) {
   function request(file: string): Promise<void> {
     let p = pending.get(file);
     if (!p) {
-      p = Assets.load<Texture>(base + file)
+      p = assetUrl(base + file)
+        .then((url) => Assets.load<Texture>(url))
         .then((t) => {
           textures.set(file, prepTexture(t));
           // mehrere Bilder kurz hintereinander: einmal neu aufbauen

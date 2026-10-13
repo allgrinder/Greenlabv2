@@ -1,0 +1,13 @@
+[
+  { "id": "sandbox-bench-200", "name": "Sandkasten Lärche mit Bankdeckel 2 × 2 m", "category": "play", "defaultLayer": "build", "width": 2.0, "depth": 2.0, "height": 0.35, "symbol": "sandboxBench", "unit": "pcs", "price": 590, "fallback": "play" },
+  { "id": "slide-freestanding", "name": "Rutsche freistehend mit Leiter", "category": "play", "defaultLayer": "build", "width": 3.2, "depth": 0.8, "height": 1.7, "symbol": "slideTower", "unit": "pcs", "price": 1190, "fallback": "play" },
+  { "id": "soccer-goal-300", "name": "Fußballtor Alu 3 × 2 m", "category": "play", "defaultLayer": "build", "width": 3.0, "depth": 1.2, "height": 2.0, "symbol": "soccerGoal", "unit": "pcs", "price": 349, "fallback": "play" },
+  { "id": "table-tennis-outdoor", "name": "Tischtennisplatte outdoor", "category": "play", "defaultLayer": "build", "width": 2.74, "depth": 1.525, "height": 0.76, "symbol": "pingPongTable", "unit": "pcs", "price": 890, "fallback": "table" },
+  { "id": "stilt-house", "name": "Stelzenhaus mit Leiter", "category": "play", "defaultLayer": "build", "width": 2.4, "depth": 2.4, "height": 3.4, "symbol": "stiltHouse", "unit": "pcs", "price": 2890, "fallback": "shed" },
+  { "id": "boulder-granite", "name": "Findling Granit", "category": "deco", "defaultLayer": "build", "width": 1.2, "depth": 0.9, "height": 0.7, "symbol": "graniteBoulder", "unit": "pcs", "price": 420, "fallback": "barrel" },
+  { "id": "bird-bath", "name": "Vogeltränke auf Betonsockel", "category": "deco", "defaultLayer": "build", "width": 0.6, "depth": 0.6, "height": 0.8, "symbol": "birdBath", "unit": "pcs", "price": 189, "fallback": "barrel" },
+  { "id": "insect-hotel", "name": "Insektenhotel auf Pfosten", "category": "deco", "defaultLayer": "build", "width": 0.6, "depth": 0.3, "height": 1.6, "symbol": "insectHotel", "unit": "pcs", "price": 129, "fallback": "shed" },
+  { "id": "nest-box-pole", "name": "Nistkasten am Pfahl", "category": "deco", "defaultLayer": "build", "width": 0.3, "depth": 0.3, "height": 2.2, "symbol": "nestBoxPole", "unit": "pcs", "price": 89, "fallback": "barrel" },
+  { "id": "sculpture-corten", "name": "Skulptur Cortenstahl „Flamme“", "category": "deco", "defaultLayer": "build", "width": 0.6, "depth": 0.6, "height": 1.8, "symbol": "cortenSculpture", "unit": "pcs", "price": 1650, "fallback": "barrel" },
+  { "id": "planter-fibrecement-100", "name": "Pflanzkübel Faserzement 100 × 100, bepflanzt", "category": "deco", "defaultLayer": "build", "width": 1.0, "depth": 1.0, "height": 0.9, "symbol": "planterLarge", "unit": "pcs", "price": 690, "fallback": "planter" }
+]

@@ -587,6 +587,709 @@ def meadow(T, rnd):
             tiled(o, T, size)
 
 
+# ------------------------------------------------------------------ Pflaster, Naturstein, Rasengitter
+
+
+def _loc_coords(nt, rnd, T, k: float = 3.7):
+    """
+    Objektkoordinaten plus Objektlage (auf die Kachel gefaltet): jeder Stein zeigt einen anderen Ausschnitt
+    der Oberflächentextur, die Randkopien (um genau eine Kachel versetzt) aber denselben – nahtlos.
+    """
+    tc = nt.nodes.new("ShaderNodeTexCoord")
+    info = nt.nodes.new("ShaderNodeObjectInfo")
+    wr = nt.nodes.new("ShaderNodeVectorMath")
+    wr.operation = "WRAP"
+    nt.links.new(info.outputs["Location"], wr.inputs[0])
+    # kleiner Versatz der Faltgrenzen: kein Steinmittelpunkt liegt genau darauf
+    wr.inputs[1].default_value = (T[0] + 0.0123, 0.0171, 10.0)
+    wr.inputs[2].default_value = (0.0123, -T[1] + 0.0171, -10.0)
+    sc = nt.nodes.new("ShaderNodeVectorMath")
+    sc.operation = "SCALE"
+    sc.inputs["Scale"].default_value = k
+    nt.links.new(wr.outputs["Vector"], sc.inputs[0])
+    add = nt.nodes.new("ShaderNodeVectorMath")
+    add.operation = "ADD"
+    nt.links.new(tc.outputs["Object"], add.inputs[0])
+    nt.links.new(sc.outputs["Vector"], add.inputs[1])
+    off = nt.nodes.new("ShaderNodeVectorMath")
+    off.operation = "ADD"
+    off.inputs[1].default_value = (rnd.uniform(0, 50), rnd.uniform(0, 50), rnd.uniform(0, 50))
+    nt.links.new(add.outputs["Vector"], off.inputs[0])
+    return off.outputs["Vector"]
+
+
+def _vary(m, T):
+    """concrete_mat nachträglich auf _loc_coords umstellen (viele Steine teilen sich ein Material)"""
+    nt = m.node_tree
+    tc = next(n for n in nt.nodes if n.bl_idname == "ShaderNodeTexCoord")
+    off = tc.outputs["Object"].links[0].to_node
+    targets = [ln.to_socket for ln in off.outputs["Vector"].links]
+    v = _loc_coords(nt, random.Random(len(m.name) * 31 + 5), T)
+    for s in targets:
+        nt.links.new(v, s)
+    return m
+
+
+def sand_joint_mat(name: str, rnd: random.Random, hex_: str = "#a69a80", dirt: float = 0.5):
+    """Fugensand: feine helle Körner, etwas dunkler Schmutz und Feuchte"""
+    m, b = _principled(name)
+    nt = m.node_tree
+    v = _coords(nt, rnd)
+    c = lin(hex_)
+    n1 = _n(nt, "ShaderNodeTexNoise", Scale=420.0, Detail=4.0)
+    nt.links.new(v, n1.inputs["Vector"])
+    ramp = nt.nodes.new("ShaderNodeValToRGB")
+    ramp.color_ramp.elements[0].color = (*[x * 0.62 for x in c], 1)
+    ramp.color_ramp.elements[1].color = (*[min(1, x * 1.18) for x in c], 1)
+    nt.links.new(n1.outputs["Fac"], ramp.inputs["Fac"])
+    gr = _n(nt, "ShaderNodeTexVoronoi", Scale=700.0)
+    nt.links.new(v, gr.inputs["Vector"])
+    col = _mix(nt, ramp.outputs["Color"], tuple(min(1, x * 1.35) for x in c), _range(nt, gr.outputs["Distance"], 0.25, 0.08, 0.5))
+    d = _n(nt, "ShaderNodeTexNoise", Scale=6.0, Detail=4.0)
+    nt.links.new(v, d.inputs["Vector"])
+    col = _mix(nt, col, lin("#4a4234"), _range(nt, d.outputs["Fac"], 0.5, 0.68, dirt))
+    nt.links.new(col, b.inputs["Base Color"])
+    b.inputs["Roughness"].default_value = 1.0
+    bump = _n(nt, "ShaderNodeBump", Strength=0.7, Distance=0.002)
+    nt.links.new(n1.outputs["Fac"], bump.inputs["Height"])
+    nt.links.new(bump.outputs["Normal"], b.inputs["Normal"])
+    _ao(m, 0.7, 0.02)
+    return m
+
+
+def grit_mat(name: str, rnd: random.Random, moss: float = 0.25):
+    """Fugensplitt 1/3 aus Granit: grau-bunte, kantige Körnchen, dunkle Zwischenräume, etwas Moos"""
+    m, b = _principled(name)
+    nt = m.node_tree
+    v = _coords(nt, rnd)
+    vor = _n(nt, "ShaderNodeTexVoronoi", Scale=260.0)
+    nt.links.new(v, vor.inputs["Vector"])
+    sep = nt.nodes.new("ShaderNodeSeparateColor")
+    nt.links.new(vor.outputs["Color"], sep.inputs["Color"])
+    ramp = nt.nodes.new("ShaderNodeValToRGB")
+    ramp.color_ramp.interpolation = "CONSTANT"
+    es = ramp.color_ramp.elements
+    es[0].color = (*lin("#5d5b58"), 1)
+    es[1].position = 0.3
+    es[1].color = (*lin("#8d8a85"), 1)
+    for pos, h in ((0.6, "#a59e96"), (0.8, "#3b3a39"), (0.9, "#9a8478")):
+        e = es.new(pos)
+        e.color = (*lin(h), 1)
+    nt.links.new(sep.outputs["Red"], ramp.inputs["Fac"])
+    # Zwischenräume zwischen den Körnern dunkel
+    col = _mix(nt, ramp.outputs["Color"], lin("#211f1c"), _range(nt, vor.outputs["Distance"], 0.32, 0.6, 0.9))
+    mo = _n(nt, "ShaderNodeTexNoise", Scale=11.0, Detail=4.0)
+    nt.links.new(v, mo.inputs["Vector"])
+    col = _mix(nt, col, lin("#4d5a26"), _range(nt, mo.outputs["Fac"], 0.55, 0.66, moss))
+    nt.links.new(col, b.inputs["Base Color"])
+    b.inputs["Roughness"].default_value = 0.95
+    inv = nt.nodes.new("ShaderNodeMath")
+    inv.operation = "SUBTRACT"
+    inv.inputs[0].default_value = 1.0
+    nt.links.new(vor.outputs["Distance"], inv.inputs[1])
+    bump = _n(nt, "ShaderNodeBump", Strength=0.9, Distance=0.003)
+    nt.links.new(inv.outputs["Value"], bump.inputs["Height"])
+    nt.links.new(bump.outputs["Normal"], b.inputs["Normal"])
+    _ao(m, 0.75, 0.025)
+    return m
+
+
+def granite_mat(name: str, hex_: str, rnd: random.Random, T):
+    """
+    Granit, gespalten und abgetreten: Kristallkörnung (dunkler Glimmer, heller Quarz/Feldspat, rötliche
+    Feldspäte), wolkige Tonschwankung, Schmutz in den Mulden, glatter getretene Kuppen
+    """
+    m, b = _principled(name)
+    nt = m.node_tree
+    v = _loc_coords(nt, rnd, T)
+    c = lin(hex_)
+    mott = _n(nt, "ShaderNodeTexNoise", Scale=9.0, Detail=5.0, Roughness=0.6)
+    nt.links.new(v, mott.inputs["Vector"])
+    ramp = nt.nodes.new("ShaderNodeValToRGB")
+    ramp.color_ramp.elements[0].color = (*[x * 0.8 for x in c], 1)
+    ramp.color_ramp.elements[1].color = (*[min(1, x * 1.12) for x in c], 1)
+    nt.links.new(mott.outputs["Fac"], ramp.inputs["Fac"])
+    col = ramp.outputs["Color"]
+    for scale, amount in ((240.0, 0.75), (520.0, 0.5)):
+        vor = _n(nt, "ShaderNodeTexVoronoi", Scale=scale)
+        nt.links.new(v, vor.inputs["Vector"])
+        sep = nt.nodes.new("ShaderNodeSeparateColor")
+        nt.links.new(vor.outputs["Color"], sep.inputs["Color"])
+        kr = nt.nodes.new("ShaderNodeValToRGB")
+        kr.color_ramp.interpolation = "CONSTANT"
+        es = kr.color_ramp.elements
+        es[0].color = (*[x * 0.32 for x in c], 1)  # Glimmer
+        es[1].position = 0.16
+        es[1].color = (*c, 1)
+        for pos, cc in ((0.55, tuple(min(1, x * 1.45) for x in c)), (0.82, tuple(min(1, x * f) for x, f in zip(c, (1.3, 1.1, 1.02)))), (0.93, tuple(x * 0.7 for x in c))):
+            e = es.new(pos)
+            e.color = (*cc, 1)
+        nt.links.new(sep.outputs["Red"], kr.inputs["Fac"])
+        col = _mix(nt, col, kr.outputs["Color"], amount)
+    # Schmutz und Flechten
+    st = _n(nt, "ShaderNodeTexNoise", Scale=14.0, Detail=5.0)
+    nt.links.new(v, st.inputs["Vector"])
+    col = _mix(nt, col, tuple(x * f for x, f in zip(c, (0.55, 0.52, 0.46))), _range(nt, st.outputs["Fac"], 0.52, 0.7, 0.55))
+    nt.links.new(col, b.inputs["Base Color"])
+    b.inputs["Specular IOR Level"].default_value = 0.35
+    rr = _n(nt, "ShaderNodeTexNoise", Scale=30.0, Detail=3.0)
+    nt.links.new(v, rr.inputs["Vector"])
+    nt.links.new(_range(nt, rr.outputs["Fac"], 0.3, 0.7, 1.0), b.inputs["Roughness"])
+    b.inputs["Roughness"].default_value = 0.7
+    mr = rr.outputs["Fac"].links[0].to_node
+    mr.inputs["To Min"].default_value = 0.55
+    mr.inputs["To Max"].default_value = 0.85
+    # Relief: grobe Spaltfläche und Kristallkörnung
+    sp = _n(nt, "ShaderNodeTexNoise", Scale=45.0, Detail=8.0, Roughness=0.65)
+    nt.links.new(v, sp.inputs["Vector"])
+    bump = _n(nt, "ShaderNodeBump", Strength=0.45, Distance=0.004)
+    nt.links.new(sp.outputs["Fac"], bump.inputs["Height"])
+    nt.links.new(bump.outputs["Normal"], b.inputs["Normal"])
+    _ao(m, 0.6, 0.02)
+    return m
+
+
+def flagstone_mat(name: str, hex_: str, rnd: random.Random, T):
+    """
+    Quarzit/Sandstein, spaltrau: Schichtung als feine Bänder, Eisenoxid-Flecken, Körnung, helle Flechten,
+    Schmutz und Algen zum Rand hin (über die Umgebungsverdeckung)
+    """
+    m, b = _principled(name)
+    nt = m.node_tree
+    v = _loc_coords(nt, rnd, T, 2.3)
+    c = lin(hex_)
+    mott = _n(nt, "ShaderNodeTexNoise", Scale=4.0, Detail=6.0, Roughness=0.6)
+    nt.links.new(v, mott.inputs["Vector"])
+    ramp = nt.nodes.new("ShaderNodeValToRGB")
+    ramp.color_ramp.elements[0].color = (*[x * 0.78 for x in c], 1)
+    ramp.color_ramp.elements[1].color = (*[min(1, x * 1.12) for x in c], 1)
+    ramp.color_ramp.elements[0].position = 0.3
+    ramp.color_ramp.elements[1].position = 0.7
+    nt.links.new(mott.outputs["Fac"], ramp.inputs["Fac"])
+    col = ramp.outputs["Color"]
+    # Schichtung: lange, leicht gewellte Bänder in zufälliger Richtung
+    ang = rnd.uniform(0, math.pi)
+    rot = nt.nodes.new("ShaderNodeVectorRotate")
+    rot.rotation_type = "Z_AXIS"
+    rot.inputs["Angle"].default_value = ang
+    nt.links.new(v, rot.inputs["Vector"])
+    wave = _n(nt, "ShaderNodeTexWave", Scale=7.0, Distortion=5.0, Detail=5.0, **{"Detail Scale": 1.5})
+    nt.links.new(rot.outputs["Vector"], wave.inputs["Vector"])
+    col = _mix(nt, col, tuple(x * 0.8 for x in c), _range(nt, wave.outputs["Fac"], 0.55, 0.85, 0.45))
+    col = _mix(nt, col, tuple(min(1, x * 1.15) for x in c), _range(nt, wave.outputs["Fac"], 0.3, 0.1, 0.35))
+    # Eisenoxid: rostige Wolken und Ringe
+    fe = _n(nt, "ShaderNodeTexNoise", Scale=2.6, Detail=6.0, Roughness=0.65)
+    nt.links.new(v, fe.inputs["Vector"])
+    col = _mix(nt, col, lin("#9a6c45"), _range(nt, fe.outputs["Fac"], 0.6, 0.72, 0.5))
+    # Körnung
+    gr = _n(nt, "ShaderNodeTexNoise", Scale=380.0, Detail=2.0)
+    nt.links.new(v, gr.inputs["Vector"])
+    col = _mix(nt, col, tuple(x * 0.7 for x in c), _range(nt, gr.outputs["Fac"], 0.55, 0.75, 0.5))
+    col = _mix(nt, col, tuple(min(1, x * 1.25) for x in c), _range(nt, gr.outputs["Fac"], 0.42, 0.3, 0.35))
+    # Flechten (hell, rund) und Algen/Schmutz (dunkelgrün-braun)
+    li = _n(nt, "ShaderNodeTexVoronoi", Scale=22.0)
+    nt.links.new(v, li.inputs["Vector"])
+    lm = _n(nt, "ShaderNodeTexNoise", Scale=3.0)
+    nt.links.new(v, lm.inputs["Vector"])
+    lmul = nt.nodes.new("ShaderNodeMath")
+    lmul.operation = "MULTIPLY"
+    nt.links.new(_range(nt, li.outputs["Distance"], 0.1, 0.05, 0.75), lmul.inputs[0])
+    nt.links.new(_range(nt, lm.outputs["Fac"], 0.5, 0.62), lmul.inputs[1])
+    col = _mix(nt, col, lin("#ddd8c6"), lmul.outputs["Value"])
+    al = _n(nt, "ShaderNodeTexNoise", Scale=7.0, Detail=5.0)
+    nt.links.new(v, al.inputs["Vector"])
+    col = _mix(nt, col, lin("#55513a"), _range(nt, al.outputs["Fac"], 0.58, 0.72, 0.5))
+    nt.links.new(col, b.inputs["Base Color"])
+    b.inputs["Roughness"].default_value = 0.82
+    b.inputs["Specular IOR Level"].default_value = 0.3
+    # Relief: flache Spaltstufen (Schichtung) und raue Körnung
+    hf = nt.nodes.new("ShaderNodeMath")
+    hf.operation = "MULTIPLY_ADD"
+    nt.links.new(gr.outputs["Fac"], hf.inputs[0])
+    hf.inputs[1].default_value = 0.25
+    st = _n(nt, "ShaderNodeTexNoise", Scale=9.0, Detail=8.0, Roughness=0.6)
+    nt.links.new(v, st.inputs["Vector"])
+    nt.links.new(st.outputs["Fac"], hf.inputs[2])
+    bump = _n(nt, "ShaderNodeBump", Strength=0.38, Distance=0.006)
+    nt.links.new(hf.outputs["Value"], bump.inputs["Height"])
+    nt.links.new(bump.outputs["Normal"], b.inputs["Normal"])
+    _ao(m, 0.65, 0.03)
+    return m
+
+
+def soil_moss_mat(name: str, rnd: random.Random, moss: float = 0.6):
+    """Fugenerde mit Sand, Moos und Algen"""
+    m, b = _principled(name)
+    nt = m.node_tree
+    v = _coords(nt, rnd)
+    n1 = _n(nt, "ShaderNodeTexNoise", Scale=180.0, Detail=5.0)
+    nt.links.new(v, n1.inputs["Vector"])
+    ramp = nt.nodes.new("ShaderNodeValToRGB")
+    ramp.color_ramp.elements[0].color = (*lin("#2c241b"), 1)
+    ramp.color_ramp.elements[1].color = (*lin("#6a5c47"), 1)
+    nt.links.new(n1.outputs["Fac"], ramp.inputs["Fac"])
+    mo = _n(nt, "ShaderNodeTexNoise", Scale=14.0, Detail=5.0)
+    nt.links.new(v, mo.inputs["Vector"])
+    col = _mix(nt, ramp.outputs["Color"], lin("#4a5a22"), _range(nt, mo.outputs["Fac"], 0.42, 0.56, moss))
+    nt.links.new(col, b.inputs["Base Color"])
+    b.inputs["Roughness"].default_value = 1.0
+    bump = _n(nt, "ShaderNodeBump", Strength=0.7, Distance=0.004)
+    nt.links.new(n1.outputs["Fac"], bump.inputs["Height"])
+    nt.links.new(bump.outputs["Normal"], b.inputs["Normal"])
+    _ao(m, 0.75, 0.03)
+    return m
+
+
+def _poly_area(poly):
+    return 0.5 * sum(a.x * b.y - b.x * a.y for a, b in zip(poly, poly[1:] + poly[:1]))
+
+
+def _offset(poly, d: float):
+    """Polygon (gegen den Uhrzeigersinn) um d nach innen versetzen"""
+    n = len(poly)
+    out = []
+    for i in range(n):
+        p0, p1, p2 = poly[i - 1], poly[i], poly[(i + 1) % n]
+        e1, e2 = (p1 - p0), (p2 - p1)
+        if e1.length < 1e-9 or e2.length < 1e-9:
+            out.append(p1.copy())
+            continue
+        e1.normalize()
+        e2.normalize()
+        n1, n2 = Vector((-e1.y, e1.x)), Vector((-e2.y, e2.x))
+        mm = n1 + n2
+        mm = n1 if mm.length < 1e-6 else mm.normalized()
+        out.append(p1 + mm * (d / max(0.4, mm.dot(n1))))
+    return out
+
+
+def _refine(poly, step: float, jit: float, rnd: random.Random):
+    """Kanten unterteilen und sanft unregelmäßig machen (gespaltene, gebrochene Kanten)"""
+    out = []
+    for i, a in enumerate(poly):
+        b = poly[(i + 1) % len(poly)]
+        L = (b - a).length
+        k = max(1, int(L / step + 0.5))
+        nrm = Vector((-(b - a).y, (b - a).x)).normalized() if L > 1e-9 else Vector((0, 0))
+        r1, r2, r3 = rnd.uniform(-1, 1), rnd.uniform(-1, 1), rnd.uniform(-1, 1)
+        for j in range(k):
+            t = j / k
+            o = jit * (0.6 * r1 * math.sin(math.pi * t) + 0.3 * r2 * math.sin(2 * math.pi * t) + 0.25 * r3 * math.sin(3 * math.pi * t))
+            out.append(a.lerp(b, t) + nrm * (o + rnd.uniform(-0.15, 0.15) * jit))
+    return out
+
+
+def rock_mesh(name: str, outline, rnd: random.Random, height: float, rings, dome=None, zjit: float = 0.0):
+    """
+    Stein aus Umriss (Blender-XY, lokal): senkrechte Flanken, gerundete Oberkante über Ringe (Einzug, Höhe),
+    oben Kuppe (dome = Höhe der Mitte) oder flache Deckfläche
+    """
+    pts = [Vector((p.x, p.y)) for p in outline]
+    if _poly_area(pts) < 0:
+        pts.reverse()
+    n = len(pts)
+    bm = bmesh.new()
+    loops = [[bm.verts.new((p.x, p.y, -height)) for p in pts]]
+    for d, z in rings:
+        ring = _offset(pts, d) if d else pts
+        loops.append([bm.verts.new((p.x, p.y, z + (rnd.uniform(-zjit, zjit) if d else 0.0))) for p in ring])
+    faces = []
+    for r0, r1 in zip(loops, loops[1:]):
+        for i in range(n):
+            faces.append(bm.faces.new((r0[i], r0[(i + 1) % n], r1[(i + 1) % n], r1[i])))
+    inner = loops[-1]
+    if dome is not None:
+        c = sum((Vector(v.co) for v in inner), Vector((0, 0, 0))) / n
+        cv = bm.verts.new((c.x, c.y, dome))
+        for i in range(n):
+            faces.append(bm.faces.new((inner[i], inner[(i + 1) % n], cv)))
+        for f in faces:
+            f.smooth = True
+    else:
+        for f in faces:
+            f.smooth = True
+        bm.faces.new(inner).smooth = False
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    return me
+
+
+def blade(bm, x: float, y: float, z: float, L: float, a: float, lean: float, w: float, mi: int):
+    """Grashalm als schmales, gebogenes Band (Plan-Koordinaten, Neigungsrichtung a)"""
+    d = Vector((math.cos(a), math.sin(a), 0))
+    s = Vector((-math.sin(a), math.cos(a), 0)) * w
+    prev = None
+    for k in range(4):
+        t = k / 3
+        pos = Vector((x, -y, z)) + d * (L * lean * t * t) + Vector((0, 0, L * t * (1 - lean * 0.45 * t)))
+        ww = s * (1 - t * 0.85)
+        v1, v2 = bm.verts.new(pos - ww), bm.verts.new(pos + ww)
+        if prev:
+            f = bm.faces.new((prev[0], prev[1], v2, v1))
+            f.material_index = mi
+        prev = (v1, v2)
+
+
+def periodic_mesh(name: str, bm, mats, T):
+    """Mesh in die Szene, dazu acht um ±Kachelgröße versetzte Kopien (nahtlos)"""
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    ob = link(bpy.data.objects.new(name, me), outline=False)
+    for m in mats:
+        ob.data.materials.append(m)
+    for dx in (-T[0], 0, T[0]):
+        for dy in (-T[1], 0, T[1]):
+            if dx or dy:
+                c = ob.copy()
+                c.location = P(dx, dy, 0)
+                bpy.context.scene.collection.objects.link(c)
+    return ob
+
+
+@ground("herringbone", (1.4142, 1.4142), 480)
+def herringbone(T, rnd):
+    """
+    Betonpflaster 20 × 10 × 8 im Fischgrätverband 45°, grau meliert, Fase, Sandfuge 3–4 mm.
+    Verband im Raster 10 cm: Läufer H_k = [k, k+2] × [k, k+1], Binder V_k = [k, k+1] × [k+1, k+3],
+    Gitter (1, 1) und (4, 0). Um 45° gedreht ergibt das die Rechteckperiode 14,14 × 28,28 cm;
+    die Kachel (1,4142 m) umfasst 10 × 5 Perioden.
+    """
+    base_plane(T, sand_joint_mat("hb_joint", rnd, "#a99d83", 0.45), -0.006)
+    tones = ["#a9a69f", "#9c9993", "#b4b1a9", "#8f8c86", "#807d78", "#bdb9b1", "#726f6b", "#a39f96", "#97948c", "#b0aba0"]
+    mats = [_vary(concrete_mat(f"hb{i}", h, rnd, rough=0.86, stain=1.0, moss=0.06, wear=1.1, pore=0.9), T) for i, h in enumerate(tones)]
+    me = slab_mesh("hbstone", 0.1965, 0.0965, 0.08)
+    me.materials.append(mats[0])
+    u = 0.1
+    s2 = math.sqrt(0.5)
+    ox, oy = 0.0371, 0.0219  # Musterversatz: keine Steinmitte genau auf dem Kachelrand
+    for m4 in range(-12, 13):
+        for k in range(-30, 31):
+            for cx, cy, ang in ((k + 1, k + 0.5, 0.0), (k + 0.5, k + 2, math.pi / 2)):
+                gx, gy = (cx + 4 * m4) * u, cy * u
+                # Drehung um −45° (Plan): Läufer und Binder stehen schräg, die Grätenreihen laufen entlang x
+                x, y = (gx + gy) * s2 + ox, (gy - gx) * s2 + oy
+                if not (0 <= x < T[0] and 0 <= y < T[1]):
+                    continue
+                ob = link(bpy.data.objects.new("hb", me), outline=False)
+                # leichte Höhenunterschiede und Verkippung wie im Sandbett verlegt
+                ob.location = P(x, y, -0.04 + rnd.uniform(-0.0015, 0.0015))
+                a = ang - math.pi / 4  # Plan-Winkel; Blender-Drehung mit umgekehrtem Vorzeichen (y nach unten)
+                ob.rotation_euler = Euler((rnd.uniform(-0.008, 0.008), rnd.uniform(-0.008, 0.008), -a + rnd.uniform(-0.006, 0.006)))
+                bev = ob.modifiers.new("b", "BEVEL")
+                bev.width = 0.0045
+                bev.segments = 3
+                bev.limit_method = "ANGLE"
+                ob.material_slots[0].link = "OBJECT"
+                ob.material_slots[0].material = mats[rnd.randrange(len(mats))]
+                tiled(ob, T, 0.16)
+
+
+def _place_sett(pl, rnd, mats, T, joint):
+    """Pflasterstein aus Plan-Umriss: Fuge abziehen, Kanten brechen, Kuppe formen, setzen"""
+    pts = [Vector((x, y)) for x, y in pl]
+    c = sum(pts, Vector((0, 0))) / len(pts)
+    loc = [Vector((p.x - c.x, -(p.y - c.y))) for p in pts]
+    if _poly_area(loc) < 0:
+        loc.reverse()
+    loc = _offset(loc, joint / 2 + rnd.uniform(-0.0015, 0.002))
+    loc = _refine(loc, 0.016, 0.0035, rnd)
+    me = rock_mesh("sett", loc, rnd, 0.07, [(0, -0.013), (0.004, -0.0055), (0.009, -0.0018), (0.018, 0.0)], dome=rnd.uniform(0.0, 0.003), zjit=0.0012)
+    ob = link(bpy.data.objects.new("sett", me), outline=False)
+    ob.location = P(c.x, c.y, rnd.uniform(-0.004, 0.002))
+    ob.rotation_euler = Euler((rnd.uniform(-0.03, 0.03), rnd.uniform(-0.03, 0.03), 0))
+    me.materials.append(mats[rnd.randrange(len(mats))])
+    tiled(ob, T, 0.12)
+    return ob
+
+
+@ground("granite", (3.0, 1.44), 400)
+def granite(T, rnd):
+    """
+    Granit-Kleinpflaster 9/11 im Segmentbogen, grau-bunt, Splittfuge. Zwei Bögen je 1,5 m Sehne,
+    Stich 20 cm; die Reihen sind senkrecht verschobene Kopien desselben Bogens (Reihenabstand 12 cm),
+    damit geht die Periode in x (Bogenbreite) und y (Reihenabstand) auf. An den Bogenfüßen sitzt je
+    Reihe ein Zwickelstein; die Stoßfugen stehen dort senkrecht und drehen zur Bogenmitte in die Normale.
+    """
+    base_plane(T, grit_mat("gr_joint", rnd), -0.018)
+    tones = ["#8f8d8a", "#9a9188", "#7f8186", "#a39a92", "#8a8478", "#6f6e6c", "#a8a49c", "#97877c", "#858a8c", "#9d958c"]
+    mats = [granite_mat(f"gr{i}", h, rnd, T) for i, h in enumerate(tones)]
+    B, hh, p = 1.5, 0.2, 0.12
+    R = (B * B / 4 + hh * hh) / (2 * hh)
+    R0 = math.sqrt(R * R - B * B / 4)
+    nA = int(round(T[0] / B))
+
+    def cy(x):
+        """Bogen: 0 am Fuß, Stich hh in der Mitte (Plan-y)"""
+        xm = (x % B) - B / 2
+        return math.sqrt(R * R - xm * xm) - R0
+
+    def slope(x):
+        xm = (x % B) - B / 2
+        return -xm / math.sqrt(R * R - xm * xm)
+
+    def side(x):
+        """Stoßfuge: unten (x, c(x)), oben (x + δ, c(x + δ) + p); δ dreht von senkrecht (Bogenfuß) in die Normale"""
+        dist = min(x % B, B - x % B)
+        g = max(0.0, min(1.0, (dist - 0.06) / 0.3))
+        g = g * g * (3 - 2 * g)
+        s = slope(x)
+        return x - s * p / (1 + s * s) * g
+
+    def arclen(x0, x1, n=40):
+        return sum(math.hypot((x1 - x0) / n, cy(x0 + (x1 - x0) * (i + 1) / n) - cy(x0 + (x1 - x0) * i / n)) for i in range(n))
+
+    def split(s0, s1, L, ws):
+        """Teilungspunkte (x) für Steinlängen ws entlang der Bogenlänge zwischen s0 und s1"""
+        tot = sum(ws)
+        xs, acc = [s0], 0.0
+        for w_ in ws[:-1]:
+            acc += w_ / tot * L
+            lo, hi = s0, s1
+            for _ in range(28):
+                mid = (lo + hi) / 2
+                if arclen(s0, mid, 16) < acc:
+                    lo = mid
+                else:
+                    hi = mid
+            xs.append((lo + hi) / 2)
+        return xs + [s1]
+
+    joint = 0.011
+    for r in range(int(round(T[1] / p))):
+        y0 = r * p
+        wj = [rnd.uniform(0.085, 0.11) for _ in range(nA)]  # Zwickelbreiten je Bogenfuß dieser Reihe
+        for a in range(nA):
+            xa = a * B
+            # Zwickelstein am Bogenfuß: Chevron, Seiten senkrecht
+            jl, jr = xa - wj[a] / 2, xa + wj[a] / 2
+            _place_sett([(jl, cy(jl) + y0), (xa, y0), (jr, cy(jr) + y0), (jr, cy(jr) + y0 + p), (xa, y0 + p), (jl, cy(jl) + y0 + p)], rnd, mats, T, joint)
+            # Bogensteine bis zum nächsten Zwickel; Längen je Reihe neu gewürfelt (Fugenversatz)
+            s0, s1 = jr, xa + B - wj[(a + 1) % nA] / 2
+            L = arclen(s0, s1)
+            n = max(1, int(round(L / 0.108)))
+            xs = split(s0, s1, L, [rnd.uniform(0.82, 1.18) for _ in range(n)])
+            for x0, x1 in zip(xs, xs[1:]):
+                lower = [(x0 + (x1 - x0) * t, cy(x0 + (x1 - x0) * t) + y0) for t in (0, 0.33, 0.67, 1)]
+                u0, u1 = side(x0), side(x1)
+                upper = [(u1 + (u0 - u1) * t, cy(u1 + (u0 - u1) * t) + y0 + p) for t in (0, 0.33, 0.67, 1)]
+                _place_sett(lower + upper, rnd, mats, T, joint)
+
+
+def _clip(poly, a: Vector, nrm: Vector, d: float):
+    """Polygon auf die Halbebene {x | (x − a)·nrm ≤ d} beschneiden (Sutherland-Hodgman)"""
+    out = []
+    for i, p in enumerate(poly):
+        q = poly[(i + 1) % len(poly)]
+        fp, fq = (p - a).dot(nrm) - d, (q - a).dot(nrm) - d
+        if fp <= 0:
+            out.append(p)
+        if (fp < 0 < fq) or (fq < 0 < fp):
+            out.append(p.lerp(q, fp / (fp - fq)))
+    return out
+
+
+def periodic_voronoi(pts, T, weights=None):
+    """Voronoi-Zellen auf dem Torus (Kachel): je Punkt das Polygon um ihn, Nachbarn aus den 3 × 3 Kopien"""
+    cells = []
+    for i, p in enumerate(pts):
+        poly = [p + Vector(v) for v in ((-1.5, -1.5), (1.5, -1.5), (1.5, 1.5), (-1.5, 1.5))]
+        for j, q in enumerate(pts):
+            for dx in (-T[0], 0, T[0]):
+                for dy in (-T[1], 0, T[1]):
+                    if i == j and not dx and not dy:
+                        continue
+                    qq = q + Vector((dx, dy))
+                    dv = qq - p
+                    L = dv.length
+                    if L > 2.0:
+                        continue
+                    # Leistungsdiagramm: Gewicht verschiebt die Trennlinie (größere und kleinere Platten)
+                    w = 0.0 if weights is None else (weights[i] - weights[j]) / (2 * L)
+                    poly = _clip(poly, p, dv / L, L / 2 + w)
+        cells.append(poly)
+    return cells
+
+
+@ground("flagstone", (2.0, 2.0), 360)
+def flagstone(T, rnd):
+    """
+    Polygonalplatten aus Quarzit/Sandstein, beige-grau, 3 cm, unregelmäßige Fugen 1,5–3 cm mit Erde,
+    Moospolstern und Grasbüscheln. Zellen: gewichtetes Voronoi auf dem Torus (nahtlos), einmal geglättet;
+    Ecken gebrochen, Kanten leicht unregelmäßig, Platten etwas verkippt.
+    """
+    base_plane(T, soil_moss_mat("fl_joint", rnd, 0.65), -0.016)
+    tones = ["#b9ad97", "#a89f8f", "#c2b49a", "#9f9a8e", "#b5a58a", "#a7a194", "#c9bda6", "#9b8f7b", "#b0a796", "#a49580"]
+    mats = [flagstone_mat(f"fl{i}", h, rnd, T) for i, h in enumerate(tones)]
+    pts = [Vector((rnd.uniform(0, T[0]), rnd.uniform(0, T[1]))) for _ in range(24)]
+    for _ in range(2):  # Lloyd-Glättung: gleichmäßigere Plattengrößen
+        cells = periodic_voronoi(pts, T)
+        nxt = []
+        for p, poly in zip(pts, cells):
+            c = sum(poly, Vector((0, 0))) / len(poly)
+            nxt.append(Vector((c.x % T[0], c.y % T[1])))
+        pts = nxt
+    weights = [rnd.uniform(-0.02, 0.03) for _ in pts]
+    cells = periodic_voronoi(pts, T, weights)
+    joints = []  # Fugenlinien (Plan) für Moos und Gras
+    for p, poly in zip(pts, cells):
+        c = sum(poly, Vector((0, 0))) / len(poly)
+        # Ecken brechen: jede Ecke durch zwei Punkte auf den anschließenden Kanten ersetzen
+        broken = []
+        for i, v in enumerate(poly):
+            a, b = poly[i - 1], poly[(i + 1) % len(poly)]
+            k = rnd.uniform(0.02, 0.05)
+            broken.append(v.lerp(a, min(0.3, k / max(1e-6, (a - v).length))))
+            broken.append(v.lerp(b, min(0.3, k / max(1e-6, (b - v).length))))
+        for i, v in enumerate(poly):
+            joints.append((v, poly[(i + 1) % len(poly)]))
+        loc = [Vector((v.x - c.x, -(v.y - c.y))) for v in broken]
+        if _poly_area(loc) < 0:
+            loc.reverse()
+        loc = _offset(loc, rnd.uniform(0.007, 0.013))
+        loc = _refine(loc, 0.02, 0.008, rnd)
+        me = rock_mesh("flag", loc, rnd, 0.03, [(0, -0.009), (0.003, -0.0035), (0.008, -0.001), (0.015, 0.0)], dome=None, zjit=0.0008)
+        ob = link(bpy.data.objects.new("flag", me), outline=False)
+        ob.location = P(c.x, c.y, rnd.uniform(-0.003, 0.003))
+        ob.rotation_euler = Euler((rnd.uniform(-0.012, 0.012), rnd.uniform(-0.012, 0.012), 0))
+        me.materials.append(mats[rnd.randrange(len(mats))])
+        tiled(ob, T, 0.9)
+
+    # Moospolster und Grasbüschel entlang der Fugen (jede Fuge kommt von beiden Zellen: halbe Dichte)
+    moss = [pmat(f"fm{i}", lin(h), 0.9, 0.18, 0.5, 120, 0.2, 0.6) for i, h in enumerate(["#4f6123", "#5d6f2a", "#6b7a32", "#43541d", "#7a8340"])]
+    gm = [pmat(f"fg{i}", lin(h), 0.65, 0.1, 0.0, 10, 0.3, 0.5) for i, h in enumerate(["#4d5a22", "#5a6a28", "#647530", "#6e7d36", "#7d8a3e", "#8f9446"])]
+    bmm = bmesh.new()
+    bmg = bmesh.new()
+    zone = [(Vector((rnd.uniform(0, T[0]), rnd.uniform(0, T[1]))), rnd.uniform(0.2, 0.45)) for _ in range(9)]
+
+    def lush(x, y):
+        """Feuchte, schattige Zonen: dort mehr Moos und Gras"""
+        best = 0.0
+        for zc, zr in zone:
+            dx = min(abs(x - zc.x), T[0] - abs(x - zc.x))
+            dy = min(abs(y - zc.y), T[1] - abs(y - zc.y))
+            best = max(best, 1 - math.hypot(dx, dy) / zr)
+        return best
+
+    for a, b in joints:
+        L = (b - a).length
+        if L < 1e-4:
+            continue
+        t_ = (b - a) / L
+        nrm = Vector((-t_.y, t_.x))
+        s = 0.0
+        while s < L:
+            s += rnd.uniform(0.006, 0.02)
+            q = a + t_ * s
+            x, y = q.x % T[0], q.y % T[1]
+            wet = lush(x, y)
+            if rnd.random() < 0.22 + 0.5 * wet:
+                # Moospolster: flache Kuppe in der Fuge
+                r = rnd.uniform(0.003, 0.007) * (1 + wet * 0.6)
+                o = nrm * rnd.gauss(0, 0.004)
+                ret = bmesh.ops.create_icosphere(bmm, subdivisions=1, radius=1.0)
+                mi = rnd.randrange(len(moss))
+                for v in ret["verts"]:
+                    v.co = Vector((x + o.x + v.co.x * r * rnd.uniform(0.85, 1.15), -(y + o.y) + v.co.y * r, -0.014 + max(-0.3, v.co.z) * r * 0.9))
+                    for f in v.link_faces:
+                        f.material_index = mi
+            if rnd.random() < 0.015 + 0.06 * wet:
+                # Grasbüschel
+                size = rnd.uniform(0.6, 1.2) * (0.8 + wet * 0.5)
+                for _ in range(int(rnd.uniform(5, 14) * size)):
+                    o = nrm * rnd.gauss(0, 0.004) + t_ * rnd.gauss(0, 0.006)
+                    blade(bmg, x + o.x, y + o.y, -0.014, rnd.uniform(0.03, 0.08) * size, rnd.uniform(0, 6.28), rnd.uniform(0.45, 0.85), 0.0025, rnd.randrange(len(gm)))
+    periodic_mesh("flmoss", bmm, moss, T)
+    periodic_mesh("flgrass", bmg, gm, T)
+
+
+def _grid_block_mesh(rnd):
+    """
+    Rasengitterstein 60 × 40 × 8: 4 × 3 Kammern (oben 10,5 × 9 cm, nach unten konisch enger, Ecken gerundet),
+    Stege 4,5 cm, am Rand halbe Stege – im Verband ergibt sich ein durchgehendes Gitter
+    """
+    W, D, H = 0.596, 0.396, 0.08
+    blk = link(bpy.data.objects.new("gblk", slab_mesh("gblk", W, D, H)), outline=False)
+    blk.location = (0, 0, -H / 2)
+    bm = bmesh.new()
+
+    def rrect(cx, cy, a, b, r, z):
+        out = []
+        for qx, qy, a0 in ((1, 1, 0), (-1, 1, 90), (-1, -1, 180), (1, -1, 270)):
+            ox, oy = cx + qx * (a / 2 - r), cy + qy * (b / 2 - r)
+            for k in range(5):
+                ang = math.radians(a0 + k * 22.5)
+                out.append(bm.verts.new((ox + math.cos(ang) * r, oy + math.sin(ang) * r, z)))
+        return out
+
+    for i in range(4):
+        for j in range(3):
+            cx, cy = -0.225 + i * 0.15, -0.13333 + j * 0.13333
+            top = rrect(cx, cy, 0.105 + 0.003, 0.09 + 0.003, 0.018, 0.005)
+            bot = rrect(cx, cy, 0.085 - 0.003, 0.07 - 0.003, 0.012, -0.095)
+            n = len(top)
+            for k in range(n):
+                bm.faces.new((bot[k], bot[(k + 1) % n], top[(k + 1) % n], top[k]))
+            bm.faces.new(top)
+            bm.faces.new(list(reversed(bot)))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    cme = bpy.data.meshes.new("cut")
+    bm.to_mesh(cme)
+    bm.free()
+    cut = link(bpy.data.objects.new("cut", cme), outline=False)
+    mod = blk.modifiers.new("cut", "BOOLEAN")
+    mod.operation = "DIFFERENCE"
+    mod.object = cut
+    dg = bpy.context.evaluated_depsgraph_get()
+    dg.update()
+    me = bpy.data.meshes.new_from_object(blk.evaluated_get(dg))
+    me.name = "gridblock"
+    # Mesh mittig in z wie slab_mesh (Lage setzt der Aufrufer)
+    bpy.data.objects.remove(blk)
+    bpy.data.objects.remove(cut)
+    return me
+
+
+@ground("grassPaver", (2.4, 1.6), 360)
+def grass_paver(T, rnd):
+    """
+    Rasengitterstein Beton 60 × 40 × 8, grau, im Halbverband; Kammern mit Erde und Gras (je Kammer
+    unterschiedlich dicht, manche fast kahl), Halme hängen über die Stege; Stege abgefahren und verschmutzt
+    """
+    base_plane(T, pmat("gp_soil", lin("#4a3a2a"), 1.0, 0.35, 0.8, 60, 0.2, 0.7), -0.032)
+    me = _grid_block_mesh(rnd)
+    tones = ["#a29f97", "#9a968e", "#aaa69e", "#918d85", "#a7a196", "#8c8982"]
+    mats = [_vary(concrete_mat(f"gp{i}", h, rnd, rough=0.88, stain=1.3, moss=0.35, wear=1.3, pore=1.3), T) for i, h in enumerate(tones)]
+    me.materials.append(mats[0])
+    gm = [pmat(f"gpg{i}", lin(h), 0.6, 0.1, 0.0, 10, 0.3, 0.5) for i, h in enumerate(["#4d5a22", "#5a6a28", "#647530", "#43501d", "#6e7d36", "#55642a", "#7f8b3e", "#98985a"])]
+    bmg = bmesh.new()
+    for row in range(int(round(T[1] / 0.4))):
+        off = (row % 2) * 0.3
+        for col in range(int(round(T[0] / 0.6))):
+            x0, y0 = col * 0.6 + off + 0.3, row * 0.4 + 0.2
+            ob = link(bpy.data.objects.new("gp", me), outline=False)
+            ob.location = P(x0, y0, -0.04 + rnd.uniform(-0.002, 0.002))
+            ob.rotation_euler = Euler((rnd.uniform(-0.008, 0.008), rnd.uniform(-0.008, 0.008), rnd.uniform(-0.004, 0.004)))
+            bev = ob.modifiers.new("b", "BEVEL")
+            bev.width = 0.004
+            bev.segments = 2
+            bev.limit_method = "ANGLE"
+            ob.material_slots[0].link = "OBJECT"
+            ob.material_slots[0].material = mats[rnd.randrange(len(mats))]
+            tiled(ob, T, 0.35)
+            # Gras in den Kammern
+            for i in range(4):
+                for j in range(3):
+                    hx, hy = x0 - 0.225 + i * 0.15, y0 - 0.13333 + j * 0.13333
+                    dens = rnd.choice([1.0, 1.0, 0.9, 0.8, 0.6, 0.35, 0.12])
+                    for _ in range(int(55 * dens)):
+                        bx, by = hx + rnd.uniform(-0.042, 0.042), hy + rnd.uniform(-0.035, 0.035)
+                        L = rnd.uniform(0.045, 0.12) * (0.6 + 0.4 * dens)
+                        blade(bmg, bx % T[0], by % T[1], -0.03, L, rnd.uniform(0, 6.28), rnd.uniform(0.35, 0.85), 0.0028, rnd.randrange(len(gm)))
+    periodic_mesh("gpgrass", bmg, gm, T)
+
+
 #: Trittplatten (Naturstein, freigestellt) – Einzelbilder statt Kachel
 STEPPING = 4
 

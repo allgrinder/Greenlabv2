@@ -32,10 +32,11 @@ def _extra_mats():
     # Emaille schwarz (Kugelgrill): tiefes Anthrazit mit Klarlack, klare Glanzlichter
     m, b = lib._principled("enamel")
     lib._color_noise(m, b, (0.012, 0.012, 0.013), (0.02, 0.02, 0.021), 5)
-    b.inputs["Roughness"].default_value = 0.22
-    b.inputs["Metallic"].default_value = 0.1
-    b.inputs["Coat Weight"].default_value = 0.7
-    b.inputs["Coat Roughness"].default_value = 0.08
+    b.inputs["Roughness"].default_value = 0.3
+    b.inputs["Metallic"].default_value = 0.0
+    b.inputs["Specular IOR Level"].default_value = 0.35
+    b.inputs["Coat Weight"].default_value = 0.35
+    b.inputs["Coat Roughness"].default_value = 0.12
     lib._ao(m, 0.5)
     lib._mats["enamel"] = m
     # gebürsteter Edelstahl (Griffe, Beine, Lüftung)
@@ -69,8 +70,8 @@ def _extra_mats():
     sc.inputs[1].default_value = 0.75
     nt.links.new(mix.outputs[0], sc.inputs[0])
     ramp = nt.nodes.new("ShaderNodeValToRGB")
-    ramp.color_ramp.elements[0].color = (0.13, 0.085, 0.05, 1)
-    ramp.color_ramp.elements[1].color = (0.33, 0.23, 0.15, 1)
+    ramp.color_ramp.elements[0].color = (0.11, 0.09, 0.068, 1)
+    ramp.color_ramp.elements[1].color = (0.25, 0.205, 0.158, 1)
     nt.links.new(sc.outputs[0], ramp.inputs["Fac"])
     nt.links.new(ramp.outputs["Color"], b.inputs["Base Color"])
     bump = nt.nodes.new("ShaderNodeBump")
@@ -282,21 +283,30 @@ def hollywood_swing(w: float, d: float, h: float):
         t = (y + yc) / (2 * yc)
         return zb + (zf - zb) * t + 0.05 * (1 - ((y) / yc) ** 2)
 
+    # vier Spriegel tragen den Stoff; dazwischen hängt er durch und bildet flache Bahnen
+    bows = [-X, -X / 3, X / 3, X]
     grid = []
-    nx, ny = 24, 16
+    nx, ny = 60, 16
     for i in range(nx + 1):
         x = -X - 0.05 + (2 * X + 0.1) * i / nx
+        k = min(2, max(0, int((x - bows[0]) / (bows[1] - bows[0]))))
+        fr = min(1.0, max(0.0, (x - bows[k]) / (bows[k + 1] - bows[k])))
         row = []
         for j in range(ny + 1):
             y = -yc + 2 * yc * j / ny
-            sag = 0.012 * math.sin(math.pi * i / nx)  # Stoff hängt zwischen den Rahmenrohren leicht durch
+            edge = 1 - abs(y / yc) ** 6  # an Volant-Kanten gespannt
+            sag = 0.05 * math.sin(math.pi * fr) * edge
             row.append(P(x, y, roof_z(y) - sag))
         grid.append(row)
     _sheet("canopy", grid, "fabric_light", 0.008)
+    for x in bows:
+        pts = [(x, -yc + 2 * yc * j / 12, roof_z(-yc + 2 * yc * j / 12) - 0.012) for j in range(13)]
+        _tube("bow", pts, 0.014 if abs(x) < X else 0.016, "anthracite")
     for x in (-X, X):
-        pts = [(x, -yc + 2 * yc * j / 12, roof_z(-yc + 2 * yc * j / 12) - 0.02) for j in range(13)]
-        _tube("roofrail", pts, 0.016, "anthracite")
         _tube("roofpost", [(x, 0, zt), (x, 0, roof_z(0) - 0.02)], 0.02, "anthracite")
+    for x in (-X - 0.05, X + 0.05):
+        pts = [(x, -yc + 2 * yc * j / 12, roof_z(-yc + 2 * yc * j / 12) + 0.002) for j in range(13)]
+        _tube("piping_side", pts, 0.01, "fabric_dark", res=2)
     for y in (-yc, yc):
         z = roof_z(y)
         box("valance", -X - 0.05, y - 0.006, z - 0.13, X + 0.05, y + 0.006, z, "fabric_light", 0.004)
@@ -410,11 +420,11 @@ def garden_bench(w: float, d: float, h: float):
         _beam("rail", (x, yF, zseat - 0.03), (x, yB + 0.1, zseat - 0.055), 0.05, 0.016, "anthracite", side=(1, 0, 0), bevel=0.002)
         # Hinterbein mit Rückenlehne in einem Zug
         _beam("leg_b", (x, yB + 0.12, 0), (x, yB + 0.08, zseat - 0.03), 0.05, 0.016, "anthracite", side=(1, 0, 0), bevel=0.002)
-        _beam("back", (x, yB + 0.08, zseat - 0.06), (x, yB - 0.02, h - 0.01), 0.05, 0.016, "anthracite", side=(1, 0, 0), bevel=0.002)
+        _beam("back", (x, yB + 0.08, zseat - 0.06), (x, yB - 0.01, h - 0.07), 0.05, 0.016, "anthracite", side=(1, 0, 0), bevel=0.002)
         # Fußleiste und Armlehne
         _beam("foot", (x, yF + 0.0, 0.015), (x, yB + 0.08, 0.015), 0.03, 0.05, "anthracite", side=(1, 0, 0), bevel=0.003)
         _beam("armsteel", (x, yB + 0.02, 0.64), (x, yF - 0.02, 0.64), 0.016, 0.05, "anthracite", side=(1, 0, 0), bevel=0.002)
-        box("armwood", x - 0.04, yB, 0.648, x + 0.04, yF + 0.01, 0.676, "wood_slat", 0.004)
+        box("armwood", x - 0.028, yB + 0.01, 0.648, x + 0.028, yF + 0.01, 0.672, "wood_slat", 0.004)
     # Längsstrebe unter dem Sitz
     _beam("stretcher", (-xs, yB + 0.14, 0.2), (xs, yB + 0.14, 0.2), 0.04, 0.016, "anthracite", bevel=0.002)
     # Sitzlatten (5), folgen der Neigung der Sitzauflage
@@ -426,10 +436,10 @@ def garden_bench(w: float, d: float, h: float):
         _beam("slat", (-w / 2, y, z), (w / 2, y, z), 0.028, 0.075, "wood_slat", side=(0, 1, 0), bevel=0.004)
     # Rückenlatten (3) auf der Rückenlehne
     a = Vector((yB + 0.08, zseat - 0.06))
-    b = Vector((yB - 0.02, h - 0.01))
+    b = Vector((yB - 0.01, h - 0.07))
     dirv = (b - a).normalized()
     nrm = Vector((dirv.y, -dirv.x))  # nach vorn
-    for t in (0.47, 0.68, 0.89):
+    for t in (0.5, 0.72, 0.94):
         q = a + (b - a) * t + nrm * 0.03
         _beam("backslat", (-w / 2 + 0.04, q.x, q.y), (w / 2 - 0.04, q.x, q.y), 0.026, 0.085, "wood_slat", side=(0, dirv.x, dirv.y), bevel=0.004)
 
@@ -473,7 +483,7 @@ def bistro_set(w: float, d: float, h: float):
     cylinder("column", 0, 0, 0.03, h - 0.06, 0.03, "anthracite", 32)
     _lathe("foot", [(0.0, 0.0), (0.23, 0.0), (0.235, 0.008), (0.22, 0.022), (0.06, 0.04), (0.035, 0.07), (0.0, 0.07)], 0, 0, "anthracite", 96)
     off = w / 2 - 0.28
-    for cx, cy, ang in ((-off, -0.07, 90 + 8), (off, 0.08, -90 - 10)):
+    for cx, cy, ang in ((-off, -0.07, -90 - 8), (off, 0.08, 90 + 10)):
         parts = _collect(_bistro_chair)
         _place(parts, cx, cy, ang)
 
@@ -526,7 +536,7 @@ def parasol_round(w: float, d: float, h: float):
     # Windklappe mit Spalt und Spitze
     _lathe("vent", [(0.0, apex + 0.1), (0.1, apex + 0.08), (0.22, apex + 0.03), (0.23, apex + 0.015)], 0, 0, "fabric_light", 64)
     cylinder("ventpost", 0, 0, apex - 0.05, apex + 0.1, 0.03, "anthracite", 32)
-    _lathe("finial", [(0.0, apex + 0.16), (0.02, apex + 0.155), (0.03, apex + 0.12), (0.035, apex + 0.1), (0.0, apex + 0.1)], 0, 0, "anthracite", 32)
+    _lathe("finial", [(0.0, apex + 0.135), (0.012, apex + 0.132), (0.02, apex + 0.115), (0.022, apex + 0.1), (0.0, apex + 0.1)], 0, 0, "graphite", 32)
     # Mast, Läufer, Kurbel
     cylinder("pole", 0, 0, 0.08, apex, 0.024, "anthracite", 32)
     cylinder("runner", 0, 0, apex - 0.68, apex - 0.56, 0.035, "anthracite", 32, 0.005)
@@ -681,7 +691,7 @@ def kettle_grill(w: float, d: float, h: float):
         t = 0.62
         ring.append((tx + (fx_ - tx) * t, ty + (fy_ - ty) * t, 0.2))
     _tube("rack", ring, 0.007, "steel", closed=True, res=1)
-    _lathe("ashpan", [(0.0, 0.11), (0.1, 0.115), (0.135, 0.14), (0.15, 0.21), (0.155, 0.215)], 0, 0, "steel", 64)
+    _lathe("ashpan", [(0.0, 0.13), (0.07, 0.133), (0.095, 0.15), (0.105, 0.205), (0.11, 0.21)], 0, 0, "graphite", 64)
 
 
 GENERATORS = {

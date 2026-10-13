@@ -112,6 +112,13 @@
    "h": 2.0,
    "ppm": 360,
    "variants": []
+  },
+  "grassPaver": {
+   "file": "grassPaver.webp",
+   "w": 2.4,
+   "h": 1.6,
+   "ppm": 360,
+   "variants": []
   }
  },
  "stepping": [

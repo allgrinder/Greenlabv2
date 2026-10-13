@@ -754,101 +754,118 @@ def ping_pong(w: float, d: float, h: float):
 
 
 def stilt_house(w: float, d: float, h: float):
-    """Stelzenhaus: Podest auf vier Pfosten, Häuschen mit vergrauter Lärchenschalung, Stehfalzdach anthrazit, Leiter und Geländer"""
+    """Stelzenhaus: Podest auf vier Pfosten, Häuschen mit vergrauter Lärchenschalung und Pultdach (Stehfalz, anthrazit),
+    Terrasse mit Staketengeländer, Leiter nach Süden, Kletterseil"""
     zd = 1.4  # Podesthöhe (Oberkante Belag)
     pw = 0.12
     x0, x1 = -w / 2, w / 2
-    y0, y1 = -d / 2, d / 2 - 0.55  # Podest; vor dem Podest steht die Leiter
-    # Pfosten und Kopfbänder
+    y0, y1 = -d / 2, d / 2 - 0.55  # Podest; davor (Süden) steht die Leiter
+    wn = "wood_natural"
+    # Pfosten auf Betonfundamenten, Kopfbänder, Rähm
     posts = [(x0 + 0.1, y0 + 0.1), (x1 - 0.1 - pw, y0 + 0.1), (x0 + 0.1, y1 - 0.1 - pw), (x1 - 0.1 - pw, y1 - 0.1 - pw)]
     for (px, py) in posts:
-        box("post", px, py, 0, px + pw, py + pw, zd + 1.05 if py > 0 else zd, "wood_natural", 0.008)
+        box("post", px, py, 0, px + pw, py + pw, zd - 0.05, wn, 0.008)
         box("footing", px - 0.03, py - 0.03, 0, px + pw + 0.03, py + pw + 0.03, 0.08, "concrete", 0.006)
-    for (px, py) in posts:
         cx, cy = px + pw / 2, py + pw / 2
         sx = 1 if cx < 0 else -1
-        _plank("brace", P(cx + sx * 0.06, cy, zd - 0.75), P(cx + sx * 0.6, cy, zd - 0.2), Vector((0, 1, 0)), 0.04, 0.09, "wood_natural")
-    box("beam_n", x0, y0 + 0.08, zd - 0.24, x1, y0 + 0.24, zd - 0.05, "wood_natural", 0.006)
-    box("beam_s", x0, y1 - 0.24, zd - 0.24, x1, y1 - 0.08, zd - 0.05, "wood_natural", 0.006)
-    box("deck", x0, y0, zd - 0.05, x1, y1, zd, "wood_natural", 0.004)
-    box("deck_edge", x0 - 0.01, y1 - 0.03, zd - 0.12, x1 + 0.01, y1, zd - 0.01, "wood_natural", 0.004)
-    # Häuschen (Norden), Eingang nach Süden
-    hx0, hx1 = x0 + 0.2, x1 - 0.55
-    hy0, hy1 = y0 + 0.15, y0 + 1.35
-    zw = zd + 1.15
-    box("hut", hx0, hy0, zd, hx1, hy1, zw, "wood_grey")
-    zr = h
-    # Giebeldreiecke an West und Ost (First entlang x)
+        _plank("brace", P(cx + sx * 0.06, cy, zd - 0.75), P(cx + sx * 0.6, cy, zd - 0.2), Vector((0, 1, 0)), 0.04, 0.09, wn)
+    box("beam_n", x0, y0 + 0.08, zd - 0.24, x1, y0 + 0.24, zd - 0.05, _cm("larch_x"), 0.006)
+    box("beam_s", x0, y1 - 0.24, zd - 0.24, x1, y1 - 0.08, zd - 0.05, _cm("larch_x"), 0.006)
+    box("deck", x0, y0, zd - 0.05, x1, y1, zd, wn, 0.004)
+    box("deck_edge", x0 - 0.01, y1 - 0.03, zd - 0.12, x1 + 0.01, y1, zd - 0.01, _cm("larch_x"), 0.004)
+    # Häuschen in der Nordwest-Ecke, Pultdach steigt nach Süden (Eingangsseite)
+    hx0, hx1 = x0 + 0.1, x0 + 1.45
+    hy0, hy1 = y0 + 0.1, y0 + 1.2
+    zs = h - 0.06  # Traufe/Wandoberkante Süd
+    zn = zd + 1.15  # Wandoberkante Nord
+    slope = (zs - zn) / (hy1 - hy0)
+    bm = bmesh.new()
+    bot = [bm.verts.new(P(x, y, zd)) for x, y in ((hx0, hy0), (hx1, hy0), (hx1, hy1), (hx0, hy1))]
+    top = [bm.verts.new(P(x, y, zn if y == hy0 else zs)) for x, y in ((hx0, hy0), (hx1, hy0), (hx1, hy1), (hx0, hy1))]
+    bm.faces.new(list(reversed(bot)))
+    bm.faces.new(top)
+    for i in range(4):
+        bm.faces.new((bot[i], bot[(i + 1) % 4], top[(i + 1) % 4], top[i]))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    _obj("hut", bm, "wood_grey")
+    # Eckleisten anthrazit
+    for (cx, cy) in ((hx0, hy1), (hx1, hy1), (hx1, hy0)):
+        box("corner_trim", cx - 0.02, cy - 0.02, zd, cx + 0.02, cy + 0.02, zn if cy == hy0 else zs, "anthracite", 0.003)
+    # Südfassade: Türöffnung (dunkel) mit Zarge, großes Fenster; Ostwand: Bullauge
+    dx0, dx1 = hx0 + 0.15, hx0 + 0.67
+    box("door_frame", dx0 - 0.045, hy1, zd, dx1 + 0.045, hy1 + 0.03, zd + 1.3, "anthracite", 0.004)
+    box("door", dx0, hy1 + 0.004, zd, dx1, hy1 + 0.034, zd + 1.255, _cm("hole"))
+    wx0, wx1 = hx1 - 0.55, hx1 - 0.12
+    box("win_frame", wx0 - 0.045, hy1, zd + 0.55, wx1 + 0.045, hy1 + 0.03, zd + 1.3, "anthracite", 0.004)
+    box("win", wx0, hy1 + 0.004, zd + 0.595, wx1, hy1 + 0.034, zd + 1.255, "window")
+    box("sill", wx0 - 0.06, hy1, zd + 0.53, wx1 + 0.06, hy1 + 0.07, zd + 0.555, "anthracite", 0.003)
     yc = (hy0 + hy1) / 2
-    for x in (hx0, hx1):
-        bm = bmesh.new()
-        bm.faces.new([bm.verts.new(p) for p in (P(x, hy0, zw), P(x, hy1, zw), P(x, yc, zr - 0.12))])
-        gb = _obj("gable", bm, "wood_grey")
-        sol = gb.modifiers.new("t", "SOLIDIFY")
-        sol.thickness = 0.03
-        sol.offset = 0
-    # Tür (Öffnung dunkel) und Fenster mit anthrazit Rahmen
-    dx0, dx1 = hx0 + 0.18, hx0 + 0.78
-    box("door_frame", dx0 - 0.05, hy1, zd, dx1 + 0.05, hy1 + 0.03, zd + 1.0, "anthracite", 0.004)
-    box("door", dx0, hy1 + 0.005, zd, dx1, hy1 + 0.035, zd + 0.95, _cm("hole"))
-    wx0, wx1 = hx1 - 0.48, hx1 - 0.12
-    box("win_frame", wx0 - 0.04, hy1, zd + 0.42, wx1 + 0.04, hy1 + 0.03, zd + 0.88, "anthracite", 0.004)
-    box("win", wx0, hy1 + 0.005, zd + 0.46, wx1, hy1 + 0.035, zd + 0.84, "window")
-    box("win_e_frame", hx1, yc - 0.25, zd + 0.42, hx1 + 0.03, yc + 0.25, zd + 0.88, "anthracite", 0.004)
-    box("win_e", hx1 + 0.005, yc - 0.21, zd + 0.46, hx1 + 0.035, yc + 0.21, zd + 0.84, "window")
-    # Stehfalzdach: zwei Flächen, First entlang x, Falze im Abstand von 25 cm
-    ov = 0.2
-    ry0, ry1 = hy0 - ov, hy1 + ov
-    slope = (zr - 0.12 - zw) / (yc - hy0)
-    for sy in (-1, 1):
-        ye = ry1 if sy > 0 else ry0
-        ze = zr - 0.12 - slope * abs(ye - yc)
-        a_ = P(hx0 - ov, yc, zr - 0.05)
-        b_ = P(hx0 - ov, ye, ze + 0.07)
-        e = Vector((1, 0, 0))
-        s = (b_ - a_).normalized()
-        nrm = e.cross(s)
-        if nrm.z < 0:
-            nrm = -nrm
-        L = (b_ - a_).length
-        span = hx1 - hx0 + 2 * ov
-        plate("roof", a_, e, s, nrm, span, L, 0.025, "anthracite")
-        k = 0.12
-        while k < span - 0.05:
-            plate("seam", a_ + e * k + nrm * 0.024, e, s, nrm, 0.012, L, 0.028, "graphite")
-            k += 0.25
-        plate("fascia", b_ - nrm * 0.05, e, nrm, -s, span, 0.08, 0.02, "anthracite")
-    _rod("ridge", P(hx0 - ov - 0.01, yc, zr - 0.02), P(hx1 + ov + 0.01, yc, zr - 0.02), 0.035, "graphite", 16)
-    # Geländer: Pfosten + waagrechte Lärchenlatten an Ost- und Südkante, Lücke für die Leiter
-    lx0, lx1 = x1 - 0.95, x1 - 0.45  # Leiteröffnung im Süden
-    rails = [
-        ((x1 - 0.05, y0 + 0.05), (x1 - 0.05, y1 - 0.05)),
-        ((x0 + 0.05, y1 - 0.05), (lx0, y1 - 0.05)),
-        ((lx1, y1 - 0.05), (x1 - 0.05, y1 - 0.05)),
-        ((x0 + 0.05, hy1 + 0.02), (x0 + 0.05, y1 - 0.05)),
+    _rod("port_frame", P(hx1 - 0.005, yc, zd + 0.85), P(hx1 + 0.03, yc, zd + 0.85), 0.2, "anthracite", 40)
+    _rod("port", P(hx1 + 0.02, yc, zd + 0.85), P(hx1 + 0.034, yc, zd + 0.85), 0.16, "window", 40)
+    # Pultdach mit Überstand, Stehfalze im Abstand von 25 cm, Ortgang- und Traufblech
+    ov, ovs = 0.12, 0.3
+    a_ = P(hx0 - ov, hy0 - ov, zn - slope * ov)
+    b_ = P(hx0 - ov, hy1 + ovs, zs + slope * ovs)
+    e = Vector((1, 0, 0))
+    s = (b_ - a_).normalized()
+    nrm = e.cross(s)
+    if nrm.z < 0:
+        nrm = -nrm
+    L = (b_ - a_).length
+    span = hx1 - hx0 + 2 * ov
+    plate("roof", a_, e, s, nrm, span, L, 0.03, "anthracite")
+    k = 0.1
+    while k < span - 0.05:
+        plate("seam", a_ + e * k + nrm * 0.029, e, s, nrm, 0.012, L, 0.025, "graphite")
+        k += 0.25
+    plate("fascia_s", b_ - nrm * 0.06, e, nrm, -s, span, 0.1, 0.018, "anthracite")
+    plate("fascia_n", a_ - nrm * 0.06 - s * 0.018, e, nrm, s, span, 0.1, 0.018, "anthracite")
+    for xx in (0.0, span - 0.018):
+        plate("verge", a_ + e * xx - nrm * 0.05, s, nrm, e, L, 0.09, 0.018, "anthracite")
+    # Staketengeländer: Handlauf, Unterholm, senkrechte Latten; Lücke für die Leiter
+    lx0, lx1 = x1 - 0.95, x1 - 0.45
+    runs = [
+        ((x1 - 0.04, y0 + 0.04), (x1 - 0.04, y1 - 0.04)),
+        ((x0 + 0.04, y1 - 0.04), (lx0, y1 - 0.04)),
+        ((lx1, y1 - 0.04), (x1 - 0.04, y1 - 0.04)),
+        ((x0 + 0.04, hy1 + 0.02), (x0 + 0.04, y1 - 0.04)),
+        ((hx1 + 0.02, y0 + 0.04), (x1 - 0.04, y0 + 0.04)),
     ]
-    for (ax, ay), (bx, by) in rails:
-        for zz in (0.3, 0.55, 0.8):
-            if ax == bx:
-                box("rail", ax - 0.022, ay, zd + zz, ax + 0.022, by, zd + zz + 0.09, "wood_natural", 0.004)
+    slats = _Batch("slats", wn, False)
+    for (ax, ay), (bx, by) in runs:
+        along_x = ay == by
+        L_ = abs(bx - ax) if along_x else abs(by - ay)
+        n_ = max(1, int(L_ / 0.11))
+        for i in range(n_ + 1):
+            f = i / n_
+            qx, qy = ax + (bx - ax) * f, ay + (by - ay) * f
+            if along_x:
+                slats.cube(qx - 0.022, qy - 0.012, zd + 0.06, qx + 0.022, qy + 0.012, zd + 0.93)
             else:
-                box("rail", ax, ay - 0.022, zd + zz, bx, ay + 0.022, zd + zz + 0.09, "wood_natural", 0.004)
+                slats.cube(qx - 0.012, qy - 0.022, zd + 0.06, qx + 0.012, qy + 0.022, zd + 0.93)
+        lo, hi = (min(ax, bx), max(ax, bx)), (min(ay, by), max(ay, by))
+        mat_ = _cm("larch_x") if along_x else _cm("larch_y")
+        box("handrail", lo[0] - 0.035, lo[1] - 0.035, zd + 0.93, hi[0] + 0.035, hi[1] + 0.035, zd + 0.965 + (0.003 if along_x else 0), mat_, 0.004)
+        box("lowrail", lo[0] - 0.02, lo[1] - 0.02, zd + 0.1, hi[0] + 0.02, hi[1] + 0.02, zd + 0.16, mat_, 0.003)
         for (qx, qy) in ((ax, ay), (bx, by)):
-            box("rpost", qx - 0.04, qy - 0.04, zd, qx + 0.04, qy + 0.04, zd + 0.95, "wood_natural", 0.005)
-        box("handrail", min(ax, bx) - 0.045, min(ay, by) - 0.045, zd + 0.95, max(ax, bx) + 0.045, max(ay, by) + 0.045, zd + 0.98, "wood_natural", 0.004)
-    # Leiter nach Süden, steil
+            box("newel", qx - 0.045, qy - 0.045, zd, qx + 0.045, qy + 0.045, zd + 1.02, wn, 0.006)
+    slats.build(0.003)
+    # Leiter nach Süden, steil, mit Griffbügeln aus Edelstahl
     for x in (lx0 + 0.02, lx1 - 0.06):
-        _plank("ladder", P(x + 0.02, d / 2 - 0.03, 0), P(x + 0.02, y1 - 0.02, zd + 0.05), Vector((0, -1, 0.3)), 0.09, 0.04, "wood_natural")
+        _plank("ladder", P(x + 0.02, d / 2 - 0.03, 0), P(x + 0.02, y1 - 0.02, zd + 0.05), Vector((0, -1, 0.3)), 0.09, 0.04, wn)
     for i in range(1, 6):
         z = zd * i / 6
         y = d / 2 - 0.03 - (d / 2 - y1 - 0.01) * i / 6
-        box("rung", lx0 + 0.06, y - 0.06, z - 0.025, lx1 - 0.06, y + 0.06, z + 0.01, "wood_natural", 0.004)
-    # Schaukelseil? Nein – Kletterseil mit Knoten unter dem Podest an der Westseite
-    _rod("rope", P(x0 + 0.5, y1 - 0.4, zd - 0.24), P(x0 + 0.5, y1 - 0.4, 0.25), 0.014, "fabric_light", 10)
+        box("rung", lx0 + 0.06, y - 0.06, z - 0.025, lx1 - 0.06, y + 0.06, z + 0.01, _cm("larch_x"), 0.004)
+    for x in (lx0 + 0.0, lx1 - 0.0):
+        _rod("grip", P(x, y1 - 0.04, zd + 0.97), P(x, y1 + 0.12, zd + 0.55), 0.016, _cm("steel"), 14)
+    # Kletterseil mit Knoten unter dem Podest
+    _rod("rope", P(x0 + 0.55, y1 - 0.4, zd - 0.24), P(x0 + 0.55, y1 - 0.4, 0.25), 0.014, "fabric_light", 10)
+    bt = _Batch("knot", "fabric_light", True)
     for z in (0.35, 0.65, 0.95):
-        bt = _Batch("knot", "fabric_light", True)
-        bt.blob(P(x0 + 0.5, y1 - 0.4, z), 0.035, (1, 1, 0.8), 2)
-        bt.build()
+        bt.blob(P(x0 + 0.55, y1 - 0.4, z), 0.035, (1, 1, 0.8), 2)
+    bt.build()
+
 
 
 # ------------------------------------------------------------------ Deko & Natur
@@ -1010,8 +1027,8 @@ def nest_box(w: float, d: float, h: float):
     bev.width = 0.004
     bev.limit_method = "ANGLE"
     # Einflugloch
-    _rod("entry", P(0, yc + by - 0.006, zt_f - 0.08), P(0, yc + by + 0.002, zt_f - 0.08), 0.016, _cm("hole"), 24)
-    _rod("entry_ring", P(0, yc + by - 0.002, zt_f - 0.08), P(0, yc + by + 0.004, zt_f - 0.08), 0.021, "graphite", 24)
+    _rod("entry", P(0, yc + by - 0.006, zt_f - 0.13), P(0, yc + by + 0.0045, zt_f - 0.13), 0.017, _cm("hole"), 24)
+    _rod("entry_ring", P(0, yc + by - 0.002, zt_f - 0.13), P(0, yc + by + 0.003, zt_f - 0.13), 0.023, "graphite", 24)
     # Dach mit Überstand bis zur Objektkante
     a_ = P(-w / 2 + 0.02, -d / 2 + 0.03, zt_b + 0.005)
     b_ = P(-w / 2 + 0.02, yc + by + 0.04, zt_f + 0.005 - 0.04 * 0.2)

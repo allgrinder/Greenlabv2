@@ -89,15 +89,15 @@ def _wire(kind: str):
         nt.links.new(div.outputs[0], fr.inputs[0])
         lt = nt.nodes.new("ShaderNodeMath")
         lt.operation = "LESS_THAN"
-        lt.inputs[1].default_value = 0.11
+        lt.inputs[1].default_value = 0.07
         nt.links.new(fr.outputs[0], lt.inputs[0])
         lines.append(lt)
     mx = nt.nodes.new("ShaderNodeMath")
     mx.operation = "MAXIMUM"
     nt.links.new(lines[0].outputs[0], mx.inputs[0])
     nt.links.new(lines[1].outputs[0], mx.inputs[1])
-    b.inputs["Base Color"].default_value = (0.36, 0.37, 0.37, 1)
-    b.inputs["Metallic"].default_value = 0.7
+    b.inputs["Base Color"].default_value = (0.26, 0.265, 0.265, 1)
+    b.inputs["Metallic"].default_value = 0.6
     b.inputs["Roughness"].default_value = 0.45
     tr = nt.nodes.new("ShaderNodeBsdfTransparent")
     mix = nt.nodes.new("ShaderNodeMixShader")
@@ -912,16 +912,16 @@ def chicken_coop(w: float, d: float, h: float):
         bx("run_door", a_, sy1 - 0.01, b_, c_, sy1 + 0.02, d_, "thermo_grey_z", 0.003)
     bx("run_latch", dx0 + 0.005, sy1 + 0.02, 0.6, dx0 + 0.03, sy1 + 0.035, 0.66, "inox")
     # Tränke und Futterspender
-    cyl("drinker", ax1 - 0.3, sy0 + 0.3, 0.025, 0.06, 0.16, "inox", 40, 0.004)
-    cyl("drinker_tank", ax1 - 0.3, sy0 + 0.3, 0.06, 0.36, 0.11, "inox", 40, 0.006)
-    cyl("drinker_lid", ax1 - 0.3, sy0 + 0.3, 0.36, 0.38, 0.03, "graphite", 16)
+    cyl("drinker", ax1 - 0.2, sy0 + 0.22, 0.025, 0.05, 0.12, "inox", 40, 0.004)
+    cyl("drinker_tank", ax1 - 0.2, sy0 + 0.22, 0.05, 0.3, 0.08, "inox", 40, 0.006)
+    cyl("drinker_lid", ax1 - 0.2, sy0 + 0.22, 0.3, 0.32, 0.025, "graphite", 16)
     cyl("feeder", floor_x0 + 0.35, sy0 + 0.35, 0.025, 0.05, 0.15, "graphite", 40, 0.004)
     cyl("feeder_tube", floor_x0 + 0.35, sy0 + 0.35, 0.05, 0.42, 0.075, "graphite", 32, 0.004)
     cyl("feed", floor_x0 + 0.35, sy0 + 0.35, 0.045, 0.055, 0.13, "straw", 32)
     # Hühner
-    hen(0.25, 0.25, math.radians(200), "hen_brown")
-    hen(0.75, -0.15, math.radians(-30), "hen_white", peck=True)
-    hen(-0.35, 0.3, math.radians(10), "hen_brown", peck=True)
+    hen(0.72, 0.28, math.radians(200), "hen_brown")
+    hen(0.4, -0.38, math.radians(-25), "hen_white", peck=True)
+    hen(-0.62, 0.22, math.radians(15), "hen_brown", peck=True)
 
 
 # ------------------------------------------------------------------ Outdoorküche

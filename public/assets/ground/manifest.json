@@ -91,6 +91,13 @@
     "basalt_v1.webp",
     "basalt_v2.webp"
    ]
+  },
+  "herringbone": {
+   "file": "herringbone.webp",
+   "w": 1.4142,
+   "h": 1.4142,
+   "ppm": 480,
+   "variants": []
   }
  },
  "stepping": [

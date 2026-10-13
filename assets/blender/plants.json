@@ -5,6 +5,7 @@
   "kind": "tree",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 15,
   "heightMature": 20,
   "colors": {
@@ -70,6 +71,7 @@
   "kind": "tree",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 5,
   "heightMature": 6,
   "colors": {
@@ -136,6 +138,7 @@
   "kind": "tree",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 7,
   "heightMature": 5,
   "colors": {
@@ -202,6 +205,7 @@
   "kind": "tree",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 8,
   "heightMature": 7,
   "colors": {
@@ -268,6 +272,7 @@
   "kind": "tree",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 10,
   "heightMature": 12,
   "colors": {
@@ -321,6 +326,7 @@
   "kind": "tree",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 5,
   "heightMature": 5,
   "colors": {
@@ -374,6 +380,7 @@
   "kind": "tree",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 7,
   "heightMature": 14,
   "colors": {
@@ -427,6 +434,7 @@
   "kind": "tree",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 8,
   "heightMature": 12,
   "colors": {
@@ -492,6 +500,7 @@
   "kind": "tree",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 14,
   "heightMature": 20,
   "colors": {
@@ -558,6 +567,7 @@
   "kind": "tree",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 14,
   "heightMature": 18,
   "colors": {
@@ -623,6 +633,7 @@
   "kind": "tree",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 16,
   "heightMature": 22,
   "colors": {
@@ -688,6 +699,7 @@
   "kind": "tree",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 6,
   "heightMature": 7,
   "colors": {
@@ -748,11 +760,656 @@
   ]
  },
  {
+  "id": "castanea-sativa",
+  "name": "Esskastanie",
+  "kind": "tree",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 12,
+  "heightMature": 18,
+  "colors": {
+   "summer": "#5F7C42",
+   "spring": "#93AA5E",
+   "autumn": "#BF923C",
+   "winter": "#7A6E5E"
+  },
+  "looks": [
+   {
+    "key": "#93AA5E|0||",
+    "look": {
+     "color": "#93AA5E",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#5F7C42|0||",
+    "look": {
+     "color": "#5F7C42",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#BF923C|0||",
+    "look": {
+     "color": "#BF923C",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7A6E5E|1||",
+    "look": {
+     "color": "#7A6E5E",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "betula-pendula",
+  "name": "Birke, mehrstämmig",
+  "kind": "tree",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 7,
+  "heightMature": 15,
+  "colors": {
+   "summer": "#7E9A55",
+   "spring": "#A9BF72",
+   "autumn": "#D7B444",
+   "winter": "#8A8478"
+  },
+  "looks": [
+   {
+    "key": "#A9BF72|0||",
+    "look": {
+     "color": "#A9BF72",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#7E9A55|0||",
+    "look": {
+     "color": "#7E9A55",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#D7B444|0||",
+    "look": {
+     "color": "#D7B444",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#8A8478|1||",
+    "look": {
+     "color": "#8A8478",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "magnolia",
+  "name": "Tulpen-Magnolie",
+  "kind": "tree",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 5,
+  "heightMature": 5,
+  "colors": {
+   "summer": "#6C8A50",
+   "autumn": "#B79A50",
+   "winter": "#7A6E5E",
+   "bloom": "#F2DCE4"
+  },
+  "looks": [
+   {
+    "key": "#6C8A50|1|#F2DCE4|",
+    "look": {
+     "color": "#6C8A50",
+     "bare": true,
+     "bloom": "#F2DCE4",
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6C8A50|0||",
+    "look": {
+     "color": "#6C8A50",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#B79A50|0||",
+    "look": {
+     "color": "#B79A50",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7A6E5E|1||",
+    "look": {
+     "color": "#7A6E5E",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "acer-palmatum",
+  "name": "Fächerahorn",
+  "kind": "tree",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 4,
+  "heightMature": 4,
+  "colors": {
+   "summer": "#6E8E48",
+   "spring": "#A7B865",
+   "autumn": "#C4402C",
+   "winter": "#7A6E5E"
+  },
+  "looks": [
+   {
+    "key": "#A7B865|0||",
+    "look": {
+     "color": "#A7B865",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6E8E48|0||",
+    "look": {
+     "color": "#6E8E48",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#C4402C|0||",
+    "look": {
+     "color": "#C4402C",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7A6E5E|1||",
+    "look": {
+     "color": "#7A6E5E",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "catalpa-nana",
+  "name": "Kugel-Trompetenbaum",
+  "kind": "tree",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 5,
+  "heightMature": 5,
+  "colors": {
+   "summer": "#7FA052",
+   "spring": "#9DB66A",
+   "autumn": "#BFA24E",
+   "winter": "#7A6E5E"
+  },
+  "looks": [
+   {
+    "key": "#9DB66A|0||",
+    "look": {
+     "color": "#9DB66A",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#7FA052|0||",
+    "look": {
+     "color": "#7FA052",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#BFA24E|0||",
+    "look": {
+     "color": "#BFA24E",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7A6E5E|1||",
+    "look": {
+     "color": "#7A6E5E",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "pyrus-communis",
+  "name": "Birne ›Williams Christ‹",
+  "kind": "tree",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 6,
+  "heightMature": 7,
+  "colors": {
+   "summer": "#6D8C4E",
+   "spring": "#A9BC86",
+   "autumn": "#B9763A",
+   "winter": "#7A6E5E",
+   "bloom": "#F7F4EE",
+   "fruit": "#C9B94A"
+  },
+  "looks": [
+   {
+    "key": "#A9BC86|0|#F7F4EE|",
+    "look": {
+     "color": "#A9BC86",
+     "bare": false,
+     "bloom": "#F7F4EE",
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6D8C4E|0||",
+    "look": {
+     "color": "#6D8C4E",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#B9763A|0||",
+    "look": {
+     "color": "#B9763A",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7A6E5E|1||",
+    "look": {
+     "color": "#7A6E5E",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "prunus-avium",
+  "name": "Süßkirsche",
+  "kind": "tree",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 8,
+  "heightMature": 9,
+  "colors": {
+   "summer": "#6A8750",
+   "spring": "#B4C48E",
+   "autumn": "#C26A35",
+   "winter": "#7A6E5E",
+   "bloom": "#FAF7F3",
+   "fruit": "#8E1F24"
+  },
+  "looks": [
+   {
+    "key": "#B4C48E|0|#FAF7F3|",
+    "look": {
+     "color": "#B4C48E",
+     "bare": false,
+     "bloom": "#FAF7F3",
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6A8750|0||",
+    "look": {
+     "color": "#6A8750",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#C26A35|0||",
+    "look": {
+     "color": "#C26A35",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7A6E5E|1||",
+    "look": {
+     "color": "#7A6E5E",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "prunus-domestica",
+  "name": "Zwetschge",
+  "kind": "tree",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 6,
+  "heightMature": 6,
+  "colors": {
+   "summer": "#6B8552",
+   "spring": "#AFC08C",
+   "autumn": "#B98A3E",
+   "winter": "#7A6E5E",
+   "bloom": "#F6F3EC",
+   "fruit": "#4A3264"
+  },
+  "looks": [
+   {
+    "key": "#AFC08C|0|#F6F3EC|",
+    "look": {
+     "color": "#AFC08C",
+     "bare": false,
+     "bloom": "#F6F3EC",
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6B8552|0||",
+    "look": {
+     "color": "#6B8552",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#B98A3E|0||",
+    "look": {
+     "color": "#B98A3E",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7A6E5E|1||",
+    "look": {
+     "color": "#7A6E5E",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "cydonia-oblonga",
+  "name": "Quitte",
+  "kind": "tree",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 5,
+  "heightMature": 5,
+  "colors": {
+   "summer": "#72905A",
+   "spring": "#AFC28E",
+   "autumn": "#C8A044",
+   "winter": "#7A6E5E",
+   "bloom": "#F4DCDD",
+   "fruit": "#D8B83A"
+  },
+  "looks": [
+   {
+    "key": "#AFC28E|0||",
+    "look": {
+     "color": "#AFC28E",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#72905A|0||",
+    "look": {
+     "color": "#72905A",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#C8A044|0||#D8B83A",
+    "look": {
+     "color": "#C8A044",
+     "bare": false,
+     "bloom": null,
+     "fruit": "#D8B83A"
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7A6E5E|1||",
+    "look": {
+     "color": "#7A6E5E",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "pinus-sylvestris",
+  "name": "Waldkiefer",
+  "kind": "tree",
+  "deciduous": false,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 8,
+  "heightMature": 15,
+  "colors": {
+   "summer": "#4E6A47",
+   "winter": "#4A6244"
+  },
+  "looks": [
+   {
+    "key": "#4E6A47|0||",
+    "look": {
+     "color": "#4E6A47",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring",
+     "summer",
+     "autumn"
+    ]
+   },
+   {
+    "key": "#4A6244|0||",
+    "look": {
+     "color": "#4A6244",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
   "id": "spiraea",
   "name": "Prachtspiere",
   "kind": "shrub",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 2,
   "heightMature": 2,
   "colors": {
@@ -807,6 +1464,7 @@
   "kind": "shrub",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 2,
   "heightMature": 2.5,
   "colors": {
@@ -861,6 +1519,7 @@
   "kind": "shrub",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 1.5,
   "heightMature": 1.5,
   "colors": {
@@ -926,6 +1585,7 @@
   "kind": "shrub",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 2.6,
   "heightMature": 3,
   "colors": {
@@ -980,6 +1640,7 @@
   "kind": "shrub",
   "deciduous": false,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 1,
   "heightMature": 1,
   "colors": {
@@ -1009,6 +1670,7 @@
   "kind": "shrub",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 3,
   "heightMature": 4,
   "colors": {
@@ -1057,11 +1719,475 @@
   ]
  },
  {
+  "id": "rhododendron",
+  "name": "Rhododendron",
+  "kind": "shrub",
+  "deciduous": false,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 2,
+  "heightMature": 1.8,
+  "colors": {
+   "summer": "#3F5A34",
+   "bloom": "#C9467A"
+  },
+  "looks": [
+   {
+    "key": "#3F5A34|0|#C9467A|",
+    "look": {
+     "color": "#3F5A34",
+     "bare": false,
+     "bloom": "#C9467A",
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#3F5A34|0||",
+    "look": {
+     "color": "#3F5A34",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer",
+     "autumn",
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "rosa-shrub",
+  "name": "Strauchrose",
+  "kind": "shrub",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 1.4,
+  "heightMature": 1.5,
+  "colors": {
+   "summer": "#5E7A44",
+   "autumn": "#9C7A3E",
+   "winter": "#7E7466",
+   "bloom": "#E07A4A"
+  },
+  "looks": [
+   {
+    "key": "#5E7A44|0||",
+    "look": {
+     "color": "#5E7A44",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#5E7A44|0|#E07A4A|",
+    "look": {
+     "color": "#5E7A44",
+     "bare": false,
+     "bloom": "#E07A4A",
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#9C7A3E|0||",
+    "look": {
+     "color": "#9C7A3E",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7E7466|1||",
+    "look": {
+     "color": "#7E7466",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "forsythia",
+  "name": "Forsythie",
+  "kind": "shrub",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 2.5,
+  "heightMature": 2.5,
+  "colors": {
+   "summer": "#6F8C52",
+   "autumn": "#A4823E",
+   "winter": "#7E7466",
+   "bloom": "#F2C83A"
+  },
+  "looks": [
+   {
+    "key": "#6F8C52|1|#F2C83A|",
+    "look": {
+     "color": "#6F8C52",
+     "bare": true,
+     "bloom": "#F2C83A",
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6F8C52|0||",
+    "look": {
+     "color": "#6F8C52",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#A4823E|0||",
+    "look": {
+     "color": "#A4823E",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7E7466|1||",
+    "look": {
+     "color": "#7E7466",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "buddleja",
+  "name": "Sommerflieder",
+  "kind": "shrub",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 2.5,
+  "heightMature": 2.5,
+  "colors": {
+   "summer": "#7A8E6A",
+   "winter": "#7E7466",
+   "bloom": "#8A5FA8"
+  },
+  "looks": [
+   {
+    "key": "#7A8E6A|0||",
+    "look": {
+     "color": "#7A8E6A",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring",
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7A8E6A|0|#8A5FA8|",
+    "look": {
+     "color": "#7A8E6A",
+     "bare": false,
+     "bloom": "#8A5FA8",
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#7E7466|1||",
+    "look": {
+     "color": "#7E7466",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "laurocerasus",
+  "name": "Kirschlorbeer",
+  "kind": "shrub",
+  "deciduous": false,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 2.2,
+  "heightMature": 2.2,
+  "colors": {
+   "summer": "#3E5E2E",
+   "spring": "#5B7A3A"
+  },
+  "looks": [
+   {
+    "key": "#5B7A3A|0||",
+    "look": {
+     "color": "#5B7A3A",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#3E5E2E|0||",
+    "look": {
+     "color": "#3E5E2E",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer",
+     "autumn",
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ribes",
+  "name": "Johannisbeere",
+  "kind": "shrub",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 1.3,
+  "heightMature": 1.4,
+  "colors": {
+   "summer": "#6E8C50",
+   "autumn": "#A88A3E",
+   "winter": "#7E7466",
+   "fruit": "#B3242C"
+  },
+  "looks": [
+   {
+    "key": "#6E8C50|0||",
+    "look": {
+     "color": "#6E8C50",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6E8C50|0||#B3242C",
+    "look": {
+     "color": "#6E8C50",
+     "bare": false,
+     "bloom": null,
+     "fruit": "#B3242C"
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#A88A3E|0||",
+    "look": {
+     "color": "#A88A3E",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7E7466|1||",
+    "look": {
+     "color": "#7E7466",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "rubus-idaeus",
+  "name": "Himbeere",
+  "kind": "shrub",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 1,
+  "heightMature": 1.6,
+  "colors": {
+   "summer": "#6C8A52",
+   "autumn": "#A88A3E",
+   "winter": "#7E7466",
+   "fruit": "#C2304A"
+  },
+  "looks": [
+   {
+    "key": "#6C8A52|0||",
+    "look": {
+     "color": "#6C8A52",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring",
+     "summer"
+    ]
+   },
+   {
+    "key": "#A88A3E|0||",
+    "look": {
+     "color": "#A88A3E",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7E7466|1||",
+    "look": {
+     "color": "#7E7466",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fargesia",
+  "name": "Schirmbambus",
+  "kind": "shrub",
+  "deciduous": false,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 1.5,
+  "heightMature": 3,
+  "colors": {
+   "summer": "#7C9A4E",
+   "winter": "#76904A"
+  },
+  "looks": [
+   {
+    "key": "#7C9A4E|0||",
+    "look": {
+     "color": "#7C9A4E",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring",
+     "summer",
+     "autumn"
+    ]
+   },
+   {
+    "key": "#76904A|0||",
+    "look": {
+     "color": "#76904A",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "taxus-column",
+  "name": "Säulen-Eibe",
+  "kind": "shrub",
+  "deciduous": false,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 1,
+  "heightMature": 3,
+  "colors": {
+   "summer": "#2F4A2E"
+  },
+  "looks": [
+   {
+    "key": "#2F4A2E|0||",
+    "look": {
+     "color": "#2F4A2E",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring",
+     "summer",
+     "autumn",
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
   "id": "geranium",
   "name": "Storchschnabel",
   "kind": "perennial",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.6,
   "heightMature": 0.4,
   "colors": {
@@ -1127,6 +2253,7 @@
   "kind": "perennial",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.5,
   "heightMature": 0.5,
   "colors": {
@@ -1192,6 +2319,7 @@
   "kind": "grass",
   "deciduous": false,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.6,
   "heightMature": 0.6,
   "colors": {
@@ -1257,6 +2385,7 @@
   "kind": "perennial",
   "deciduous": false,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.6,
   "heightMature": 0.5,
   "colors": {
@@ -1321,6 +2450,7 @@
   "kind": "perennial",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.5,
   "heightMature": 0.5,
   "colors": {
@@ -1375,6 +2505,7 @@
   "kind": "perennial",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.3,
   "heightMature": 0.8,
   "colors": {
@@ -1429,6 +2560,7 @@
   "kind": "perennial",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.5,
   "heightMature": 0.9,
   "colors": {
@@ -1495,6 +2627,7 @@
   "kind": "perennial",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.5,
   "heightMature": 0.7,
   "colors": {
@@ -1550,6 +2683,7 @@
   "kind": "perennial",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.6,
   "heightMature": 0.4,
   "colors": {
@@ -1616,6 +2750,7 @@
   "kind": "perennial",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.5,
   "heightMature": 0.7,
   "colors": {
@@ -1682,6 +2817,7 @@
   "kind": "perennial",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.6,
   "heightMature": 0.9,
   "colors": {
@@ -1737,6 +2873,7 @@
   "kind": "perennial",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.8,
   "heightMature": 1,
   "colors": {
@@ -1792,6 +2929,7 @@
   "kind": "grass",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.6,
   "heightMature": 0.4,
   "colors": {
@@ -1857,6 +2995,7 @@
   "kind": "grass",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.8,
   "heightMature": 0.8,
   "colors": {
@@ -1922,6 +3061,7 @@
   "kind": "grass",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.6,
   "heightMature": 1.5,
   "colors": {
@@ -1987,6 +3127,7 @@
   "kind": "perennial",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.8,
   "heightMature": 0.6,
   "colors": {
@@ -2053,6 +3194,7 @@
   "kind": "perennial",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.7,
   "heightMature": 0.8,
   "colors": {
@@ -2114,11 +3256,347 @@
   ]
  },
  {
+  "id": "paeonia",
+  "name": "Pfingstrose",
+  "kind": "perennial",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 0.9,
+  "heightMature": 0.9,
+  "colors": {
+   "summer": "#E7A3B4",
+   "spring": "#7C8C52",
+   "autumn": "#A6844A",
+   "winter": "#7A6A58",
+   "bloom": "#E7A3B4"
+  },
+  "looks": [
+   {
+    "key": "#6d8a4b|0||",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6d8a4b|0|#E7A3B4|",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": "#E7A3B4",
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#80855a|0||",
+    "look": {
+     "color": "#80855a",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7d7464|0||",
+    "look": {
+     "color": "#7d7464",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "delphinium",
+  "name": "Rittersporn",
+  "kind": "perennial",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 0.6,
+  "heightMature": 1.6,
+  "colors": {
+   "summer": "#4D6CC4",
+   "spring": "#7D9A5E",
+   "autumn": "#A08A50",
+   "winter": "#7A6A58",
+   "bloom": "#4D6CC4"
+  },
+  "looks": [
+   {
+    "key": "#6d8a4b|0||",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6d8a4b|0|#4D6CC4|",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": "#4D6CC4",
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#80855a|0||",
+    "look": {
+     "color": "#80855a",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7d7464|0||",
+    "look": {
+     "color": "#7d7464",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "iris",
+  "name": "Schwertlilie",
+  "kind": "perennial",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 0.5,
+  "heightMature": 0.8,
+  "colors": {
+   "summer": "#6A5AA8",
+   "spring": "#7F9A70",
+   "autumn": "#9C8C5A",
+   "winter": "#7A6A58",
+   "bloom": "#6A5AA8"
+  },
+  "looks": [
+   {
+    "key": "#6d8a4b|0|#6A5AA8|",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": "#6A5AA8",
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6d8a4b|0||",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#80855a|0||",
+    "look": {
+     "color": "#80855a",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7d7464|0||",
+    "look": {
+     "color": "#7d7464",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "tulipa",
+  "name": "Tulpen (Gruppe)",
+  "kind": "perennial",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 0.4,
+  "heightMature": 0.45,
+  "colors": {
+   "summer": "#8E9A5A",
+   "spring": "#C8343A",
+   "autumn": "#8C7A58",
+   "winter": "#7A6A58",
+   "bloom": "#C8343A"
+  },
+  "looks": [
+   {
+    "key": "#6d8a4b|0|#C8343A|",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": "#C8343A",
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6d8a4b|0||",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#80855a|0||",
+    "look": {
+     "color": "#80855a",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7d7464|0||",
+    "look": {
+     "color": "#7d7464",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "narcissus",
+  "name": "Narzissen (Gruppe)",
+  "kind": "perennial",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 0.4,
+  "heightMature": 0.4,
+  "colors": {
+   "summer": "#8E9A5A",
+   "spring": "#F2D34A",
+   "autumn": "#8C7A58",
+   "winter": "#7A6A58",
+   "bloom": "#F2D34A"
+  },
+  "looks": [
+   {
+    "key": "#6d8a4b|0|#F2D34A|",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": "#F2D34A",
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6d8a4b|0||",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#80855a|0||",
+    "look": {
+     "color": "#80855a",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7d7464|0||",
+    "look": {
+     "color": "#7d7464",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
   "id": "astilbe",
   "name": "Astilbe",
   "kind": "perennial",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.5,
   "heightMature": 0.7,
   "colors": {
@@ -2185,6 +3663,7 @@
   "kind": "perennial",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.9,
   "heightMature": 0.8,
   "colors": {
@@ -2239,6 +3718,7 @@
   "kind": "perennial",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.5,
   "heightMature": 0.4,
   "colors": {
@@ -2305,6 +3785,7 @@
   "kind": "perennial",
   "deciduous": false,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.45,
   "heightMature": 0.35,
   "colors": {
@@ -2371,6 +3852,7 @@
   "kind": "perennial",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.6,
   "heightMature": 1,
   "colors": {
@@ -2437,6 +3919,7 @@
   "kind": "perennial",
   "deciduous": false,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.5,
   "heightMature": 0.35,
   "colors": {
@@ -2503,6 +3986,7 @@
   "kind": "grass",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 1,
   "heightMature": 1.6,
   "colors": {
@@ -2569,6 +4053,7 @@
   "kind": "grass",
   "deciduous": false,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.5,
   "heightMature": 0.35,
   "colors": {
@@ -2634,6 +4119,7 @@
   "kind": "espalier",
   "deciduous": false,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 1.6,
   "heightMature": 3.8,
   "colors": {
@@ -2699,6 +4185,7 @@
   "kind": "espalier",
   "deciduous": false,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 1.6,
   "heightMature": 3.6,
   "colors": {
@@ -2740,6 +4227,7 @@
   "kind": "espalier",
   "deciduous": false,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 1.5,
   "heightMature": 4,
   "colors": {
@@ -2781,6 +4269,7 @@
   "kind": "espalier",
   "deciduous": false,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 1.5,
   "heightMature": 3.5,
   "colors": {
@@ -2822,6 +4311,7 @@
   "kind": "espalier",
   "deciduous": true,
   "marcescent": true,
+  "climber": false,
   "diameterMature": 1.6,
   "heightMature": 4,
   "colors": {
@@ -2887,6 +4377,7 @@
   "kind": "espalier",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 1.8,
   "heightMature": 4.2,
   "colors": {
@@ -2947,11 +4438,282 @@
   ]
  },
  {
+  "id": "clematis",
+  "name": "Clematis (Waldrebe)",
+  "kind": "espalier",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": true,
+  "diameterMature": 1.5,
+  "heightMature": 2.5,
+  "colors": {
+   "summer": "#5E7C44",
+   "winter": "#7A6E5E",
+   "bloom": "#5D4E9E"
+  },
+  "looks": [
+   {
+    "key": "#5E7C44|0||",
+    "look": {
+     "color": "#5E7C44",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring",
+     "autumn"
+    ]
+   },
+   {
+    "key": "#5E7C44|0|#5D4E9E|",
+    "look": {
+     "color": "#5E7C44",
+     "bare": false,
+     "bloom": "#5D4E9E",
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#7A6E5E|1||",
+    "look": {
+     "color": "#7A6E5E",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "parthenocissus",
+  "name": "Wilder Wein",
+  "kind": "espalier",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": true,
+  "diameterMature": 1.5,
+  "heightMature": 3,
+  "colors": {
+   "summer": "#4F7038",
+   "spring": "#8AA35A",
+   "autumn": "#B2302A",
+   "winter": "#7A6E5E"
+  },
+  "looks": [
+   {
+    "key": "#8AA35A|0||",
+    "look": {
+     "color": "#8AA35A",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#4F7038|0||",
+    "look": {
+     "color": "#4F7038",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#B2302A|0||",
+    "look": {
+     "color": "#B2302A",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7A6E5E|1||",
+    "look": {
+     "color": "#7A6E5E",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "hedera",
+  "name": "Efeu",
+  "kind": "espalier",
+  "deciduous": false,
+  "marcescent": false,
+  "climber": true,
+  "diameterMature": 1.5,
+  "heightMature": 2.5,
+  "colors": {
+   "summer": "#344E2C"
+  },
+  "looks": [
+   {
+    "key": "#344E2C|0||",
+    "look": {
+     "color": "#344E2C",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring",
+     "summer",
+     "autumn",
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "wisteria",
+  "name": "Blauregen (Glyzinie)",
+  "kind": "espalier",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": true,
+  "diameterMature": 1.5,
+  "heightMature": 3,
+  "colors": {
+   "summer": "#6E8E4E",
+   "autumn": "#C4A44A",
+   "winter": "#7A6E5E",
+   "bloom": "#9C8AD0"
+  },
+  "looks": [
+   {
+    "key": "#6E8E4E|0|#9C8AD0|",
+    "look": {
+     "color": "#6E8E4E",
+     "bare": false,
+     "bloom": "#9C8AD0",
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6E8E4E|0||",
+    "look": {
+     "color": "#6E8E4E",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#C4A44A|0||",
+    "look": {
+     "color": "#C4A44A",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7A6E5E|1||",
+    "look": {
+     "color": "#7A6E5E",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "rosa-climbing",
+  "name": "Kletterrose",
+  "kind": "espalier",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": true,
+  "diameterMature": 1.5,
+  "heightMature": 2.5,
+  "colors": {
+   "summer": "#567444",
+   "winter": "#7A6E5E",
+   "bloom": "#F2D2D4"
+  },
+  "looks": [
+   {
+    "key": "#567444|0||",
+    "look": {
+     "color": "#567444",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring",
+     "autumn"
+    ]
+   },
+   {
+    "key": "#567444|0|#F2D2D4|",
+    "look": {
+     "color": "#567444",
+     "bare": false,
+     "bloom": "#F2D2D4",
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#7A6E5E|1||",
+    "look": {
+     "color": "#7A6E5E",
+     "bare": true,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
   "id": "platanus-roof",
   "name": "Platanen-Dachspalier",
   "kind": "espalier",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 2.5,
   "heightMature": 2.6,
   "colors": {
@@ -3017,6 +4779,7 @@
   "kind": "espalier",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 1.6,
   "heightMature": 2.2,
   "colors": {
@@ -3083,6 +4846,7 @@
   "kind": "vegetable",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.6,
   "heightMature": 1.8,
   "colors": {
@@ -3134,6 +4898,7 @@
   "kind": "vegetable",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.3,
   "heightMature": 0.3,
   "colors": {
@@ -3185,6 +4950,7 @@
   "kind": "vegetable",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 0.4,
   "heightMature": 0.4,
   "colors": {
@@ -3236,6 +5002,7 @@
   "kind": "vegetable",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 2,
   "heightMature": 0.5,
   "colors": {
@@ -3282,11 +5049,201 @@
   ]
  },
  {
+  "id": "strawberry",
+  "name": "Erdbeeren",
+  "kind": "vegetable",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 0.4,
+  "heightMature": 0.25,
+  "colors": {
+   "summer": "#5E7C44"
+  },
+  "looks": [
+   {
+    "key": "#5E7C44|0||",
+    "look": {
+     "color": "#5E7C44",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#5E7C44|0||#B9472F",
+    "look": {
+     "color": "#5E7C44",
+     "bare": false,
+     "bloom": null,
+     "fruit": "#B9472F"
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#80855a|0||",
+    "look": {
+     "color": "#80855a",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7d7464|0||",
+    "look": {
+     "color": "#7d7464",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "zucchini",
+  "name": "Zucchini",
+  "kind": "vegetable",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 1.2,
+  "heightMature": 0.6,
+  "colors": {
+   "summer": "#6E8A50"
+  },
+  "looks": [
+   {
+    "key": "#6E8A50|0||",
+    "look": {
+     "color": "#6E8A50",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6E8A50|0||#B9472F",
+    "look": {
+     "color": "#6E8A50",
+     "bare": false,
+     "bloom": null,
+     "fruit": "#B9472F"
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#80855a|0||",
+    "look": {
+     "color": "#80855a",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7d7464|0||",
+    "look": {
+     "color": "#7d7464",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "beans",
+  "name": "Stangenbohnen",
+  "kind": "vegetable",
+  "deciduous": true,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 0.6,
+  "heightMature": 2.2,
+  "colors": {
+   "summer": "#6A8C4A"
+  },
+  "looks": [
+   {
+    "key": "#6A8C4A|0||",
+    "look": {
+     "color": "#6A8C4A",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#6A8C4A|0|#6A8C4A|",
+    "look": {
+     "color": "#6A8C4A",
+     "bare": false,
+     "bloom": "#6A8C4A",
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#80855a|0||",
+    "look": {
+     "color": "#80855a",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#7d7464|0||",
+    "look": {
+     "color": "#7d7464",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
   "id": "carpinus-hedge",
   "name": "Hainbuchenhecke",
   "kind": "hedge",
   "deciduous": true,
   "marcescent": false,
+  "climber": false,
   "diameterMature": 1.5,
   "heightMature": 1.8,
   "colors": {
@@ -3336,6 +5293,228 @@
     "key": "#957C59|0||",
     "look": {
      "color": "#957C59",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fagus-hedge",
+  "name": "Rotbuchenhecke",
+  "kind": "hedge",
+  "deciduous": true,
+  "marcescent": true,
+  "climber": false,
+  "diameterMature": 1.5,
+  "heightMature": 1.8,
+  "colors": {
+   "summer": "#5A7442",
+   "spring": "#9AB264",
+   "autumn": "#B7783A",
+   "winter": "#9C6A3E"
+  },
+  "looks": [
+   {
+    "key": "#9AB264|0||",
+    "look": {
+     "color": "#9AB264",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#5A7442|0||",
+    "look": {
+     "color": "#5A7442",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
+    ]
+   },
+   {
+    "key": "#B7783A|0||",
+    "look": {
+     "color": "#B7783A",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "autumn"
+    ]
+   },
+   {
+    "key": "#9C6A3E|0||",
+    "look": {
+     "color": "#9C6A3E",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ligustrum-hedge",
+  "name": "Ligusterhecke",
+  "kind": "hedge",
+  "deciduous": false,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 1.2,
+  "heightMature": 1.8,
+  "colors": {
+   "summer": "#4F6C3A",
+   "winter": "#4E6238"
+  },
+  "looks": [
+   {
+    "key": "#4F6C3A|0||",
+    "look": {
+     "color": "#4F6C3A",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring",
+     "summer",
+     "autumn"
+    ]
+   },
+   {
+    "key": "#4E6238|0||",
+    "look": {
+     "color": "#4E6238",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "taxus-hedge",
+  "name": "Eibenhecke",
+  "kind": "hedge",
+  "deciduous": false,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 1,
+  "heightMature": 1.8,
+  "colors": {
+   "summer": "#2F4A2E"
+  },
+  "looks": [
+   {
+    "key": "#2F4A2E|0||",
+    "look": {
+     "color": "#2F4A2E",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring",
+     "summer",
+     "autumn",
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "laurocerasus-hedge",
+  "name": "Kirschlorbeerhecke",
+  "kind": "hedge",
+  "deciduous": false,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 1.4,
+  "heightMature": 1.8,
+  "colors": {
+   "summer": "#3E5E2E",
+   "spring": "#5B7A3A"
+  },
+  "looks": [
+   {
+    "key": "#5B7A3A|0||",
+    "look": {
+     "color": "#5B7A3A",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
+    "key": "#3E5E2E|0||",
+    "look": {
+     "color": "#3E5E2E",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "summer",
+     "autumn",
+     "winter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "thuja-hedge",
+  "name": "Thujahecke",
+  "kind": "hedge",
+  "deciduous": false,
+  "marcescent": false,
+  "climber": false,
+  "diameterMature": 1,
+  "heightMature": 2,
+  "colors": {
+   "summer": "#41663A",
+   "winter": "#4C6438"
+  },
+  "looks": [
+   {
+    "key": "#41663A|0||",
+    "look": {
+     "color": "#41663A",
+     "bare": false,
+     "bloom": null,
+     "fruit": null
+    },
+    "seasons": [
+     "spring",
+     "summer",
+     "autumn"
+    ]
+   },
+   {
+    "key": "#4C6438|0||",
+    "look": {
+     "color": "#4C6438",
      "bare": false,
      "bloom": null,
      "fruit": null

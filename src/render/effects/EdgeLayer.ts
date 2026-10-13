@@ -42,6 +42,10 @@ function spillOf(texture: string, season: Season): [string, number][] {
       return [leaves];
     case 'paving':
     case 'slabs':
+    case 'herringbone':
+    case 'granite':
+    case 'flagstone':
+    case 'grassPaver':
     case 'wood':
       return [leaves];
     default:

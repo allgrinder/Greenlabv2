@@ -29,6 +29,10 @@ Die App öffnet mit der Startseite: zuletzt bearbeiteter Garten, alle gespeicher
 
 Der Assistent legt das Grundstück standardmäßig mit Rasen an (Schalter „Grundstück mit Rasen anlegen“): eine Rasenfläche über das ganze Grundstück, 30 cm vom Rand abgesetzt. Beete, Wege, Deck und Platten werden obenauf gezeichnet; Halme hängen über ihre Kanten, die Rasenkante darunter bleibt unsichtbar. Ohne Schalter beginnt der Garten als Erdfläche.
 
+## Katalog
+
+Pflanzen: 22 Bäume, 15 Sträucher, 6 Hecken, 13 Spaliere und Kletterpflanzen, 24 Stauden, 6 Gräser, 7 Gemüse – alle mit Blender-Bildern je Jahreszeit. Bauten und Ausstattung (70 Objekte) stehen in der Bibliothek in Gruppen: Bauten, Terrasse/Möbel/Schatten, Beete & Nutzgarten, Wasser, Zäune/Mauern/Rankhilfen, Spielen, Deko & Natur, Technik. Beläge: 17, darunter Fischgrät, Granit im Segmentbogen, Polygonalplatten und Rasengitter; Wasser lässt sich auch als Weg zeichnen (Bachlauf). Neue Objekte: Generator in `assets/blender/items_<gruppe>.py`, Maße/Name/Preis in `catalog_<gruppe>.json`, Eintrag in `src/core/catalog/items.ts`, Platzhalter in `src/render/symbols/itemFallbacks.ts`. Dicht belaubte Objekte rendern ohne Konturlinien (`NO_OUTLINES` in `render_items.py`); viele Objekte lassen sich parallel in getrennte `--out`-Ordner rendern und danach zusammenführen.
+
 ## Sicherung
 
 Gärten liegen nur im Browser. „Alle Gärten sichern“ (Startseite, Projektmenü) lädt eine Datei mit allen Gärten und Hintergrundbildern; „JSON importieren“ holt sie zurück. Die Startseite erinnert nach 14 Tagen mit Änderungen. Die Bibliothek zeigt die Blender-Renderings (Draufsicht, Sommer) als Vorschaubilder.

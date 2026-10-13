@@ -81,7 +81,8 @@ export type Brush =
   | { kind: 'item'; catalogId: string }
   | { kind: 'lamp'; lampType: import('../core/model/types').LampType }
   | { kind: 'irr'; what: 'sprinkler' | 'tap' | 'manifold' }
-  | { kind: 'espalier'; speciesId: string };
+  | { kind: 'espalier'; speciesId: string }
+  | { kind: 'hedge'; speciesId: string };
 
 export interface Viewport {
   /** Weltpunkt in der Bildschirmmitte */

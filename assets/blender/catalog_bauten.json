@@ -1,0 +1,9 @@
+[
+ {"id": "carport-flachdach-stahl", "name": "Carport Flachdach Stahl anthrazit 3,2 × 5,5 m", "category": "building", "defaultLayer": "build", "width": 3.2, "depth": 5.5, "height": 2.6, "symbol": "carportFlat", "unit": "pcs", "price": 2890, "fallback": "shed"},
+ {"id": "geraeteschuppen-pultdach-klein", "name": "Geräteschuppen Pultdach Rhombusleisten 2,0 × 1,5 m", "category": "shed", "defaultLayer": "build", "width": 2.0, "depth": 1.5, "height": 2.1, "symbol": "toolShedMono", "unit": "pcs", "price": 1490, "fallback": "shed"},
+ {"id": "fahrradunterstand-gruendach", "name": "Fahrradunterstand mit Gründach 2,2 × 1,8 m", "category": "shed", "defaultLayer": "build", "width": 2.2, "depth": 1.8, "height": 2.0, "symbol": "bikeShelter", "unit": "pcs", "price": 1890, "fallback": "shed"},
+ {"id": "muelltonnenbox-2er-pflanzdach", "name": "Mülltonnenbox für 2 Tonnen mit Pflanzdach, Stahl/Holz", "category": "shed", "defaultLayer": "build", "width": 1.5, "depth": 0.8, "height": 1.25, "symbol": "binStore2", "unit": "pcs", "price": 649, "fallback": "compost"},
+ {"id": "fasssauna-thermoholz", "name": "Fasssauna Thermoholz mit Vordach 2,2 × 3,0 m", "category": "building", "defaultLayer": "build", "width": 2.2, "depth": 3.0, "height": 2.3, "symbol": "barrelSauna", "unit": "pcs", "price": 7900, "fallback": "shed"},
+ {"id": "huehnerstall-mit-auslauf", "name": "Hühnerstall mit Auslauf und Nistkasten 2,5 × 1,5 m", "category": "building", "defaultLayer": "build", "width": 2.5, "depth": 1.5, "height": 1.6, "symbol": "chickenCoop", "unit": "pcs", "price": 789, "fallback": "shed"},
+ {"id": "outdoorkueche-gasgrill", "name": "Outdoorküche Beton/Edelstahl mit Gasgrill und Spüle 2,6 m", "category": "furniture", "defaultLayer": "build", "width": 2.6, "depth": 0.8, "height": 0.95, "symbol": "outdoorKitchen", "unit": "pcs", "price": 4990, "fallback": "table"}
+]

@@ -25,6 +25,9 @@ from items import GENERATORS  # noqa: E402
 
 #: im Boden liegende Objekte: kein Licht-Boden (er würde das Becken abschatten)
 NO_GROUND = {"pool"}
+#: dicht belaubte Objekte (Rankhilfen mit Kletterpflanzen, bepflanzter Kübel): ohne Konturlinien rendern –
+#: Freestyle würde jede Blattinstanz auswerten und den Speicher sprengen (wie bei den Pflanzen)
+NO_OUTLINES = {"roseArch", "trellisWall", "climbObelisk", "planterLarge"}
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
@@ -36,6 +39,12 @@ def catalog_sizes() -> dict[str, tuple[float, float, float]]:
     for m in re.finditer(r"width: ([\d.]+), depth: ([\d.]+), height: ([\d.]+), symbol: '(\w+)'", src):
         w, d, h, sym = float(m[1]), float(m[2]), float(m[3]), m[4]
         out.setdefault(sym, (w, d, h))
+    # neue Objektgruppen, die noch nicht im Katalog stehen: Maße aus assets/blender/catalog_<gruppe>.json
+    import glob
+
+    for path in sorted(glob.glob(os.path.join(ROOT, "assets/blender/catalog_*.json"))):
+        for e in json.load(open(path, encoding="utf-8")):
+            out.setdefault(e["symbol"], (float(e["width"]), float(e["depth"]), float(e["height"])))
     return out
 
 
@@ -68,7 +77,7 @@ def main():
             continue
         w, d, h = sizes[sym]
         t0 = time.time()
-        lib.reset_scene(16 if args.quick else 40 if args.preview else 64, ground=sym not in NO_GROUND)
+        lib.reset_scene(16 if args.quick else 40 if args.preview else 64, ground=sym not in NO_GROUND, outlines=sym not in NO_OUTLINES)
         gen(w, d, h)
         ppm = ppm_for(w, d, args.quick) / (1.6 if args.preview else 1)
         entry = {"w": w, "d": d, "h": h, "ppm": round(ppm, 3), "top": [], "oblique": []}

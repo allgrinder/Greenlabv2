@@ -459,6 +459,10 @@ export type MaterialId =
   | 'stepping'
   | 'slabs'
   | 'basalt'
+  | 'herringbone'
+  | 'granite'
+  | 'flagstone'
+  | 'grassPaver'
   | (string & {});
 
 export type QuantityUnit = 'm2' | 'm3' | 'm' | 'pcs';
@@ -467,7 +471,24 @@ export interface Material {
   id: MaterialId;
   name: string; // „Kies 8/16, Jurakalk“
   /** Schlüssel des prozeduralen Texturgenerators in render/textures */
-  texture: 'lawn' | 'gravel' | 'paving' | 'wood' | 'mulch' | 'barkMulch' | 'soil' | 'water' | 'meadow' | 'sand' | 'stepping' | 'slabs' | 'basalt';
+  texture:
+    | 'lawn'
+    | 'gravel'
+    | 'paving'
+    | 'wood'
+    | 'mulch'
+    | 'barkMulch'
+    | 'soil'
+    | 'water'
+    | 'meadow'
+    | 'sand'
+    | 'stepping'
+    | 'slabs'
+    | 'basalt'
+    | 'herringbone'
+    | 'granite'
+    | 'flagstone'
+    | 'grassPaver';
   baseColor: string;
   /** Kachelgröße der Textur in Weltmetern */
   tileSizeM: number;
@@ -499,7 +520,7 @@ export interface PlantSpecies {
   sun: 'full' | 'partial' | 'shade' | 'full-partial';
   deciduous: boolean;
   /** Farben je Jahreszeit für Phase 2; summer ist Pflicht */
-  colors: { summer: string; spring?: string; autumn?: string; winter?: string; bloom?: string };
+  colors: { summer: string; spring?: string; autumn?: string; winter?: string; bloom?: string; fruit?: string };
   /** Jahreslauf, 12 Monate, für die Bibliotheksdetailansicht */
   phenology: ('bare' | 'leaf' | 'bloom' | 'fruit' | 'autumn')[];
   price: number;
@@ -507,12 +528,14 @@ export interface PlantSpecies {
   marcescent?: boolean;
   /** blüht vor dem Laubaustrieb am kahlen Holz (Judasbaum): im Frühling kahl mit Blüte */
   bloomOnBareWood?: boolean;
+  /** Kletterpflanze (an Wand, Zaun oder Rankgitter): als Spalierreihe gezeichnet, Laub bis zum Boden */
+  climber?: boolean;
 }
 
 export interface CatalogItem {
   id: string;
   name: string;
-  category: 'building' | 'raisedBed' | 'shed' | 'terrace' | 'pond' | 'pool' | 'play' | 'furniture' | 'fence' | 'greenhouse' | 'compost' | 'edging';
+  category: 'building' | 'raisedBed' | 'shed' | 'terrace' | 'pond' | 'pool' | 'play' | 'furniture' | 'fence' | 'greenhouse' | 'compost' | 'edging' | 'water' | 'deco' | 'tech';
   defaultLayer: LayerKind;
   width: number;
   depth: number;

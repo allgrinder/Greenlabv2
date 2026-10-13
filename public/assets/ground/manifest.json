@@ -91,6 +91,34 @@
     "basalt_v1.webp",
     "basalt_v2.webp"
    ]
+  },
+  "herringbone": {
+   "file": "herringbone.webp",
+   "w": 1.4142,
+   "h": 1.4142,
+   "ppm": 480,
+   "variants": []
+  },
+  "granite": {
+   "file": "granite.webp",
+   "w": 3.0,
+   "h": 1.44,
+   "ppm": 400,
+   "variants": []
+  },
+  "flagstone": {
+   "file": "flagstone.webp",
+   "w": 2.0,
+   "h": 2.0,
+   "ppm": 360,
+   "variants": []
+  },
+  "grassPaver": {
+   "file": "grassPaver.webp",
+   "w": 2.4,
+   "h": 1.6,
+   "ppm": 360,
+   "variants": []
   }
  },
  "stepping": [

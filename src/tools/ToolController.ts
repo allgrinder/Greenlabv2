@@ -82,7 +82,18 @@ export class ToolController {
           cmd.addObject(newPath(ctx.doc(), path, def.pathWidth, def.pathMaterial));
         },
       }),
-      hedge: new PathBuilderTool(ctx, { id: 'hedge', closed: false, curves: false, source: 'polygon', min: 2, finish: (path) => cmd.addObject(newHedge(ctx.doc(), path)) }),
+      hedge: new PathBuilderTool(ctx, {
+        id: 'hedge',
+        closed: false,
+        curves: false,
+        source: 'polygon',
+        min: 2,
+        finish: (path) => {
+          // Heckenart aus der Bibliothek (Hainbuche, Rotbuche, Liguster, Eibe, Kirschlorbeer, Thuja)
+          const b = store.getState().session.brush;
+          cmd.addObject(newHedge(ctx.doc(), path, b?.kind === 'hedge' ? b.speciesId : undefined));
+        },
+      }),
       drip: new PathBuilderTool(ctx, { id: 'drip', closed: false, curves: true, source: 'polygon', min: 2, finish: (path) => cmd.addObject(newDrip(ctx.doc(), path, 3)) }),
       pipe: new PathBuilderTool(ctx, { id: 'pipe', closed: false, curves: false, source: 'polygon', min: 2, finish: (path) => cmd.addObject(newPipe(ctx.doc(), path)) }),
       lights: new PathBuilderTool(ctx, { id: 'lights', closed: false, curves: true, source: 'polygon', min: 2, finish: (path) => cmd.addObject(newLamp(ctx.doc(), 'stringLights', path.nodes[0].p, path)) }),

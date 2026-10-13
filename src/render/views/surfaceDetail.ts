@@ -113,7 +113,7 @@ export function surfaceDetails(g: Graphics, regions: FlatRegion[], texture: stri
     }
     return;
   }
-  if (texture === 'paving' || texture === 'slabs' || texture === 'wood') {
+  if (['paving', 'slabs', 'herringbone', 'granite', 'flagstone', 'grassPaver', 'wood'].includes(texture)) {
     // einzelnes Laub, im Herbst deutlich mehr
     const d = season === 'autumn' ? 0.6 : 0.12;
     const cols = [0x8a6a3a, 0xa8823e, 0x6e5a34, 0xb98d45];

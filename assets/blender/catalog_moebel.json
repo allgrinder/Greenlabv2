@@ -1,0 +1,9 @@
+[
+  { "id": "hollywoodschaukel", "name": "Hollywoodschaukel mit Sonnendach", "category": "furniture", "defaultLayer": "build", "width": 2.1, "depth": 1.4, "height": 1.9, "symbol": "hollywoodSwing", "unit": "pcs", "price": 549, "fallback": "lounger" },
+  { "id": "haengematte-gestell", "name": "Hängematte mit Stahlgestell", "category": "furniture", "defaultLayer": "build", "width": 3.2, "depth": 1.1, "height": 1.1, "symbol": "hammockStand", "unit": "pcs", "price": 319, "fallback": "lounger" },
+  { "id": "gartenbank-holz-stahl", "name": "Gartenbank Holz/Stahl", "category": "furniture", "defaultLayer": "build", "width": 1.6, "depth": 0.6, "height": 0.85, "symbol": "gardenBench", "unit": "pcs", "price": 389, "fallback": "lounger" },
+  { "id": "bistro-set", "name": "Bistro-Set (Tisch rund + 2 Stühle)", "category": "furniture", "defaultLayer": "build", "width": 1.4, "depth": 1.0, "height": 0.75, "symbol": "bistroSet", "unit": "pcs", "price": 299, "fallback": "table" },
+  { "id": "sonnenschirm-rund-3m", "name": "Sonnenschirm rund Ø 3 m mit Ständer", "category": "furniture", "defaultLayer": "build", "width": 3.0, "depth": 3.0, "height": 2.5, "symbol": "parasolRound", "unit": "pcs", "price": 429, "fallback": "table" },
+  { "id": "sonnensegel-dreieck", "name": "Sonnensegel dreieckig 5 × 4 m mit 3 Masten", "category": "furniture", "defaultLayer": "build", "width": 5.0, "depth": 4.0, "height": 2.8, "symbol": "shadeSail", "unit": "pcs", "price": 1290, "fallback": "shed" },
+  { "id": "kugelgrill", "name": "Kugelgrill Ø 57 cm", "category": "furniture", "defaultLayer": "build", "width": 0.65, "depth": 0.65, "height": 1.0, "symbol": "kettleGrill", "unit": "pcs", "price": 329, "fallback": "barrel" }
+]

@@ -1,0 +1,11 @@
+[
+  { "id": "fence-dsm-anthracite-250", "name": "Doppelstabmattenzaun anthrazit, Feld 2,5 m", "category": "fence", "defaultLayer": "build", "width": 2.5, "depth": 0.1, "height": 1.4, "symbol": "dsmFence", "unit": "m", "price": 58, "fallback": "fence" },
+  { "id": "fence-privacy-larch-180", "name": "Sichtschutzzaun Lärche vergraut, Lamellen 1,8 m", "category": "fence", "defaultLayer": "build", "width": 1.8, "depth": 0.1, "height": 1.8, "symbol": "larchScreen", "unit": "m", "price": 165, "fallback": "fence" },
+  { "id": "fence-bamboo-180", "name": "Bambusmatte als Sichtschutz an Pfosten", "category": "fence", "defaultLayer": "build", "width": 1.8, "depth": 0.08, "height": 1.8, "symbol": "bambooScreen", "unit": "m", "price": 48, "fallback": "fence" },
+  { "id": "gate-single-anthracite-120", "name": "Gartenpforte einflüglig, anthrazit", "category": "fence", "defaultLayer": "build", "width": 1.2, "depth": 0.1, "height": 1.2, "symbol": "gardenGate", "unit": "pcs", "price": 420, "fallback": "fence" },
+  { "id": "wall-gabion-200", "name": "Gabionenwand, Steinfüllung Granit", "category": "fence", "defaultLayer": "build", "width": 2.0, "depth": 0.3, "height": 1.2, "symbol": "gabionWall", "unit": "m", "price": 210, "fallback": "fence" },
+  { "id": "wall-l-stone-80", "name": "L-Stein / Winkelstützelement Beton 80 cm", "category": "fence", "defaultLayer": "build", "width": 1.0, "depth": 0.6, "height": 0.8, "symbol": "lStone", "unit": "m", "price": 95, "fallback": "fence" },
+  { "id": "raised-bed-stone-200x100", "name": "Hochbeet aus Naturstein 200 × 100", "category": "raisedBed", "defaultLayer": "build", "width": 2.0, "depth": 1.0, "height": 0.6, "symbol": "stoneRaisedBed", "unit": "pcs", "price": 1350, "fallback": "raisedBed" },
+  { "id": "edge-palisade-40", "name": "Holzpalisaden-Einfassung, Rundholz Ø 12 cm", "category": "fence", "defaultLayer": "build", "width": 1.0, "depth": 0.12, "height": 0.4, "symbol": "palisadeEdge", "unit": "m", "price": 34, "fallback": "fence" },
+  { "id": "steps-block-concrete-3", "name": "Blockstufen Beton, 3 Stufen 120 cm", "category": "terrace", "defaultLayer": "build", "width": 1.2, "depth": 1.05, "height": 0.45, "symbol": "blockSteps", "unit": "pcs", "price": 390, "fallback": "table" }
+]

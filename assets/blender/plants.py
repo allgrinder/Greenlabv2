@@ -82,7 +82,13 @@ def leaves_for(area: float, size: float, coverage: float = 2.2) -> int:
 
 
 #: Rindenfarbe (dunkel, hell) je Art, wenn sie auffällt – Hartriegel mit roten Ruten
-BARK = {"cornus": ((0.22, 0.03, 0.02), (0.45, 0.07, 0.04))}
+BARK = {
+    "cornus": ((0.22, 0.03, 0.02), (0.45, 0.07, 0.04)),
+    # Birke: weiße Rinde mit dunklen Querbändern (Rauschen), Kirsche: rötlich-grau mit Glanz
+    "betula-pendula": ((0.32, 0.31, 0.29), (0.82, 0.8, 0.76)),
+    "prunus-avium": ((0.12, 0.06, 0.05), (0.3, 0.18, 0.15)),
+    "pinus-sylvestris": ((0.22, 0.09, 0.04), (0.5, 0.26, 0.12)),
+}
 
 
 def bark_material(kind: str = "") -> bpy.types.Material:
@@ -381,6 +387,16 @@ TREES = {
     "juglans-regia": dict(shape="spread", stem=0.3, leaf=0.11, form="pinnate", dens=110, multi=1),
     "quercus-rubra": dict(shape="round", stem=0.27, leaf=0.09, form="lobed", dens=150, multi=1),
     "cercis-siliquastrum": dict(shape="spread", stem=0.18, leaf=0.05, form="heart", dens=200, multi=4),
+    "castanea-sativa": dict(shape="round", stem=0.26, leaf=0.11, form="oval", dens=120, multi=1),
+    "betula-pendula": dict(shape="oval", stem=0.3, leaf=0.04, form="heart", dens=210, multi=3),
+    "magnolia": dict(shape="spread", stem=0.18, leaf=0.09, form="oval", dens=150, multi=3),
+    "acer-palmatum": dict(shape="spread", stem=0.2, leaf=0.045, form="palmate", dens=200, multi=2),
+    "catalpa-nana": dict(shape="globe", stem=0.5, leaf=0.12, form="heart", dens=170, multi=1),
+    "pyrus-communis": dict(shape="vase", stem=0.3, leaf=0.055, form="oval", dens=170, multi=1),
+    "prunus-avium": dict(shape="oval", stem=0.32, leaf=0.07, form="oval", dens=160, multi=1),
+    "prunus-domestica": dict(shape="round", stem=0.3, leaf=0.06, form="oval", dens=170, multi=1),
+    "cydonia-oblonga": dict(shape="spread", stem=0.22, leaf=0.06, form="round", dens=170, multi=1),
+    "pinus-sylvestris": dict(shape="spread", stem=0.55, leaf=0.05, form="needle", dens=260, multi=1),
 }
 SHRUBS = {
     "hydrangea": dict(shape="mound", leaf=0.09, form="big", dens=130, heads=("ball", 0.2, 30)),
@@ -390,9 +406,40 @@ SHRUBS = {
     "spiraea": dict(shape="mound", leaf=0.035, form="oval", dens=260, heads=("ball", 0.035, 220)),
     "cornus": dict(shape="vase", leaf=0.07, form="oval", dens=150, heads=None),
     "carpinus-hedge": dict(shape="hedge", leaf=0.045, form="oval", dens=420, heads=None),
+    "fagus-hedge": dict(shape="hedge", leaf=0.05, form="oval", dens=420, heads=None),
+    "ligustrum-hedge": dict(shape="hedge", leaf=0.032, form="oval", dens=520, heads=None),
+    "taxus-hedge": dict(shape="hedge", leaf=0.018, form="needle", dens=900, heads=None),
+    "laurocerasus-hedge": dict(shape="hedge", leaf=0.085, form="oval", dens=300, heads=None),
+    "thuja-hedge": dict(shape="hedge", leaf=0.02, form="needle", dens=900, heads=None),
+    "rhododendron": dict(shape="mound", leaf=0.1, form="oval", dens=120, heads=("ball", 0.14, 40)),
+    "rosa-shrub": dict(shape="round", leaf=0.035, form="oval", dens=230, heads=None, bloom_size=0.06),
+    "forsythia": dict(shape="vase", leaf=0.05, form="oval", dens=170, heads=None),
+    "buddleja": dict(shape="vase", leaf=0.08, form="needle", dens=140, heads=("panicle", 0.12, 45)),
+    "laurocerasus": dict(shape="round", leaf=0.1, form="oval", dens=130, heads=None),
+    "ribes": dict(shape="round", leaf=0.045, form="palmate", dens=190, heads=None),
+    "rubus-idaeus": dict(shape="vase", leaf=0.05, form="pinnate", dens=170, heads=None),
+    "fargesia": dict(shape="vase", leaf=0.06, form="needle", dens=260, heads=None),
+    "taxus-column": dict(shape="column", leaf=0.018, form="needle", dens=900, heads=None),
+}
+#: Kletterpflanzen (Spalier-Generator mit Laub bis zum Boden): Blattgröße/-form, Blütengröße
+CLIMBERS = {
+    "clematis": dict(leaf=0.04, form="oval", fsize=0.06, fkind="saucer"),
+    "parthenocissus": dict(leaf=0.07, form="palmate", fsize=0.0, fkind="ball"),
+    "hedera": dict(leaf=0.045, form="heart", fsize=0.0, fkind="ball"),
+    "wisteria": dict(leaf=0.06, form="pinnate", fsize=0.05, fkind="ball"),
+    "rosa-climbing": dict(leaf=0.035, form="oval", fsize=0.05, fkind="saucer"),
 }
 #: Stauden: Blattgröße/-form, Blütenform, Blütengröße, Anzahl, Blattton
 PERENNIALS = {
+    # große, gefüllte Schalenblüten über dichtem Laub
+    "paeonia": dict(leaf=0.07, form="oval", flower="saucer", fsize=0.085, n=7, tint=1.0, leaf_hex="#5c7a44", mound=0.85),
+    # hohe, dichte Blütenkerzen
+    "delphinium": dict(leaf=0.06, form="palmate", flower="spike", fsize=0.02, n=6, tint=1.0, leaf_hex="#5f7e48"),
+    # Schwertblätter, große Blüten
+    "iris": dict(strap=dict(n=40, width=0.025, arch=0.2), flower="lily", fsize=0.07, n=5, tint=1.0, leaf=0.05, form="needle", leaf_hex="#6f8a6c"),
+    # Zwiebelblumen: schmale Blätter, Kelche
+    "tulipa": dict(strap=dict(n=24, width=0.02, arch=0.3), flower="lily", fsize=0.045, n=9, tint=1.0, leaf=0.04, form="needle", leaf_hex="#7a9a68"),
+    "narcissus": dict(strap=dict(n=30, width=0.012, arch=0.3), flower="daisy", fsize=0.045, n=10, tint=1.0, leaf=0.04, form="needle", leaf_hex="#6e8e5c"),
     # breite, blaugrüne Blätter, lockere lila Blütentrauben darüber
     "hosta": dict(leaf=0.13, form="big", flower="spike", fsize=0.016, n=7, tint=1.0, leaf_hex="#6e8b80", mound=0.7, spread=0.85, frame=True),
     # überhängende Schwertblätter, orange Trichterblüten
@@ -446,7 +493,7 @@ def tree(sp: dict, look: dict, seed: int):
     if shape == "spread":
         ch *= 0.75
         zc = z0 + ch
-    br = Branches("branches")
+    br = Branches("branches", sp["id"])
     trunk_r = max(0.08, min(0.4, R * 0.045))
     # Stämme
     tops = []
@@ -709,17 +756,17 @@ def shrub(sp: dict, look: dict, seed: int):
     if shape == "hedge":  # Heckenabschnitt: gerade so hoch wie breit, dicht
         H = min(H, R * 2.2)
     br = Branches("stems", sp["id"])
-    stems = 1 if shape == "globe" else 7
-    cr = R * (0.45 if shape in ("globe", "hedge") else 0.38)
+    stems = 1 if shape in ("globe", "column") else 7
+    cr = R * (0.45 if shape in ("globe", "hedge") else 0.62 if shape == "column" else 0.38)
     centers: list[Vector] = []
-    n = 9 if shape in ("globe", "hedge") else int(max(10, min(30, (R / cr) ** 2 * 6)))
+    n = 9 if shape in ("globe", "hedge") else int(max(8, H / cr * 1.6)) if shape == "column" else int(max(10, min(30, (R / cr) ** 2 * 6)))
     tries = 0
     while len(centers) < n and tries < 2000:
         tries += 1
         u = Vector((rnd.uniform(-1, 1), rnd.uniform(-1, 1), rnd.uniform(0, 1)))
         if Vector((u.x, u.y, u.z - 0.5)).length > 0.9:
             continue
-        wide = 1.0 if shape != "vase" else 0.55 + 0.45 * u.z
+        wide = 0.3 if shape == "column" else 1.0 if shape != "vase" else 0.55 + 0.45 * u.z
         c = Vector((u.x * R * 0.62 * wide, u.y * R * 0.62 * wide, cr * 0.7 + u.z * (H - cr * 1.5)))
         if all((c - o).length > cr * 0.7 for o in centers):
             centers.append(c)
@@ -731,11 +778,16 @@ def shrub(sp: dict, look: dict, seed: int):
     for c in centers:
         twigs(br, c, cr * 0.8, rnd, 6 if look["bare"] else 2, 0.01, 2 if look["bare"] else 1)
     if look["bare"]:
+        if look.get("bloom"):
+            # Blüte am kahlen Holz (Forsythie): dichte Blütenbüschel entlang der Triebe
+            fl = flower_obj(look["bloom"], 0.014, "ball")
+            pts = [c + Vector((rnd.uniform(-1, 1), rnd.uniform(-1, 1), rnd.uniform(-1, 1))) * cr * rnd.uniform(0.2, 1.1) for c in centers for _ in range(160)]
+            emit_verts(point_cloud("bareBloom", pts), fl, len(pts), rnd.randint(1, 99999), 0.45)
         return
     ls = max(p["leaf"], R * 0.02)
     leaf = leaf_obj(leaf_material(look["color"]), ls, p["form"])
     heads = p["heads"] if look.get("bloom") else None
-    compact = shape in ("globe", "hedge")
+    compact = shape in ("globe", "hedge", "column")
     if not compact:
         # natürlicher Strauch: Laubmassen mit fransigem Rand (wie Baumkronen), Blütenstände oben auf den Massen
         spray = leaf_spray(leaf_material(look["color"]), ls * 0.8, p["form"], 5)
@@ -751,7 +803,10 @@ def shrub(sp: dict, look: dict, seed: int):
             emit_verts(point_cloud("heads", chosen), flower_obj(look["bloom"], hs * 0.8, "ball"), len(chosen), rnd.randint(1, 99999), 0.35)
         elif look.get("bloom"):
             chosen = [q for q in pts if rnd.random() < 0.25]
-            emit_verts(point_cloud("bl", chosen), flower_obj(look["bloom"], ls * 0.5), len(chosen), rnd.randint(1, 99999), 0.4)
+            emit_verts(point_cloud("bl", chosen), flower_obj(look["bloom"], p.get("bloom_size", ls * 0.5)), len(chosen), rnd.randint(1, 99999), 0.4)
+        if look.get("fruit"):
+            chosen = [q for q in pts if rnd.random() < 0.18]
+            emit_verts(point_cloud("fr", chosen), flower_obj(look["fruit"], 0.014, "ball"), len(chosen), rnd.randint(1, 99999), 0.3)
         return
     for i, c in enumerate(centers):
         r = cr * rnd.uniform(0.85, 1.12)
@@ -770,6 +825,9 @@ def espalier(sp: dict, look: dict, seed: int):
     """Spalierschirm eines Baums: Breite = Abstand, Tiefe 0,45 m (Dachspalier 2,5 × 2,2 m)"""
     rnd = random.Random(seed)
     roof = sp["id"] == "platanus-roof"
+    if sp.get("climber"):
+        climber(sp, look, rnd)
+        return
     W, D = (2.5, 2.2) if roof else (1.5, 0.45)
     z0, z1 = (2.2, 2.6) if roof else (1.8, sp["heightMature"])
     br = Branches("frame")
@@ -797,6 +855,36 @@ def espalier(sp: dict, look: dict, seed: int):
                 emit(b, leaf, 4 * math.pi * r * r * 260, rnd.randint(1, 99999))
                 if look.get("bloom"):
                     emit(b, flower_obj(look["bloom"], 0.03), 4 * math.pi * r * r * 18, rnd.randint(1, 99999), 0.4)
+
+
+def climber(sp: dict, look: dict, rnd: random.Random):
+    """Kletterpflanze an Rankgitter/Wand: 1,5 m breiter, 0,3 m tiefer Laubvorhang vom Boden bis zur Endhöhe, locker und unregelmäßig"""
+    p = CLIMBERS.get(sp["id"], dict(leaf=0.05, form="oval", fsize=0.0, fkind="ball"))
+    W, D, H = 1.5, 0.3, sp["heightMature"]
+    br = Branches("vines", sp["id"])
+    for k in range(5):
+        x = -W / 2 + W * (k + 0.5) / 5 + rnd.uniform(-0.1, 0.1)
+        pts = [Vector((x * 0.3, 0, 0))] + [Vector((x + rnd.uniform(-0.25, 0.25), rnd.uniform(-0.05, 0.05), H * t)) for t in (0.3, 0.6, 0.95)]
+        br.add(pts, [0.03, 0.02, 0.014, 0.008])
+        for t in (0.35, 0.6, 0.85):
+            c = Vector((x, 0, H * t))
+            twigs(br, c, 0.3, rnd, 4 if look["bare"] else 2, 0.006, 2 if look["bare"] else 1)
+    if look["bare"]:
+        return
+    leaf = leaf_spray(leaf_material(look["color"]), p["leaf"], p["form"], 5)
+    spray_area = 5 * 0.7 * p["leaf"] ** 2
+    nx, nz = 5, max(3, int(H / 0.5))
+    for i in range(nx):
+        for k in range(nz):
+            if k == nz - 1 and rnd.random() < 0.4:  # oben ausgefranst
+                continue
+            c = Vector((-W / 2 + W * (i + 0.5) / nx + rnd.uniform(-0.08, 0.08), rnd.uniform(-0.03, 0.03), H * (k + 0.5) / nz))
+            r = max(W / nx, H / nz) * rnd.uniform(0.55, 0.7)
+            b = blob(f"c{i}{k}", c, r, rnd, 0.9, look["color"])
+            b.scale = (1.0, D * 0.55 / r, 1.0)
+            emit(b, leaf, 4 * math.pi * r * r * D / r / spray_area * 1.6, rnd.randint(1, 99999))
+            if look.get("bloom") and p["fsize"] > 0:
+                emit(b, flower_obj(look["bloom"], p["fsize"], p["fkind"]), 4 * math.pi * r * r * 10, rnd.randint(1, 99999), 0.4)
 
 
 def perennial(sp: dict, look: dict, seed: int):
@@ -1001,7 +1089,16 @@ def vegetable(sp: dict, look: dict, seed: int):
             inst.location = (rnd.uniform(-R, R) * 0.6, rnd.uniform(-R, R) * 0.6, 0.12)
             inst.scale = (1, 1, 0.75)
         return
-    leaf_size, form, n_cl = {"tomato": (0.05, "oval", 6), "lettuce": (0.06, "round", 1), "herbs": (0.022, "oval", 4)}.get(vid, (0.04, "oval", 3))
+    if vid == "zucchini":
+        leaf = leaf_obj(leaf_material(look["color"]), 0.15, "big")
+        for i in range(4):
+            a = rnd.random() * math.tau
+            d = rnd.random() * R * 0.4
+            b = blob(f"z{i}", Vector((math.cos(a) * d, math.sin(a) * d, 0.2)), R * 0.42, rnd, 0.6)
+            emit(b, leaf, 55, rnd.randint(1, 99999))
+            emit(b, flower_obj("#E9B52E", 0.05, "lily"), 2, rnd.randint(1, 99999), 0.3, False)
+        return
+    leaf_size, form, n_cl = {"tomato": (0.05, "oval", 6), "lettuce": (0.06, "round", 1), "herbs": (0.022, "oval", 4), "strawberry": (0.035, "round", 2), "beans": (0.05, "heart", 6)}.get(vid, (0.04, "oval", 3))
     leaf = leaf_obj(leaf_material(look["color"]), leaf_size, form)
     for i in range(n_cl):
         z = H * (0.25 + 0.6 * i / max(1, n_cl - 1)) if vid == "tomato" else R * 0.5
@@ -1012,6 +1109,17 @@ def vegetable(sp: dict, look: dict, seed: int):
         emit(b, leaf, 4 * math.pi * r * r / (leaf_size ** 2) * 0.45, rnd.randint(1, 99999))
         if vid == "tomato" and look["color"] != "#7d7464":
             emit(b, flower_obj("#C23B22", 0.03, "ball"), 6, rnd.randint(1, 99999), 0.3, False)
+        if vid == "strawberry":
+            emit(b, flower_obj("#C8232C", 0.018, "ball"), 8, rnd.randint(1, 99999), 0.3, False)
+            emit(b, flower_obj("#F6F2E8", 0.012, "saucer"), 5, rnd.randint(1, 99999), 0.3, False)
+        if vid == "beans":
+            emit(b, flower_obj("#F3EEDF", 0.012, "ball"), 10, rnd.randint(1, 99999), 0.3, False)
+    if vid == "beans":
+        # Bohnenstangen (Tipi aus vier Stangen)
+        for k in range(4):
+            a = k / 4 * math.tau + 0.4
+            stake = Branches(f"stake{k}", "")
+            stake.add([Vector((math.cos(a) * R * 0.45, math.sin(a) * R * 0.45, 0)), Vector((0, 0, H * 1.02))], [0.012, 0.01])
 
 
 GENERATORS = {"tree": tree, "shrub": shrub, "hedge": shrub, "espalier": espalier, "perennial": perennial, "grass": grass, "vegetable": vegetable}

@@ -10,7 +10,7 @@ import { getSpecies } from '../catalog/plants';
 import { createMustergarten } from './mustergarten';
 
 /** Pflanzenarten, die die Bibliothek zeigt (Abschnitte in ui/library/LibraryPanel.tsx); Hecken über das Heckenwerkzeug */
-const LIBRARY_PLANT_KINDS = ['tree', 'shrub', 'espalier', 'perennial', 'grass', 'vegetable'];
+const LIBRARY_PLANT_KINDS = ['tree', 'shrub', 'hedge', 'espalier', 'perennial', 'grass', 'vegetable'];
 const BED_KINDS = ['perennial', 'grass'];
 const TOOL_TYPES = ['area', 'path', 'planting', 'plant', 'hedge', 'espalier', 'item', 'lamp', 'sprinkler', 'drip', 'pipe', 'text', 'dimension'];
 
@@ -45,7 +45,7 @@ describe('Mustergarten mit den Werkzeugen nachbaubar', () => {
   it('Pflanzen und Rabatten-Mischungen kommen aus der Bibliothek', () => {
     for (const o of objects) {
       if (o.type === 'plant') expect(LIBRARY_PLANT_KINDS, o.speciesId).toContain(getSpecies(o.speciesId).kind);
-      if (o.type === 'hedge') expect(o.speciesId).toBe('carpinus-hedge');
+      if (o.type === 'hedge') expect(getSpecies(o.speciesId).kind).toBe('hedge');
       if (o.type === 'planting') {
         for (const m of o.mix) expect(BED_KINDS, m.speciesId).toContain(getSpecies(m.speciesId).kind);
         // Regler „Pflanzdichte“ in der Rabatte: 3–14 je m²

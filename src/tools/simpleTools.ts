@@ -6,7 +6,7 @@ import { num } from '../core/format';
 import { smoothFreehand } from '../core/geometry/smooth';
 import type { SnapResult } from '../core/geometry/snap';
 import { add, dist, normalize, perp, scale, sub, dot } from '../core/geometry/vec';
-import { newArea, newDimension, newEspalier, newFixture, newFromCatalog, newLamp, newPath, newPlant, newSprinkler, newText } from '../core/model/factory';
+import { newArea, newDimension, newEspalier, newHedge, newFixture, newFromCatalog, newLamp, newPath, newPlant, newSprinkler, newText } from '../core/model/factory';
 import { getLamp } from '../core/catalog/lamps';
 import type { PlanObject, Project, Region } from '../core/model/types';
 import type { Brush } from '../state/types';
@@ -271,5 +271,8 @@ export function objectFromBrush(doc: Project, brush: Brush, p: Vec2): PlanObject
     case 'espalier':
       // abgelegt aus der Bibliothek: Reihe aus zwei Bäumen, danach Punkte ziehen
       return newEspalier(doc, { kind: 'path', closed: false, source: 'polygon', nodes: [{ p: { x: p.x - 1.5, y: p.y } }, { p: { x: p.x + 1.5, y: p.y } }] }, brush.speciesId);
+    case 'hedge':
+      // abgelegt aus der Bibliothek: 3 m Heckenstück, danach Punkte ziehen
+      return newHedge(doc, { kind: 'path', closed: false, source: 'polygon', nodes: [{ p: { x: p.x - 1.5, y: p.y } }, { p: { x: p.x + 1.5, y: p.y } }] }, brush.speciesId);
   }
 }

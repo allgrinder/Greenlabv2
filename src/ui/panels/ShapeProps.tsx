@@ -2,6 +2,7 @@
  * Flächenartige Objekte: Fläche, Weg, Rabatte (Geometrie-Teil) und Hecke.
  */
 import { AREA_MATERIALS, MULCH_MATERIALS, PATH_MATERIALS } from '../../core/catalog/materials';
+import { PLANTS } from '../../core/catalog/plants';
 import { degrees, meters, num, squareMeters } from '../../core/format';
 import type { AreaObject, PlanObject, Project } from '../../core/model/types';
 import type { ObjectQuantities } from '../../core/quantities/quantities';
@@ -105,10 +106,19 @@ export function PlantingProps({ o, q, doc }: { o: Extract<PlanObject, { type: 'p
   );
 }
 
+const HEDGES = PLANTS.filter((p) => p.kind === 'hedge');
+
 export function HedgeProps({ o, q, doc }: { o: Extract<PlanObject, { type: 'hedge' }>; q: ObjectQuantities; doc: Project }) {
   return (
     <div className={s.section}>
       <div className={u.eyebrow}>Hecke</div>
+      <select className={s.select} value={o.speciesId} onChange={(e) => update(o, 'Heckenart', (d) => void (d.speciesId = e.target.value))} aria-label="Heckenart" data-testid="hedge-species">
+        {HEDGES.map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.name}
+          </option>
+        ))}
+      </select>
       <div className={s.grid2}>
         <Field label="Länge" value={meters(q.length ?? 0, 1)} />
         <NumberField label="Schnitthöhe" value={o.height} format={(v) => meters(v)} min={0.3} max={6} onCommit={(v) => update(o, 'Heckenhöhe', (d) => void (d.height = v))} />

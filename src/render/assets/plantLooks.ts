@@ -29,7 +29,7 @@ export function plantLook(sp: PlantSpecies, season: Season): PlantLook {
   }
   const bare = isBare(sp, season);
   const bloom = inBloom(sp, season) ? (sp.colors.bloom ?? null) : null;
-  const fruit = sp.phenology[MONTH[season]] === 'fruit' ? '#B9472F' : null;
+  const fruit = sp.phenology[MONTH[season]] === 'fruit' ? (sp.colors.fruit ?? '#B9472F') : null;
   return { color: seasonColor(sp, season), bare, bloom, fruit };
 }
 

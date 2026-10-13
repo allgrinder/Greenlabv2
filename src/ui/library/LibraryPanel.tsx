@@ -5,7 +5,7 @@
 import { useMemo, useState } from 'react';
 import { LIBRARY_ITEMS } from '../../core/catalog/items';
 import { PLANTS } from '../../core/catalog/plants';
-import type { PlantKind } from '../../core/model/types';
+import type { CatalogItem, PlantKind } from '../../core/model/types';
 import { useEditor } from '../../state';
 import type { Brush } from '../../state/types';
 import { DND_MIME } from '../../tools/BackgroundTools';
@@ -44,9 +44,22 @@ interface Entry {
 const PLANT_SECTIONS: { h: string; kinds: PlantKind[]; glyph: GlyphKind }[] = [
   { h: 'Bäume', kinds: ['tree'], glyph: 'tree' },
   { h: 'Sträucher', kinds: ['shrub'], glyph: 'shrub' },
-  { h: 'Spalierbäume · Sichtschutz', kinds: ['espalier'], glyph: 'hedge' },
+  { h: 'Hecken', kinds: ['hedge'], glyph: 'hedge' },
+  { h: 'Spaliere & Kletterpflanzen', kinds: ['espalier'], glyph: 'hedge' },
   { h: 'Stauden & Gräser', kinds: ['perennial', 'grass'], glyph: 'peren' },
   { h: 'Gemüse & Kräuter', kinds: ['vegetable'], glyph: 'veg' },
+];
+
+/** Gruppen für „Bauten & Ausstattung“ (Reihenfolge wie in der Bibliothek) */
+const ITEM_SECTIONS: [string, CatalogItem['category'][]][] = [
+  ['Bauten', ['building', 'shed', 'greenhouse']],
+  ['Terrasse, Möbel & Schatten', ['terrace', 'furniture']],
+  ['Beete & Nutzgarten', ['raisedBed', 'compost']],
+  ['Wasser', ['pond', 'pool', 'water']],
+  ['Zäune, Mauern & Rankhilfen', ['fence']],
+  ['Spielen', ['play']],
+  ['Deko & Natur', ['deco']],
+  ['Technik', ['tech']],
 ];
 
 function useSections() {
@@ -57,27 +70,32 @@ function useSections() {
         key: `plant:${p.id}`,
         name: p.name,
         src: glyphSrc(sec.glyph, p.colors.bloom && sec.glyph === 'peren' ? p.colors.summer : p.colors.summer, p.colors.spring ?? '#8FA56C'),
-        brush: (p.kind === 'espalier' ? { kind: 'espalier', speciesId: p.id } : { kind: 'plant', speciesId: p.id }) as Brush,
+        brush: (p.kind === 'espalier' ? { kind: 'espalier', speciesId: p.id } : p.kind === 'hedge' ? { kind: 'hedge', speciesId: p.id } : { kind: 'plant', speciesId: p.id }) as Brush,
         search: `${p.name} ${p.latin}`.toLowerCase(),
         filter: ['all', 'plants'] as Filter[],
-        sub: p.kind === 'espalier' ? `${p.deciduous ? (p.marcescent ? 'hält Laub im Winter' : 'laubabwerfend') : 'immergrün'} · ${p.price} € je Baum` : undefined,
+        sub:
+          p.kind === 'espalier' || p.kind === 'hedge'
+            ? `${p.deciduous ? (p.marcescent ? 'hält Laub im Winter' : 'laubabwerfend') : 'immergrün'} · ${p.price} € je ${p.kind === 'hedge' ? 'Pflanze' : p.climber ? 'Pflanze' : 'Baum'}`
+            : undefined,
         photo: { kind: 'plant' as const, id: p.id },
       })),
     }));
     // Pinsel vorn in „Stauden & Gräser“
     const per = sections.find((x) => x.h === 'Stauden & Gräser');
     per?.items.unshift({ key: 'tool:brush', name: 'Pinsel', src: BRUSH_GLYPH, brush: 'brush', search: 'pinsel malen streuen stauden blumen', filter: ['all', 'plants'], sub: 'Mischung im Radius malen, Alt radiert' });
-    const build: Entry[] = LIBRARY_ITEMS.map((i) => ({
-      key: `item:${i.id}`,
-      name: i.name.replace(/ \(.*$/, '').replace(/ \d.*$/, '').replace(/,.*$/, ''),
-      src: glyphSrc(SYMBOL_GLYPH[i.symbol] ?? 'edge'),
-      brush: { kind: 'item', catalogId: i.id } as Brush,
-      search: i.name.toLowerCase(),
-      filter: (i.category === 'pond' || i.category === 'pool' ? ['all', 'build', 'water'] : ['all', 'build']) as Filter[],
-      photo: { kind: 'item' as const, id: i.symbol },
-    }));
-    build.splice(7, 0, { key: 'hedge', name: 'Hecke', src: glyphSrc('hedge'), brush: 'hedge', search: 'hecke hainbuche', filter: ['all', 'plants', 'build'], photo: { kind: 'plant', id: 'carpinus-hedge' } });
-    sections.push({ h: 'Bauten & Ausstattung', items: build });
+    // Bauten und Ausstattung nach Gruppen
+    for (const [h, cats] of ITEM_SECTIONS) {
+      const items: Entry[] = LIBRARY_ITEMS.filter((i) => cats.includes(i.category)).map((i) => ({
+        key: `item:${i.id}`,
+        name: i.name.replace(/ \(.*$/, '').replace(/ \d.*$/, '').replace(/,.*$/, ''),
+        src: glyphSrc(SYMBOL_GLYPH[i.symbol] ?? 'edge'),
+        brush: { kind: 'item', catalogId: i.id } as Brush,
+        search: i.name.toLowerCase(),
+        filter: (i.category === 'pond' || i.category === 'pool' || i.category === 'water' ? ['all', 'build', 'water'] : ['all', 'build']) as Filter[],
+        photo: { kind: 'item' as const, id: i.symbol },
+      }));
+      if (items.length) sections.push({ h, items });
+    }
     sections.push({
       h: 'Licht',
       items: LAMPS.map((l) => ({
@@ -122,6 +140,7 @@ export function LibraryPanel() {
     const lens = water ? { lens: 'irrigation' as const } : {};
     if (typeof e.brush === 'string') setSession({ tool: e.brush, selection: [], ...lens });
     else if (e.brush.kind === 'espalier') setSession({ brush: e.brush, tool: 'espalier', selection: [] });
+    else if (e.brush.kind === 'hedge') setSession({ brush: e.brush, tool: 'hedge', selection: [] });
     else if (tool === 'brush' && e.brush.kind === 'plant' && brushable(e.brush.speciesId)) {
       // Pinsel aktiv: Staude in die Mischung aufnehmen bzw. herausnehmen
       const id = e.brush.speciesId;
@@ -132,8 +151,8 @@ export function LibraryPanel() {
   const isOn = (e: Entry) =>
     typeof e.brush === 'string'
       ? tool === e.brush
-      : e.brush.kind === 'espalier'
-        ? tool === 'espalier' && JSON.stringify(brush) === JSON.stringify(e.brush)
+      : e.brush.kind === 'espalier' || e.brush.kind === 'hedge'
+        ? tool === e.brush.kind && JSON.stringify(brush) === JSON.stringify(e.brush)
         : tool === 'brush' && e.brush.kind === 'plant'
           ? paint.mix.includes(e.brush.speciesId)
           : tool === 'plant' && JSON.stringify(brush) === JSON.stringify(e.brush);

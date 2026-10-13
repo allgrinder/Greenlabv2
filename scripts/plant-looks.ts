@@ -14,6 +14,7 @@ const out = PLANTS.map((sp) => ({
   kind: sp.kind,
   deciduous: sp.deciduous,
   marcescent: !!sp.marcescent,
+  climber: !!sp.climber,
   diameterMature: sp.diameterMature,
   heightMature: sp.heightMature,
   colors: sp.colors,

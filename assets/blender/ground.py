@@ -863,13 +863,29 @@ def _offset(poly, d: float):
     return out
 
 
+def _sanitize(poly, d: float):
+    """Kanten, die beim Einzug um d kollabieren würden (Richtung kippt), zu einem Punkt zusammenziehen"""
+    poly = list(poly)
+    while len(poly) > 3:
+        inner = _offset(poly, d)
+        n = len(poly)
+        bad = [i for i in range(n) if (inner[(i + 1) % n] - inner[i]).dot(poly[(i + 1) % n] - poly[i]) <= 0]
+        if not bad:
+            break
+        i = bad[0]
+        mid = (poly[i] + poly[(i + 1) % n]) / 2
+        poly[i] = mid
+        del poly[(i + 1) % n]
+    return poly
+
+
 def _refine(poly, step: float, jit: float, rnd: random.Random):
     """
-    Kanten unterteilen; dazu je Punkt eine sanfte Verschiebung (gespaltene, gebrochene Kanten).
-    Die Verschiebung wird getrennt geliefert und erst nach dem Einzug auf alle Ringe gleich angewendet –
-    so können sich die Ringe nicht überschneiden (sonst Löcher in der Deckfläche).
+    Kantenunterteilung für rock_mesh: je Punkt (Kante i, Anteil t, Verschiebung) – sanft unregelmäßige,
+    gespaltene Kanten. Die Ringe werden erst am groben Umriss eingezogen und dann alle gleich unterteilt
+    und verschoben; so falten sie sich an den Ecken nicht (sonst Löcher und Kippflächen in der Deckfläche).
     """
-    pts, disp = [], []
+    spec = []
     for i, a in enumerate(poly):
         b = poly[(i + 1) % len(poly)]
         L = (b - a).length
@@ -879,28 +895,30 @@ def _refine(poly, step: float, jit: float, rnd: random.Random):
         for j in range(k):
             t = j / k
             o = jit * (0.6 * r1 * math.sin(math.pi * t) + 0.3 * r2 * math.sin(2 * math.pi * t) + 0.25 * r3 * math.sin(3 * math.pi * t))
-            pts.append(a.lerp(b, t))
-            disp.append(nrm * (o + rnd.uniform(-0.15, 0.15) * jit) if j else Vector((0, 0)))
-    return pts, disp
+            spec.append((i, t, nrm * (o + rnd.uniform(-0.15, 0.15) * jit) if j else Vector((0, 0))))
+    return spec
 
 
-def rock_mesh(name: str, outline, rnd: random.Random, height: float, rings, dome=None, zjit: float = 0.0, disp=None):
+def rock_mesh(name: str, outline, rnd: random.Random, height: float, rings, dome=None, zjit: float = 0.0, spec=None):
     """
-    Stein aus Umriss (Blender-XY, lokal, gegen den Uhrzeigersinn): senkrechte Flanken, gerundete Oberkante
-    über Ringe (Einzug, Höhe), oben Kuppe (dome = Höhe der Mitte) oder flache Deckfläche.
-    disp: Verschiebung je Umrisspunkt, nach dem Einzug auf alle Ringe gleich angewendet
+    Stein aus grobem Umriss (Blender-XY, lokal, gegen den Uhrzeigersinn): senkrechte Flanken, gerundete
+    Oberkante über Ringe (Einzug, Höhe), oben Kuppe (dome = Höhe der Mitte) oder flache Deckfläche.
+    spec: Kantenunterteilung aus _refine (gleich für alle Ringe)
     """
     pts = [Vector((p.x, p.y)) for p in outline]
-    disp = [Vector((d.x, d.y)) for d in disp] if disp else [Vector((0, 0))] * len(pts)
     if _poly_area(pts) < 0:
-        pts.reverse()
-        disp.reverse()
-    n = len(pts)
+        raise ValueError("Umriss muss gegen den Uhrzeigersinn laufen")
+    spec = spec or [(i, 0.0, Vector((0, 0))) for i in range(len(pts))]
+    n = len(spec)
+
+    def sub(ring):
+        return [ring[i].lerp(ring[(i + 1) % len(ring)], t) + d for i, t, d in spec]
+
     bm = bmesh.new()
-    loops = [[bm.verts.new((p.x + q.x, p.y + q.y, -height)) for p, q in zip(pts, disp)]]
+    loops = [[bm.verts.new((p.x, p.y, -height)) for p in sub(pts)]]
     for d, z in rings:
-        ring = _offset(pts, d) if d else pts
-        loops.append([bm.verts.new((p.x + q.x, p.y + q.y, z + (rnd.uniform(-zjit, zjit) if d else 0.0))) for p, q in zip(ring, disp)])
+        ring = sub(_offset(pts, d) if d else pts)
+        loops.append([bm.verts.new((p.x, p.y, z + (rnd.uniform(-zjit, zjit) if d else 0.0))) for p in ring])
     faces = []
     for r0, r1 in zip(loops, loops[1:]):
         for i in range(n):
@@ -1002,9 +1020,10 @@ def _place_sett(pl, rnd, mats, T, joint):
     if _poly_area(loc) < 0:
         loc.reverse()
     loc = _offset(loc, joint / 2 + rnd.uniform(-0.0015, 0.002))
-    loc, dsp = _refine(loc, 0.016, 0.0055, rnd)
+    loc = _sanitize(loc, 0.024)
+    dsp = _refine(loc, 0.016, 0.0055, rnd)
     # gebrochene Kante über Ringe, flache Kuppe; Deckfläche eben (eine Fächer-Kuppe zeigt Schattierungsgrate)
-    me = rock_mesh("sett", loc, rnd, 0.07, [(0, -0.013), (0.004, -0.0055), (0.009, -0.0018), (0.017, 0.0), (0.026, 0.001)], dome=None, zjit=0.0008, disp=dsp)
+    me = rock_mesh("sett", loc, rnd, 0.07, [(0, -0.013), (0.004, -0.0055), (0.009, -0.0018), (0.016, 0.0), (0.022, 0.001)], dome=None, zjit=0.0008, spec=dsp)
     ob = link(bpy.data.objects.new("sett", me), outline=False)
     ob.location = P(c.x, c.y, rnd.uniform(-0.004, 0.002))
     ob.rotation_euler = Euler((rnd.uniform(-0.03, 0.03), rnd.uniform(-0.03, 0.03), 0))
@@ -1080,10 +1099,9 @@ def granite(T, rnd):
             n = max(1, int(round(L / 0.108)))
             xs = split(s0, s1, L, [rnd.uniform(0.82, 1.18) for _ in range(n)])
             for x0, x1 in zip(xs, xs[1:]):
-                lower = [(x0 + (x1 - x0) * t, cy(x0 + (x1 - x0) * t) + y0) for t in (0, 0.33, 0.67, 1)]
+                # Viereck: die Bogenkrümmung über 10 cm (Stich < 1 mm) bleibt unberücksichtigt
                 u0, u1 = side(x0), side(x1)
-                upper = [(u1 + (u0 - u1) * t, cy(u1 + (u0 - u1) * t) + y0 + p) for t in (0, 0.33, 0.67, 1)]
-                _place_sett(lower + upper, rnd, mats, T, joint)
+                _place_sett([(x0, cy(x0) + y0), (x1, cy(x1) + y0), (u1, cy(u1) + y0 + p), (u0, cy(u0) + y0 + p)], rnd, mats, T, joint)
 
 
 def _clip(poly, a: Vector, nrm: Vector, d: float):
@@ -1121,6 +1139,57 @@ def periodic_voronoi(pts, T, weights=None):
     return cells
 
 
+def _merge_close(cells, T, dmin: float):
+    """
+    Voronoi-Ecken näher als dmin (auf dem Torus) zu einer zusammenfassen – für alle Zellen gleich, damit
+    die Fugen stimmig bleiben. Kurze Kanten würden beim Einzug kollabieren.
+    """
+    verts = [v for poly in cells for v in poly]
+    W = [Vector((v.x % T[0], v.y % T[1])) for v in verts]
+
+    def tor(a, b):
+        dx, dy = abs(a.x - b.x), abs(a.y - b.y)
+        return math.hypot(min(dx, T[0] - dx), min(dy, T[1] - dy))
+
+    parent = list(range(len(verts)))
+
+    def root(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    for i in range(len(verts)):
+        for j in range(i):
+            if tor(W[i], W[j]) < dmin:
+                parent[root(i)] = root(j)
+    groups = {}
+    for i in range(len(verts)):
+        groups.setdefault(root(i), []).append(i)
+    mean = {}
+    for r, idx in groups.items():
+        ref = W[idx[0]]
+        acc = Vector((0, 0))
+        for i in idx:
+            d = W[i] - ref
+            acc += Vector((d.x - round(d.x / T[0]) * T[0], d.y - round(d.y / T[1]) * T[1]))
+        mean[r] = ref + acc / len(idx)
+    out, k = [], 0
+    for poly in cells:
+        new = []
+        for v in poly:
+            m = mean[root(k)]
+            d = v - m
+            q = m + Vector((round(d.x / T[0]) * T[0], round(d.y / T[1]) * T[1]))
+            k += 1
+            if not new or (q - new[-1]).length > 1e-6:
+                new.append(q)
+        if len(new) > 1 and (new[0] - new[-1]).length < 1e-6:
+            new.pop()
+        out.append(new)
+    return out
+
+
 @ground("flagstone", (2.0, 2.0), 360)
 def flagstone(T, rnd):
     """
@@ -1129,7 +1198,7 @@ def flagstone(T, rnd):
     Ecken gebrochen, Kanten leicht unregelmäßig, Platten etwas verkippt.
     """
     base_plane(T, soil_moss_mat("fl_joint", rnd, 0.65), -0.016)
-    tones = ["#b9ad97", "#a89f8f", "#c2b49a", "#9f9a8e", "#b5a58a", "#a7a194", "#c9bda6", "#9b8f7b", "#b0a796", "#a49580"]
+    tones = ["#b2a58c", "#a0988a", "#bcae92", "#989488", "#ae9d80", "#a29b8d", "#c3b59c", "#958873", "#aaa08c", "#9e8f78"]
     mats = [flagstone_mat(f"fl{i}", h, rnd, T) for i, h in enumerate(tones)]
     pts = [Vector((rnd.uniform(0, T[0]), rnd.uniform(0, T[1]))) for _ in range(24)]
     for _ in range(2):  # Lloyd-Glättung: gleichmäßigere Plattengrößen
@@ -1147,6 +1216,7 @@ def flagstone(T, rnd):
         if not small:
             break
         del pts[small[0]], weights[small[0]]
+    cells = _merge_close(cells, T, 0.06)
     joints = []  # Fugenlinien (Plan) für Moos und Gras
     for p, poly in zip(pts, cells):
         c = sum(poly, Vector((0, 0))) / len(poly)
@@ -1162,9 +1232,10 @@ def flagstone(T, rnd):
         loc = [Vector((v.x - c.x, -(v.y - c.y))) for v in broken]
         if _poly_area(loc) < 0:
             loc.reverse()
-        loc = _offset(loc, rnd.uniform(0.007, 0.013))
-        loc, dsp = _refine(loc, 0.02, 0.008, rnd)
-        me = rock_mesh("flag", loc, rnd, 0.03, [(0, -0.009), (0.003, -0.0035), (0.008, -0.001), (0.015, 0.0)], dome=None, zjit=0.0008, disp=dsp)
+        loc = _offset(loc, rnd.uniform(0.009, 0.016))
+        loc = _sanitize(loc, 0.017)
+        dsp = _refine(loc, 0.02, 0.008, rnd)
+        me = rock_mesh("flag", loc, rnd, 0.03, [(0, -0.009), (0.003, -0.0035), (0.008, -0.001), (0.015, 0.0)], dome=None, zjit=0.0008, spec=dsp)
         ob = link(bpy.data.objects.new("flag", me), outline=False)
         ob.location = P(c.x, c.y, rnd.uniform(-0.003, 0.003))
         ob.rotation_euler = Euler((rnd.uniform(-0.012, 0.012), rnd.uniform(-0.012, 0.012), 0))
@@ -1199,7 +1270,7 @@ def flagstone(T, rnd):
             q = a + t_ * s
             x, y = q.x % T[0], q.y % T[1]
             wet = lush(x, y)
-            if rnd.random() < 0.22 + 0.5 * wet:
+            if rnd.random() < 0.3 + 0.55 * wet:
                 # Moospolster: flache Kuppe in der Fuge
                 r = rnd.uniform(0.003, 0.007) * (1 + wet * 0.6)
                 o = nrm * rnd.gauss(0, 0.004)

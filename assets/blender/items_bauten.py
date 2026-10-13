@@ -28,6 +28,7 @@ _WOOD = {
     "thermo": ((0.13, 0.068, 0.034), (0.27, 0.155, 0.08)),  # Thermo-Kiefer, warmes Dunkelbraun
     "thermo_grey": ((0.12, 0.11, 0.095), (0.24, 0.225, 0.2)),  # vergrautes Thermoholz
     "larch_oiled": ((0.22, 0.115, 0.05), (0.42, 0.25, 0.12)),  # Lärche frisch geölt (Schneidebrett, Akzente)
+    "silver": ((0.2, 0.19, 0.17), (0.4, 0.38, 0.34)),  # silbergrau verwittertes Holz (Schuppen, Stall)
 }
 
 
@@ -178,6 +179,16 @@ def xmat(kind: str) -> bpy.types.Material:
     elif kind == "hen_white":
         m, b = lib._principled(kind)
         lib._color_noise(m, b, (0.55, 0.53, 0.48), (0.7, 0.68, 0.63), 40)
+        b.inputs["Roughness"].default_value = 0.9
+        b.inputs["Sheen Weight"].default_value = 0.5
+    elif kind == "hen_brown_dark":  # Flügel/Schwanz: dunkleres Rotbraun bis Schwarz
+        m, b = lib._principled(kind)
+        lib._color_noise(m, b, (0.06, 0.025, 0.012), (0.2, 0.075, 0.025), 30)
+        b.inputs["Roughness"].default_value = 0.85
+        b.inputs["Sheen Weight"].default_value = 0.5
+    elif kind == "hen_white_dark":
+        m, b = lib._principled(kind)
+        lib._color_noise(m, b, (0.45, 0.43, 0.39), (0.6, 0.58, 0.53), 30)
         b.inputs["Roughness"].default_value = 0.9
         b.inputs["Sheen Weight"].default_value = 0.5
     elif kind == "beak":  # Schnabel und Beine
@@ -383,6 +394,7 @@ def slats_y(name, x0, x1, y0, y1, z0, z1, pitch, height, material, top=None):
 def pavers(x0, y0, x1, y1, sx, sy, z1=0.03, material="concrete", seed=1):
     """Betonplatten im Halbverband mit Fugen"""
     r = rng(seed)
+    bx("paver_bed", x0 + 0.002, y0 + 0.002, 0.0, x1 - 0.002, y1 - 0.002, z1 - 0.012, "gravel_dark")
     y = y0
     row = 0
     while y < y1 - 1e-6:
@@ -391,7 +403,7 @@ def pavers(x0, y0, x1, y1, sx, sy, z1=0.03, material="concrete", seed=1):
         while x < x1 - 1e-6:
             xa, xe = max(x0, x), min(x1, x + sx)
             if xe - xa > 0.05:
-                bx("paver", xa + 0.004, y + 0.004, 0.0, xe - 0.004, ye - 0.004, z1 + r.uniform(-0.002, 0.002), material, 0.004)
+                bx("paver", xa + 0.004, y + 0.004, z1 - 0.03, xe - 0.004, ye - 0.004, z1 + r.uniform(-0.002, 0.002), material, 0.004)
             x += sx
         y = ye
         row += 1
@@ -498,11 +510,11 @@ def tool_shed_mono(w: float, d: float, h: float):
     prism("core", [(wy0 + 0.03, 0.07), (wy1 - 0.03, 0.07), (wy1 - 0.03, wall_top(wy1 - 0.03)), (wy0 + 0.03, wall_top(wy0 + 0.03))], "x", wx0 + 0.03, wx1 - 0.03, "graphite")
     lp, lh = 0.088, 0.07
     # Front (Plan-Süden) und Rückseite: Latten entlang x
-    slats_x("slat_s", wx0 + 0.04, wx1 - 0.04, wy1 - 0.03, wy1, 0.09, wall_top(wy1) - 0.02, lp, lh, "thermo_grey_z")
-    slats_x("slat_n", wx0 + 0.04, wx1 - 0.04, wy0, wy0 + 0.03, 0.09, wall_top(wy0) - 0.02, lp, lh, "thermo_grey_z")
+    slats_x("slat_s", wx0 + 0.04, wx1 - 0.04, wy1 - 0.03, wy1, 0.09, wall_top(wy1) - 0.02, lp, lh, "silver_z")
+    slats_x("slat_n", wx0 + 0.04, wx1 - 0.04, wy0, wy0 + 0.03, 0.09, wall_top(wy0) - 0.02, lp, lh, "silver_z")
     # Seiten: Latten entlang y, oben vom Dachgefälle begrenzt
     for x0_, x1_ in ((wx0, wx0 + 0.03), (wx1 - 0.03, wx1)):
-        slats_y("slat_side", x0_, x1_, wy0 + 0.04, wy1 - 0.04, 0.09, wall_top(wy1) - 0.02, lp, lh, "thermo_grey_z", top=lambda y: wall_top(y) - 0.02)
+        slats_y("slat_side", x0_, x1_, wy0 + 0.04, wy1 - 0.04, 0.09, wall_top(wy1) - 0.02, lp, lh, "silver_z", top=lambda y: wall_top(y) - 0.02)
     # Eckprofile anthrazit (Winkel)
     for x, y, sx, sy in ((wx0, wy0, 1, 1), (wx1, wy0, -1, 1), (wx0, wy1, 1, -1), (wx1, wy1, -1, -1)):
         zt = wall_top(y)
@@ -601,8 +613,10 @@ def bike_shelter(w: float, d: float, h: float):
     foliage_carpet("sedum_g", x0, y0, x1, y1, h - 0.055, 2600, 0.028, "leaf_sedum", seed=6)
     foliage_carpet("sedum_r", x0, y0, x1, y1, h - 0.05, 650, 0.026, "leaf_sedum_red", seed=13)
     r = rng(21)
-    for _ in range(9):  # einzelne Polster (Thymian, Dachwurz) für Struktur
-        foliage_ball("cushion", P(r.uniform(x0 + 0.1, x1 - 0.1), r.uniform(y0 + 0.1, y1 - 0.1), h - 0.05), r.uniform(0.06, 0.1), 120, 0.022, "leaf_sedum_red" if r.random() < 0.3 else "leaf_sedum", seed=r.randint(1, 999))
+    for _ in range(7):  # einzelne flache Polster (Thymian, Dachwurz) für Struktur
+        c = P(r.uniform(x0 + 0.1, x1 - 0.1), r.uniform(y0 + 0.1, y1 - 0.1), h - 0.06)
+        ob = foliage_ball("cushion", c, r.uniform(0.07, 0.1), 160, 0.02, "leaf_light" if r.random() < 0.5 else "leaf_sedum_red", seed=r.randint(1, 999))
+        ob.scale = (1, 1, 0.45)
     # Wasserspeier vorn rechts
     bx("spout", w / 2 - 0.3, d / 2, h - 0.06, w / 2 - 0.24, d / 2 + 0.1, h - 0.03, "graphite")
     # zwei Fahrräder, Vorderrad an der Rückwand, in Anlehnbügeln
@@ -753,26 +767,34 @@ def barrel_sauna(w: float, d: float, h: float):
 
 
 def hen(x: float, y: float, yaw: float, kind: str = "hen_brown", z: float = 0.0, peck: bool = False):
-    """Huhn (~40 cm): Körper, Schwanzfedern, Kopf mit Kamm und Schnabel; `yaw` = Blickrichtung (Plan, Bogenmaß)"""
+    """Huhn (~40 cm): Körper, Flügel, aufgestellte Schwanzfedern, Hals, Kopf mit Kamm, Kehllappen und Schnabel; `yaw` = Blickrichtung"""
     c, s = math.cos(yaw), math.sin(yaw)
 
-    def L(fx, fz):
-        """lokale Vorwärtsdistanz fx und Höhe fz → Plan-Punkt"""
-        return (x + c * fx, y + s * fx, z + fz)
+    def L(fx, fz, lat=0.0):
+        """lokal: fx nach vorn, lat zur Seite, fz Höhe → Plan-Punkt"""
+        return (x + c * fx - s * lat, y + s * fx + c * lat, z + fz)
 
-    ellipsoid("hen_body", L(0, 0.2), 0.16, 0.1, 0.11, kind, yaw, 0.15)
-    ellipsoid("hen_breast", L(0.08, 0.2), 0.08, 0.085, 0.09, kind, yaw)
-    ellipsoid("hen_tail", L(-0.13, 0.28), 0.07, 0.04, 0.09, "hen_brown" if kind == "hen_brown" else "hen_white", yaw, -0.6)
-    hz = 0.2 if peck else 0.36
-    hx = 0.19 if peck else 0.15
-    ellipsoid("hen_neck", L(hx * 0.75, hz - 0.04 if not peck else 0.22), 0.045, 0.045, 0.07, kind, yaw, 0.5 if not peck else 1.2)
-    ellipsoid("hen_head", L(hx, hz), 0.045, 0.038, 0.042, kind, yaw)
-    ellipsoid("hen_comb", L(hx - 0.005, hz + 0.045), 0.035, 0.008, 0.022, "comb", yaw)
-    ellipsoid("hen_wattle", L(hx + 0.02, hz - 0.04), 0.012, 0.008, 0.018, "comb", yaw)
-    ellipsoid("hen_beak", L(hx + 0.05, hz - 0.004), 0.022, 0.01, 0.008, "beak", yaw, -0.2)
+    dark = kind + "_dark"
+    ellipsoid("hen_body", L(0.0, 0.2), 0.15, 0.1, 0.1, kind, yaw, 0.12)
+    ellipsoid("hen_breast", L(0.07, 0.21), 0.085, 0.08, 0.09, kind, yaw)
     for side in (-1, 1):
-        lx, ly = x - s * side * 0.04, y + c * side * 0.04
+        ellipsoid("hen_wing", L(-0.02, 0.225, side * 0.058), 0.12, 0.03, 0.062, dark, yaw, 0.1)
+    ellipsoid("hen_tail", L(-0.12, 0.3), 0.045, 0.045, 0.1, dark, yaw, -0.45)
+    ellipsoid("hen_tail2", L(-0.15, 0.27), 0.04, 0.035, 0.075, kind, yaw, -0.9)
+    if peck:
+        neck, head = (0.14, 0.2, 1.1), (0.2, 0.12)
+    else:
+        neck, head = (0.1, 0.3, 0.35), (0.135, 0.38)
+    ellipsoid("hen_neck", L(neck[0], neck[1]), 0.045, 0.045, 0.075, kind, yaw, neck[2])
+    hx, hz = head
+    ellipsoid("hen_head", L(hx, hz), 0.042, 0.036, 0.04, kind, yaw)
+    ellipsoid("hen_comb", L(hx - 0.004, hz + 0.042), 0.034, 0.008, 0.02, "comb", yaw)
+    ellipsoid("hen_wattle", L(hx + 0.022, hz - 0.04), 0.012, 0.008, 0.017, "comb", yaw)
+    ellipsoid("hen_beak", L(hx + 0.047, hz - 0.004), 0.02, 0.009, 0.008, "beak", yaw, -0.25)
+    for side in (-1, 1):
+        lx, ly, _ = L(0.0, 0.0, side * 0.04)
         tube("hen_leg", (lx, ly, z), (lx, ly, z + 0.12), 0.007, "beak", 6, outline=False)
+        tube("hen_toe", (lx, ly, z + 0.004), (lx + c * 0.05, ly + s * 0.05, z + 0.004), 0.004, "beak", 4, outline=False)
 
 
 def chicken_coop(w: float, d: float, h: float):
@@ -807,7 +829,18 @@ def chicken_coop(w: float, d: float, h: float):
     def wall_top(y):
         return under(y) - 0.005
 
-    prism("house", [(sy0, zf + 0.04), (sy1, zf + 0.04), (sy1, wall_top(sy1)), (sy0, wall_top(sy0))], "x", sx0, sx1, "wood_grey")
+    prism("house", [(sy0, zf + 0.04), (sy1, zf + 0.04), (sy1, wall_top(sy1)), (sy0, wall_top(sy0))], "x", sx0, sx1, "silver_z")
+    # Deckleisten (Boden-Deckel-Schalung)
+    x = sx0 + 0.1
+    while x < sx1 - 0.06:
+        for y in (sy0 - 0.012, sy1):
+            bx("batten", x - 0.015, y, zf + 0.04, x + 0.015, y + 0.012, wall_top(y), "silver_z", 0.002)
+        x += 0.13
+    y = sy0 + 0.1
+    while y < sy1 - 0.06:
+        for x in (sx0 - 0.012, sx1):
+            bx("batten", x, y - 0.015, zf + 0.04, x + 0.012, y + 0.015, wall_top(y + 0.015), "silver_z", 0.002)
+        y += 0.13
     # Eckleisten hell abgesetzt
     for x in (sx0 - 0.012, sx1 - 0.03):
         for y in (sy0 - 0.012, sy1 - 0.03):
@@ -821,12 +854,12 @@ def chicken_coop(w: float, d: float, h: float):
     bx("vent_back", sx0 + 0.2, sy1 - 0.005, wall_top(sy1) - 0.18, sx1 - 0.2, sy1 + 0.002, wall_top(sy1) - 0.08, "mat_black")
     # Servicetür vorn
     bx("door_frame", sx0 + 0.12, sy1, zf + 0.1, sx0 + 0.5, sy1 + 0.012, zf + 0.62, "anthracite", 0.002)
-    bx("door_panel", sx0 + 0.15, sy1 + 0.004, zf + 0.13, sx0 + 0.47, sy1 + 0.016, zf + 0.59, "wood_grey", 0.002)
-    bx("latch", sx0 + 0.42, sy1 + 0.016, zf + 0.34, sx0 + 0.45, sy1 + 0.03, zf + 0.4, "inox")
+    bx("door_panel", sx0 + 0.15, sy1 + 0.004, zf + 0.13, sx0 + 0.47, sy1 + 0.026, zf + 0.59, "silver_z", 0.002)
+    bx("latch", sx0 + 0.42, sy1 + 0.026, zf + 0.34, sx0 + 0.45, sy1 + 0.04, zf + 0.4, "inox")
     # Nistkasten auf der Westseite mit Klappdeckel
     nx0 = -w / 2 + ov - 0.01
     nz0, nz1 = zf + 0.08, zf + 0.42
-    bx("nestbox", nx0, -0.42, nz0, sx0, 0.42, nz1, "wood_grey", 0.003)
+    bx("nestbox", nx0, -0.42, nz0, sx0, 0.42, nz1, "silver_z", 0.003)
     a = math.radians(22)
     e = Vector((0, 1, 0))
     s = Vector((-math.cos(a), 0, -math.sin(a)))

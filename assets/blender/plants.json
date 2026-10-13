@@ -1733,6 +1733,18 @@
   },
   "looks": [
    {
+    "key": "#3F5A34|0|#C9467A|",
+    "look": {
+     "color": "#3F5A34",
+     "bare": false,
+     "bloom": "#C9467A",
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
     "key": "#3F5A34|0||",
     "look": {
      "color": "#3F5A34",
@@ -1741,7 +1753,6 @@
      "fruit": null
     },
     "seasons": [
-     "spring",
      "summer",
      "autumn",
      "winter"
@@ -3270,7 +3281,18 @@
      "fruit": null
     },
     "seasons": [
-     "spring",
+     "spring"
+    ]
+   },
+   {
+    "key": "#6d8a4b|0|#E7A3B4|",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": "#E7A3B4",
+     "fruit": null
+    },
+    "seasons": [
      "summer"
     ]
    },
@@ -3385,6 +3407,18 @@
   },
   "looks": [
    {
+    "key": "#6d8a4b|0|#6A5AA8|",
+    "look": {
+     "color": "#6d8a4b",
+     "bare": false,
+     "bloom": "#6A5AA8",
+     "fruit": null
+    },
+    "seasons": [
+     "spring"
+    ]
+   },
+   {
     "key": "#6d8a4b|0||",
     "look": {
      "color": "#6d8a4b",
@@ -3393,7 +3427,6 @@
      "fruit": null
     },
     "seasons": [
-     "spring",
      "summer"
     ]
    },
@@ -4429,8 +4462,19 @@
     },
     "seasons": [
      "spring",
-     "summer",
      "autumn"
+    ]
+   },
+   {
+    "key": "#5E7C44|0|#5D4E9E|",
+    "look": {
+     "color": "#5E7C44",
+     "bare": false,
+     "bloom": "#5D4E9E",
+     "fruit": null
+    },
+    "seasons": [
+     "summer"
     ]
    },
    {

@@ -407,19 +407,19 @@ SHRUBS = {
     "cornus": dict(shape="vase", leaf=0.07, form="oval", dens=150, heads=None),
     "carpinus-hedge": dict(shape="hedge", leaf=0.045, form="oval", dens=420, heads=None),
     "fagus-hedge": dict(shape="hedge", leaf=0.05, form="oval", dens=420, heads=None),
-    "ligustrum-hedge": dict(shape="hedge", leaf=0.032, form="oval", dens=520, heads=None),
-    "taxus-hedge": dict(shape="hedge", leaf=0.018, form="needle", dens=900, heads=None),
+    "ligustrum-hedge": dict(shape="hedge", leaf=0.038, form="oval", dens=520, heads=None),
+    "taxus-hedge": dict(shape="hedge", leaf=0.028, form="oval", dens=700, heads=None),
     "laurocerasus-hedge": dict(shape="hedge", leaf=0.085, form="oval", dens=300, heads=None),
-    "thuja-hedge": dict(shape="hedge", leaf=0.02, form="needle", dens=900, heads=None),
+    "thuja-hedge": dict(shape="hedge", leaf=0.032, form="lobed", dens=650, heads=None),
     "rhododendron": dict(shape="mound", leaf=0.1, form="oval", dens=120, heads=("ball", 0.14, 40)),
     "rosa-shrub": dict(shape="round", leaf=0.035, form="oval", dens=230, heads=None, bloom_size=0.06),
     "forsythia": dict(shape="vase", leaf=0.05, form="oval", dens=170, heads=None),
-    "buddleja": dict(shape="vase", leaf=0.08, form="needle", dens=140, heads=("panicle", 0.12, 45)),
+    "buddleja": dict(shape="vase", leaf=0.07, form="oval", dens=150, heads=("panicle", 0.1, 45)),
     "laurocerasus": dict(shape="round", leaf=0.1, form="oval", dens=130, heads=None),
     "ribes": dict(shape="round", leaf=0.045, form="palmate", dens=190, heads=None),
     "rubus-idaeus": dict(shape="vase", leaf=0.05, form="pinnate", dens=170, heads=None),
-    "fargesia": dict(shape="vase", leaf=0.06, form="needle", dens=260, heads=None),
-    "taxus-column": dict(shape="column", leaf=0.018, form="needle", dens=900, heads=None),
+    "fargesia": dict(shape="vase", leaf=0.055, form="oval", dens=240, heads=None),
+    "taxus-column": dict(shape="column", leaf=0.028, form="oval", dens=700, heads=None),
 }
 #: Kletterpflanzen (Spalier-Generator mit Laub bis zum Boden): Blattgröße/-form, Blütengröße
 CLIMBERS = {
@@ -1094,7 +1094,7 @@ def vegetable(sp: dict, look: dict, seed: int):
         for i in range(4):
             a = rnd.random() * math.tau
             d = rnd.random() * R * 0.4
-            b = blob(f"z{i}", Vector((math.cos(a) * d, math.sin(a) * d, 0.2)), R * 0.42, rnd, 0.6)
+            b = blob(f"z{i}", Vector((math.cos(a) * d * 0.7, math.sin(a) * d * 0.7, 0.2)), R * 0.33, rnd, 0.6)
             emit(b, leaf, 55, rnd.randint(1, 99999))
             emit(b, flower_obj("#E9B52E", 0.05, "lily"), 2, rnd.randint(1, 99999), 0.3, False)
         return

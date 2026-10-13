@@ -63,9 +63,9 @@ def _wood(m, b, dark, light, grain_axis: str, scale: float = 9.0):
     wave = nt.nodes.new("ShaderNodeTexWave")
     wave.bands_direction = grain_axis
     wave.inputs["Scale"].default_value = scale
-    wave.inputs["Distortion"].default_value = 6
-    wave.inputs["Detail"].default_value = 4
-    wave.inputs["Detail Scale"].default_value = 1.6
+    wave.inputs["Distortion"].default_value = 2.5
+    wave.inputs["Detail"].default_value = 2
+    wave.inputs["Detail Scale"].default_value = 1.2
     nt.links.new(tc.outputs["Object"], wave.inputs["Vector"])
     noise = nt.nodes.new("ShaderNodeTexNoise")
     noise.inputs["Scale"].default_value = 3.0
@@ -95,24 +95,28 @@ def zmat(kind: str) -> bpy.types.Material:
         return lib._mats[kind]
     m, b = lib._principled(kind)
     nt = m.node_tree
-    if kind in ("z_larch_h", "z_larch_v", "z_larch_x"):
-        # vergraute Lärche: silbergrau mit warmem Unterton; Maserung horizontal (h), senkrecht (v) oder entlang x (Pfähle: x)
-        axis = {"z_larch_h": "Z", "z_larch_v": "X", "z_larch_x": "X"}[kind]
-        _wood(m, b, (0.1, 0.092, 0.08), (0.27, 0.255, 0.23), axis, 7.0 if kind == "z_larch_h" else 9.0)
+    if kind in ("z_larch_h", "z_larch_v"):
+        # vergraute Lärche: silbergrau mit warmem Unterton; Maserung horizontal (h) bzw. senkrecht (v)
+        _wood(m, b, (0.13, 0.122, 0.108), (0.25, 0.237, 0.214), "Z" if kind == "z_larch_h" else "X", 5.0)
         b.inputs["Roughness"].default_value = 0.82
+    elif kind == "z_pole":
+        # Rundholz der Palisaden (Kiefer kesseldruckimprägniert, vergraut): etwas wärmer, Maserung längs
+        _wood(m, b, (0.15, 0.125, 0.09), (0.36, 0.31, 0.24), "X", 4.0)
+        b.inputs["Roughness"].default_value = 0.85
+        lib._bump(m, b, 30, 0.2)
     elif kind == "z_endgrain":
         # Hirnholz der Palisaden: Jahresringe um die Pfahlachse, Risse, etwas heller als die Mantelfläche
         tc = nt.nodes.new("ShaderNodeTexCoord")
         wave = nt.nodes.new("ShaderNodeTexWave")
         wave.wave_type = "RINGS"
         wave.rings_direction = "Z"
-        wave.inputs["Scale"].default_value = 28
-        wave.inputs["Distortion"].default_value = 2.5
+        wave.inputs["Scale"].default_value = 19
+        wave.inputs["Distortion"].default_value = 4
         wave.inputs["Detail"].default_value = 3
         nt.links.new(tc.outputs["Object"], wave.inputs["Vector"])
         ramp = nt.nodes.new("ShaderNodeValToRGB")
-        ramp.color_ramp.elements[0].color = (0.13, 0.115, 0.095, 1)
-        ramp.color_ramp.elements[1].color = (0.3, 0.275, 0.235, 1)
+        ramp.color_ramp.elements[0].color = (0.16, 0.13, 0.095, 1)
+        ramp.color_ramp.elements[1].color = (0.42, 0.37, 0.3, 1)
         nt.links.new(wave.outputs["Fac"], ramp.inputs["Fac"])
         col = _brightness(nt, ramp.outputs["Color"], _attr_rnd(nt), 0.8, 1.15)
         nt.links.new(col, b.inputs["Base Color"])
@@ -139,7 +143,7 @@ def zmat(kind: str) -> bpy.types.Material:
         nt.links.new(sh.outputs[0], fr.inputs[0])
         node = nt.nodes.new("ShaderNodeMath")
         node.operation = "LESS_THAN"
-        node.inputs[1].default_value = 0.035
+        node.inputs[1].default_value = 0.05
         nt.links.new(fr.outputs[0], node.inputs[0])
         # Längsfasern
         wave = nt.nodes.new("ShaderNodeTexWave")
@@ -148,8 +152,8 @@ def zmat(kind: str) -> bpy.types.Material:
         wave.inputs["Distortion"].default_value = 2
         nt.links.new(tc.outputs["Object"], wave.inputs["Vector"])
         ramp = nt.nodes.new("ShaderNodeValToRGB")
-        ramp.color_ramp.elements[0].color = (0.2, 0.15, 0.075, 1)
-        ramp.color_ramp.elements[1].color = (0.42, 0.33, 0.17, 1)
+        ramp.color_ramp.elements[0].color = (0.4, 0.27, 0.09, 1)
+        ramp.color_ramp.elements[1].color = (0.68, 0.5, 0.22, 1)
         mixr = nt.nodes.new("ShaderNodeMix")
         mixr.data_type = "FLOAT"
         mixr.inputs["Factor"].default_value = 0.25
@@ -160,7 +164,7 @@ def zmat(kind: str) -> bpy.types.Material:
         mixn.data_type = "RGBA"
         nt.links.new(node.outputs[0], mixn.inputs["Factor"])
         nt.links.new(ramp.outputs["Color"], mixn.inputs["A"])
-        mixn.inputs["B"].default_value = (0.09, 0.065, 0.035, 1)
+        mixn.inputs["B"].default_value = (0.3, 0.2, 0.08, 1)
         nt.links.new(mixn.outputs["Result"], b.inputs["Base Color"])
         b.inputs["Roughness"].default_value = 0.45
         b.inputs["Coat Weight"].default_value = 0.2
@@ -324,7 +328,8 @@ def _dsm_mat(x0: float, x1: float, z0: float, z1: float, yc: float, name: str = 
         z = z0 + 0.02 + (top_h - z0 - 0.02) * j / k
         for dy in (-0.007, 0.007):
             bt.rod((x0, yc + dy, z), (x1, yc + dy, z), 0.004, 8, 0.5)
-    return bt.finish("anthracite", smooth=True)
+    # ohne Konturlinien: bei Drähten unter einem Pixel würde die warme Kontur die Farbe bestimmen
+    return bt.finish("anthracite", smooth=True, outline=False)
 
 
 def _steel_post(name: str, cx: float, cy: float, sx: float, sy: float, h: float):
@@ -394,7 +399,7 @@ def larch_screen(w: float, d: float, h: float):
         zbox("batten", min(x_in, x_in - side * 0.022), -0.032, 0.04, max(x_in, x_in - side * 0.022), -0.012, h - 0.06, "z_larch_v", 0.002)
     x0, x1 = -w / 2 + ps, w / 2 - ps
     bt = Batch("slats", seed=7)
-    t, hs, gap = 0.021, 0.068, 0.010
+    t, hs, gap = 0.021, 0.068, 0.014
     z = 0.05
     top = h - 0.06
     while z + hs + t <= top + 1e-6:
@@ -409,31 +414,30 @@ def larch_screen(w: float, d: float, h: float):
 
 def bamboo_screen(w: float, d: float, h: float):
     """Bambusmatte als Sichtschutz: Rohre Ø 16–22 mm, mit verzinktem Draht gebunden, vor zwei anthrazit
-    Stahlpfosten mit Querriegeln montiert"""
+    Stahlpfosten (60 × 60) mit Querriegeln montiert"""
     ps = 0.06
     for side in (-1, 1):
-        cx = side * (w / 2 - 0.12)
-        _steel_post(f"post_{side}", cx, -0.01, ps, ps, h - 0.06)
+        cx = side * (w / 2 - ps / 2)
+        _steel_post(f"post_{side}", cx, -0.005, ps, ps, h)
+    mx0, mx1 = -w / 2 + ps + 0.002, w / 2 - ps - 0.002
     for z in (0.25, h - 0.3):
-        zbox("rail", -w / 2 + 0.06, -0.006, z - 0.02, w / 2 - 0.06, 0.016, z + 0.02, "anthracite", 0.002)
+        zbox("rail", -w / 2 + ps, -0.012, z - 0.02, w / 2 - ps, 0.012, z + 0.02, "anthracite", 0.002)
     r = rng(31)
     bt = Batch("culms", seed=31)
-    x = -w / 2 + 0.002
-    yc = 0.03
-    culms = []
+    x = mx0
+    yc = 0.025
     while True:
         rad = r.uniform(0.008, 0.011)
-        if x + 2 * rad > w / 2 - 0.002:
+        if x + 2 * rad > mx1:
             break
         cx = x + rad
-        culms.append((cx, rad))
-        bt.rod((cx, yc + r.uniform(-0.002, 0.002), 0.02 + r.uniform(0, 0.012)), (cx, yc + r.uniform(-0.002, 0.002), h - r.uniform(0, 0.018)), rad, 10)
-        x += 2 * rad + r.uniform(0.0, 0.0015)
+        bt.rod((cx, yc + r.uniform(-0.002, 0.002), 0.03 + r.uniform(0, 0.012)), (cx, yc + r.uniform(-0.002, 0.002), h - 0.035 - r.uniform(0, 0.018)), rad, 10)
+        x += 2 * rad + r.uniform(-0.0004, 0.0005)
     bt.finish("z_bamboo", smooth=True)
     # Bindedraht: vier Lagen, vorne über die Rohre geführt
     wires = Batch("wire", seed=2)
     for z in (0.12, 0.62, 1.15, h - 0.12):
-        wires.rod((-w / 2, yc + 0.0105, z), (w / 2, yc + 0.0105, z), 0.0012, 6, 0.5)
+        wires.rod((mx0, yc + 0.0105, z), (mx1, yc + 0.0105, z), 0.0012, 6, 0.5)
     wires.finish("z_galv", smooth=True, outline=False)
 
 
@@ -523,19 +527,20 @@ def gabion_wall(w: float, d: float, h: float):
 
 def l_stone(w: float, d: float, h: float):
     """L-Stein (Winkelstützelement) aus Beton: Wand 10 → 8 cm verjüngt, Fuß 11 cm, Voute, Transportanker oben;
-    Fuß zur Schauseite (+y), 3 mm Fuge je Seite für die Reihung"""
+    Wand an der Schauseite (+y), Fuß hinten, 3 mm Fuge je Seite für die Reihung"""
     x0, x1 = -w / 2 + 0.003, w / 2 - 0.003
-    y_back = -d / 2
+    # Wand an der Schauseite (+y), Fuß nach hinten unter die Hinterfüllung (Regeleinbau)
+    yf = d / 2
     tb, tt, tf, v = 0.10, 0.08, 0.11, 0.035
     prof = [
-        (y_back, 0.0),
-        (d / 2, 0.0),
-        (d / 2, tf - 0.012),
-        (d / 2 - 0.02, tf),  # Fußvorderkante leicht gebrochen
-        (y_back + tb + v, tf),
-        (y_back + tb, tf + v),  # Voute
-        (y_back + tt, h),
-        (y_back, h),
+        (yf, 0.0),
+        (yf, h),
+        (yf - tt, h),
+        (yf - tb, tf + v),  # Voute
+        (yf - tb - v, tf),
+        (-d / 2 + 0.02, tf),  # Fußende leicht gebrochen
+        (-d / 2, tf - 0.012),
+        (-d / 2, 0.0),
     ]
     # Profil in Plan-(y, z); Blender-y ist gespiegelt – Reihenfolge so, dass die Normalen außen liegen
     bt = Batch("lstone", seed=1)
@@ -544,8 +549,8 @@ def l_stone(w: float, d: float, h: float):
     ob.modifiers["bevel"].segments = 3
     # Transportanker-Aussparungen oben in der Wand
     for x in (-w / 2 + 0.25, w / 2 - 0.25):
-        zbox("anchor", x - 0.022, y_back + 0.02, h - 0.004, x + 0.022, y_back + tt - 0.02, h + 0.001, "concrete_dark", 0.004)
-        zbox("anchor_hook", x - 0.006, y_back + tt / 2 - 0.004, h - 0.003, x + 0.006, y_back + tt / 2 + 0.004, h + 0.002, "graphite")
+        zbox("anchor", x - 0.022, yf - tt + 0.02, h - 0.004, x + 0.022, yf - 0.02, h + 0.001, "concrete_dark", 0.004)
+        zbox("anchor_hook", x - 0.006, yf - tt / 2 - 0.004, h - 0.003, x + 0.006, yf - tt / 2 + 0.004, h + 0.002, "graphite")
 
 
 def block_steps(w: float, d: float, h: float):
@@ -684,7 +689,7 @@ def palisade_edge(w: float, d: float, h: float):
         bm.to_mesh(me)
         bm.free()
         ob = link(bpy.data.objects.new("pole", me))
-        ob.data.materials.append(zmat("z_larch_x"))
+        ob.data.materials.append(zmat("z_pole"))
         ob.data.materials.append(zmat("z_endgrain"))
         ob.location = P(cx, cy, 0)
         ob.rotation_euler = (r.uniform(-0.012, 0.012), r.uniform(-0.012, 0.012), r.uniform(0, math.tau))

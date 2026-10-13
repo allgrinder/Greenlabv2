@@ -420,7 +420,7 @@ def garden_bench(w: float, d: float, h: float):
         _beam("rail", (x, yF, zseat - 0.03), (x, yB + 0.1, zseat - 0.055), 0.05, 0.016, "anthracite", side=(1, 0, 0), bevel=0.002)
         # Hinterbein mit Rückenlehne in einem Zug
         _beam("leg_b", (x, yB + 0.12, 0), (x, yB + 0.08, zseat - 0.03), 0.05, 0.016, "anthracite", side=(1, 0, 0), bevel=0.002)
-        _beam("back", (x, yB + 0.08, zseat - 0.06), (x, yB - 0.01, h - 0.07), 0.05, 0.016, "anthracite", side=(1, 0, 0), bevel=0.002)
+        _beam("back", (x, yB + 0.08, zseat - 0.06), (x, yB + 0.08 - 0.09 * 0.86, zseat - 0.06 + (h - 0.01 - zseat) * 0.86), 0.05, 0.016, "anthracite", side=(1, 0, 0), bevel=0.002)
         # Fußleiste und Armlehne
         _beam("foot", (x, yF + 0.0, 0.015), (x, yB + 0.08, 0.015), 0.03, 0.05, "anthracite", side=(1, 0, 0), bevel=0.003)
         _beam("armsteel", (x, yB + 0.02, 0.64), (x, yF - 0.02, 0.64), 0.016, 0.05, "anthracite", side=(1, 0, 0), bevel=0.002)
@@ -434,13 +434,13 @@ def garden_bench(w: float, d: float, h: float):
         t = (yF - y) / (yF - yB - 0.1)
         z = zseat - 0.03 - 0.025 * t + 0.025 + 0.014
         _beam("slat", (-w / 2, y, z), (w / 2, y, z), 0.028, 0.075, "wood_slat", side=(0, 1, 0), bevel=0.004)
-    # Rückenlatten (3) auf der Rückenlehne
+    # Rückenlatten (3) hinter der Rückenlehne verschraubt
     a = Vector((yB + 0.08, zseat - 0.06))
     b = Vector((yB - 0.01, h - 0.07))
     dirv = (b - a).normalized()
     nrm = Vector((dirv.y, -dirv.x))  # nach vorn
     for t in (0.5, 0.72, 0.94):
-        q = a + (b - a) * t + nrm * 0.03
+        q = a + (b - a) * t - nrm * 0.036  # Latten hinter der Wange: von oben deckt die Latte den Stahl
         _beam("backslat", (-w / 2 + 0.04, q.x, q.y), (w / 2 - 0.04, q.x, q.y), 0.026, 0.085, "wood_slat", side=(0, dirv.x, dirv.y), bevel=0.004)
 
 
@@ -576,12 +576,9 @@ def shade_sail(w: float, d: float, h: float):
     for i in range(N + 1):
         row = []
         for j in range(N + 1):
-            # Raster über dem Dreieck: Zeilen zerfallen zur Spitze C hin in einen Punkt
+            # Raster über dem Dreieck: Zeile 0 fällt in der Ecke A zu einem Punkt zusammen
             a = 1 - i / N
-            if i == N:
-                b_ = 0.0
-            else:
-                b_ = (1 - a) * j / N
+            b_ = (1 - a) * j / N
             c = 1 - a - b_
             p = A * a + B * b_ + C * c
             # Ränder bogenförmig nach innen ziehen, Fläche in der Mitte leicht durchhängen
@@ -590,7 +587,7 @@ def shade_sail(w: float, d: float, h: float):
             q.z = p.z - 0.18 * 27 * a * b_ * c * 0.6 + (G.z - p.z) * pull
             row.append(P(q.x, q.y, q.z))
         rows.append(row)
-    # Raster ist an der Spitze C entartet: Faces mit doppelten Punkten verschmelzen
+    # Raster ist in der Ecke A entartet: Faces mit doppelten Punkten verschmelzen
     ob = _sheet("sail", rows, "fabric_light", 0.004)
     bm = bmesh.new()
     bm.from_mesh(ob.data)

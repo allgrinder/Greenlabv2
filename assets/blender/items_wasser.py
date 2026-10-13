@@ -455,67 +455,64 @@ def _sample_path(pts: list[Vector], step: float) -> list[Vector]:
     return out
 
 
-def climber_on(name: str, paths: list[list[Vector]], rr: random.Random, leaf_hex: str, leaf_size: float, bloom_hex: str | None, bloom_size: float, bloom_share: float,
-               spread: float = 0.09, step: float = 0.05, bloom_kind: str = "rose", flat_axis: str | None = None, flat: float = 1.0, density: float = 3.0, bloom_hex2: str | None = None):
+def climber_on(name: str, paths: list[list[Vector]], rr: random.Random, leaf_hex: str, leaf_size: float, blooms: list[tuple[str, float, str, float]],
+               rad: tuple[float, float] = (0.05, 0.085), step: float = 0.06, flat_axis: str | None = None, flat: float = 1.0, coverage: float = 2.8, stray: float = 0.25):
     """
-    Kletterpflanze entlang von Trieben (Polygonzüge in Blender-Koordinaten): Triebe als dünne Äste,
-    Blattzweige als Punktwolke um die Triebe (innen dichter, Rand fransig), dunkler Laubkern,
-    Blüten außen auf der Laubmasse. `flat_axis` = 'x' oder 'y' (Blender) drückt die Wolke flach (Rankwand).
+    Kletterpflanze entlang von Trieben (Polygonzüge in Blender-Koordinaten).
+
+    Triebe als dünne Äste; darum ein Laubkern aus verschmolzenen, verbeulten Kugeln (dunkel – Lücken lesen
+    sich als beschattetes Laub). Blattzweige sitzen als Partikel dicht auf der Kernoberfläche, ein Teil im
+    Inneren für Tiefe; einzelne Kugeln stehen weiter ab (fransiger Umriss).
+    `blooms` = [(Farbe, Größe, Form 'rose'/'saucer'/'ball', Blüten je m² Kernfläche)].
+    `flat_axis` = 'x' oder 'y' (Blender) drückt das Laub flach (Rankwand).
     """
     pl = _plants()
     br = pl.Branches(f"{name}_stems")
-    leaf_pts: list[Vector] = []
-    core_pts: list[tuple[Vector, float]] = []
+    bm = bmesh.new()
+    area = 0.0
     for path in paths:
         pts = _sample_path(path, step)
-        # Trieb mit leichter Wellung
-        stem = [p + Vector((rr.uniform(-0.015, 0.015), rr.uniform(-0.015, 0.015), 0)) for p in pts[:: max(1, len(pts) // 18)]]
+        stem = [p + Vector((rr.uniform(-0.012, 0.012), rr.uniform(-0.012, 0.012), 0)) for p in pts[:: max(1, len(pts) // 16)]]
         if len(stem) >= 2:
-            br.add(stem, [0.012 * (1 - 0.6 * i / len(stem)) for i in range(len(stem))])
+            br.add(stem, [0.011 * (1 - 0.6 * i / len(stem)) for i in range(len(stem))])
         for i, p in enumerate(pts):
             t = i / max(1, len(pts) - 1)
-            sp = spread * (1.0 - 0.35 * t)
-            k = int(density * (1.2 - 0.5 * t) + rr.random())
-            for _ in range(k):
-                off = Vector((rr.gauss(0, sp), rr.gauss(0, sp), rr.gauss(0, sp * 0.8)))
-                if flat_axis == "x":
-                    off.x *= flat
-                elif flat_axis == "y":
-                    off.y *= flat
-                leaf_pts.append(p + off)
-            if i % 3 == 0:
-                core_pts.append((p, sp * 0.8))
-    # dunkler Laubkern: verschmolzene Kugeln entlang der Triebe (Lücken lesen sich als beschattetes Laub)
-    bm = bmesh.new()
-    for p, r_ in core_pts:
-        sx = r_ * (flat if flat_axis == "x" else 1.0)
-        sy = r_ * (flat if flat_axis == "y" else 1.0)
-        bmesh.ops.create_icosphere(bm, subdivisions=2, radius=1, matrix=Matrix.Translation(p) @ Matrix.Diagonal((sx, sy, r_ * 0.9, 1)))
+            r_ = rr.uniform(*rad) * (1.0 - 0.3 * t)
+            off = Vector((rr.gauss(0, r_ * 0.35), rr.gauss(0, r_ * 0.35), rr.gauss(0, r_ * 0.3)))
+            if rr.random() < stray:  # abstehende Triebspitze
+                off = off * 2.6
+                r_ *= 0.6
+            sx = sy = r_
+            if flat_axis == "x":
+                sx *= flat
+                off.x *= flat
+            elif flat_axis == "y":
+                sy *= flat
+                off.y *= flat
+            res = bmesh.ops.create_icosphere(bm, subdivisions=2, radius=1, matrix=Matrix.Translation(p + off) @ Matrix.Diagonal((sx, sy, r_ * 0.85, 1)))
+            ph = rr.uniform(0, 6)
+            for v in res["verts"]:
+                d = (v.co - (p + off)).normalized()
+                v.co += d * r_ * 0.18 * math.sin(d.x * 3.1 + ph) * math.sin(d.y * 2.7 + ph * 1.3 + d.z * 2.0)
+            area += 4 * math.pi * r_ * r_ * (0.75 if flat_axis else 1.0)
     me = bpy.data.meshes.new(f"{name}_core")
     bm.to_mesh(me)
     bm.free()
     core = link(bpy.data.objects.new(f"{name}_core", me), outline=False)
     core.data.materials.append(pl.core_material(leaf_hex))
+    for poly in core.data.polygons:
+        poly.use_smooth = True
     lm = pl.leaf_material(leaf_hex)
     spray = pl.leaf_spray(lm, leaf_size, "oval", 5)
-    pl.emit_verts(pl.point_cloud(f"{name}_leaves", leaf_pts), spray, len(leaf_pts), rr.randint(1, 99999), 0.5)
-    # einzelne Blätter dazwischen füllen kleine Lücken
-    single = pl.leaf_obj(lm, leaf_size * 0.9, "oval")
-    fill = [p + Vector((rr.gauss(0, 0.02), rr.gauss(0, 0.02), rr.gauss(0, 0.02))) for p in rr.sample(leaf_pts, len(leaf_pts) // 2)]
-    pl.emit_verts(pl.point_cloud(f"{name}_fill", fill), single, len(fill), rr.randint(1, 99999), 0.5)
-    if bloom_hex:
-        # Blüten bevorzugt außen und oben auf der Laubmasse
-        cand = [q for q in leaf_pts if rr.random() < bloom_share]
-        for hex_, part in ((bloom_hex, cand[: len(cand) * 2 // 3] if bloom_hex2 else cand), (bloom_hex2, cand[len(cand) * 2 // 3 :] if bloom_hex2 else [])):
-            if not part or not hex_:
-                continue
-            fl = _rose_obj(pl, hex_, bloom_size) if bloom_kind == "rose" else pl.flower_obj(hex_, bloom_size, bloom_kind)
-            pts = [q + Vector((0, 0, leaf_size * 0.6)) for q in part]
-            pl.emit_verts(pl.point_cloud(f"{name}_bloom", pts), fl, len(pts), rr.randint(1, 99999), 0.35)
-            # Knospen
-        buds = [q + Vector((0, 0, leaf_size * 0.5)) for q in leaf_pts if rr.random() < bloom_share * 0.4]
-        if buds:
-            pl.emit_verts(pl.point_cloud(f"{name}_buds", buds), pl.flower_obj(bloom_hex, bloom_size * 0.28, "ball"), len(buds), rr.randint(1, 99999), 0.3)
+    spray_area = 5 * 0.7 * leaf_size**2
+    n = area * coverage / spray_area
+    pl.emit(core, spray, n, rr.randint(1, 99999), 0.5, random_rot=1.0)
+    pl.emit(core, pl.leaf_obj(lm, leaf_size, "oval"), n * 1.2, rr.randint(1, 99999), 0.5, random_rot=1.0)
+    pl.emit(core, spray, n * 0.25, rr.randint(1, 99999), 0.5, volume=True, random_rot=1.0)
+    for hex_, size, kind, per_m2 in blooms:
+        fl = _rose_obj(pl, hex_, size) if kind == "rose" else pl.flower_obj(hex_, size, kind)
+        pl.emit(core, fl, area * per_m2, rr.randint(1, 99999), 0.35, random_rot=0.35)
+    return core
 
 
 # ------------------------------------------------------------------ Wasser
@@ -930,7 +927,7 @@ def rose_arch(w: float, d: float, h: float):
         a = rr.uniform(0.25, 0.85) * math.pi
         x, zz = math.cos(a) * R, zc + math.sin(a) * R
         paths.append([P(x, rr.uniform(-yy, yy), zz), P(x + rr.uniform(-0.15, 0.15), rr.choice((-1, 1)) * (yy + 0.12), zz - rr.uniform(0.1, 0.3))])
-    climber_on("rose", paths, rr, "#3d5a2c", 0.034, "#d25a7c", 0.034, 0.16, spread=0.085, step=0.045, bloom_kind="rose", density=3.2, bloom_hex2="#ec97ab")
+    climber_on("rose", paths, rr, "#557a3a", 0.032, [("#c9476e", 0.045, "rose", 34), ("#e98fa6", 0.04, "rose", 22), ("#7a2a3c", 0.012, "ball", 30)], rad=(0.06, 0.1), step=0.07)
     bounds(w, d, h)
 
 
@@ -982,7 +979,7 @@ def trellis_wall(w: float, d: float, h: float):
             zz = rr.uniform(th + 0.3, top - 0.1)
             xx = x0 + (x1 - x0) * (i + 0.5) / n
             paths.append([P(xx, 0, zz), P(xx + rr.choice((-1, 1)) * rr.uniform(0.15, 0.3), rr.uniform(-0.03, 0.03), zz + rr.uniform(-0.05, 0.1))])
-    climber_on("jasmin", paths, rr, "#2f4a24", 0.03, "#f1eee4", 0.022, 0.2, spread=0.085, step=0.05, bloom_kind="saucer", flat_axis="y", flat=0.75, density=3.0)
+    climber_on("jasmin", paths, rr, "#4a6c34", 0.026, [("#f3f0e6", 0.024, "saucer", 140), ("#e8e2c8", 0.008, "ball", 60)], rad=(0.05, 0.09), step=0.07, flat_axis="y", flat=0.55)
     bounds(w, d, h)
 
 
@@ -1025,7 +1022,7 @@ def climb_obelisk(w: float, d: float, h: float):
             m = max(abs(c), abs(s))
             pts.append(P(c / m * r_, s / m * r_, z))
         paths.append(pts)
-    climber_on("clematis", paths, rr, "#3f5f2c", 0.03, "#7b5aa8", 0.05, 0.08, spread=0.07, step=0.045, bloom_kind="saucer", density=2.6, bloom_hex2="#9d82c6")
+    climber_on("clematis", paths, rr, "#58783c", 0.03, [("#6f4fa3", 0.055, "saucer", 26), ("#9a7fc8", 0.05, "saucer", 14)], rad=(0.05, 0.08), step=0.07)
     bounds(w, d, h)
 
 

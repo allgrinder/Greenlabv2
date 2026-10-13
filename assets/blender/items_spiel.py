@@ -108,8 +108,8 @@ def _cm(kind: str) -> str:
     if kind == "granite":  # grauer Granit: Feldspat hell/rötlich, Glimmer dunkel, leichte Moosflecken oben
         mix = _speckle(
             m, b, (0.2, 0.195, 0.185), (0.3, 0.29, 0.27),
-            [(0.0, (0.25, 0.25, 0.26)), (0.22, (0.6, 0.6, 0.6)), (0.62, (1.0, 1.0, 1.0)), (0.86, (1.1, 0.95, 0.85)), (0.95, (0.12, 0.12, 0.13))],
-            110,
+            [(0.0, (0.55, 0.55, 0.56)), (0.18, (0.8, 0.8, 0.8)), (0.6, (1.0, 1.0, 1.0)), (0.88, (1.08, 0.98, 0.9)), (0.96, (0.35, 0.35, 0.37))],
+            260,
         )
         moss = _moss(m, b, mix.outputs["Result"], 0.75)
         nt.links.new(moss.outputs["Result"], b.inputs["Base Color"])
@@ -813,10 +813,12 @@ def bird_bath(w: float, d: float, h: float):
     box("column", -0.11, -0.11, 0.05, 0.11, 0.11, h - 0.11, "concrete", 0.008)
     R = min(w, d) / 2
     _lathe("bowl", [(0.0, h - 0.12), (0.13, h - 0.12), (R - 0.04, h - 0.07), (R - 0.005, h - 0.03), (R, h - 0.012), (R - 0.008, h), (R - 0.03, h - 0.002), (R - 0.08, h - 0.03), (0.12, h - 0.055), (0.0, h - 0.06)], "concrete", 0, 0, 72)
-    cylinder("water", 0, 0, h - 0.06, h - 0.024, R - 0.055, "water", 72)
+    # Wasserspiegel knapp unter dem Rand, Radius passend zur Innenwand
+    cylinder("water", 0, 0, h - 0.06, h - 0.036, 0.205, "water", 72)
+    # flache Kiesel als Landeplatz für kleine Vögel, ragen aus dem Wasser
     r = rng(8)
-    for i, (x, y, s) in enumerate(((0.11, -0.06, 0.04), (0.15, 0.03, 0.03), (-0.14, 0.09, 0.035))):
-        _rock(f"pebble{i}", x, y, s, s * 0.8, s * 0.7, r.randint(1, 999), _cm("granite")).location.z = h - 0.05
+    for i, (x, y, s) in enumerate(((0.1, -0.07, 0.055), (0.15, 0.03, 0.04), (-0.13, 0.1, 0.045))):
+        _rock(f"pebble{i}", x, y, s, s * 0.8, 0.045, r.randint(1, 999), "concrete_dark").location.z = h - 0.065
 
 
 def insect_hotel(w: float, d: float, h: float):
@@ -936,12 +938,12 @@ def insect_hotel(w: float, d: float, h: float):
 
 def nest_box(w: float, d: float, h: float):
     """Nistkasten am Pfahl: vergraute Lärche, Einflugloch 32 mm nach Süden, Pultdach anthrazit, Pfahl Stahl anthrazit"""
-    zb0 = h - 0.36
-    box("pole", -0.03, -0.03, 0, 0.03, 0.03, zb0 + 0.12, "anthracite", 0.004)
-    box("bracket", -0.05, -0.12, zb0 - 0.04, 0.05, -0.03, zb0 + 0.02, "anthracite", 0.003)
-    bx, by = 0.08, 0.09
-    yc = -0.05
-    zt_f, zt_b = h - 0.08, h - 0.04  # Pultdach fällt nach vorn
+    zb0 = h - 0.38
+    box("pole", -0.03, -0.03, 0, 0.03, 0.03, zb0 + 0.1, "anthracite", 0.004)
+    box("bracket", -0.06, -0.035, zb0 - 0.05, 0.06, 0.035, zb0, "anthracite", 0.003)
+    bx, by = 0.1, 0.1
+    yc = -0.02
+    zt_f, zt_b = h - 0.07, h - 0.03  # Pultdach fällt nach vorn
     bm = bmesh.new()
     pts = [(-bx, yc - by, zb0), (bx, yc - by, zb0), (bx, yc + by, zb0), (-bx, yc + by, zb0)]
     bot = [bm.verts.new(P(x, y, z)) for x, y, z in pts]
@@ -951,7 +953,7 @@ def nest_box(w: float, d: float, h: float):
     for i in range(4):
         bm.faces.new((bot[i], bot[(i + 1) % 4], top[(i + 1) % 4], top[i]))
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    body = _obj("body", bm, "wood_grey")
+    body = _obj("body", bm, "wood_natural")
     bev = body.modifiers.new("b", "BEVEL")
     bev.width = 0.004
     bev.limit_method = "ANGLE"
@@ -959,15 +961,15 @@ def nest_box(w: float, d: float, h: float):
     _rod("entry", P(0, yc + by - 0.006, zt_f - 0.08), P(0, yc + by + 0.002, zt_f - 0.08), 0.016, _cm("hole"), 24)
     _rod("entry_ring", P(0, yc + by - 0.002, zt_f - 0.08), P(0, yc + by + 0.004, zt_f - 0.08), 0.021, "graphite", 24)
     # Dach mit Überstand bis zur Objektkante
-    a_ = P(-w / 2, -d / 2, zt_b + 0.005)
-    b_ = P(-w / 2, d / 2 - 0.02, zt_f + 0.005 - (d / 2 - 0.02 - (yc + by)) * 0.2)
+    a_ = P(-w / 2 + 0.02, -d / 2 + 0.03, zt_b + 0.005)
+    b_ = P(-w / 2 + 0.02, yc + by + 0.04, zt_f + 0.005 - 0.04 * 0.2)
     e = Vector((1, 0, 0))
     s = (b_ - a_).normalized()
     nrm = e.cross(s)
     if nrm.z < 0:
         nrm = -nrm
-    plate("roof", a_, e, s, nrm, w, (b_ - a_).length, 0.015, "anthracite")
-    plate("drip", b_, e, -nrm, s, w, 0.03, 0.006, "anthracite")
+    plate("roof", a_, e, s, nrm, w - 0.04, (b_ - a_).length, 0.015, "anthracite")
+    plate("drip", b_, e, -nrm, s, w - 0.04, 0.03, 0.006, "anthracite")
     # Klappe/Schrauben am Kasten
     for z in (zb0 + 0.04, zt_f - 0.03):
         _rod("screw", P(bx - 0.02, yc + by - 0.002, z), P(bx - 0.02, yc + by + 0.003, z), 0.004, "graphite", 8)

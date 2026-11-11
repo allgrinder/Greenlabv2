@@ -1,3 +1,4 @@
+import { SAMPLES } from '../../core/sample/samples';
 import { useEffect, useRef, useState } from 'react';
 import { formatDate, num } from '../../core/format';
 import { backupDue, REMIND_DAYS, type StorageState } from '../../persistence/backup';
@@ -40,7 +41,7 @@ export function StartScreen({
   onOpen: (id: string) => void;
   onHover: (id: string) => void;
   onNew: () => void;
-  onSample: () => void;
+  onSample: (key: string) => void;
   onImport: (f: File) => void;
   /** letzte Sicherung, Speicherzustand und Aktion „Alle Gärten sichern“ */
   backup?: { at: string | null; storage: StorageState; onBackup: () => void };
@@ -82,9 +83,6 @@ export function StartScreen({
             <button type="button" className={s.primary} onClick={onNew} disabled={busy} data-testid="start-new">
               <Icon name="plus" size={15} /> Neuer Garten
             </button>
-            <button type="button" className={s.ghost} onClick={onSample} disabled={busy} data-testid="open-sample">
-              Mustergarten
-            </button>
             <button type="button" className={s.ghost} onClick={() => file.current?.click()} disabled={busy} data-testid="start-import">
               <Icon name="upload" size={14} /> JSON importieren
             </button>
@@ -115,7 +113,7 @@ export function StartScreen({
             </svg>
             <div>
               <div className={s.emptyTitle}>Noch kein Garten angelegt</div>
-              <div className={s.emptyText}>Lege dein Grundstück mit Maßen an oder schau dir den Mustergarten an.</div>
+              <div className={s.emptyText}>Lege dein Grundstück mit Maßen an oder schau dir einen der Mustergärten unten an.</div>
             </div>
           </section>
         )}
@@ -173,9 +171,36 @@ export function StartScreen({
             </div>
           </section>
         )}
+
+        <section>
+          <div className={s.sectionHead}>
+            <span className={s.sectionTitle}>Mustergärten</span>
+            <span className={s.count}>{SAMPLES.length}</span>
+          </div>
+          <div className={s.grid}>
+            {SAMPLES.map((g) => (
+              <div key={g.key} className={s.card}>
+                <button type="button" className={s.cardMain} onClick={() => onSample(g.key)} disabled={busy} data-testid={g.key === 'modern' ? 'open-sample' : `open-sample-${g.key}`}>
+                  <span className={s.cardThumb}>
+                    <SampleImage sampleKey={g.key} />
+                  </span>
+                  <span className={s.cardName}>{g.title}</span>
+                  <span className={s.cardSub}>{g.text}</span>
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );
+}
+
+/** Vorschaubild eines Mustergartens (vorgerendert); ohne Bild der Umriss */
+function SampleImage({ sampleKey }: { sampleKey: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return <Outline pts={SAMPLES.find((g) => g.key === sampleKey)?.create().site.boundary} />;
+  return <img src={`${import.meta.env.BASE_URL}assets/samples/${sampleKey}.webp`} alt="" draggable={false} loading="lazy" onError={() => setFailed(true)} />;
 }
 
 function Card({ meta, busy, opening, onOpen, onHover, onDelete }: { meta: ProjectMeta; busy: boolean; opening: boolean; onOpen: () => void; onHover: () => void; onDelete: () => void }) {

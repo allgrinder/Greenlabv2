@@ -23,7 +23,7 @@ Jede Änderung an der Darstellung wird an zwei Gärten geprüft: am Mustergarten
 
 ## Start
 
-Die App öffnet mit der Startseite: zuletzt bearbeiteter Garten, alle gespeicherten Gärten mit Vorschaubild, Neuer Garten, Mustergarten, JSON-Import. Grafik und Bilder laden währenddessen im Hintergrund (Fortschritt oben rechts); ein Garten öffnet erst, wenn er vollständig gezeichnet ist. `?bench=N` öffnet weiterhin direkt einen Benchmark-Garten.
+Die App öffnet mit der Startseite: zuletzt bearbeiteter Garten, alle gespeicherten Gärten mit Vorschaubild, Neuer Garten, JSON-Import und die Mustergärten. Grafik und Bilder laden währenddessen im Hintergrund (Fortschritt oben rechts); ein Garten öffnet erst, wenn er vollständig gezeichnet ist. `?bench=N` öffnet weiterhin direkt einen Benchmark-Garten.
 
 ## Neuer Garten
 
@@ -31,7 +31,7 @@ Der Assistent legt das Grundstück standardmäßig mit Rasen an (Schalter „Gru
 
 ## Katalog
 
-Pflanzen: 22 Bäume, 15 Sträucher, 6 Hecken, 13 Spaliere und Kletterpflanzen, 24 Stauden, 6 Gräser, 7 Gemüse – alle mit Blender-Bildern je Jahreszeit. Bauten und Ausstattung (70 Objekte) stehen in der Bibliothek in Gruppen: Bauten, Terrasse/Möbel/Schatten, Beete & Nutzgarten, Wasser, Zäune/Mauern/Rankhilfen, Spielen, Deko & Natur, Technik. Beläge: 17, darunter Fischgrät, Granit im Segmentbogen, Polygonalplatten und Rasengitter; Wasser lässt sich auch als Weg zeichnen (Bachlauf). Neue Objekte: Generator in `assets/blender/items_<gruppe>.py`, Maße/Name/Preis in `catalog_<gruppe>.json`, Eintrag in `src/core/catalog/items.ts`, Platzhalter in `src/render/symbols/itemFallbacks.ts`. Dicht belaubte Objekte rendern ohne Konturlinien (`NO_OUTLINES` in `render_items.py`); viele Objekte lassen sich parallel in getrennte `--out`-Ordner rendern und danach zusammenführen.
+Pflanzen: 22 Bäume, 15 Sträucher, 6 Hecken, 13 Spaliere und Kletterpflanzen, 24 Stauden, 6 Gräser, 7 Gemüse – alle mit Blender-Bildern je Jahreszeit. Bauten und Ausstattung (71 Objekte) stehen in der Bibliothek in Gruppen: Bauten, Terrasse/Möbel/Schatten, Beete & Nutzgarten, Wasser, Zäune/Mauern/Rankhilfen, Spielen, Deko & Natur, Technik. Beläge: 17, darunter Fischgrät, Granit im Segmentbogen, Polygonalplatten und Rasengitter; Wasser lässt sich auch als Weg zeichnen (Bachlauf). Neue Objekte: Generator in `assets/blender/items_<gruppe>.py`, Maße/Name/Preis in `catalog_<gruppe>.json`, Eintrag in `src/core/catalog/items.ts`, Platzhalter in `src/render/symbols/itemFallbacks.ts`. Dicht belaubte Objekte rendern ohne Konturlinien (`NO_OUTLINES` in `render_items.py`); viele Objekte lassen sich parallel in getrennte `--out`-Ordner rendern und danach zusammenführen.
 
 ## Sicherung
 
@@ -99,7 +99,10 @@ Umgesetzt sind alle acht Kernfunktionen der Phase 1 sowie PNG-Export (siehe `ARC
 - Gebäude, Möbel und Ausstattung sind in Blender modelliert und gerendert (modern, grau/anthrazit): Draufsicht und Schrägansicht in vier Drehungen, ohne Schlagschatten (den wirft die App). Skripte und Anleitung: `assets/blender/README.md`.
 - Bodenbeläge (Kies, Platten, Holzdeck, Häcksel, Rinde, Erde, Sand, Wildwiese, Großformatplatten, Basaltsplitt, Trittplatten) sind in Blender Stück für Stück modelliert und als nahtlose Kacheln gerendert.
 - Basalt für Beete: Basaltsplitt als Abdeckung jeder Pflanzfläche wählbar (Eigenschaften → Abdeckung), dazu Basalt-Findlinge und Basaltstelen im Katalog.
-- Beispielgarten ist der „Mustergarten Modern & Naturnah“ (30 × 50 m, sieben Zonen: Eingang, Spiel, Rasen, Hochbeete, Pavillon, Naturwiese mit Homeoffice-Pod, Feuerstelle).
+- Mustergärten (`src/core/sample/samples.ts`):
+  - „Modern & Naturnah“ (30 × 50 m, sieben Zonen: Eingang, Spiel, Rasen, Hochbeete, Pavillon, Naturwiese mit Homeoffice-Pod, Feuerstelle).
+  - „Entspannung, Spiel & Obst“ (aufgemessenes Grundstück, rund 1.500 m², acht Zonen: Zugang vom alten Garten, überdachte Outdoorküche, Office-Pod & Fasssauna, Spielgarten, Feuerstelle & Lounge mit Quellstein, Spalierlinden an der Grenze, Obstwiese, Gewächshaus & Hochbeete; Rotbuchenhecke ringsum, offen zum alten Garten).
+  - Neuer Mustergarten aus einem JSON-Export: Grenze und Kanten aus der Datei übernehmen, Inhalt als Funktion in `src/core/sample/` bauen, in `SAMPLES` eintragen, Test wie `spielgarten.test.ts` (alles im Grundstück, nur Katalogeinträge), Vorschaubild nach `public/assets/samples/`.
 - Beläge ohne sichtbare Kachelwiederholung und ohne harte Kanten: aufgebrochene Texturen, großflächige Variation, einmalige Details, ausgefranste Ränder und echte Grashalme, die über Rasen- und Beetkanten hängen. Mehrere Blender-Varianten je Belag (Kies, Wiese …) gegen Wiederholung.
 - Einfassung wählbar (Eigenschaften: Ohne / Stein / Stahl / Corten) und als echtes Material mit Licht und Schatten gezeichnet; ohne Einfassung keine Linie. Einzelne Kiesel, Rindenstücke und Laub liegen über den Kanten.
 - Bäume und freie Sträucher sind aus Blattzweigen in Laubmassen aufgebaut (Punktwolke mit Klumpen, fransiger Rand, Lichtdurchlass) – keine Laubkugeln mehr.

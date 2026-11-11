@@ -1051,3 +1051,66 @@ GENERATORS = {
     "chickenCoop": chicken_coop,
     "outdoorKitchen": outdoor_kitchen,
 }
+
+
+# ------------------------------------------------------------------ Überdachte Outdoorküche
+
+
+def _moved(build, dx: float, dy: float):
+    """Teil-Generator ausführen und alle dabei entstandenen Objekte in Plan-Koordinaten verschieben"""
+    before = set(bpy.data.objects.keys())
+    build()
+    for ob in bpy.data.objects:
+        if ob.name not in before:
+            ob.location += P(dx, dy)
+
+
+def kitchen_pavilion(w: float, d: float, h: float):
+    """
+    Überdachte Outdoorküche: Lamellendach (Aluminium anthrazit, Lamellen halb geöffnet) auf vier Pfosten,
+    Rückwand aus Thermoholz-Latten, Küchenzeile mit Grill und Spüle an der Rückwand, Essplatz für sechs.
+    """
+    import items  # Tisch mit Stühlen aus dem Grundmodul (zirkulärer Import erst zur Laufzeit)
+
+    pavers(-w / 2 + 0.06, -d / 2 + 0.06, w / 2 - 0.06, d / 2 - 0.06, 0.8, 0.4, 0.03, "concrete", 11)
+    t = 0.15
+    zb = h - 0.26  # Unterkante Rahmen
+    for x in (-w / 2, w / 2 - t):
+        for y in (-d / 2, d / 2 - t):
+            bx("post", x, y, 0.03, x + t, y + t, zb, "anthracite", 0.004)
+            bx("footplate", x - 0.04, y - 0.04, 0.03, x + t + 0.04, y + t + 0.04, 0.045, "graphite", 0.003)
+    # umlaufender Rahmen mit innenliegender Rinne, Abdeckprofil
+    for a, b_, c, d_ in ((-w / 2, -d / 2, w / 2, -d / 2 + t), (-w / 2, d / 2 - t, w / 2, d / 2), (-w / 2, -d / 2 + t, -w / 2 + t, d / 2 - t), (w / 2 - t, -d / 2 + t, w / 2, d / 2 - t)):
+        bx("frame", a, b_, zb, c, d_, h - 0.01, "anthracite", 0.004)
+        bx("coping", a, b_, h - 0.01, c, d_, h, "graphite", 0.002)
+    # Lamellen quer zur Tiefe, fast senkrecht geöffnet: von oben feine Linien mit Durchblick auf Küche und Tisch
+    tilt = math.radians(84)
+    e = Vector((1, 0, 0))
+    s_ = Vector((0, -math.cos(tilt), math.sin(tilt)))
+    n = e.cross(s_)
+    lw, pitch = 0.18, 0.22
+    y = -d / 2 + t + 0.04
+    while y < d / 2 - t - 0.08:
+        org = P(-w / 2 + t + 0.01, y, h - 0.2)
+        pl("louvre", org, e, s_, n, w - 2 * t - 0.02, lw, 0.022, "anthracite")
+        y += pitch
+    # Achsen der Lamellen (Antrieb) an den Seiten
+    for x in (-w / 2 + t, w / 2 - t - 0.04):
+        bx("axle_rail", x, -d / 2 + t, h - 0.21, x + 0.04, d / 2 - t, h - 0.17, "graphite")
+    # Rückwand (Plan-Norden) aus waagerechten Thermoholz-Latten zwischen den hinteren Pfosten
+    yb = -d / 2 + t / 2
+    slats_x("slat_back", -w / 2 + t, w / 2 - t, yb - 0.012, yb + 0.012, 0.12, zb - 0.05, 0.105, 0.085, "thermo_z")
+    # Küchenzeile an der Rückwand (links), Essplatz rechts
+    kw, kd = 2.6, 0.8
+    kx = -w / 2 + t + 0.15 + kw / 2
+    _moved(lambda: outdoor_kitchen(kw, kd, 0.95), kx, -d / 2 + t + 0.06 + kd / 2)
+    # Wandregal mit Kräutertöpfen über der Arbeitsplatte
+    bx("shelf", kx - 0.9, yb + 0.012, 1.45, kx + 0.4, yb + 0.25, 1.48, "larch_oiled_x", 0.003)
+    for i, xh in enumerate((kx - 0.75, kx - 0.45, kx - 0.15, kx + 0.2)):
+        cyl("pot", xh, yb + 0.14, 1.48, 1.6, 0.06, "corten" if i % 2 else "concrete", 20)
+        foliage_ball(f"herb{i}", P(xh, yb + 0.14, 1.67), 0.075, 70, 0.022, "leaf_light" if i % 2 else "leaf", seed=40 + i)
+    tx = w / 2 - t - 0.25 - 1.0
+    _moved(lambda: items.table(2.0, d - 2 * t - 0.25, 0.75), tx, 0.12)
+
+
+GENERATORS["kitchenPavilion"] = kitchen_pavilion

@@ -1,3 +1,4 @@
+import { SAMPLES } from '../../core/sample/samples';
 import { useEffect, useRef, useState } from 'react';
 import { num } from '../../core/format';
 import { deleteProject, listProjects, type ProjectMeta } from '../../persistence/db';
@@ -22,7 +23,7 @@ export function ProjectMenu({
   onOpen: (id: string) => void;
   onHome: () => void;
   onNew: () => void;
-  onSample: () => void;
+  onSample: (key: string) => void;
   onImport: (f: File) => void;
   onExportJson: () => void;
   onBackup: () => void;
@@ -92,9 +93,11 @@ export function ProjectMenu({
         <button type="button" className={s.action} onClick={onNew} data-testid="menu-new">
           <Icon name="plus" size={14} /> Neues Projekt
         </button>
-        <button type="button" className={s.action} onClick={onSample} data-testid="menu-sample">
-          Beispielgarten
-        </button>
+        {SAMPLES.map((g) => (
+          <button key={g.key} type="button" className={s.action} onClick={() => onSample(g.key)} data-testid={g.key === 'modern' ? 'menu-sample' : `menu-sample-${g.key}`}>
+            Mustergarten {g.title}
+          </button>
+        ))}
         <button type="button" className={s.action} onClick={() => file.current?.click()} data-testid="menu-import">
           <Icon name="upload" size={14} /> JSON importieren
         </button>

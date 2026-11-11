@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { bbox } from '../core/geometry/polygon';
 import type { Project } from '../core/model/types';
 import { createBenchmark } from '../core/sample/benchmark';
-import { createMustergarten } from '../core/sample/mustergarten';
+import { getSample } from '../core/sample/samples';
 import { startAutosave, type SaveState } from '../persistence/autosave';
 import { getBlob, getThumbnail, lastProjectId, listProjects, loadProject, putBlob, putThumbnail, rememberLast, rememberSample, sampleProjectId, saveProject } from '../persistence/db';
 import { exportProject, importProject } from '../persistence/jsonIO';
@@ -236,12 +236,12 @@ export function App() {
   };
 
   /** Mustergarten: die gespeicherte Kopie öffnen, nur beim ersten Mal anlegen */
-  const openSample = async () => {
-    const id = sampleProjectId();
+  const openSample = async (key = 'modern') => {
+    const id = sampleProjectId(key);
     const existing = id ? await loadProject(id).catch(() => null) : null;
     if (existing) return open(existing);
-    const p = createMustergarten();
-    rememberSample(p.id);
+    const p = getSample(key).create();
+    rememberSample(p.id, key);
     await createAndOpen(p);
   };
 
@@ -384,7 +384,7 @@ export function App() {
         <NewProjectWizard
           canCancel
           onCancel={() => switchTo(prevScreen.current === 'editor' && docId ? 'editor' : 'start')}
-          onSample={openSample}
+          onSample={() => openSample()}
           onCreate={({ project, backgroundBlob }) => createAndOpen(project, backgroundBlob && project.background ? { [project.background.blobId]: backgroundBlob } : {})}
         />
       )}

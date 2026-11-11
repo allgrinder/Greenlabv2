@@ -105,19 +105,22 @@ export async function getThumbnail(id: Id): Promise<Blob | undefined> {
 const LAST = 'gw:lastProject';
 const SAMPLE = 'gw:sampleProject';
 
-/** Id der gespeicherten Kopie des Mustergartens (damit „Mustergarten“ keine Duplikate anlegt) */
-export function sampleProjectId(): Id | null {
+/** Speicherschlüssel je Mustergarten; der erste behält den alten Schlüssel (bestehende Kopien bleiben gültig) */
+const sampleKey = (key: string) => (key === 'modern' ? SAMPLE : `${SAMPLE}:${key}`);
+
+/** Id der gespeicherten Kopie eines Mustergartens (damit „Mustergarten“ keine Duplikate anlegt) */
+export function sampleProjectId(key = 'modern'): Id | null {
   try {
-    return localStorage.getItem(SAMPLE);
+    return localStorage.getItem(sampleKey(key));
   } catch {
     return null;
   }
 }
 
-export function rememberSample(id: Id | null) {
+export function rememberSample(id: Id | null, key = 'modern') {
   try {
-    if (id) localStorage.setItem(SAMPLE, id);
-    else localStorage.removeItem(SAMPLE);
+    if (id) localStorage.setItem(sampleKey(key), id);
+    else localStorage.removeItem(sampleKey(key));
   } catch {
     /* privater Modus */
   }

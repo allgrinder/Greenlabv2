@@ -1114,3 +1114,125 @@ def kitchen_pavilion(w: float, d: float, h: float):
 
 
 GENERATORS["kitchenPavilion"] = kitchen_pavilion
+
+
+# ------------------------------------------------------------------ Geräteschuppen mit Kaminholzunterstand
+
+
+def _log_stack(x0: float, x1: float, y0: float, y1: float, z0: float, z1: float, seed: int = 3):
+    """Gestapeltes Kaminholz (Scheite 33 cm quer zur Front): ein Mesh, Rinde dunkel, Hirnholz hell"""
+    r = rng(seed)
+    me = bpy.data.meshes.new("logs")
+    bm = bmesh.new()
+    L = 0.33
+    rows = max(1, int((y1 - y0) // (L + 0.01)))
+    rad = 0.055
+    z = z0 + rad
+    k = 0
+    while z < z1 - rad:
+        x = x0 + rad + (0.5 * rad if k % 2 else 0)
+        while x < x1 - rad:
+            for j in range(rows):
+                rr = rad * r.uniform(0.75, 1.1)
+                yc = y1 - L / 2 - j * (L + 0.01) + r.uniform(-0.03, 0.03)
+                m = Matrix.Translation(P(x + r.uniform(-0.01, 0.01), yc, z + r.uniform(-0.008, 0.008))) @ Matrix.Rotation(math.pi / 2, 4, "X")
+                bmesh.ops.create_cone(bm, cap_ends=True, segments=7, radius1=rr, radius2=rr * r.uniform(0.92, 1.0), depth=L * r.uniform(0.94, 1.04), matrix=m)
+            x += rad * 2.02
+        z += rad * 1.8
+        k += 1
+    for f in bm.faces:
+        f.material_index = 1 if len(f.verts) > 4 else 0
+    bm.to_mesh(me)
+    bm.free()
+    ob = link(bpy.data.objects.new("logs", me), outline=False)
+    ob.data.materials.append(lib.mat("log"))
+    ob.data.materials.append(xmat("larch_oiled_y"))
+    return ob
+
+
+def shed_woodstore(w: float, d: float, h: float):
+    """Geräteschuppen (Pultdach, vergraute Rhombusleisten) mit angebautem Kaminholzunterstand unter durchlaufendem Dach"""
+    ws = 1.4  # Breite des Holzunterstands (Plan-Osten)
+    sw = w - ws
+    _moved(lambda: tool_shed_mono(sw, d, h), -w / 2 + sw / 2, 0)
+    # gleiche Dachneigung wie der Schuppen
+    rt = 0.05
+    zf, zb = h - rt - 0.03 - 0.28, h - 0.36 - 0.28  # Dach des Unterstands 28 cm tiefer: von oben als eigener Bauteil lesbar
+    x0, x1 = -w / 2 + sw, w / 2
+    bx("wood_plinth", x0 + 0.05, -d / 2 + 0.12, 0, x1 - 0.05, d / 2 - 0.16, 0.1, "concrete_dark", 0.004)
+    slope = (zf - zb) / d
+    under = lambda y: zb + slope * (y + d / 2)
+    for x in (x1 - 0.1,):
+        for y in (-d / 2 + 0.12, d / 2 - 0.26):
+            bx("post", x, y, 0.0, x + 0.09, y + 0.09, under(y + 0.045) - 0.01, "anthracite", 0.003)
+    # Rückwand aus Leisten, damit das Holz luftig, aber geschützt liegt
+    slats_x("wood_back", x0 + 0.04, x1 - 0.1, -d / 2 + 0.12, -d / 2 + 0.145, 0.12, under(-d / 2 + 0.13) - 0.04, 0.12, 0.07, "silver_z")
+    mono_roof(x0 - 0.01, x1 + 0.04, d / 2, -d / 2, zf, zb, rt, "anthracite", "graphite")
+    _log_stack(x0 + 0.06, x1 - 0.12, -d / 2 + 0.17, d / 2 - 0.2, 0.1, under(0) - 0.12, 5)
+    # Hackklotz mit Axt vor dem Unterstand
+    cyl("block", x1 - 0.45, d / 2 + 0.25, 0, 0.42, 0.2, "log", 20)
+    _set(cylinder("block_top", x1 - 0.45, d / 2 + 0.25, 0.42, 0.43, 0.19, "graphite", 20), "larch_oiled_y")
+
+
+GENERATORS["shedWoodstore"] = shed_woodstore
+
+
+# ------------------------------------------------------------------ Gartenhaus-Office mit überdachter Outdoorküche
+
+
+def _green_roof(x0: float, y0: float, x1: float, y1: float, h: float, seed: int = 6):
+    """Flachdach mit Attika, Kiesrand und Sedum (extensive Begrünung)"""
+    bx("roofdeck", x0, y0, h - 0.22, x1, y1, h - 0.08, "anthracite", 0.008)
+    a_ = 0.07
+    for a, b_, c, d_ in ((x0, y0, x1, y0 + a_), (x0, y1 - a_, x1, y1), (x0, y0 + a_, x0 + a_, y1 - a_), (x1 - a_, y0 + a_, x1, y1 - a_)):
+        bx("attika", a, b_, h - 0.08, c, d_, h, "anthracite", 0.004)
+    bx("gravel", x0 + a_, y0 + a_, h - 0.08, x1 - a_, y1 - a_, h - 0.055, "gravel_light")
+    gx0, gy0, gx1, gy1 = x0 + 0.3, y0 + 0.3, x1 - 0.3, y1 - 0.3
+    foliage_carpet("sedum_g", gx0, gy0, gx1, gy1, h - 0.055, 1800, 0.03, "leaf_sedum", seed=seed)
+    foliage_carpet("sedum_r", gx0, gy0, gx1, gy1, h - 0.05, 420, 0.028, "leaf_sedum_red", seed=seed + 7)
+    r = rng(seed + 15)
+    for _ in range(14):
+        c = P(r.uniform(gx0 + 0.15, gx1 - 0.15), r.uniform(gy0 + 0.15, gy1 - 0.15), h - 0.06)
+        ob = foliage_ball("cushion", c, r.uniform(0.08, 0.13), 180, 0.022, "leaf_light" if r.random() < 0.5 else "leaf_sedum_red", seed=r.randint(1, 999))
+        ob.scale = (1, 1, 0.45)
+
+
+def garden_office_kitchen(w: float, d: float, h: float):
+    """
+    Ensemble an der Grenze: geschlossenes Gartenhaus als Homeoffice (Thermoholz, Glasfront, Gründach) und unter
+    gleicher Dachlinie die offene Outdoorküche mit Lamellendach und Essplatz. Plan-Süden (+y) ist die Gartenseite.
+    """
+    ow = 4.5  # Breite des Office (Plan-Westen, links)
+    kw = w - ow
+    _moved(lambda: kitchen_pavilion(kw, d, h), -w / 2 + ow + kw / 2, 0)
+    x0, x1 = -w / 2, -w / 2 + ow
+    y0, y1 = -d / 2, d / 2
+    zt = h - 0.22  # Unterkante Dach
+    bx("plinth", x0 + 0.04, y0 + 0.04, 0, x1, y1 - 0.04, 0.14, "concrete_dark", 0.004)
+    # Kern und Holzfassade an Rück- und Stirnseite
+    bx("core", x0 + 0.08, y0 + 0.08, 0.14, x1 - 0.02, y1 - 0.12, zt, "graphite")
+    slats_x("clad_back", x0 + 0.06, x1, y0 + 0.04, y0 + 0.07, 0.16, zt - 0.03, 0.11, 0.09, "thermo_z")
+    slats_y("clad_side", x0 + 0.04, x0 + 0.07, y0 + 0.06, y1 - 0.1, 0.16, zt - 0.03, 0.11, 0.09, "thermo_z")
+    # Glasfront zum Garten: raumhohe Felder, eines als Schiebetür
+    gy = y1 - 0.12
+    bx("glass", x0 + 0.12, gy, 0.16, x1 - 0.1, gy + 0.02, zt - 0.06, "window")
+    n = 4
+    for i in range(n + 1):
+        x = x0 + 0.1 + (ow - 0.2) * i / n
+        bx("mullion", x - 0.03, gy - 0.01, 0.14, x + 0.03, gy + 0.05, zt, "anthracite", 0.003)
+    bx("transom", x0 + 0.08, gy - 0.01, 0.14, x1 - 0.06, gy + 0.05, 0.2, "anthracite")
+    bx("head", x0 + 0.08, gy - 0.01, zt - 0.08, x1 - 0.06, gy + 0.05, zt, "anthracite")
+    bx("door_pull", x1 - 0.95, gy + 0.05, 0.9, x1 - 0.92, gy + 0.07, 1.4, "inox")
+    # Schreibtisch mit Stuhl und Leuchte hinter dem Glas (in der Schrägansicht sichtbar)
+    bx("desk", x0 + 0.5, y1 - 1.25, 0.72, x0 + 2.3, y1 - 0.55, 0.76, "larch_oiled_x", 0.004)
+    for xx in (x0 + 0.55, x0 + 2.2):
+        bx("desk_leg", xx, y1 - 1.2, 0.14, xx + 0.05, y1 - 0.6, 0.72, "anthracite")
+    bx("screen", x0 + 1.1, y1 - 1.15, 0.78, x0 + 1.75, y1 - 1.12, 1.15, "mat_black")
+    bx("chair_seat", x0 + 1.15, y1 - 0.45, 0.45, x0 + 1.65, y1 - 0.0 - 0.2, 0.5, "fabric_dark", 0.02)
+    # Vordach über der Glasfront und Wandleuchte
+    bx("canopy", x0, y1 - 0.12, zt - 0.02, x1, y1 + 0.35, zt + 0.06, "anthracite", 0.004)
+    bx("lamp", x1 - 0.4, gy + 0.05, 2.0, x1 - 0.3, gy + 0.12, 2.2, "anthracite", 0.004)
+    _green_roof(x0, y0, x1, y1, h, 9)
+
+
+GENERATORS["gardenOfficeKitchen"] = garden_office_kitchen

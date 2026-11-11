@@ -7314,6 +7314,74 @@
      ]
     }
    ]
+  },
+  "shedWoodstore": {
+   "w": 4.4,
+   "d": 2.4,
+   "h": 2.3,
+   "ppm": 137.5,
+   "top": [
+    {
+     "file": "shedWoodstore_top_0.webp",
+     "rot": 0,
+     "px": [
+      637,
+      428
+     ],
+     "anchor": [
+      0.4989,
+      0.4446
+     ]
+    }
+   ],
+   "oblique": [
+    {
+     "file": "shedWoodstore_oblique_0.webp",
+     "rot": 0,
+     "px": [
+      637,
+      508
+     ],
+     "anchor": [
+      0.4989,
+      0.6122
+     ]
+    }
+   ]
+  },
+  "gardenOfficeKitchen": {
+   "w": 9.6,
+   "d": 4.0,
+   "h": 2.9,
+   "ppm": 91.146,
+   "top": [
+    {
+     "file": "gardenOfficeKitchen_top_0.webp",
+     "rot": 0,
+     "px": [
+      893,
+      415
+     ],
+     "anchor": [
+      0.498,
+      0.4659
+     ]
+    }
+   ],
+   "oblique": [
+    {
+     "file": "gardenOfficeKitchen_oblique_0.webp",
+     "rot": 0,
+     "px": [
+      893,
+      466
+     ],
+     "anchor": [
+      0.498,
+      0.6612
+     ]
+    }
+   ]
   }
  }
 }

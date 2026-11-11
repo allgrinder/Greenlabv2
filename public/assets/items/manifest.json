@@ -7319,18 +7319,54 @@
    "w": 4.4,
    "d": 2.4,
    "h": 2.3,
-   "ppm": 137.5,
+   "ppm": 220.0,
    "top": [
     {
      "file": "shedWoodstore_top_0.webp",
      "rot": 0,
      "px": [
-      637,
-      428
+      1019,
+      685
      ],
      "anchor": [
       0.4989,
       0.4446
+     ]
+    },
+    {
+     "file": "shedWoodstore_top_90.webp",
+     "rot": 90,
+     "px": [
+      685,
+      1019
+     ],
+     "anchor": [
+      0.5554,
+      0.4989
+     ]
+    },
+    {
+     "file": "shedWoodstore_top_180.webp",
+     "rot": 180,
+     "px": [
+      1019,
+      685
+     ],
+     "anchor": [
+      0.5011,
+      0.5554
+     ]
+    },
+    {
+     "file": "shedWoodstore_top_270.webp",
+     "rot": 270,
+     "px": [
+      685,
+      1019
+     ],
+     "anchor": [
+      0.4446,
+      0.5011
      ]
     }
    ],
@@ -7339,12 +7375,48 @@
      "file": "shedWoodstore_oblique_0.webp",
      "rot": 0,
      "px": [
-      637,
-      508
+      1019,
+      812
      ],
      "anchor": [
       0.4989,
       0.6122
+     ]
+    },
+    {
+     "file": "shedWoodstore_oblique_90.webp",
+     "rot": 90,
+     "px": [
+      685,
+      1117
+     ],
+     "anchor": [
+      0.5554,
+      0.6312
+     ]
+    },
+    {
+     "file": "shedWoodstore_oblique_180.webp",
+     "rot": 180,
+     "px": [
+      1019,
+      766
+     ],
+     "anchor": [
+      0.5011,
+      0.6831
+     ]
+    },
+    {
+     "file": "shedWoodstore_oblique_270.webp",
+     "rot": 270,
+     "px": [
+      685,
+      1070
+     ],
+     "anchor": [
+      0.4446,
+      0.6285
      ]
     }
    ]
@@ -7353,18 +7425,54 @@
    "w": 9.6,
    "d": 4.0,
    "h": 2.9,
-   "ppm": 91.146,
+   "ppm": 145.833,
    "top": [
     {
      "file": "gardenOfficeKitchen_top_0.webp",
      "rot": 0,
      "px": [
-      893,
-      415
+      1429,
+      664
      ],
      "anchor": [
       0.498,
       0.4659
+     ]
+    },
+    {
+     "file": "gardenOfficeKitchen_top_90.webp",
+     "rot": 90,
+     "px": [
+      664,
+      1429
+     ],
+     "anchor": [
+      0.5341,
+      0.498
+     ]
+    },
+    {
+     "file": "gardenOfficeKitchen_top_180.webp",
+     "rot": 180,
+     "px": [
+      1429,
+      664
+     ],
+     "anchor": [
+      0.502,
+      0.5341
+     ]
+    },
+    {
+     "file": "gardenOfficeKitchen_top_270.webp",
+     "rot": 270,
+     "px": [
+      664,
+      1429
+     ],
+     "anchor": [
+      0.4659,
+      0.502
      ]
     }
    ],
@@ -7373,12 +7481,48 @@
      "file": "gardenOfficeKitchen_oblique_0.webp",
      "rot": 0,
      "px": [
-      893,
-      466
+      1429,
+      746
      ],
      "anchor": [
       0.498,
       0.6612
+     ]
+    },
+    {
+     "file": "gardenOfficeKitchen_oblique_90.webp",
+     "rot": 90,
+     "px": [
+      664,
+      1415
+     ],
+     "anchor": [
+      0.5341,
+      0.5849
+     ]
+    },
+    {
+     "file": "gardenOfficeKitchen_oblique_180.webp",
+     "rot": 180,
+     "px": [
+      1429,
+      774
+     ],
+     "anchor": [
+      0.502,
+      0.6736
+     ]
+    },
+    {
+     "file": "gardenOfficeKitchen_oblique_270.webp",
+     "rot": 270,
+     "px": [
+      664,
+      1408
+     ],
+     "anchor": [
+      0.4659,
+      0.5879
      ]
     }
    ]

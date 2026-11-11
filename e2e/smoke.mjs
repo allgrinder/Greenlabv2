@@ -194,6 +194,17 @@ const names = await p.evaluate(async () => (await new Promise((res) => { const r
 assert.equal(names.filter((x) => x.includes('Mustergarten')).length, 1);
 step('Startseite mit Vorschaubild, Mustergarten ohne Duplikat');
 
+// zweiter Mustergarten über die Startseite: aufgemessenes Grundstück mit Outdoorküche
+await p.click('[data-testid=home]');
+await p.waitForSelector('[data-testid=open-sample-spielgarten]');
+await p.click('[data-testid=open-sample-spielgarten]');
+await p.waitForSelector('[data-testid=start-screen]', { state: 'detached' });
+const sg = await p.evaluate(() => { const d = window.__gw.editor.getState().doc; return { name: d.name, n: d.site.boundary.length, kitchen: Object.values(d.objects).some((o) => o.catalogId === 'outdoorkueche-ueberdacht') }; });
+assert.ok(sg.name.includes('Spiel'));
+assert.equal(sg.n, 8);
+assert.ok(sg.kitchen);
+step('Zweiter Mustergarten (Entspannung, Spiel & Obst)');
+
 // Sicherung aller Gärten: Hinweis, Datei, Wiederherstellen (alles schon vorhanden)
 await p.click('[data-testid=home]');
 await p.waitForSelector('[data-testid=backup-bar]');

@@ -7208,6 +7208,112 @@
      ]
     }
    ]
+  },
+  "kitchenPavilion": {
+   "w": 5.4,
+   "d": 3.8,
+   "h": 2.7,
+   "ppm": 220.0,
+   "top": [
+    {
+     "file": "kitchenPavilion_top_0.webp",
+     "rot": 0,
+     "px": [
+      1241,
+      889
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "kitchenPavilion_top_90.webp",
+     "rot": 90,
+     "px": [
+      889,
+      1241
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "kitchenPavilion_top_180.webp",
+     "rot": 180,
+     "px": [
+      1241,
+      889
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "file": "kitchenPavilion_top_270.webp",
+     "rot": 270,
+     "px": [
+      889,
+      1241
+     ],
+     "anchor": [
+      0.5,
+      0.5
+     ]
+    }
+   ],
+   "oblique": [
+    {
+     "file": "kitchenPavilion_oblique_0.webp",
+     "rot": 0,
+     "px": [
+      1241,
+      1064
+     ],
+     "anchor": [
+      0.5,
+      0.6586
+     ]
+    },
+    {
+     "file": "kitchenPavilion_oblique_90.webp",
+     "rot": 90,
+     "px": [
+      889,
+      1352
+     ],
+     "anchor": [
+      0.5,
+      0.6248
+     ]
+    },
+    {
+     "file": "kitchenPavilion_oblique_180.webp",
+     "rot": 180,
+     "px": [
+      1241,
+      1064
+     ],
+     "anchor": [
+      0.5,
+      0.6586
+     ]
+    },
+    {
+     "file": "kitchenPavilion_oblique_270.webp",
+     "rot": 270,
+     "px": [
+      889,
+      1352
+     ],
+     "anchor": [
+      0.5,
+      0.6248
+     ]
+    }
+   ]
   }
  }
 }

@@ -25,7 +25,7 @@ export const SAMPLES: SampleGarden[] = [
   {
     key: 'spielgarten',
     title: 'Entspannung, Spiel & Obst',
-    text: 'rund 1.500 m² · Outdoorküche, Office & Sauna, Spielgarten, Obstwiese und Gemüsegarten',
+    text: 'rund 1.500 m² · Homeoffice mit Outdoorküche, Feuerstelle, Naturteich, Spielgarten, Obstwiese',
     create: createSpielgarten,
   },
 ];

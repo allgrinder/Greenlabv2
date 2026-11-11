@@ -3,7 +3,7 @@ import { getItem } from '../catalog/items';
 import { getMaterial } from '../catalog/materials';
 import { getSpecies } from '../catalog/plants';
 import { footprint } from '../geometry/objects';
-import { pointInPolygon } from '../geometry/polygon';
+import { pointInPolygon, signedArea } from '../geometry/polygon';
 import { boundaryFromPlot } from '../geometry/plot';
 import { createSpielgarten } from './spielgarten';
 import { SAMPLES } from './samples';
@@ -60,12 +60,58 @@ describe('Mustergarten Entspannung, Spiel & Obst', () => {
     for (const f of fruit) if (f.type === 'plant') expect(f.position.y).toBeGreaterThan(38);
   });
 
-  it('enthält Outdoorküche überdacht, Office, Sauna, Feuerstelle, Wasserspiel, Spielgeräte, Gewächshaus und Hochbeete', () => {
+  it('Ensemble: Homeoffice mit Outdoorküche an der Ostgrenze (3 m Abstand), Feuerstelle ≥ 5 m davor', () => {
+    const ens = objs.find((o) => o.type === 'item' && o.catalogId === 'gartenhaus-office-kueche');
+    const fire = objs.find((o) => o.type === 'item' && o.catalogId === 'firepit-round');
+    expect(ens && fire).toBeTruthy();
+    const corners = footprint(ens!)[0].outer;
+    // Abstand jeder Ecke zur Ostgrenze B–C
+    const [b, c] = [doc.site.boundary[1], doc.site.boundary[2]];
+    const len = Math.hypot(c.x - b.x, c.y - b.y);
+    for (const q of corners) expect(Math.abs((c.x - b.x) * (b.y - q.y) - (b.x - q.x) * (c.y - b.y)) / len).toBeGreaterThan(2.95);
+    if (fire?.type === 'item') for (const q of corners) expect(Math.hypot(q.x - fire.position.x, q.y - fire.position.y)).toBeGreaterThan(5);
+    const amel = objs.filter((o) => o.type === 'plant' && o.speciesId === 'amelanchier-lamarckii');
+    expect(amel.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it('Gerätehaus mit Holzunterstand an der Westgrenze, keine Sauna und keine Lounge', () => {
+    const items = objs.flatMap((o) => (o.type === 'item' ? [o] : []));
+    const shed = items.find((o) => o.catalogId === 'geraetehaus-holzunterstand');
+    expect(shed?.position.x).toBeLessThan(13);
+    for (const gone of ['fasssauna-thermoholz', 'lounge-sofa', 'office-pod'])
+      expect(
+        items.some((o) => o.catalogId === gone),
+        gone,
+      ).toBe(false);
+  });
+
+  it('Naturteich 25–35 m², Wege nur aus Trittplatten', () => {
+    const pond = objs.find((o) => o.type === 'area' && o.materialId === 'water');
+    expect(pond).toBeDefined();
+    const a = footprint(pond!).reduce((s, r) => s + Math.abs(signedArea(r.outer)), 0);
+    expect(a).toBeGreaterThan(25);
+    expect(a).toBeLessThan(35);
+    const paths = objs.filter((o) => o.type === 'path');
+    expect(paths.length).toBeGreaterThan(0);
+    for (const o of paths) if (o.type === 'path') expect(o.materialId).toBe('stepping');
+  });
+
+  it('enthält Spielgeräte, Gewächshaus, Hochbeete, Wasserspiel und alle Zonen', () => {
     const items = new Set(objs.flatMap((o) => (o.type === 'item' ? [o.catalogId] : [])));
-    for (const i of ['outdoorkueche-ueberdacht', 'office-pod', 'fasssauna-thermoholz', 'firepit-round', 'spring-stone', 'play-swing', 'trampoline-ground', 'greenhouse-4x3.5', 'raised-bed-corten-300x100', 'haengematte-gestell', 'lounge-sofa'])
+    for (const i of [
+      'gartenhaus-office-kueche',
+      'geraetehaus-holzunterstand',
+      'firepit-round',
+      'spring-stone',
+      'play-swing',
+      'trampoline-ground',
+      'greenhouse-4x3.5',
+      'raised-bed-corten-300x100',
+      'haengematte-gestell',
+    ])
       expect(items.has(i), i).toBe(true);
     const texts = objs.flatMap((o) => (o.type === 'text' ? [o.text] : []));
-    for (const n of ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧']) expect(texts.some((t) => t.startsWith(n))).toBe(true);
+    for (const n of ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨']) expect(texts.some((t) => t.startsWith(n))).toBe(true);
   });
 
   it('steht in der Liste der Mustergärten', () => {

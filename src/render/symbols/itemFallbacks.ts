@@ -11,6 +11,8 @@ export const ITEM_FALLBACK: Record<string, string> = {
   chickenCoop: 'shed',
   outdoorKitchen: 'table',
   kitchenPavilion: 'pergola',
+  gardenOfficeKitchen: 'shed',
+  shedWoodstore: 'shed',
   hollywoodSwing: 'lounger',
   hammockStand: 'lounger',
   gardenBench: 'lounger',

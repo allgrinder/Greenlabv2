@@ -8,8 +8,8 @@
  */
 import { difference } from '../geometry/clip';
 import { footprint } from '../geometry/objects';
-import { flatToRegion, simpleRegion } from '../geometry/regions';
-import { flattenRegion, pathSegments } from '../geometry/shape';
+import { simpleRegion } from '../geometry/regions';
+import { flattenRegion, pathSegments, type FlatRegion } from '../geometry/shape';
 import { cubicAt, cubicDerivative } from '../geometry/bezier';
 import { createProject, layerOfKind, objectBase } from '../model/defaults';
 import { newDrip, newLamp } from '../model/factory';
@@ -95,8 +95,8 @@ const CROSS_PATH: PathGeometry = {
     { p: P(6.2, 10.4), in: P(-2, -1.2), out: P(2, 1.2), smooth: true },
     { p: P(12.6, 12.9), in: P(-2.2, -0.6), out: P(2.4, 0.5), smooth: true },
     { p: P(19.6, 13.4), in: P(-2, 0.2), out: P(2, -0.2), smooth: true },
-    { p: P(25.2, 13.5), in: P(-1.6, -0.4), out: P(1.4, 0.4), smooth: true },
-    { p: P(28.2, 15.5), in: P(-1, -1) },
+    { p: P(26.6, 13.5), in: P(-1.8, -0.3), out: P(1.5, 0.3), smooth: true },
+    { p: P(30.0, 15.5), in: P(-1.1, -1) },
   ],
 };
 
@@ -119,22 +119,22 @@ const POND: PathGeometry = {
   closed: true,
   source: 'bezier',
   nodes: [
-    { p: P(24.04, 16.84), in: P(-0.82, 0.25), out: P(0.82, -0.25), smooth: true },
-    { p: P(26.64, 17.49), in: P(-0.6, -0.46), out: P(0.6, 0.46), smooth: true },
-    { p: P(27.67, 19.63), in: P(0.05, -0.62), out: P(-0.05, 0.62), smooth: true },
-    { p: P(26.36, 21.21), in: P(0.09, -0.54), out: P(-0.09, 0.54), smooth: true },
-    { p: P(27.11, 22.88), in: P(0.19, -0.46), out: P(-0.19, 0.46), smooth: true },
-    { p: P(25.25, 24.0), in: P(0.7, -0.08), out: P(-0.7, 0.08), smooth: true },
-    { p: P(22.92, 23.35), in: P(0.48, 0.5), out: P(-0.48, -0.5), smooth: true },
-    { p: P(22.36, 21.02), in: P(0.2, 0.73), out: P(-0.2, -0.73), smooth: true },
-    { p: P(21.71, 18.97), in: P(-0.28, 0.7), out: P(0.28, -0.7), smooth: true },
+    { p: P(25.54, 16.84), in: P(-0.82, 0.25), out: P(0.82, -0.25), smooth: true },
+    { p: P(28.14, 17.49), in: P(-0.6, -0.46), out: P(0.6, 0.46), smooth: true },
+    { p: P(29.17, 19.63), in: P(0.05, -0.62), out: P(-0.05, 0.62), smooth: true },
+    { p: P(27.86, 21.21), in: P(0.09, -0.54), out: P(-0.09, 0.54), smooth: true },
+    { p: P(28.61, 22.88), in: P(0.19, -0.46), out: P(-0.19, 0.46), smooth: true },
+    { p: P(26.75, 24.0), in: P(0.7, -0.08), out: P(-0.7, 0.08), smooth: true },
+    { p: P(24.42, 23.35), in: P(0.48, 0.5), out: P(-0.48, -0.5), smooth: true },
+    { p: P(23.86, 21.02), in: P(0.2, 0.73), out: P(-0.2, -0.73), smooth: true },
+    { p: P(23.21, 18.97), in: P(-0.28, 0.7), out: P(0.28, -0.7), smooth: true },
   ],
 };
 
-/** Ensemble als Linie an der Ostgrenze: Mitte, Drehung (Gartenseite nach Westen), 3 m Abstand zur Grenze */
-const ENSEMBLE = { x: 32.63, y: 19.97, rot: 96.03 };
+/** Ensemble als Linie direkt an der Ostgrenze (Rückwand vor der Hecke): Mitte, Drehung (Gartenseite nach Westen) */
+const ENSEMBLE = { x: 34.47, y: 20.17, rot: 96.03 };
 /** Feuerstelle in derselben Linie südlich der Küche (Brandschutz: Abstand zum Dach ≥ 5 m) */
-const FIRE = P(30.56, 30.98);
+const FIRE = P(31.76, 31.11);
 
 /** Ringsegment um die Feuerstelle (Winkel in Grad, y nach unten): Beet mit Kupferfelsenbirnen */
 function arcBed(a0: number, a1: number, r0: number, r1: number): PathGeometry {
@@ -269,21 +269,20 @@ export function createSpielgarten(): Project {
       'Felsenbirnen-Beet am Homeoffice',
       simpleRegion(
         poly([
-          [28.6, 14.2],
-          [29.4, 12.6],
-          [31.5, 11.9],
-          [34.0, 12.3],
-          [35.6, 13.4],
-          [35.3, 14.9],
-          [31.2, 14.5],
+          [30.00, 14.2],
+          [30.80, 12.6],
+          [32.90, 11.9],
+          [35.40, 12.3],
+          [37.00, 13.4],
+          [36.70, 14.9],
+          [32.60, 14.5],
         ]),
       ),
       FIRE_BED,
     ),
     planting('Felsenbirnen-Beet an der Feuerstelle', simpleRegion(arcBed(95, 235, 4.4, 6.4)), FIRE_BED),
     planting('Rabatte Ost Nord', simpleRegion(eastBand(2.2, 11.6, 1.9)), SUNNY),
-    planting('Schattenbeet hinter dem Gartenhaus', simpleRegion(eastBand(15.4, 24.8, 1.65)), [['dryopteris', 0.3], ['hosta', 0.2], ['carex', 0.2], ['alchemilla', 0.15], ['geranium', 0.15]], 7),
-    planting('Rabatte Ost Süd', simpleRegion(eastBand(26.2, 40.5, 1.1)), SUNNY),
+    planting('Rabatte Ost Süd', simpleRegion(eastBand(35.4, 40.5, 1.1)), SUNNY),
     planting('Rabatte West Nord', simpleRegion(westBand(14.2, 16.4)), [
       ['geranium', 0.3],
       ['alchemilla', 0.25],
@@ -315,8 +314,8 @@ export function createSpielgarten(): Project {
       'Uferbeet Nord',
       simpleRegion(
         poly([
-          [21.32, 18.53], [21.27, 17.24], [21.85, 16.15], [22.77, 15.25], [23.99, 14.77], [25.3, 14.75], [26.51, 15.21], [27.51, 15.97], [28.14, 17.03], [28.03, 18.41],
-          [27.82, 18.55], [27.44, 17.8], [26.83, 17.19], [26.05, 16.76], [25.18, 16.48], [24.26, 16.49], [23.37, 16.76], [22.64, 17.3], [22.04, 17.95], [21.53, 18.66],
+          [22.82, 18.53], [22.77, 17.24], [23.35, 16.15], [24.27, 15.25], [25.49, 14.77], [26.80, 14.75], [28.01, 15.21], [29.01, 15.97], [29.64, 17.03], [29.53, 18.41],
+          [29.32, 18.55], [28.94, 17.8], [28.33, 17.19], [27.55, 16.76], [26.68, 16.48], [25.76, 16.49], [24.87, 16.76], [24.14, 17.3], [23.54, 17.95], [23.03, 18.66],
         ]),
       ),
       POND_EDGE,
@@ -326,8 +325,8 @@ export function createSpielgarten(): Project {
       'Uferbeet Süd',
       simpleRegion(
         poly([
-          [27.76, 23.0], [27.77, 24.31], [27.12, 25.24], [26.15, 25.88], [25.01, 26.15], [23.83, 26.04], [22.75, 25.6], [21.88, 24.83], [21.44, 23.74], [21.92, 22.32],
-          [22.13, 22.2], [22.25, 23.0], [22.74, 23.63], [23.43, 24.02], [24.18, 24.24], [24.97, 24.32], [25.76, 24.21], [26.48, 23.91], [27.1, 23.44], [27.57, 22.84],
+          [29.26, 23.0], [29.27, 24.31], [28.62, 25.24], [27.65, 25.88], [26.51, 26.15], [25.33, 26.04], [24.25, 25.6], [23.38, 24.83], [22.94, 23.74], [23.42, 22.32],
+          [23.63, 22.2], [23.75, 23.0], [24.24, 23.63], [24.93, 24.02], [25.68, 24.24], [26.47, 24.32], [27.26, 24.21], [27.98, 23.91], [28.60, 23.44], [29.07, 22.84],
         ]),
       ),
       POND_EDGE,
@@ -336,7 +335,7 @@ export function createSpielgarten(): Project {
   ];
 
   // ---------- Flächen und Wege (Wege nur aus Trittplatten)
-  const ensembleTerrace = area('Terrasse Gartenhaus & Küche', simpleRegion(rect(29.45, 19.64, 2.4, 9.6, 0, ENSEMBLE.rot - 90)), 'slabs');
+  const ensembleTerrace = area('Terrasse Gartenhaus & Küche', simpleRegion(rect(31.29, 19.83, 2.4, 9.6, 0, ENSEMBLE.rot - 90)), 'slabs');
   const sand = area('Spielsand', simpleRegion(rect(14.5, 6.0, 8, 6, 0.9)), 'sand');
   const firePlace = area('Platz Feuerstelle', simpleRegion(rect(FIRE.x, FIRE.y, 6.6, 6.6, 3.3)), 'flagstone');
   const pond = area('Naturteich', simpleRegion(POND), 'water');
@@ -354,12 +353,14 @@ export function createSpielgarten(): Project {
   );
   const vegGravel = area('Kiesfläche Gemüsegarten', simpleRegion(rect(29.6, 45.2, 7.6, 6.4, 0.2)), 'gravel', { catalogId: 'edge.stahl-anthrazit', sides: 'outline' });
   const cross = path('Trittplatten Zugang – Homeoffice', CROSS_PATH, 0.9, 'stepping');
-  const toFire = path('Trittplatten Küche – Feuerstelle', line([[28.9, 24.9], [29.6, 27.6]]), 0.9, 'stepping');
+  const toFire = path('Trittplatten Küche – Feuerstelle', line([[30.4, 24.9], [30.9, 27.7]]), 0.9, 'stepping');
   const south = path('Trittplatten Teich – Gemüsegarten', SOUTH_PATH, 0.9, 'stepping');
 
+  // Rasen durchgehend unter allen Flächen und Beeten: wer Terrasse, Teich oder Beete verschiebt, hinterlässt keine Lücke
+  add(area('Rasen', simpleRegion(poly(LAWN_OUTLINE)), 'lawn'));
+  // Regner nur dort, wo der Rasen frei liegt
   const lawnCut = [...beds, ensembleTerrace, sand, firePlace, pond, orchard, vegGravel].flatMap((o) => footprint(o));
-  const lawn = difference([flattenRegion(simpleRegion(poly(LAWN_OUTLINE)))], lawnCut);
-  lawn.forEach((r, i) => add(area(i === 0 ? 'Rasen' : `Rasen ${i + 1}`, flatToRegion(r), 'lawn')));
+  const openLawn = difference([flattenRegion(simpleRegion(poly(LAWN_OUTLINE)))], lawnCut);
   [ensembleTerrace, sand, firePlace, pond, orchard, vegGravel, cross, south, toFire].forEach((o) => add(o));
   beds.forEach((b) => add(b));
 
@@ -406,7 +407,7 @@ export function createSpielgarten(): Project {
     plantedDiameter: d,
   });
   // Kupferfelsenbirnen (mehrstämmig) umfassen Feuerstelle und Terrasse: Sichtschutz mit Lücken zum Garten
-  for (const [x, y] of [[30.3, 13.3], [33.7, 13.2]] as [number, number][]) add(plant('amelanchier-lamarckii', x, y, 3.2, 'Kupferfelsenbirne', 2020));
+  for (const [x, y] of [[31.7, 13.3], [35.0, 13.3]] as [number, number][]) add(plant('amelanchier-lamarckii', x, y, 3.2, 'Kupferfelsenbirne', 2020));
   for (const a of [118, 165, 212]) add(plant('amelanchier-lamarckii', ...onArc(a, 5.4), 3.2, 'Kupferfelsenbirne', 2020));
   // Hausbäume: Walnuss über der Hängematte in der Ruheecke oben rechts, Esskastanie am Gemüsegarten, Roteiche am Gerätehaus, Judasbaum am Spielgarten
   add(plant('juglans-regia', 33.4, 7.2, 5.6, 'Walnuss', 2012));
@@ -414,7 +415,7 @@ export function createSpielgarten(): Project {
   add(plant('quercus-rubra', 13.6, 14.8, 4.6, 'Amerikanische Roteiche', 2014));
   add(plant('cercis-siliquastrum', 24.6, 3.4, 3.2, 'Judasbaum', 2016));
   // Füllung: mehrstämmige Birke am Teich, Magnolie zwischen Teich und Gemüsegarten
-  add(plant('betula-pendula', 22.9, 27.6, 3.4, 'Birke', 2016));
+  add(plant('betula-pendula', 24.2, 27.8, 3.4, 'Birke', 2016));
   add(plant('magnolia', 26.3, 38.0, 3.2, 'Tulpen-Magnolie', 2016));
   // Obstwiese: Apfel, Birne, Süßkirsche (Halbstämme)
   add(plant('prunus-avium', 16.4, 41.4, 4.4, 'Süßkirsche', 2018));
@@ -426,7 +427,7 @@ export function createSpielgarten(): Project {
   let k = 0;
   const shrub = (x: number, y: number, d: number, id?: string) => add(plant(id ?? kinds[k++ % kinds.length], x, y, d));
   for (let y = 3.4; y < 11; y += 3.1) shrub(eastX(y) - 0.85 - (k % 2) * 0.35, y, 1.8 + (k % 3) * 0.25);
-  for (const y of [35.6, 38.2]) shrub(eastX(y) - 0.7, y, 1.3);
+  for (const y of [36.4, 38.8]) shrub(eastX(y) - 0.7, y, 1.3);
   for (const y of [15.3, 23.4, 25.8]) shrub(westHedgeX(y) + 1.3, y, 1.5, k++ % 2 ? 'hydrangea' : 'viburnum');
   for (let x = 10.6; x < 21.5; x += 3.3) shrub(x, 1.65, 1.5, k++ % 2 ? 'spiraea' : 'rosa-shrub');
   shrub(24.0, 47.9, 1.3, 'ribes');
@@ -454,9 +455,9 @@ export function createSpielgarten(): Project {
   add(item('gartenhaus-office-kueche', ENSEMBLE.x, ENSEMBLE.y, ENSEMBLE.rot, null, 'Homeoffice & Outdoorküche'));
   add(item('firepit-round', FIRE.x, FIRE.y, 0, null, 'Feuerstelle'));
   // ⑤ Naturteich vor der Terrasse: Quellstein als Zulauf, Findlinge am Ufer; Hängematte unter der Walnuss
-  add(item('spring-stone', 22.6, 16.4, 0, null, 'Quellstein'));
-  add(item('boulder-granite', 27.3, 21.4, 20));
-  add(item('boulder-granite', 21.9, 21.9, 140));
+  add(item('spring-stone', 24.1, 16.4, 0, null, 'Quellstein'));
+  add(item('boulder-granite', 28.8, 21.4, 20));
+  add(item('boulder-granite', 23.4, 21.9, 140));
   add(item('haengematte-gestell', 30.6, 8.6, 60, null, 'Hängematte'));
   // ⑦ Obstwiese: Vogeltränke und Insektenhotel
   add(item('insect-hotel', 24.8, 40.4, 270));
@@ -473,7 +474,7 @@ export function createSpielgarten(): Project {
   add(item('tap-post', 29.4, 47.9));
   // ⑨ Gerätehaus mit Kaminholzunterstand an der Westgrenze, Tür zum Garten
   add(item('geraetehaus-holzunterstand', 11.35, 19.33, -96.35, null, 'Gerätehaus & Kaminholz'));
-  add(item('power-post', 28.5, 25.2));
+  add(item('power-post', 30.0, 25.3));
 
   // ---------- Beschriftung: die acht Zonen
   const text = (t: string, x: number, y: number, size = 0.65): TextObject => ({
@@ -487,9 +488,9 @@ export function createSpielgarten(): Project {
   });
   add(text('① Zugang alter Garten', 3.6, 3.4));
   add(text('② Spielgarten', 14.5, 9.7));
-  add(text('③ Homeoffice & Küche', 31.4, 26.3));
+  add(text('③ Homeoffice & Küche', 32.6, 26.4));
   add(text('④ Feuerstelle', FIRE.x, 35.2));
-  add(text('⑤ Naturteich', 24.6, 27.0));
+  add(text('⑤ Naturteich', 26.0, 26.9));
   add(text('⑥ Spalier', 12, 37.5));
   add(text('⑦ Obstwiese', 18.2, 48.2));
   add(text('⑧ Gemüsegarten', 29.6, 41.2));
@@ -506,7 +507,7 @@ export function createSpielgarten(): Project {
   add(dim(P(39.75, 0.21), P(34.51, 49.78), -1.2));
 
   addLighting(p, add);
-  addIrrigation(p, add, BEDS);
+  addIrrigation(p, add, openLawn, BEDS);
   // Nachbarhaus auf Flurstück 38: Blick auf Feuerstelle und Lounge prüfen (Sichtschutz-Reiter)
   p.observers.push({ id: 'nachbar-38', name: 'Nachbarhaus Flurstück 38, 1. OG', position: P(3, 36), eyeHeight: 4.5 });
   return p;
@@ -525,7 +526,7 @@ function addLighting(p: Project, add: (o: PlanObject) => PlanObject) {
     });
   lamp('bollard', 1.2, 6.2, { name: 'Poller Zugang' });
   lamp('bollard', 1.2, 8.6, { name: 'Poller Zugang' });
-  lamp('treeUplight', 32.4, 25.4, {
+  lamp('treeUplight', 32.0, 8.6, {
     name: 'Baumstrahler Walnuss',
     directionDeg: 45,
     beamAngleDeg: 36,
@@ -552,13 +553,13 @@ function addLighting(p: Project, add: (o: PlanObject) => PlanObject) {
       lumen: 260,
     });
   }
-  lamp('wall', 32.1, 6.1, {
+  lamp('wall', 32.7, 17.4, {
     name: 'Wandleuchte Homeoffice',
     directionDeg: 270,
   });
-  lamp('spot', 27.0, 34.0, {
+  lamp('spot', 29.4, 20.6, {
     name: 'Spot Naturteich',
-    directionDeg: 0,
+    directionDeg: 180,
     beamAngleDeg: 50,
     lumen: 300,
   });
@@ -569,11 +570,8 @@ function addLighting(p: Project, add: (o: PlanObject) => PlanObject) {
 }
 
 /** Versenkregner für den Rasen, Tropfschlauch in jedem Hochbeet */
-function addIrrigation(p: Project, add: (o: PlanObject) => PlanObject, beds: [number, number][]) {
-  for (const o of Object.values(p.objects)) {
-    if (o.type !== 'area' || o.materialId !== 'lawn') continue;
-    for (const r of footprint(o)) for (const sp of sprinklersFor(p, r, 1)) add({ ...sp, zone: sp.position.y < 26 ? 1 : 2 });
-  }
+function addIrrigation(p: Project, add: (o: PlanObject) => PlanObject, openLawn: FlatRegion[], beds: [number, number][]) {
+  for (const r of openLawn) for (const sp of sprinklersFor(p, r, 1)) add({ ...sp, zone: sp.position.y < 26 ? 1 : 2 });
   beds.forEach(([x, y]) =>
     add({
       ...newDrip(

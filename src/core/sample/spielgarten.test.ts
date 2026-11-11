@@ -60,7 +60,7 @@ describe('Mustergarten Entspannung, Spiel & Obst', () => {
     for (const f of fruit) if (f.type === 'plant') expect(f.position.y).toBeGreaterThan(38);
   });
 
-  it('Ensemble: Homeoffice mit Outdoorküche an der Ostgrenze (3 m Abstand), Feuerstelle ≥ 5 m davor', () => {
+  it('Ensemble: Homeoffice mit Outdoorküche direkt an der Ostgrenze, Feuerstelle ≥ 5 m davor', () => {
     const ens = objs.find((o) => o.type === 'item' && o.catalogId === 'gartenhaus-office-kueche');
     const fire = objs.find((o) => o.type === 'item' && o.catalogId === 'firepit-round');
     expect(ens && fire).toBeTruthy();
@@ -68,7 +68,10 @@ describe('Mustergarten Entspannung, Spiel & Obst', () => {
     // Abstand jeder Ecke zur Ostgrenze B–C
     const [b, c] = [doc.site.boundary[1], doc.site.boundary[2]];
     const len = Math.hypot(c.x - b.x, c.y - b.y);
-    for (const q of corners) expect(Math.abs((c.x - b.x) * (b.y - q.y) - (b.x - q.x) * (c.y - b.y)) / len).toBeGreaterThan(2.95);
+    const dist = corners.map((q) => Math.abs((c.x - b.x) * (b.y - q.y) - (b.x - q.x) * (c.y - b.y)) / len);
+    // Rückwand direkt vor der Hecke an der Grenze
+    expect(Math.min(...dist)).toBeGreaterThan(1);
+    expect(Math.min(...dist)).toBeLessThan(1.3);
     if (fire?.type === 'item') for (const q of corners) expect(Math.hypot(q.x - fire.position.x, q.y - fire.position.y)).toBeGreaterThan(5);
     const amel = objs.filter((o) => o.type === 'plant' && o.speciesId === 'amelanchier-lamarckii');
     expect(amel.length).toBeGreaterThanOrEqual(4);
@@ -83,6 +86,14 @@ describe('Mustergarten Entspannung, Spiel & Obst', () => {
         items.some((o) => o.catalogId === gone),
         gone,
       ).toBe(false);
+  });
+
+  it('Rasen durchgehend: eine Fläche ohne Ausschnitte, Terrasse und Teich liegen darauf', () => {
+    const lawns = objs.filter((o) => o.type === 'area' && o.materialId === 'lawn');
+    expect(lawns).toHaveLength(1);
+    const fp = footprint(lawns[0]);
+    expect(fp).toHaveLength(1);
+    expect(fp[0].holes).toHaveLength(0);
   });
 
   it('Naturteich 25–35 m², Wege nur aus Trittplatten', () => {

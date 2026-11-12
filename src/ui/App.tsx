@@ -8,7 +8,7 @@ import { getBlob, getThumbnail, lastProjectId, listProjects, loadProject, putBlo
 import { exportProject, importProject } from '../persistence/jsonIO';
 import { exportBackup, isBackup, lastBackupAt, rememberBackup, requestPersistence, restoreBackup, storageState, type StorageState } from '../persistence/backup';
 import type { PlanRenderer } from '../render/PlanRenderer';
-import { fitBBox } from '../render/Viewport';
+import { fitBBox, fitPoints } from '../render/Viewport';
 import { editor, useEditor } from '../state';
 import { PlanCanvas } from './canvas/PlanCanvas';
 import { ToolLayer } from './canvas/ToolLayer';
@@ -199,7 +199,8 @@ export function App() {
   const fit = useCallback(() => {
     const doc = editor.getState().doc;
     if (!renderer || !doc) return;
-    editor.getState().setSession({ viewport: fitBBox(bbox(doc.site.boundary), renderer.size, PLAN_INSETS, 40, editor.getState().session.viewport.tiltDeg ?? 0) });
+    const vp = editor.getState().session.viewport;
+    editor.getState().setSession({ viewport: fitPoints(doc.site.boundary, renderer.size, PLAN_INSETS, 40, vp.tiltDeg ?? 0, vp.rotationDeg) });
   }, [renderer]);
 
   // Neues Projekt → einpassen

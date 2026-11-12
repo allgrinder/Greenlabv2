@@ -1,5 +1,6 @@
 import type { Vec2 } from '../core/model/types';
-import type { BBox } from '../core/geometry/polygon';
+import { bbox, type BBox } from '../core/geometry/polygon';
+import { rotate } from '../core/geometry/vec';
 import type { Viewport } from '../state/types';
 
 const MIN_PX_PER_M = 2;
@@ -22,17 +23,20 @@ export const OBLIQUE_TILT_DEG = 35;
 export const tiltCos = (v: Viewport) => Math.cos(((v.tiltDeg ?? 0) * Math.PI) / 180);
 export const tiltTan = (v: Viewport) => Math.tan(((v.tiltDeg ?? 0) * Math.PI) / 180);
 
+/** Ansichtsdrehung in Grad (90°-Schritte; positiv = Plan dreht im Uhrzeigersinn) */
+const rot = (v: Viewport) => ((Math.round((v.rotationDeg ?? 0) / 90) * 90) % 360 + 360) % 360;
+
 /** Bodenpunkt (z = 0) → Bildschirm */
-export const worldToScreen = (v: Viewport, s: ScreenSize, p: Vec2): Vec2 => ({
-  x: (p.x - v.center.x) * v.pxPerMeter + s.width / 2,
-  y: (p.y - v.center.y) * v.pxPerMeter * tiltCos(v) + s.height / 2,
-});
+export function worldToScreen(v: Viewport, s: ScreenSize, p: Vec2): Vec2 {
+  const d = rotate({ x: p.x - v.center.x, y: p.y - v.center.y }, rot(v));
+  return { x: d.x * v.pxPerMeter + s.width / 2, y: d.y * v.pxPerMeter * tiltCos(v) + s.height / 2 };
+}
 
 /** Bildschirm → Bodenpunkt (z = 0) */
-export const screenToWorld = (v: Viewport, s: ScreenSize, p: Vec2): Vec2 => ({
-  x: (p.x - s.width / 2) / v.pxPerMeter + v.center.x,
-  y: (p.y - s.height / 2) / (v.pxPerMeter * tiltCos(v)) + v.center.y,
-});
+export function screenToWorld(v: Viewport, s: ScreenSize, p: Vec2): Vec2 {
+  const d = rotate({ x: (p.x - s.width / 2) / v.pxPerMeter, y: (p.y - s.height / 2) / (v.pxPerMeter * tiltCos(v)) }, -rot(v));
+  return { x: d.x + v.center.x, y: d.y + v.center.y };
+}
 
 export const clampZoom = (ppm: number) => Math.min(MAX_PX_PER_M, Math.max(MIN_PX_PER_M, ppm));
 
@@ -40,17 +44,14 @@ export const clampZoom = (ppm: number) => Math.min(MAX_PX_PER_M, Math.max(MIN_PX
 export function zoomAt(v: Viewport, s: ScreenSize, screen: Vec2, factor: number): Viewport {
   const ppm = clampZoom(v.pxPerMeter * factor);
   const anchor = screenToWorld(v, s, screen);
-  const center = {
-    x: anchor.x - (screen.x - s.width / 2) / ppm,
-    y: anchor.y - (screen.y - s.height / 2) / (ppm * tiltCos(v)),
-  };
-  return { ...v, pxPerMeter: ppm, center };
+  const d = rotate({ x: (screen.x - s.width / 2) / ppm, y: (screen.y - s.height / 2) / (ppm * tiltCos(v)) }, -rot(v));
+  return { ...v, pxPerMeter: ppm, center: { x: anchor.x - d.x, y: anchor.y - d.y } };
 }
 
-export const panBy = (v: Viewport, dxScreen: number, dyScreen: number): Viewport => ({
-  ...v,
-  center: { x: v.center.x - dxScreen / v.pxPerMeter, y: v.center.y - dyScreen / (v.pxPerMeter * tiltCos(v)) },
-});
+export function panBy(v: Viewport, dxScreen: number, dyScreen: number): Viewport {
+  const d = rotate({ x: dxScreen / v.pxPerMeter, y: dyScreen / (v.pxPerMeter * tiltCos(v)) }, -rot(v));
+  return { ...v, center: { x: v.center.x - d.x, y: v.center.y - d.y } };
+}
 
 /** Bereich einpassen; `insets` = von Panels verdeckte Ränder in px */
 export function fitBBox(b: BBox, s: ScreenSize, insets = { left: 0, right: 0, top: 0, bottom: 0 }, margin = 40, tiltDeg = 0): Viewport {
@@ -66,10 +67,23 @@ export function fitBBox(b: BBox, s: ScreenSize, insets = { left: 0, right: 0, to
   return { center: { x: cx, y: cy }, pxPerMeter: ppm, rotationDeg: 0, ...(tiltDeg ? { tiltDeg } : {}) };
 }
 
+/** Punkte (z. B. Grundstück) einpassen, bei gedrehter Ansicht in Blickrichtung */
+export function fitPoints(pts: Vec2[], s: ScreenSize, insets = { left: 0, right: 0, top: 0, bottom: 0 }, margin = 40, tiltDeg = 0, rotationDeg = 0): Viewport {
+  const r = rot({ center: { x: 0, y: 0 }, pxPerMeter: 1, rotationDeg });
+  const v = fitBBox(bbox(pts.map((p) => rotate(p, r))), s, insets, margin, tiltDeg);
+  return { ...v, center: rotate(v.center, -r), rotationDeg: r };
+}
+
+/** Sichtbarer Bereich im Plan (bei gedrehter Ansicht die Hülle der vier Bildschirmecken) */
 export function visibleWorldBBox(v: Viewport, s: ScreenSize): BBox {
-  const a = screenToWorld(v, s, { x: 0, y: 0 });
-  const b = screenToWorld(v, s, { x: s.width, y: s.height });
-  return { minX: a.x, minY: a.y, maxX: b.x, maxY: b.y };
+  return bbox(
+    [
+      { x: 0, y: 0 },
+      { x: s.width, y: 0 },
+      { x: 0, y: s.height },
+      { x: s.width, y: s.height },
+    ].map((p) => screenToWorld(v, s, p)),
+  );
 }
 
 /** Anzeige-Zoom in Prozent relativ zu 1:100 */

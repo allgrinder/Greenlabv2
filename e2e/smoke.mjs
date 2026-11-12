@@ -349,6 +349,38 @@ assert.ok(Object.keys(man.items).length >= 12);
 for (const e of Object.values(man.items)) assert.equal(e.top.length + e.oblique.length, 8);
 step('Schrägansicht');
 
+// Ansicht drehen (90°-Schritte): Szene gedreht, Auswahl trifft weiter, Kompass dreht zurück
+await p.click('[data-testid=view-rot-right]');
+assert.equal(await p.evaluate(() => window.__gw.editor.getState().session.viewport.rotationDeg), 90);
+await p.waitForTimeout(800);
+const rotHit = await p.evaluate(() => {
+  const st = window.__gw.editor.getState();
+  // ein Objekt, das nach dem Drehen gut sichtbar mitten im Bild liegt
+  const o = Object.values(st.doc.objects).find((x) => {
+    if (x.type !== 'item') return false;
+    const q = window.__gw.renderer.toScreen(x.position);
+    return q.x > 420 && q.x < 1000 && q.y > 200 && q.y < 750;
+  });
+  return { id: o.id, s: window.__gw.renderer.toScreen(o.position) };
+});
+await p.click('[data-testid=view-top]');
+await p.waitForTimeout(600);
+const rs = await p.evaluate((id) => window.__gw.renderer.toScreen(window.__gw.editor.getState().doc.objects[id].position), rotHit.id);
+const cbox = await p.locator('canvas').first().boundingBox();
+await p.mouse.click(cbox.x + rs.x, cbox.y + rs.y);
+await p.waitForTimeout(300);
+// der Klickpunkt landet im Plan wieder auf dem Objekt, und es wird etwas ausgewählt
+const back = await p.evaluate((sc) => window.__gw.renderer.toWorld(sc), rs);
+const pos = await p.evaluate((id) => window.__gw.editor.getState().doc.objects[id].position, rotHit.id);
+assert.ok(Math.hypot(back.x - pos.x, back.y - pos.y) < 0.05, 'Bildschirm ↔ Plan in gedrehter Ansicht');
+assert.ok((await p.evaluate(() => window.__gw.editor.getState().session.selection)).length > 0, 'Auswahl in gedrehter Ansicht');
+await p.keyboard.press('Escape');
+await p.click('[data-testid=compass]');
+assert.equal(await p.evaluate(() => window.__gw.editor.getState().session.viewport.rotationDeg), 0);
+await p.click('[data-testid=view-oblique]');
+await p.keyboard.press('Escape');
+step('Ansicht drehen');
+
 await p.click('[data-testid=export-btn]');
 await p.waitForSelector('[data-testid=pdf-preview] img', { timeout: 30000 });
 await p.click('[data-testid=export-dialog] >> text=150 dpi');

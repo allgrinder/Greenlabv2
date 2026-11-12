@@ -26,6 +26,9 @@ export function BottomBar({ onFit }: { onFit: () => void }) {
   const mode = useEditor((st) => st.session.mode);
   const settings = useEditor((st) => st.doc?.settings);
   const northDeg = useEditor((st) => st.doc?.site.northDeg ?? 0);
+  /** Ansichtsdrehung in 90°-Schritten; die Bildschirmmitte bleibt stehen */
+  const viewRot = ((Math.round((vp.rotationDeg ?? 0) / 90) * 90) % 360 + 360) % 360;
+  const turn = (d: number) => setSession({ viewport: { ...vp, rotationDeg: (viewRot + d + 360) % 360 } });
   const canUndo = useEditor((st) => st.history.past.length > 0);
   const canRedo = useEditor((st) => st.history.future.length > 0);
   const undoLabel = useEditor((st) => st.history.past[st.history.past.length - 1]?.label);
@@ -169,6 +172,14 @@ export function BottomBar({ onFit }: { onFit: () => void }) {
           Schräg
         </button>
       </div>
+      <div className={s.group} role="group" aria-label="Ansicht drehen">
+        <button type="button" className={`${u.iconBtn} ${u.tipUp}`} data-tip="Ansicht 90° nach links drehen" onClick={() => turn(-90)} aria-label="Ansicht nach links drehen" data-testid="view-rot-left">
+          <TurnIcon dir={-1} />
+        </button>
+        <button type="button" className={`${u.iconBtn} ${u.tipUp}`} data-tip="Ansicht 90° nach rechts drehen" onClick={() => turn(90)} aria-label="Ansicht nach rechts drehen" data-testid="view-rot-right">
+          <TurnIcon dir={1} />
+        </button>
+      </div>
       <div className={u.divider} />
       <div className={s.daynight}>
         <button type="button" className={mode === 'day' ? s.dnBtnOn : s.dnBtn} onClick={() => setSession({ mode: 'day' })} data-testid="day-btn">
@@ -180,12 +191,30 @@ export function BottomBar({ onFit }: { onFit: () => void }) {
           Nacht
         </button>
       </div>
-      <div className={s.north} title={`Nord ${num(northDeg, 0)}°`} style={{ transform: `rotate(${northDeg}deg)` }}>
+      <button
+        type="button"
+        className={`${s.north} ${u.tipUp}`}
+        data-tip={viewRot ? 'Ansicht zurückdrehen (Plan oben)' : `Nord ${num(northDeg, 0)}°`}
+        onClick={() => viewRot && setSession({ viewport: { ...vp, rotationDeg: 0 } })}
+        aria-label={`Nord ${num(northDeg, 0)}°`}
+        data-testid="compass"
+        style={{ transform: `rotate(${northDeg + viewRot}deg)` }}
+      >
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
           <path d="M12 3l3 9h-6Z" fill="#C4553A" />
           <path d="M12 21l-3-9h6Z" fill="var(--ink3)" />
         </svg>
-      </div>
+      </button>
     </footer>
+  );
+}
+
+/** Pfeil im Kreisbogen: Ansicht drehen */
+function TurnIcon({ dir }: { dir: 1 | -1 }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden style={dir < 0 ? { transform: 'scaleX(-1)' } : undefined}>
+      <path d="M19 12a7 7 0 1 1-2.05-4.95" />
+      <path d="M19 4v4h-4" />
+    </svg>
   );
 }

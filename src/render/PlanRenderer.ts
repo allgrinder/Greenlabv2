@@ -40,6 +40,7 @@ import { orderNodes, PLANT_TYPES, syncLayers, type Mounted } from './sceneOrder'
 import { applyBackground, drawGroundShape } from './planGround';
 import { drawOverlay, type PreviewDrawer } from './planOverlay';
 import { exportFrame } from './exportFrame';
+import { RotatedDocs, sceneViewport, viewPivot } from './viewRotation';
 
 export type { ViewParams } from './viewParams';
 export type { PreviewDrawer } from './planOverlay';
@@ -271,6 +272,14 @@ export class PlanRenderer {
     return this.exportView?.size ?? this.size;
   }
 
+  /** gedrehte Ansicht: gedrehte Kopie des Gartens, die der Renderer zeichnet */
+  private rotated = new RotatedDocs();
+
+  /** Garten so, wie er gezeichnet wird (bei gedrehter Ansicht die gedrehte Kopie) */
+  private scene(doc: Project): Project {
+    return this.rotated.get(doc, this.vp.rotationDeg);
+  }
+
   toScreen = (p: Vec2): Vec2 => worldToScreen(this.vp, this.viewSize, p);
   toWorld = (p: Vec2): Vec2 => screenToWorld(this.vp, this.viewSize, p);
 
@@ -389,19 +398,21 @@ export class PlanRenderer {
   private renderNow(): void {
     const t0 = import.meta.env.DEV ? performance.now() : 0;
     const s = this.store.getState();
-    const doc = s.doc;
+    const real = s.doc;
     const vp = this.vp;
-    if (doc) {
+    // gedrehte Ansicht: Szene im Ansichtsraum, Sichtbarkeit und Trefferprüfung im echten Plan
+    const doc = real && this.scene(real);
+    if (real && doc) {
       const lod = lodFor(vp.pxPerMeter);
       const ck = this.ctxKey(doc);
-      if (doc !== this.lastDoc || lod !== this.lastLod || ck !== this.lastCtxKey) this.reconcile(doc, lod);
+      if (doc !== this.lastDoc || lod !== this.lastLod || ck !== this.lastCtxKey) this.reconcile(doc, lod, real);
       this.lastDoc = doc;
       this.lastLod = lod;
       this.applyBackground(doc);
     }
-    this.applyViewport(vp);
-    if (doc) {
-      this.cull(doc, vp);
+    this.applyViewport(real ? sceneViewport(vp, viewPivot(real)) : vp);
+    if (real && doc) {
+      this.cull(real, vp);
       this.applyEffects(doc, false);
     }
     this.drawOverlay(s);
@@ -441,11 +452,12 @@ export class PlanRenderer {
     return `${p.years}|${p.season}|${p.lens}|${p.night}|${doc.site.northDeg}|${this.vp.tiltDeg ?? 0}`;
   }
 
-  private reconcile(doc: Project, lod: number) {
+  /** `doc` = gezeichneter Garten (ggf. gedreht), `real` = echter Plan für die Trefferprüfung */
+  private reconcile(doc: Project, lod: number, real: Project = doc) {
     this.reconciled++;
     const ctx = this.viewCtx(doc, lod);
     this.lastCtxKey = this.ctxKey(doc);
-    this.index.sync(doc);
+    this.index.sync(real);
     this.syncLayers(doc);
     // Entfernte Objekte
     for (const [id, m] of this.mounted) {
@@ -517,8 +529,15 @@ export class PlanRenderer {
     this.culledDoc = doc;
     this.cullKey = key;
     const vb = expandBBox(visibleWorldBBox(vp, this.viewSize), 2);
-    // Schrägansicht: hohe Körper unterhalb des Bildrands ragen ins Bild
-    if (vp.tiltDeg) vb.maxY += 25 * tiltTan(vp);
+    // Schrägansicht: hohe Körper unterhalb des Bildrands ragen ins Bild (gedreht: Richtung je nach Drehung)
+    if (vp.tiltDeg) {
+      const ext = 25 * tiltTan(vp);
+      const r = ((Math.round((vp.rotationDeg ?? 0) / 90) * 90) % 360 + 360) % 360;
+      if (r === 0) vb.maxY += ext;
+      else if (r === 90) vb.maxX += ext;
+      else if (r === 180) vb.minY -= ext;
+      else vb.minX -= ext;
+    }
     const visible = new Set(this.index.query(vb));
     const p = this.params;
     for (const [id, m] of this.mounted) {
@@ -597,7 +616,8 @@ export class PlanRenderer {
         this.privacyDoc = doc;
         if (this.privacyTimer) clearTimeout(this.privacyTimer);
         this.privacyTimer = setTimeout(() => {
-          const d = this.store.getState().doc;
+          const real = this.store.getState().doc;
+          const d = real && this.scene(real);
           if (!d) return;
           if (d.observers.length) this.privacyLayer.set(privacyGrid(d, { season: pv.season, pose: pv.pose }), d.site.boundary, d.observers);
           else this.privacyLayer.hide();

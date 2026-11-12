@@ -86,7 +86,8 @@ Umgesetzt sind alle acht Kernfunktionen der Phase 1 sowie PNG-Export (siehe `ARC
 ## Gebäude, Möbel und Schrägansicht
 
 - **Gebäude und Möbel** (Wohnhaus, Gartenhaus, Gewächshaus, Kompost, Regentonne, Hochbeet, Tisch, Liege, Kübel, Pool, Spielturm, Zaun, Kantenstein) sind im selben fotorealistischen Stil gemalt wie die Pflanzen.
-- **Schrägansicht:** Unterleiste → „Schräg“. Fester Blick von Süden (unten im Plan), 35° aus der Senkrechten. Häuser zeigen Fassade mit Fenstern und Dach, Bäume Stamm und Krone, Hecken und Spaliere ihre Laubwand. Zoomen, Verschieben, Auswählen und alle Linsen funktionieren; sobald ein Zeichenwerkzeug gewählt wird, springt die Ansicht zurück auf „Plan“. Exporte sind immer Draufsicht.
+- **Schrägansicht:** Unterleiste → „Schräg“. Blick von unten im Plan (bzw. aus der gedrehten Richtung), 35° aus der Senkrechten. Häuser zeigen Fassade mit Fenstern und Dach, Bäume Stamm und Krone, Hecken und Spaliere ihre Laubwand. Zoomen, Verschieben, Auswählen und alle Linsen funktionieren; sobald ein Zeichenwerkzeug gewählt wird, springt die Ansicht zurück auf „Plan“. Exporte sind immer Draufsicht.
+- **Ansicht drehen:** Unterleiste → Pfeile links/rechts drehen Plan und Schrägansicht in 90°-Schritten um die Bildschirmmitte; der Kompass dreht mit, ein Klick darauf stellt zurück. Technik (`src/render/viewRotation.ts`): Der Renderer zeichnet eine gedrehte Kopie des Gartens (Objekte gemerkt, unveränderte werden nicht neu gebaut), sodass Tiefensortierung, Sonnenstand und die passende Blender-Ansicht jedes Objekts von selbst stimmen. Werkzeuge, Auswahl und Trefferprüfung bleiben im echten Plan; `worldToScreen`/`screenToWorld` in `Viewport.ts` rechnen die Drehung ein. Beschriftungen bleiben aufrecht, Exporte sind immer ungedreht.
 
 ## Ebenen
 
